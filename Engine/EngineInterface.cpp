@@ -18,10 +18,21 @@ EngineInterface::~EngineInterface()
 
 void EngineInterface::send(EngineCommand cmd, ChessBoard& cb)
 {
-
+	EngineMessage msg;
+	msg.cmd = cmd;
+	if (sizeof(cb) > MAX_ENGINEDATA)
+		return;
+	memcpy(msg.data, &cb, sizeof(cb));
+	EnterCriticalSection(&engineCS);
+	outQue.push(msg);
+	LeaveCriticalSection(&engineCS);
 }
 
 void EngineInterface::send(EngineCommand cmd)
 {
-
+	EngineMessage msg;
+	msg.cmd = cmd;
+	EnterCriticalSection(&engineCS);
+	outQue.push(msg);
+	LeaveCriticalSection(&engineCS);
 }

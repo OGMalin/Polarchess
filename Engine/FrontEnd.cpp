@@ -389,9 +389,13 @@ void FrontEnd::uciGo(const std::string& input)
 
 	engine.send(ENG_position, currentBoard);
 	if (ponder)
+	{
 		engine.send(ENG_ponder);
+	}
 	else
+	{
 		engine.send(ENG_go);
+	}
 }
 
 /* stop
@@ -413,7 +417,7 @@ void FrontEnd::uciStop()
 */
 void FrontEnd::uciPonderhit()
 {
-
+	engine.send(ENG_ponderhit);
 }
 
 void FrontEnd::uciMovegen(const std::string& s)
