@@ -1,0 +1,20 @@
+#pragma once
+
+#include <string>
+
+// Returns a word from a string where words are separated with whitespace.
+// First word is n = 1
+extern const std::string getWord(const std::string& s, int n, char* separator = NULL);
+
+// Removes whitespace in front and after a string.
+extern const std::string trim(const std::string& s);
+extern char* trim(char* s);
+
+// Force all char to lowercase.
+extern const std::string lowercase(const std::string& s);
+extern char* lowercase(char* s);
+
+
+extern bool booleanString(const std::string& s);
+extern bool existIn(char c, const char* str);
+extern bool existIn(const char* c, const char* str);
