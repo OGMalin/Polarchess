@@ -59,10 +59,6 @@ UCI::UCI()
 
 UCI::~UCI()
 {
-	DWORD exitcode;
-	GetExitCodeThread(hThread, &exitcode);
-	if (exitcode == STILL_ACTIVE)
-		TerminateThread(hThread, 0);
 	DeleteCriticalSection(&uciCS);
 	CloseHandle(hEvent);
 }

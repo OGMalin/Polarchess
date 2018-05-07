@@ -1,5 +1,4 @@
-#ifndef __Relations_h
-#define __Relations_h
+#pragma once
 
 const int knightPath[8] = { 14, 31, 33, 18,-14,-31,-33,-18 };
 const int kingPath[8]   = { -1, 15, 16, 17,  1,-15,-16,-17 };
@@ -96,4 +95,3 @@ const unsigned int distancebetweensquares[0x80] =
 
 #define squaredistance(a,b) ((a>b)?distancebetweensquares[a-b]:distancebetweensquares[b-a])
 
-#endif // __Relations_h

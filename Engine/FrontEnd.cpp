@@ -31,7 +31,7 @@ int FrontEnd::run()
 	hs[0] = uci.hEvent;
 	hs[1] = engine.hEvent;
 
-	engine.send(ENG_clearhistory);
+	engine.sendOutQue(ENG_clearhistory);
 
 	while (1)
 	{
@@ -41,7 +41,11 @@ int FrontEnd::run()
 		{
 		case WAIT_OBJECT_0:
 			if (uciInput())
+			{
+				engine.sendOutQue(ENG_quit);
+				WaitForSingleObject(engine.hThread, INFINITE);
 				return 0;
+			}
 			break;
 		case WAIT_ABANDONED_0:
 			break;
@@ -135,8 +139,10 @@ void FrontEnd::uciUci()
 /* debug [ on | off ]
 *
 * switch the debug mode of the engine on and off.
-* In debug mode the engine should send additional infos to the GUI, e.g. with
-* the "info string"
+* In debug mode the engine should send additional infos to the GUI, e.g. with the "info string" command,
+* to help debugging, e.g. the commands that the engine has received etc.
+* This mode should be switched off by default and this command can be sent
+* any time, also when the engine is thinking.
 */
 void FrontEnd::uciDebug(const std::string& s)
 {
@@ -240,8 +246,8 @@ void FrontEnd::uciRegister(const std::string& s)
 void FrontEnd::uciUcinewgame()
 {
 	currentBoard.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-	engine.send(ENG_clearhistory);
-	engine.send(ENG_clearhash);
+	engine.sendOutQue(ENG_clearhistory);
+	engine.sendOutQue(ENG_clearhash);
 }
 
 /* position [fen <fenstring> | startpos ]  moves <move1> .... <movei>
@@ -260,7 +266,7 @@ void FrontEnd::uciPosition(const std::string& input)
 	int i = 1, n;
 
 	// Clear 3-rep table (m=empty move).
-	engine.send(ENG_clearhistory);
+	engine.sendOutQue(ENG_clearhistory);
 
 	// Read the inputline
 	cmd = getWord(input, i++);
@@ -302,7 +308,7 @@ void FrontEnd::uciPosition(const std::string& input)
 			cmd = getWord(input, i++);
 			while (cmd.length())
 			{
-				engine.send(ENG_history, currentBoard);
+				engine.sendOutQue(ENG_history, currentBoard);
 				m = currentBoard.getMoveFromText(cmd);
 				currentBoard.doMove(m, false);
 				cmd = getWord(input, i++);
@@ -324,12 +330,18 @@ void FrontEnd::uciPosition(const std::string& input)
 void FrontEnd::uciGo(const std::string& input)
 {
 	int i = 1;
-	int wtime = -1, btime = -1, winc = -1, binc = -1, movestogo = -1, depth = -1, nodes = -1, mate = -1, movetime = -1;
+	int wtime = 0, btime = 0, winc = 0, binc = 0, movestogo = 0, depth = 0, nodes = 0, mate = 0, movetime = 0;
 	string cmd, searchlist;
 	bool ponder=false, infinite=false;
 	cmd = getWord(input, i++);
 	while (cmd.length()>0)
 	{
+		/* searchmoves <move1> .... <movei>
+		*
+		* restrict search to this moves only
+		* Example : After "position startpos" and "go infinite searchmoves e2e4 d2d4"
+		* the engine should only search the two moves e2e4 and d2d4 in the initial position.
+		*/
 		if (cmd == "searchmoves")
 		{
 			cmd = getWord(input, i++);
@@ -340,46 +352,100 @@ void FrontEnd::uciGo(const std::string& input)
 			}
 			i--;
 		}
+		/* ponder
+		*
+		* start searching in pondering mode.
+		* Do not exit the search in ponder mode, even if it's mate!
+		* This means that the last move sent in in the position string is the ponder move.
+		* The engine can do what it wants to do, but after a "ponderhit" command
+		* it should execute the suggested move to ponder on.This means that the ponder move sent by
+		* the GUI can be interpreted as a recommendation about which move to ponder.However, if the
+		* engine decides to ponder on a different move, it should not display any mainlines as they are
+		* likely to be misinterpreted by the GUI because the GUI expects the engine to ponder
+		* on the suggested move.
+		*/
 		else if (cmd == "ponder")
 		{
 			ponder = true;
 		}
+		/* wtime <x>
+		*
+		* white has x msec left on the clock
+		*/
 		else if (cmd == "wtime")
 		{
 			wtime = atoi(getWord(input, i++).c_str());
 		}
+		/* btime <x>
+		*
+		* black has x msec left on the clock
+		*/
 		else if (cmd == "btime")
 		{
 			btime = atoi(getWord(input, i++).c_str());
 		}
+		/* winc <x>
+		*
+		* white increment per move in mseconds if x > 0
+		*/
 		else if (cmd == "winc")
 		{
 			winc = atoi(getWord(input, i++).c_str());
 		}
+		/* binc <x>
+		*
+		* black increment per move in mseconds if x > 0
+		*/
 		else if (cmd == "binc")
 		{
 			binc = atoi(getWord(input, i++).c_str());
 		}
+		/* movestogo <x>
+		*
+		* there are x moves to the next time control,
+		* this will only be sent if x > 0,
+		* if you don't get this and get the wtime and btime it's sudden death
+		*/
 		else if (cmd == "movestogo")
 		{
 			movestogo = atoi(getWord(input, i++).c_str());
 		}
+		/* depth <x>
+		*
+		* search x plies only.
+		*/
 		else if (cmd == "depth")
 		{
 			depth = atoi(getWord(input, i++).c_str());
 		}
+		/* nodes <x>
+		*
+		* search x nodes only,
+		*/
 		else if (cmd == "nodes")
 		{
 			nodes = atoi(getWord(input, i++).c_str());
 		}
+		/* mate <x>
+		*
+		* search for a mate in x moves
+		*/
 		else if (cmd == "mate")
 		{
 			mate = atoi(getWord(input, i++).c_str());
 		}
+		/* movetime <x>
+		*
+		* search exactly x mseconds
+		*/
 		else if (cmd == "movetime")
 		{
 			movetime = atoi(getWord(input, i++).c_str());
 		}
+		/* infinite
+		*
+		* search until the "stop" command. Do not exit the search without being told so in this mode!
+		*/
 		else if (cmd == "infinite")
 		{
 			infinite = true;
@@ -387,14 +453,31 @@ void FrontEnd::uciGo(const std::string& input)
 		cmd = getWord(input, i++);
 	}
 
-	engine.send(ENG_position, currentBoard);
-	if (ponder)
+	EngineGo eg;
+	// Find time to use for the next move.
+	if (movetime)
 	{
-		engine.send(ENG_ponder);
+		eg.maxTime = eg.minTime = movetime;
 	}
 	else
 	{
-		engine.send(ENG_go);
+		if (!movestogo)
+			movestogo = 40;
+		eg.maxTime = (currentBoard.toMove == WHITE) ? (wtime + (movestogo*winc)) / movestogo : (btime + (movestogo*binc)) / movestogo;
+		eg.minTime = eg.maxTime / 2;
+	}
+	eg.nodes=nodes;
+	eg.depth = depth;
+	eg.mate = mate;
+
+	engine.sendOutQue(ENG_position, currentBoard);
+	if (ponder||infinite)
+	{
+		engine.sendOutQue(ENG_ponder, eg);
+	}
+	else
+	{
+		engine.sendOutQue(ENG_go, eg);
 	}
 }
 
@@ -406,7 +489,7 @@ void FrontEnd::uciGo(const std::string& input)
 */
 void FrontEnd::uciStop()
 {
-	engine.send(ENG_stop);
+	engine.sendOutQue(ENG_stop);
 }
 
 /* ponderhit (UCI)
@@ -417,7 +500,7 @@ void FrontEnd::uciStop()
 */
 void FrontEnd::uciPonderhit()
 {
-	engine.send(ENG_ponderhit);
+	engine.sendOutQue(ENG_ponderhit);
 }
 
 void FrontEnd::uciMovegen(const std::string& s)
