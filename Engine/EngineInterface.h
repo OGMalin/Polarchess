@@ -3,31 +3,24 @@
 #include <Windows.h>
 #include <list>
 #include "ChessBoard.h"
+#include "MoveList.h"
 
 enum EngineCommand
 {
-	ENG_none=0,
-	ENG_position,
-	ENG_history,
-	ENG_clearhistory,
-	ENG_clearhash,
-	ENG_go,
-	ENG_stop,
-	ENG_quit,
-	ENG_ponder,
-	ENG_ponderhit,
-	ENG_move,
-	ENG_debug,
-	ENG_nodebug,
-	ENG_pv
-};
-
-#define MAX_ENGINEDATA 1024
-
-struct EngineMessage
-{
-	EngineCommand cmd;
-	BYTE data[MAX_ENGINEDATA];
+	ENG_none=0,			// in|out
+	ENG_position,		// out
+	ENG_history,		// out
+	ENG_clearhistory,	// out
+	ENG_clearhash,		// out
+	ENG_go,				// out
+	ENG_stop,			// out
+	ENG_quit,			// out
+	ENG_ponder,			// out
+	ENG_ponderhit,		// out
+	ENG_info,			// in
+	ENG_debug,			// in|out
+	ENG_nodebug,		// out
+	ENG_string			// in
 };
 
 struct EngineGo
@@ -37,6 +30,7 @@ struct EngineGo
 	DWORD depth;
 	DWORD nodes;
 	DWORD mate;
+	MoveList searchlist;
 };
 
 class EngineInterface
@@ -45,15 +39,23 @@ public:
 	HANDLE hEvent;
 	HANDLE hEngine;
 	HANDLE hThread;
-	std::list<EngineMessage> inQue;
-	std::list<EngineMessage> outQue;
-
+	std::list<EngineCommand> inQueCmd;
+	std::list<std::string> inQueStr;
+	std::list<EngineCommand> outQueCmd;
+	std::list<ChessBoard> outQueCb;
+	std::list<EngineGo> outQueGo;
 	EngineInterface();
 	virtual ~EngineInterface();
+	void sendInQue(EngineCommand cmd);
+	void sendInQue(EngineCommand cmd, std::string& s);
 	void sendOutQue(EngineCommand cmd, ChessBoard& cb);
 	void sendOutQue(EngineCommand cmd);
 	void sendOutQue(EngineCommand cmd, EngineGo& eg);
-	EngineCommand peekOutQue();
 	EngineCommand peekInQue();
+	EngineCommand getInQue();
+	EngineCommand getInQue(std::string& s);
+	EngineCommand peekOutQue();
 	EngineCommand getOutQue();
+	EngineCommand getOutQue(ChessBoard& cb);
+	EngineCommand getOutQue(EngineGo& cb);
 };

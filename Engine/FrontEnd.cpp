@@ -52,8 +52,6 @@ int FrontEnd::run()
 			break;
 		case WAIT_OBJECT_0+1:
 			engineInput();
-			if (uciInput())
-				return 0;
 			break;
 		case WAIT_ABANDONED_0+1:
 			break;
@@ -335,7 +333,8 @@ void FrontEnd::uciGo(const std::string& input)
 {
 	int i = 1;
 	int wtime = 0, btime = 0, winc = 0, binc = 0, movestogo = 0, depth = 0, nodes = 0, mate = 0, movetime = 0;
-	string cmd, searchlist;
+	string cmd;
+	std::list<std::string> searchlist;
 	bool ponder=false, infinite=false;
 	cmd = getWord(input, i++);
 	while (cmd.length()>0)
@@ -349,12 +348,11 @@ void FrontEnd::uciGo(const std::string& input)
 		if (cmd == "searchmoves")
 		{
 			cmd = getWord(input, i++);
-			if (isMoveText(cmd))
+			while (isMoveText(cmd))
 			{
-				searchlist += cmd;
-				searchlist += ' ';
+				searchlist.push_back(cmd);
+				cmd = getWord(input, i++);
 			}
-			i--;
 		}
 		/* ponder
 		*
@@ -473,7 +471,18 @@ void FrontEnd::uciGo(const std::string& input)
 	eg.nodes=nodes;
 	eg.depth = depth;
 	eg.mate = mate;
-
+	if (searchlist.size())
+	{
+		std::list<std::string>::iterator it=searchlist.begin();
+		ChessMove m;
+		while (it != searchlist.end())
+		{
+			m = currentBoard.getMoveFromText(*it);
+			if (!m.empty())
+				eg.searchlist.push_back(m);
+			++it;
+		}
+	}
 	engine.sendOutQue(ENG_position, currentBoard);
 	if (ponder||infinite)
 	{
@@ -537,6 +546,31 @@ void FrontEnd::uciMovegen(const std::string& s)
 
 void FrontEnd::engineInput()
 {
+	int engCmd;
+	string s;
+	while ((engCmd = engine.peekInQue()) != ENG_none)
+	{
+		switch (engCmd)
+		{
+		case ENG_debug:
+			engine.getInQue(s);
+			if (debug)
+				uci.write("info string " + s);
+			break;
+		case ENG_info:
+			engine.getInQue(s);
+			uci.write("info " + s);
+			break;
+		case ENG_string:
+			engine.getInQue(s);
+			uci.write(s);
+			break;
+		default:
+			engine.getInQue(s);
+			uci.write(s);
+			break;
+		}
+	}
 }
 
 DWORD FrontEnd::movegenTest(int depth, bool init, int ply)
