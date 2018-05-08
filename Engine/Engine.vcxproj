@@ -25,6 +25,7 @@
     <ClInclude Include="DrawTable.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="EngineInterface.h" />
+    <ClInclude Include="Evaluation.h" />
     <ClInclude Include="FrontEnd.h" />
     <ClInclude Include="MoveGenerator.h" />
     <ClInclude Include="MoveList.h" />
@@ -38,6 +39,7 @@
     <ClCompile Include="ChessMove.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EngineInterface.cpp" />
+    <ClCompile Include="Evaluation.cpp" />
     <ClCompile Include="FrontEnd.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MoveGenerator.cpp" />
