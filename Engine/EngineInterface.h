@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Windows.h>
-#include <queue>
+#include <list>
 #include "ChessBoard.h"
 
 enum EngineCommand
@@ -17,6 +17,8 @@ enum EngineCommand
 	ENG_ponder,
 	ENG_ponderhit,
 	ENG_move,
+	ENG_debug,
+	ENG_nodebug,
 	ENG_pv
 };
 
@@ -43,8 +45,8 @@ public:
 	HANDLE hEvent;
 	HANDLE hEngine;
 	HANDLE hThread;
-	std::queue<EngineMessage> inQue;
-	std::queue<EngineMessage> outQue;
+	std::list<EngineMessage> inQue;
+	std::list<EngineMessage> outQue;
 
 	EngineInterface();
 	virtual ~EngineInterface();

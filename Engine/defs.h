@@ -5,6 +5,9 @@ typedef int typeColor;
 typedef int typePiece;
 typedef int typeSquare;
 
+typedef unsigned __int64 HASHKEY;
+
+
 // Shortcuts for squares in a 88 board
 enum {
 	a1 = 0x00, b1, c1, d1, e1, f1, g1, h1,
@@ -50,3 +53,7 @@ enum {
 // Switch player
 #define OTHERPLAYER(c)     (c==WHITE?BLACK:WHITE)
 
+// Convert a square from a 64 square board to the 0x88 board
+#define SQUARE128(sq)      ((sq&0x07)+((sq&0xf8)<<1))
+// Convert a square from the 0x88 board to a 64 square board
+#define SQUARE64(sq)       ((sq&0x07)+((sq&0xf8)>>1))

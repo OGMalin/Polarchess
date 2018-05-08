@@ -6,12 +6,27 @@
 #include "ChessBoard.h"
 #include "MoveGenerator.h"
 #include "defs.h"
+#include "Utility.h"
 
 using namespace std;
+
+static bool initHash = false;
+
+// keyValues to be XOR'ed
+// key[0-11][0-63] = Value for each pieces on each square
+// key[12][0-15]   = Value for castle rights
+// key[12][16]     = Value for black on move.
+// key[12][17-24]  = Value for ep file
+static HASHKEY ZobristKey[13][64];
 
 ChessBoard::ChessBoard()
 { 
 	clear();
+}
+
+ChessBoard::ChessBoard(const ChessBoard& cb)
+{
+	copy(cb);
 }
 
 ChessBoard::~ChessBoard()
@@ -43,6 +58,15 @@ void ChessBoard::clear()
 	toMove = WHITE;
 	move50draw = 0;
 }
+int ChessBoard::compare(const ChessBoard& b)
+{
+	if (memcmp(&board, &(b.board), 0x88 * sizeof(typePiece)) != 0) return 1;
+	if (castle != b.castle) return 2;
+	if (enPassant != b.enPassant) return 3;
+	if (toMove != b.toMove) return 4;
+	return 0;
+}
+
 
 void ChessBoard::setFen(const char* szFen)
 {
@@ -429,4 +453,46 @@ typePiece ChessBoard::getPieceFromChar(char c)
 	default:
 		return EMPTY;
 	}
+}
+
+HASHKEY ChessBoard::hashkey()
+{
+	HASHKEY key = (HASHKEY)0;
+	if (!initHash)
+	{
+		int i, j;
+
+		for (i = 0; i<13; i++)
+			for (j = 0; j<64; j++)
+				ZobristKey[i][j] = rand64();
+		initHash = true;
+	}
+
+	// Pieces
+	typeSquare sq = 0;
+	while (1)
+	{
+		if (board[sq] != EMPTY)
+			key ^= ZobristKey[board[sq] - 1][SQUARE64(sq)];
+		sq++;
+		if (sq & 8)
+		{
+			sq += 8;
+			if (sq>127)
+				break;
+		}
+	}
+
+	// castle could be any values from 0 to 15
+	key ^= ZobristKey[12][castle];
+
+	// EnPassant
+	if (enPassant != UNDEF)
+		key ^= ZobristKey[12][17 + FILE(enPassant)];
+
+	// Set color to move
+	if (toMove == BLACK)
+		key ^= ZobristKey[12][16];
+
+	return key;
 }

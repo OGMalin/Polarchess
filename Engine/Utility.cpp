@@ -151,3 +151,49 @@ bool existIn(const char* c, const char* str)
 			return true;
 	return false;
 }
+
+// Random number generator
+// It is building upon Donald Knuth's description in 
+// "The Art Of Computer Programming" Vol.2 third edition page 185-186
+unsigned int _rand32()
+{
+	//  const unsigned int prime=2147483647;
+	const unsigned int a = 48271;
+	const unsigned int q = 44488;  // prime/a
+	const unsigned int r = 3399;   // prime%a
+
+								   //  static unsigned int seed=time(NULL);
+	static unsigned int seed = 1;
+	unsigned int x;
+	x = a * (seed%q) - r * (seed / q);
+	seed = x;
+	return x;
+}
+
+unsigned int rand32()
+{
+	const unsigned int prime = 2147483399;
+	const unsigned int a = 40692;
+	const unsigned int q = 52774;
+	const unsigned int r = 3791;
+
+	//  static unsigned int seed=time(NULL);
+	static unsigned int seed = 1;
+	unsigned int y, x;
+	y = a * (seed%q) - r * (seed / q);
+	seed = y;
+	x = _rand32();
+	if (y >= x)
+		return (x + prime - y - 1);
+	return (x - y);
+}
+
+unsigned __int64 rand64()
+{
+	unsigned __int64 i64, low, high;
+	low = rand32();
+	high = rand32();
+	i64 = (high << 32) | low;
+	return i64;
+}
+

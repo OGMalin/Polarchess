@@ -1,6 +1,6 @@
+#include <process.h>
 #include "Engine.h"
 #include "EngineInterface.h"
-#include <process.h>
 
 void EngineSearchThreadLoop(void* lpv)
 {
@@ -15,7 +15,33 @@ void EngineSearchThreadLoop(void* lpv)
 		cmd=ei->peekOutQue();
 		if (cmd == ENG_quit)
 			break;
-		cmd = ei->getOutQue();
+		switch (cmd)
+		{
+		case ENG_debug:
+			eng.debug = true;
+			cmd = ei->getOutQue();
+			break;
+		case ENG_nodebug:
+			eng.debug = false;
+			cmd = ei->getOutQue();
+			break;
+		case ENG_stop: // No need to do anything here because the engine is in waiting state.
+			cmd = ei->getOutQue();
+			break;
+		case ENG_clearhistory:
+			cmd = ei->getOutQue();
+			eng.drawTable.clear();
+			break;
+		case ENG_ponderhit:
+		case ENG_clearhash:
+		case ENG_go:
+		case ENG_history:
+		case ENG_ponder:
+		case ENG_position:
+		default:
+			cmd = ei->getOutQue();
+			break;
+		}
 	}
 	_endthread();
 };
@@ -23,5 +49,5 @@ void EngineSearchThreadLoop(void* lpv)
 
 Engine::Engine()
 {
-
+	debug = false;
 }

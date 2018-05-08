@@ -5,6 +5,7 @@
 #include "ChessBoard.h"
 #include "MoveList.h"
 #include "MoveGenerator.h"
+#include "StopWatch.h"
 
 using namespace std;
 
@@ -43,7 +44,7 @@ int FrontEnd::run()
 			if (uciInput())
 			{
 				engine.sendOutQue(ENG_quit);
-				WaitForSingleObject(engine.hThread, INFINITE);
+				WaitForSingleObject(engine.hThread, 5000);
 				return 0;
 			}
 			break;
@@ -148,6 +149,7 @@ void FrontEnd::uciDebug(const std::string& s)
 {
 	if (s.length())
 		debug = booleanString(s);
+	engine.sendOutQue(debug ? ENG_debug : ENG_nodebug);
 }
 
 /* isready
@@ -311,6 +313,8 @@ void FrontEnd::uciPosition(const std::string& input)
 				engine.sendOutQue(ENG_history, currentBoard);
 				m = currentBoard.getMoveFromText(cmd);
 				currentBoard.doMove(m, false);
+				if (currentBoard.move50draw == 0)
+					engine.sendOutQue(ENG_clearhistory);
 				cmd = getWord(input, i++);
 			}
 
@@ -505,10 +509,29 @@ void FrontEnd::uciPonderhit()
 
 void FrontEnd::uciMovegen(const std::string& s)
 {
-	DWORD i;
+	DWORD i,t;
 	char sz[256];
-	i = movegenTest(atoi(getWord(s, 1).c_str()));
-	sprintf_s(sz,256, "%u nodes", i);
+	StopWatch st;
+	int depth = atoi(getWord(s, 1).c_str());
+	st.start();
+	i = movegenTest(depth);
+	t = st.read();
+	sprintf_s(sz, 256, "2 %u nodes in %u ms", i, t);
+	uci.write(string(sz));
+	st.start();
+	i = movegenTest2(depth, currentBoard);
+	t = st.read();
+	sprintf_s(sz, 256, "1 %u nodes in %u ms", i, t);
+	uci.write(string(sz));
+	st.start();
+	i = movegenTest(depth);
+	t=st.read();
+	sprintf_s(sz, 256, "2 %u nodes in %u ms", i, t);
+	uci.write(string(sz));
+	st.start();
+	i = movegenTest2(depth,currentBoard);
+	t = st.read();
+	sprintf_s(sz, 256, "3 %u nodes in %u ms", i, t);
 	uci.write(string(sz));
 }
 
@@ -525,6 +548,7 @@ DWORD FrontEnd::movegenTest(int depth, bool init, int ply)
 	static ChessBoard b;
 	if (init)
 	{
+		testList->clear();
 		testNodes=0;
 		b.copy(currentBoard);
 	}
@@ -541,6 +565,33 @@ DWORD FrontEnd::movegenTest(int depth, bool init, int ply)
 	};
 	return testNodes;
 }
+
+DWORD FrontEnd::movegenTest2(int depth, ChessBoard& cb, bool init, int ply)
+{
+	int moveit;
+	static DWORD testNodes;
+	static MoveList testList[30];
+	static MoveGenerator testGen;
+	ChessBoard b;
+	if (init)
+	{
+		testNodes = 0;
+		testList->clear();
+	}
+	if (depth == 0)
+		return ++testNodes;
+	testGen.makeMoves(cb, testList[ply]);
+	moveit = 0;
+	while (moveit != testList[ply].end())
+	{
+		b.copy(cb);
+		testGen.doMove(b, testList[ply].list[moveit]);
+		movegenTest2(depth - 1, b, false, ply + 1);
+		++moveit;
+	};
+	return testNodes;
+}
+
 
 bool FrontEnd::isMoveText(const std::string& input)
 {

@@ -8,6 +8,7 @@
 class FrontEnd
 {
 	DWORD movegenTest(int depth, bool init = true, int ply = 0);
+	DWORD movegenTest2(int depth, ChessBoard& cb, bool init = true, int ply = 0);
 public:
 	ChessBoard currentBoard;
 	UCI uci;

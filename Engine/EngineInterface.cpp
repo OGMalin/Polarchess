@@ -27,7 +27,7 @@ void EngineInterface::sendOutQue(EngineCommand cmd, ChessBoard& cb)
 	msg.cmd = cmd;
 	memcpy(msg.data, &cb, sizeof(cb));
 	EnterCriticalSection(&engineCS);
-	outQue.push(msg);
+	outQue.push_back(msg);
 	LeaveCriticalSection(&engineCS);
 	SetEvent(hEngine);
 }
@@ -37,7 +37,9 @@ void EngineInterface::sendOutQue(EngineCommand cmd)
 	EngineMessage msg;
 	msg.cmd = cmd;
 	EnterCriticalSection(&engineCS);
-	outQue.push(msg);
+	if (cmd == ENG_quit)
+		outQue.clear();
+	outQue.push_back(msg);
 	LeaveCriticalSection(&engineCS);
 	SetEvent(hEngine);
 }
@@ -48,7 +50,7 @@ void EngineInterface::sendOutQue(EngineCommand cmd, EngineGo& eg)
 	msg.cmd = cmd;
 	memcpy(msg.data, &eg, sizeof(eg));
 	EnterCriticalSection(&engineCS);
-	outQue.push(msg);
+	outQue.push_back(msg);
 	LeaveCriticalSection(&engineCS);
 	SetEvent(hEngine);
 }
@@ -57,7 +59,10 @@ EngineCommand EngineInterface::peekOutQue()
 {
 	EngineMessage msg;
 	EnterCriticalSection(&engineCS);
-	msg=outQue.front();
+	if (outQue.size() > 0)
+		msg = outQue.front();
+	else
+		msg.cmd = ENG_none;
 	LeaveCriticalSection(&engineCS);
 	return msg.cmd;
 }
@@ -66,8 +71,15 @@ EngineCommand EngineInterface::getOutQue()
 {
 	EngineMessage msg;
 	EnterCriticalSection(&engineCS);
-	msg = outQue.front();
-	outQue.pop();
+	if (outQue.size() > 0)
+	{
+		msg = outQue.front();
+		outQue.pop_front();
+	}
+	else
+	{
+		msg.cmd = ENG_none;
+	}
 	LeaveCriticalSection(&engineCS);
 	return msg.cmd;
 }
@@ -76,7 +88,10 @@ EngineCommand EngineInterface::peekInQue()
 {
 	EngineMessage msg;
 	EnterCriticalSection(&engineCS);
-	msg = inQue.front();
+	if (inQue.size() > 0)
+		msg = inQue.front();
+	else
+		msg.cmd = ENG_none;
 	LeaveCriticalSection(&engineCS);
 	return msg.cmd;
 }
