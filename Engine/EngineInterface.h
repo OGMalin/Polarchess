@@ -25,12 +25,12 @@ enum EngineCommand
 
 struct EngineGo
 {
-	DWORD minTime;
+	DWORD fixedTime;
 	DWORD maxTime;
 	DWORD depth;
 	DWORD nodes;
 	DWORD mate;
-	MoveList searchlist;
+	MoveList searchmoves;
 };
 
 class EngineInterface

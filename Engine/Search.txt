@@ -1,0 +1,90 @@
+
+
+Bruteforce search
+
+(evaluate gives score for who to move at that position)
+
+function findmax(depthleft)
+	if (depthleft=0) 
+		return evaluate;
+	max=-infinity
+	for (all moves)
+		score = findmin(depthleft-1)
+		if (score > max)
+			max=score
+			if (first call) bestmove=move
+	return max
+
+function findmin(depthleft)
+	if (depth=0) 
+		return -evaluate;
+	min=infinity
+	for (all moves)
+		score = findmax(depthleft-1)
+		if (score < min)
+			min=score
+	return min
+
+These function are similar so the could be but together to one function
+
+function negamax(depthleft)
+	if (depth=0)
+		return evaluate;
+	max=-infinity
+	for (all moves)
+		score = -negamax(depthleft-1)
+		if (score > max)
+			max=score
+			if (first call) bestmove = move
+	return max
+
+Iterative deepening
+
+function iterative
+	for dept=0 to maxdepth
+		negamax(depth)
+
+
+Search extention
+
+Alpha beta search
+
+function alphabetamax(alpha, beta, depthleft)
+	if (depthleft=0) 
+		return evaluate
+	for (all moves)
+		score=alphabetamin(alpha, beta, depthleft-1)
+		if (score >= beta)
+			return beta
+		if (score > alpha)
+			alpha=score
+	return alpha
+
+function alphabetamin(alpha, beta, depthleft)
+	if (depthleft=0) 
+		return -evaluate
+	for (all moves)
+		score=alphabetamax(alpha, beta, depthleft-1)
+		if (score <= alpha)
+			return alpha
+		if (score < beta)
+			beta=score
+	return beta
+
+function alphabeta(alpha, beta, depthleft)
+	if (depthleft=0) 
+		return evaluate
+	for (all moves)
+		score=-alphabeta(-beta, -alpha, depthleft-1)
+		if (score >= beta)
+			return beta
+		if (score > alpha)
+			alpha=score
+	return alpha
+
+
+Iterative deepening
+
+function iterative
+	for depth=0 to maxdepth
+		alphabeta(-infinity, infinity, depth)

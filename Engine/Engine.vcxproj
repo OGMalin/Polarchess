@@ -48,6 +48,9 @@
     <ClCompile Include="UCI.cpp" />
     <ClCompile Include="Utility.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="Search.txt" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{97503DA5-C326-4E11-91B5-8F8C84345DBA}</ProjectGuid>

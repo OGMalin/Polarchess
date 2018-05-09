@@ -8,11 +8,11 @@
 class FrontEnd
 {
 	DWORD movegenTest(int depth, bool init = true, int ply = 0);
-	DWORD movegenTest2(int depth, ChessBoard& cb, bool init = true, int ply = 0);
 public:
 	ChessBoard currentBoard;
 	UCI uci;
 	EngineInterface engine;
+	DWORD maxElo;
 	bool debug;
 	FrontEnd();
 	virtual ~FrontEnd();
@@ -31,4 +31,5 @@ public:
 	void uciPonderhit();
 	void uciMovegen(const std::string& s);
 	bool isMoveText(const std::string& input);
+	void findMaxElo();
 };

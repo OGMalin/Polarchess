@@ -14,6 +14,7 @@ const char* ENGINENAME = "PolarChess 3.0";
 FrontEnd::FrontEnd()
 {
 	debug = false;
+	maxElo = 2000;
 	currentBoard.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 }
 
@@ -32,6 +33,7 @@ int FrontEnd::run()
 	hs[0] = uci.hEvent;
 	hs[1] = engine.hEvent;
 
+	findMaxElo();
 	engine.sendOutQue(ENG_clearhistory);
 
 	while (1)
@@ -129,9 +131,14 @@ int FrontEnd::uciInput()
 */
 void FrontEnd::uciUci()
 {
+	char sz[256];
 	uci.write("id name " + string(ENGINENAME));
 	uci.write("id author Odd Gunnar Malin");
 	uci.write("option name UCI_EngineAbout type string default http://polarchess.net");
+	uci.write("option name Ponder type check default false");
+	//	uci.write("option name UCI_LimitStrength type check default false");
+//	_itoa_s(maxElo, sz, 256, 10);
+//	uci.write("option name UCI_Elo type spin default 2000 min 1000 max "+string(sz));
 	uci.write("uciok");
 }
 
@@ -334,7 +341,7 @@ void FrontEnd::uciGo(const std::string& input)
 	int i = 1;
 	int wtime = 0, btime = 0, winc = 0, binc = 0, movestogo = 0, depth = 0, nodes = 0, mate = 0, movetime = 0;
 	string cmd;
-	std::list<std::string> searchlist;
+	std::list<std::string> searchmoves;
 	bool ponder=false, infinite=false;
 	cmd = getWord(input, i++);
 	while (cmd.length()>0)
@@ -350,7 +357,7 @@ void FrontEnd::uciGo(const std::string& input)
 			cmd = getWord(input, i++);
 			while (isMoveText(cmd))
 			{
-				searchlist.push_back(cmd);
+				searchmoves.push_back(cmd);
 				cmd = getWord(input, i++);
 			}
 		}
@@ -456,30 +463,23 @@ void FrontEnd::uciGo(const std::string& input)
 	}
 
 	EngineGo eg;
+	if (!movestogo)
+		movestogo = 30;
 	// Find time to use for the next move.
-	if (movetime)
-	{
-		eg.maxTime = eg.minTime = movetime;
-	}
-	else
-	{
-		if (!movestogo)
-			movestogo = 40;
-		eg.maxTime = (currentBoard.toMove == WHITE) ? (wtime + (movestogo*winc)) / movestogo : (btime + (movestogo*binc)) / movestogo;
-		eg.minTime = eg.maxTime / 2;
-	}
+	eg.maxTime = (currentBoard.toMove == WHITE) ? (wtime + (movestogo*winc)) / movestogo : (btime + (movestogo*binc)) / movestogo;
+	eg.fixedTime = movetime;
 	eg.nodes=nodes;
 	eg.depth = depth;
 	eg.mate = mate;
-	if (searchlist.size())
+	if (searchmoves.size())
 	{
-		std::list<std::string>::iterator it=searchlist.begin();
+		std::list<std::string>::iterator it= searchmoves.begin();
 		ChessMove m;
-		while (it != searchlist.end())
+		while (it != searchmoves.end())
 		{
 			m = currentBoard.getMoveFromText(*it);
 			if (!m.empty())
-				eg.searchlist.push_back(m);
+				eg.searchmoves.push_back(m);
 			++it;
 		}
 	}
@@ -525,22 +525,7 @@ void FrontEnd::uciMovegen(const std::string& s)
 	st.start();
 	i = movegenTest(depth);
 	t = st.read();
-	sprintf_s(sz, 256, "2 %u nodes in %u ms", i, t);
-	uci.write(string(sz));
-	st.start();
-	i = movegenTest2(depth, currentBoard);
-	t = st.read();
-	sprintf_s(sz, 256, "1 %u nodes in %u ms", i, t);
-	uci.write(string(sz));
-	st.start();
-	i = movegenTest(depth);
-	t=st.read();
-	sprintf_s(sz, 256, "2 %u nodes in %u ms", i, t);
-	uci.write(string(sz));
-	st.start();
-	i = movegenTest2(depth,currentBoard);
-	t = st.read();
-	sprintf_s(sz, 256, "3 %u nodes in %u ms", i, t);
+	sprintf_s(sz, 256, "%u nodes in %u ms", i, t);
 	uci.write(string(sz));
 }
 
@@ -600,33 +585,6 @@ DWORD FrontEnd::movegenTest(int depth, bool init, int ply)
 	return testNodes;
 }
 
-DWORD FrontEnd::movegenTest2(int depth, ChessBoard& cb, bool init, int ply)
-{
-	int moveit;
-	static DWORD testNodes;
-	static MoveList testList[30];
-	static MoveGenerator testGen;
-	ChessBoard b;
-	if (init)
-	{
-		testNodes = 0;
-		testList->clear();
-	}
-	if (depth == 0)
-		return ++testNodes;
-	testGen.makeMoves(cb, testList[ply]);
-	moveit = 0;
-	while (moveit != testList[ply].end())
-	{
-		b.copy(cb);
-		testGen.doMove(b, testList[ply].list[moveit]);
-		movegenTest2(depth - 1, b, false, ply + 1);
-		++moveit;
-	};
-	return testNodes;
-}
-
-
 bool FrontEnd::isMoveText(const std::string& input)
 {
 	//  e2e4, e2-e4, e2xe4
@@ -643,4 +601,14 @@ bool FrontEnd::isMoveText(const std::string& input)
 	if (input.length()>4)
 		if (strchr("abcdefgh12345678-xX!?#+", input.at(1)) == NULL) return false;
 	return true;
-};
+}
+
+void FrontEnd::findMaxElo()
+{
+	LARGE_INTEGER pf;
+	unsigned long long freqMz;
+	if (!QueryPerformanceFrequency(&pf))
+		return;
+	freqMz = pf.QuadPart / 1000;
+	maxElo = (DWORD)freqMz;
+}
