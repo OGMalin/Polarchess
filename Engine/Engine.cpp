@@ -11,7 +11,7 @@ const int MAX_DEPTH = 100;
 void EngineSearchThreadLoop(void* lpv)
 {
 	Engine eng;
-	ENGINECOMMAND cmd;
+	ENGINECOMMAND cmd=ENG_none;
 	eng.ei = (EngineInterface*)lpv;
 	ChessBoard cb;
 	EngineGo eg;
@@ -57,6 +57,7 @@ void EngineSearchThreadLoop(void* lpv)
 				eng.fixedNodes = eg.nodes;
 				eng.fixedTime = eg.fixedTime;
 				eng.maxTime = eg.maxTime;
+				eng.fixedDepth = eg.depth;
 				eng.searchmoves = eg.searchmoves;
 				if (eng.fixedMate)
 					eng.searchtype = MATE_SEARCH;
@@ -64,6 +65,8 @@ void EngineSearchThreadLoop(void* lpv)
 					eng.searchtype = NODES_SEARCH;
 				else if (eng.fixedTime)
 					eng.searchtype = TIME_SEARCH;
+				else if (eng.fixedDepth)
+					eng.searchtype = DEPTH_SEARCH;
 				else
 					eng.searchtype = NORMAL_SEARCH;
 				eng.startSearch();
@@ -120,6 +123,7 @@ Engine::Engine()
 {
 	strength = 10000; // Strength defaults to 100%
 	debug = false;
+	contempt = 0;
 }
 
 void Engine::startSearch()
@@ -139,6 +143,14 @@ void Engine::interativeSearch()
 	{
 		if (aspirationSearch(depth) == BREAKING)
 			return;
+		if (searchtype == DEPTH_SEARCH)
+		{
+			if (depth == fixedDepth)
+			{
+				sendBestMove();
+				return;
+			}
+		}
 	}
 }
 
@@ -154,14 +166,21 @@ int Engine::rootSearch(int depth, int alpha, int beta)
 	MoveList ml;
 	char sz[256];
 	int score;
+	bool inCheck;
 	++nodes;
+	inCheck = mgen.inCheck(theBoard, theBoard.toMove);
 	mgen.makeMoves(theBoard, ml);
 	if (!ml.size)
 	{
+		if (!inCheck) // Stalemate
+			alpha = 0;
+		else
+			alpha = -MATE;
 		ei->sendInQue(ENG_info, string("string No legal moves, aborting search."));
 		return alpha;
 	}
 	// Order moves
+//	orderMoves();
 	ml.list[0].score = watch.read();
 	bestMove.push_back(ml.list[0]);
 	int mit;

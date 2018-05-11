@@ -32,6 +32,7 @@ public:
 	DWORD maxTime;
 	DWORD fixedNodes;
 	DWORD fixedMate;
+	DWORD fixedDepth;
 	DWORD nodes;
 	MoveList searchmoves;
 	DrawTable drawTable;
