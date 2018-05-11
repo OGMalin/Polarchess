@@ -21,7 +21,7 @@ EngineInterface::~EngineInterface()
 	CloseHandle(hEngine);
 }
 
-void EngineInterface::sendInQue(EngineCommand cmd)
+void EngineInterface::sendInQue(ENGINECOMMAND cmd)
 {
 	EnterCriticalSection(&engineCS);
 	inQueCmd.push_back(cmd);
@@ -29,7 +29,7 @@ void EngineInterface::sendInQue(EngineCommand cmd)
 	SetEvent(hEvent);
 }
 
-void EngineInterface::sendInQue(EngineCommand cmd, std::string& s)
+void EngineInterface::sendInQue(ENGINECOMMAND cmd, const std::string& s)
 {
 	EnterCriticalSection(&engineCS);
 	inQueCmd.push_back(cmd);
@@ -38,7 +38,7 @@ void EngineInterface::sendInQue(EngineCommand cmd, std::string& s)
 	SetEvent(hEvent);
 }
 
-void EngineInterface::sendOutQue(EngineCommand cmd)
+void EngineInterface::sendOutQue(ENGINECOMMAND cmd)
 {
 	EnterCriticalSection(&engineCS);
 	if (cmd == ENG_quit)
@@ -48,7 +48,7 @@ void EngineInterface::sendOutQue(EngineCommand cmd)
 	SetEvent(hEngine);
 }
 
-void EngineInterface::sendOutQue(EngineCommand cmd, ChessBoard& cb)
+void EngineInterface::sendOutQue(ENGINECOMMAND cmd, const ChessBoard& cb)
 {
 	EnterCriticalSection(&engineCS);
 	outQueCmd.push_back(cmd);
@@ -57,7 +57,7 @@ void EngineInterface::sendOutQue(EngineCommand cmd, ChessBoard& cb)
 	SetEvent(hEngine);
 }
 
-void EngineInterface::sendOutQue(EngineCommand cmd, EngineGo& eg)
+void EngineInterface::sendOutQue(ENGINECOMMAND cmd, const EngineGo& eg)
 {
 	EnterCriticalSection(&engineCS);
 	outQueCmd.push_back(cmd);
@@ -66,9 +66,18 @@ void EngineInterface::sendOutQue(EngineCommand cmd, EngineGo& eg)
 	SetEvent(hEngine);
 }
 
-EngineCommand EngineInterface::peekOutQue()
+void EngineInterface::sendOutQue(ENGINECOMMAND cmd, const EngineEval& e)
 {
-	EngineCommand cmd;
+	EnterCriticalSection(&engineCS);
+	outQueCmd.push_back(cmd);
+	outQueEvl.push_back(e);
+	LeaveCriticalSection(&engineCS);
+	SetEvent(hEngine);
+}
+
+ENGINECOMMAND EngineInterface::peekOutQue()
+{
+	ENGINECOMMAND cmd;
 	EnterCriticalSection(&engineCS);
 	if (outQueCmd.size() > 0)
 		cmd = outQueCmd.front();
@@ -78,9 +87,9 @@ EngineCommand EngineInterface::peekOutQue()
 	return cmd;
 }
 
-EngineCommand EngineInterface::getOutQue()
+ENGINECOMMAND EngineInterface::getOutQue()
 {
-	EngineCommand cmd;
+	ENGINECOMMAND cmd;
 	EnterCriticalSection(&engineCS);
 	if (outQueCmd.size() > 0)
 	{
@@ -95,9 +104,9 @@ EngineCommand EngineInterface::getOutQue()
 	return cmd;
 }
 
-EngineCommand EngineInterface::getOutQue(ChessBoard& cb)
+ENGINECOMMAND EngineInterface::getOutQue(ChessBoard& cb)
 {
-	EngineCommand cmd;
+	ENGINECOMMAND cmd;
 	EnterCriticalSection(&engineCS);
 	if (outQueCmd.size() > 0)
 	{
@@ -117,9 +126,9 @@ EngineCommand EngineInterface::getOutQue(ChessBoard& cb)
 	return cmd;
 }
 
-EngineCommand EngineInterface::getOutQue(EngineGo& eg)
+ENGINECOMMAND EngineInterface::getOutQue(EngineGo& eg)
 {
-	EngineCommand cmd;
+	ENGINECOMMAND cmd;
 	EnterCriticalSection(&engineCS);
 	if (outQueCmd.size() > 0)
 	{
@@ -139,9 +148,31 @@ EngineCommand EngineInterface::getOutQue(EngineGo& eg)
 	return cmd;
 }
 
-EngineCommand EngineInterface::peekInQue()
+ENGINECOMMAND EngineInterface::getOutQue(EngineEval& e)
 {
-	EngineCommand cmd;
+	ENGINECOMMAND cmd;
+	EnterCriticalSection(&engineCS);
+	if (outQueCmd.size() > 0)
+	{
+		cmd = outQueCmd.front();
+		outQueCmd.pop_front();
+		if (outQueEvl.size() > 0)
+		{
+			e = outQueEvl.front();
+			outQueEvl.pop_front();
+		}
+	}
+	else
+	{
+		cmd = ENG_none;
+	}
+	LeaveCriticalSection(&engineCS);
+	return cmd;
+}
+
+ENGINECOMMAND EngineInterface::peekInQue()
+{
+	ENGINECOMMAND cmd;
 	EnterCriticalSection(&engineCS);
 	if (inQueCmd.size() > 0)
 		cmd = inQueCmd.front();
@@ -151,9 +182,9 @@ EngineCommand EngineInterface::peekInQue()
 	return cmd;
 }
 
-EngineCommand EngineInterface::getInQue()
+ENGINECOMMAND EngineInterface::getInQue()
 {
-	EngineCommand cmd;
+	ENGINECOMMAND cmd;
 	EnterCriticalSection(&engineCS);
 	if (inQueCmd.size() > 0)
 	{
@@ -168,9 +199,9 @@ EngineCommand EngineInterface::getInQue()
 	return cmd;
 }
 
-EngineCommand EngineInterface::getInQue(std::string& s)
+ENGINECOMMAND EngineInterface::getInQue(std::string& s)
 {
-	EngineCommand cmd;
+	ENGINECOMMAND cmd;
 	EnterCriticalSection(&engineCS);
 	if (inQueCmd.size() > 0)
 	{

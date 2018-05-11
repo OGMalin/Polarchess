@@ -35,4 +35,5 @@ public:
 	bool isPieceChar(char c);
 	typePiece getPieceFromChar(char c);
 	HASHKEY hashkey();
+	const std::string uciMoveText(const ChessMove& m);
 };

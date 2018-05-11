@@ -496,3 +496,19 @@ HASHKEY ChessBoard::hashkey()
 
 	return key;
 }
+
+const std::string ChessBoard::uciMoveText(const ChessMove& m)
+{
+	// d7d8q
+	string s;
+	char file[] = "abcdefgh ";
+	char rank[] = "12345678 ";
+	char piece[] = " pnbrqk";
+	s += file[FILE(m.fromSquare)];
+	s += rank[RANK(m.fromSquare)];
+	s += file[FILE(m.toSquare)];
+	s += rank[RANK(m.toSquare)];
+	if (m.promotePiece)
+		s += piece[PIECE(m.promotePiece)];
+	return s;
+}

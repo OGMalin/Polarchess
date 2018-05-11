@@ -214,8 +214,21 @@ void MoveList::quicksort(int start, int end)
 	quicksort(last + 1, end);
 }
 
-ChessMove& MoveList::front()
+const ChessMove& MoveList::front()
 {
+	if (size)
+		return list[0];
+	// No move where found
+	list[0].clear();
+	return list[0];
+}
+
+const ChessMove& MoveList::back()
+{
+	if (size)
+		return list[size-1];
+	// No move where found
+	list[0].clear();
 	return list[0];
 }
 

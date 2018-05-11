@@ -13,8 +13,15 @@ const char* ENGINENAME = "PolarChess 3.0";
 
 FrontEnd::FrontEnd()
 {
+	// Default values
 	debug = false;
 	maxElo = 2000;
+	pawnValue = 100;
+	knightValue = 300;
+	bishopValue = 300;
+	rookValue = 500;
+	queenValue = 900;
+	contempt = 0;
 	currentBoard.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 }
 
@@ -29,13 +36,17 @@ int FrontEnd::run()
 {
 	HANDLE hs[2];
 	DWORD dw;
-
 	hs[0] = uci.hEvent;
 	hs[1] = engine.hEvent;
 
 	findMaxElo();
 	engine.sendOutQue(ENG_clearhistory);
-
+	engine.sendOutQue(ENG_eval, EngineEval(EVAL_contempt, contempt));
+	engine.sendOutQue(ENG_eval, EngineEval(EVAL_pawn, pawnValue));
+	engine.sendOutQue(ENG_eval, EngineEval(EVAL_knight, knightValue));
+	engine.sendOutQue(ENG_eval, EngineEval(EVAL_bishop, bishopValue));
+	engine.sendOutQue(ENG_eval, EngineEval(EVAL_rook, rookValue));
+	engine.sendOutQue(ENG_eval, EngineEval(EVAL_queen, queenValue));
 	while (1)
 	{
 		dw = WaitForMultipleObjects(2, hs, FALSE, INFINITE);
@@ -136,9 +147,23 @@ void FrontEnd::uciUci()
 	uci.write("id author Odd Gunnar Malin");
 	uci.write("option name UCI_EngineAbout type string default http://polarchess.net");
 	uci.write("option name Ponder type check default false");
+	sprintf_s(sz, 256, "option name Contempt type spin default %i min -500 max 500", pawnValue);
+	uci.write(sz);
+	sprintf_s(sz, 256, "option name Pawn type spin default %i min 0 max 2000", pawnValue);
+	uci.write(sz);
+	sprintf_s(sz, 256, "option name Knight type spin default %i min 0 max 2000", knightValue);
+	uci.write(sz);
+	sprintf_s(sz, 256, "option name Bishop type spin default %i min 0 max 2000", bishopValue);
+	uci.write(sz);
+	sprintf_s(sz, 256, "option name Rook type spin default %i min 0 max 2000", rookValue);
+	uci.write(sz);
+	sprintf_s(sz, 256, "option name Queen type spin default %i min 0 max 2000", queenValue);
+	uci.write(sz);
+	uci.write("option name UCI_AnalyseMode type check default false");
 	//	uci.write("option name UCI_LimitStrength type check default false");
 //	_itoa_s(maxElo, sz, 256, 10);
 //	uci.write("option name UCI_Elo type spin default 2000 min 1000 max "+string(sz));
+
 	uci.write("uciok");
 }
 
@@ -197,6 +222,8 @@ void FrontEnd::uciSetoption(const std::string& s)
 {
 	string name, value, ss;
 	int i;
+	bool b;
+	EngineEval ev;
 
 	i = 2;
 	while ((ss = getWord(s, i)).length())
@@ -212,6 +239,46 @@ void FrontEnd::uciSetoption(const std::string& s)
 		value += ss;
 		value += ' ';
 		++i;
+	}
+
+	if (name == "Contempt")
+	{
+		engine.sendOutQue(ENG_eval, EngineEval(EVAL_contempt, atoi(value.c_str())));
+	}
+	else if (name == "Pawn")
+	{
+		engine.sendOutQue(ENG_eval, EngineEval(EVAL_pawn, atoi(value.c_str())));
+	}
+	else if (name == "Knight")
+	{
+		engine.sendOutQue(ENG_eval, EngineEval(EVAL_knight, atoi(value.c_str())));
+	}
+	else if (name == "Bishop")
+	{
+		engine.sendOutQue(ENG_eval, EngineEval(EVAL_bishop, atoi(value.c_str())));
+	}
+	else if (name == "Rook")
+	{
+		engine.sendOutQue(ENG_eval, EngineEval(EVAL_rook, atoi(value.c_str())));
+	}
+	else if (name == "Queen")
+	{
+		engine.sendOutQue(ENG_eval, EngineEval(EVAL_queen, atoi(value.c_str())));
+	}
+	else if (name == "UCI_AnalyseMode")
+	{
+		b = booleanString(value);
+		ev.type = EVAL_contempt;
+		if (b)
+		{
+			ev.value = 0;
+			engine.sendOutQue(ENG_eval, ev);
+		}
+		else
+		{
+			ev.value = contempt;
+			engine.sendOutQue(ENG_eval, ev);
+		}
 	}
 }
 

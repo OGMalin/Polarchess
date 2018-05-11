@@ -29,7 +29,8 @@ public:
   void sort(int start = 0, int end = -1);
   void quicksort(int start, int end);
   void bubblesort(int start, int end);
-  ChessMove& front();
+  const ChessMove& front();
+  const ChessMove& back();
   void trunc();
   bool exist(const ChessMove& m);
   ChessMove& next(int movenr);

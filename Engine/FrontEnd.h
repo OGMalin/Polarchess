@@ -9,10 +9,16 @@ class FrontEnd
 {
 	DWORD movegenTest(int depth, bool init = true, int ply = 0);
 public:
+	int pawnValue;
+	int knightValue;
+	int bishopValue;
+	int rookValue;
+	int queenValue;
+	DWORD maxElo;
+	int contempt;
 	ChessBoard currentBoard;
 	UCI uci;
 	EngineInterface engine;
-	DWORD maxElo;
 	bool debug;
 	FrontEnd();
 	virtual ~FrontEnd();

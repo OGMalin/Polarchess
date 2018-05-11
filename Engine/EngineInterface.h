@@ -5,7 +5,7 @@
 #include "ChessBoard.h"
 #include "MoveList.h"
 
-enum EngineCommand
+enum ENGINECOMMAND
 {
 	ENG_none=0,			// in|out
 	ENG_position,		// out
@@ -20,7 +20,26 @@ enum EngineCommand
 	ENG_info,			// in
 	ENG_debug,			// in|out
 	ENG_nodebug,		// out
+	ENG_eval,			// out
 	ENG_string			// in
+};
+
+enum ENGINEEVAL
+{
+	EVAL_contempt=1,
+	EVAL_pawn,
+	EVAL_knight,
+	EVAL_bishop,
+	EVAL_rook,
+	EVAL_queen
+};
+
+struct EngineEval
+{
+	EngineEval() {};
+	EngineEval(const ENGINEEVAL t, const int v) { type = t; value = v; };
+	ENGINEEVAL type;
+	int value;
 };
 
 struct EngineGo
@@ -39,23 +58,26 @@ public:
 	HANDLE hEvent;
 	HANDLE hEngine;
 	HANDLE hThread;
-	std::list<EngineCommand> inQueCmd;
+	std::list<ENGINECOMMAND> inQueCmd;
 	std::list<std::string> inQueStr;
-	std::list<EngineCommand> outQueCmd;
+	std::list<ENGINECOMMAND> outQueCmd;
 	std::list<ChessBoard> outQueCb;
 	std::list<EngineGo> outQueGo;
+	std::list<EngineEval> outQueEvl;
 	EngineInterface();
 	virtual ~EngineInterface();
-	void sendInQue(EngineCommand cmd);
-	void sendInQue(EngineCommand cmd, std::string& s);
-	void sendOutQue(EngineCommand cmd, ChessBoard& cb);
-	void sendOutQue(EngineCommand cmd);
-	void sendOutQue(EngineCommand cmd, EngineGo& eg);
-	EngineCommand peekInQue();
-	EngineCommand getInQue();
-	EngineCommand getInQue(std::string& s);
-	EngineCommand peekOutQue();
-	EngineCommand getOutQue();
-	EngineCommand getOutQue(ChessBoard& cb);
-	EngineCommand getOutQue(EngineGo& cb);
+	void sendInQue(ENGINECOMMAND cmd);
+	void sendInQue(ENGINECOMMAND cmd, const std::string& s);
+	void sendOutQue(ENGINECOMMAND cmd, const ChessBoard& cb);
+	void sendOutQue(ENGINECOMMAND cmd);
+	void sendOutQue(ENGINECOMMAND cmd, const EngineGo& eg);
+	void sendOutQue(ENGINECOMMAND cmd, const EngineEval& e);
+	ENGINECOMMAND peekInQue();
+	ENGINECOMMAND getInQue();
+	ENGINECOMMAND getInQue(std::string& s);
+	ENGINECOMMAND peekOutQue();
+	ENGINECOMMAND getOutQue();
+	ENGINECOMMAND getOutQue(ChessBoard& cb);
+	ENGINECOMMAND getOutQue(EngineGo& cb);
+	ENGINECOMMAND getOutQue(EngineEval& e);
 };
