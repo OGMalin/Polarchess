@@ -228,6 +228,7 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 			return beta;
 		if (score > alpha)
 		{
+			ml[0].list[mit].score = score;
 			copyPV(pv[0], pv[1], ml[0].list[mit]);
 			sendPV(pv[0]);
 
