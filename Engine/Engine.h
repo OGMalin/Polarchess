@@ -6,6 +6,7 @@
 #include "EngineInterface.h"
 #include "StopWatch.h"
 #include "MoveGenerator.h"
+#include "defs.h"
 
 enum SEARCHTYPE
 {
@@ -27,6 +28,8 @@ public:
 	StopWatch watch;
 	MoveGenerator mgen;
 	SEARCHTYPE searchtype;
+	MoveList pv[MAX_PLY];
+	MoveList ml[MAX_PLY];
 	bool debug;
 	DWORD fixedTime;
 	DWORD maxTime;
@@ -36,16 +39,28 @@ public:
 	DWORD nodes;
 	MoveList searchmoves;
 	DrawTable drawTable;
+	HashDrawTable hashDrawTable;
 	EngineInterface* ei;
 	int contempt;
 	ChessBoard theBoard;
 	Engine();
 	void startSearch();
-	void interativeSearch();
-	int aspirationSearch(int depth);
-	int rootSearch(int depth, int alpha, int beta);
-	int Search(int depth, int alpha, int beta, int ply);
+	void interativeSearch(bool inCheck, HASHKEY hashKey);
+	int aspirationSearch(int depth, int bestscore, bool inCheck, HASHKEY hashKey);
+	int rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey);
+	int Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey, int ply, bool followPV);
 	int qSearch(int alpha, int beta, int ply);
+
+	// Order movelist, put m as first move.
+	void orderMoves(MoveList& mlist, const ChessMove& m);
 	bool abortCheck();
 	void sendBestMove();
+	void sendPV(const MoveList& l);
+	void copyPV(MoveList& m1, MoveList& m2, ChessMove& m)
+	{
+		m1.clear();
+		m1.push_back(m);
+		for (int i = 0; i<m2.size; i++)
+			m1.push_back(m2.list[i]);
+	};
 };

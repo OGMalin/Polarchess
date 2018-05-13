@@ -497,6 +497,74 @@ HASHKEY ChessBoard::hashkey()
 	return key;
 }
 
+HASHKEY ChessBoard::newHashkey(const ChessMove& m, HASHKEY key)
+{
+	if (m.moveType != NULL_MOVE)
+	{
+		// Remove captured piece
+		if (m.moveType&CAPTURE)
+		{
+			if (m.moveType&ENPASSANT)
+				key ^= ZobristKey[m.capturedpiece - 1][SQUARE64(m.toSquare) + (toMove == WHITE ? 8 : -8)];
+			else
+				key ^= ZobristKey[board[m.toSquare] - 1][SQUARE64(m.fromSquare)];
+		}
+
+		// Remove piece
+		if (m.moveType&PROMOTE)
+			key ^= ZobristKey[COLORPIECE(PIECECOLOR(m.promotePiece), PAWN) - 1][SQUARE64(m.fromSquare)];
+		else
+			key ^= ZobristKey[board[m.toSquare] - 1][SQUARE64(m.fromSquare)];
+
+		// Add piece
+		key ^= ZobristKey[board[m.toSquare] - 1][SQUARE64(m.toSquare)];
+
+		// Move the rook on castle
+		if (m.moveType&CASTLE)
+		{
+			switch (m.toSquare)
+			{
+			case g1:
+				key ^= ZobristKey[whiterook - 1][SQUARE64(h1)];
+				key ^= ZobristKey[whiterook - 1][SQUARE64(f1)];
+				break;
+			case g8:
+				key ^= ZobristKey[blackrook - 1][SQUARE64(h8)];
+				key ^= ZobristKey[blackrook - 1][SQUARE64(f8)];
+				break;
+			case c1:
+				key ^= ZobristKey[whiterook - 1][SQUARE64(a1)];
+				key ^= ZobristKey[whiterook - 1][SQUARE64(d1)];
+				break;
+			case c8:
+				key ^= ZobristKey[blackrook - 1][SQUARE64(a8)];
+				key ^= ZobristKey[blackrook - 1][SQUARE64(d8)];
+				break;
+			}
+		}
+
+		// Castle rights
+		if (m.oldCastle != castle)
+		{
+			key ^= ZobristKey[12][m.oldCastle];
+			key ^= ZobristKey[12][castle];
+		}
+	}
+
+	// Remove old ep.
+	if (m.oldEnPassant != UNDEF)
+		key ^= ZobristKey[12][17 + FILE(m.oldEnPassant)];
+
+	// Add ep
+	if (enPassant != UNDEF)
+		key ^= ZobristKey[12][17 + FILE(enPassant)];
+
+	// Change color to move
+	key ^= ZobristKey[12][16];
+
+	return key;
+}
+
 const std::string ChessBoard::uciMoveText(const ChessMove& m)
 {
 	// d7d8q

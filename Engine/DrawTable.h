@@ -27,13 +27,39 @@ public:
 	};
 	bool exist(ChessBoard& cb, HASHKEY key)
 	{
-		int it;
+		int it=0;
 		while (it < size)
 		{
 			if (hTable[it] == key)
 				if (bTable[it].compare(cb)==0)
 					return true;
+			++it;
 		};
 		return false;
 	};
 };
+
+// Drawtable used under search
+class HashDrawTable
+{
+	HASHKEY hTable[MAX_PLY];
+	int size;
+public:
+	HashDrawTable() {};
+	void add(HASHKEY key, int ply)
+	{
+		hTable[ply] = key;
+	};
+	bool exist(HASHKEY key, int ply)
+	{
+		int it=ply-1;
+		while (it>=0)
+		{
+			if (hTable[it] == key)
+				return true;
+			--it;
+		};
+		return false;
+	};
+};
+

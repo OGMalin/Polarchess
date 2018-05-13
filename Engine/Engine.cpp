@@ -4,13 +4,15 @@
 #include "EngineInterface.h"
 
 using namespace std;
-const int MATE = 32767;    // Mate value
 const int BREAKING = MATE + 400;
 const int MAX_DEPTH = 100;
 
+Engine eng;
+char sz[256];
+ChessMove emptyMove;
+
 void EngineSearchThreadLoop(void* lpv)
 {
-	Engine eng;
 	ENGINECOMMAND cmd=ENG_none;
 	eng.ei = (EngineInterface*)lpv;
 	ChessBoard cb;
@@ -114,6 +116,8 @@ void EngineSearchThreadLoop(void* lpv)
 				break;
 			}
 		}
+		if (cmd == ENG_quit)
+			break;
 	}
 	_endthread();
 };
@@ -128,20 +132,35 @@ Engine::Engine()
 
 void Engine::startSearch()
 {
+	int i;
+	bool inCheck;
+	HASHKEY hashKey;
 	nodes = 0;
 	bestMove.clear();
 	eval.rootcolor = theBoard.toMove;
 	eval.drawscore[eval.rootcolor] = -contempt;
 	eval.drawscore[OTHERPLAYER(eval.rootcolor)] = contempt;
-	interativeSearch();
+
+	inCheck = mgen.inCheck(theBoard, theBoard.toMove);
+	hashKey = theBoard.hashkey();
+
+	// Clear pv
+	for (i = 0; i<MAX_PLY; i++)
+		pv[i].clear();
+
+	interativeSearch(inCheck, hashKey);
 }
 
-void Engine::interativeSearch()
+void Engine::interativeSearch(bool inCheck, HASHKEY hashKey)
 {
 	int depth=1;
+	int score=-MATE;
 	for (depth = 1; depth < MAX_DEPTH; depth++)
 	{
-		if (aspirationSearch(depth) == BREAKING)
+		sprintf_s(sz, 256, "depth %i", depth);
+		ei->sendInQue(ENG_info, sz);
+		score = aspirationSearch(depth, score, inCheck, hashKey);
+		if (score == BREAKING)
 			return;
 		if (searchtype == DEPTH_SEARCH)
 		{
@@ -154,23 +173,20 @@ void Engine::interativeSearch()
 	}
 }
 
-int Engine::aspirationSearch(int depth)
+int Engine::aspirationSearch(int depth, int bestscore, bool inCheck, HASHKEY hashKey)
 {
 	int alpha=-MATE;
 	int beta=MATE;
-	return rootSearch(depth, alpha, beta);
+	return rootSearch(depth, alpha, beta, inCheck, hashKey);
 }
 
-int Engine::rootSearch(int depth, int alpha, int beta)
+int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey)
 {
-	MoveList ml;
-	char sz[256];
 	int score;
-	bool inCheck;
+	HASHKEY newkey;
 	++nodes;
-	inCheck = mgen.inCheck(theBoard, theBoard.toMove);
-	mgen.makeMoves(theBoard, ml);
-	if (!ml.size)
+	mgen.makeMoves(theBoard, ml[0]);
+	if (!ml[0].size)
 	{
 		if (!inCheck) // Stalemate
 			alpha = 0;
@@ -179,61 +195,93 @@ int Engine::rootSearch(int depth, int alpha, int beta)
 		ei->sendInQue(ENG_info, string("string No legal moves, aborting search."));
 		return alpha;
 	}
+
 	// Order moves
-//	orderMoves();
-	ml.list[0].score = watch.read();
-	bestMove.push_back(ml.list[0]);
+	if (depth == 1)
+	{
+		orderMoves(ml[0],emptyMove);
+		ml[0].list[0].score = watch.read();
+		bestMove.push_back(ml[0].list[0]);
+	}
+	else
+	{
+		orderMoves(ml[0],bestMove.back());
+	}
+
+	// Add the root position to the drawtable
+	hashDrawTable.add(hashKey, 0);
+
 	int mit;
-	for (mit = 0; mit < ml.size; mit++)
+	for (mit = 0; mit < ml[0].size; mit++)
 	{
 		// Send UCI info
-		sprintf_s(sz, 256, "currmove %s currmovenumber %i", theBoard.uciMoveText(ml.list[mit]).c_str(), mit+1);
+		sprintf_s(sz, 256, "currmove %s currmovenumber %i", theBoard.uciMoveText(ml[0].list[mit]).c_str(), mit+1);
 		ei->sendInQue(ENG_info, sz);
-
-		mgen.doMove(theBoard, ml.list[mit]);
-		score = -Search(depth - 1, -beta, -alpha, 1);
+		newkey = theBoard.newHashkey(ml[0].list[mit], hashKey);
+		mgen.doMove(theBoard, ml[0].list[mit]);
+		inCheck = mgen.inCheck(theBoard, theBoard.toMove);
+		score = -Search(depth - 1, -beta, -alpha, inCheck, newkey, 1, true);
 		if (score == -BREAKING)
 			return BREAKING;
-		mgen.undoMove(theBoard, ml.list[mit]);
+		mgen.undoMove(theBoard, ml[0].list[mit]);
 		if (score >= beta)
 			return beta;
 		if (score > alpha)
 		{
+			copyPV(pv[0], pv[1], ml[0].list[mit]);
+			sendPV(pv[0]);
+
 			alpha = score;
-			ml.list[mit].score = watch.read();
-			bestMove.push_back(ml.list[mit]);
+
+			ml[0].list[mit].score = watch.read();
+			bestMove.push_back(ml[0].list[mit]);
 		}
 	}
 	return alpha;
 }
 
-int Engine::Search(int depth, int alpha, int beta, int ply)
+int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey, int ply, bool followPV)
 {
-	MoveList ml;
 	int score;
-	bool inCheck;
+	HASHKEY newkey;
 	if (depth == 0)
 		return qSearch(alpha, beta, ply);
+
+	pv[ply].clear();
 
 	if (!(++nodes % 0x400))
 		if (abortCheck())
 			return BREAKING;
 
-	inCheck = mgen.inCheck(theBoard, theBoard.toMove);
+	if (drawTable.exist(theBoard, hashKey) || hashDrawTable.exist(hashKey, ply))
+		return (eval.drawscore[theBoard.toMove]);
 
-	mgen.makeMoves(theBoard, ml);
+	if (ply >= MAX_PLY)
+		return eval.evaluate(theBoard, alpha, beta);
+
+	// Add position to the drawtable
+	hashDrawTable.add(hashKey, ply);
+
+	mgen.makeMoves(theBoard, ml[ply]);
+	orderMoves(ml[ply], followPV?pv[ply].front():emptyMove);
 	int mit;
-	for (mit = 0; mit < ml.size; mit++)
+	for (mit = 0; mit < ml[ply].size; mit++)
 	{
-		mgen.doMove(theBoard, ml.list[mit]);
-		score = -Search(depth - 1, -beta, -alpha, ply+1);
+		newkey = theBoard.newHashkey(ml[0].list[mit], hashKey);
+		mgen.doMove(theBoard, ml[ply].list[mit]);
+		inCheck = mgen.inCheck(theBoard, theBoard.toMove);
+		score = -Search(depth - 1, -beta, -alpha, inCheck, newkey, ply+1, followPV);
 		if (score == -BREAKING)
 			return BREAKING;
-		mgen.undoMove(theBoard, ml.list[mit]);
+		mgen.undoMove(theBoard, ml[ply].list[mit]);
 		if (score >= beta)
 			return beta;
 		if (score > alpha)
+		{
 			alpha = score;
+			copyPV(pv[ply], pv[ply + 1], ml[ply].list[mit]);
+		}
+		followPV = false;
 	}
 	if (mit == 0)
 	{
@@ -248,7 +296,6 @@ int Engine::Search(int depth, int alpha, int beta, int ply)
 int Engine::qSearch(int alpha, int beta, int ply)
 {
 	int score;
-	MoveList ml;
 
 	if (!(++nodes % 0x400))
 		if (abortCheck())
@@ -260,13 +307,15 @@ int Engine::qSearch(int alpha, int beta, int ply)
 	if (score > alpha)
 		alpha = score;
 
-	mgen.makeCaptureMoves(theBoard, ml);
+	mgen.makeCaptureMoves(theBoard, ml[ply]);
 	int mit;
-	for (mit = 0; mit < ml.size; mit++)
+	for (mit = 0; mit < ml[ply].size; mit++)
 	{
-		mgen.doMove(theBoard, ml.list[mit]);
+		mgen.doMove(theBoard, ml[ply].list[mit]);
 		score = -qSearch(-beta, -alpha, ply+1);
-		mgen.undoMove(theBoard, ml.list[mit]);
+		if (score == -BREAKING)
+			return BREAKING;
+		mgen.undoMove(theBoard, ml[ply].list[mit]);
 		if (score >= beta)
 			return beta;
 		if (score > alpha)
@@ -309,7 +358,7 @@ bool Engine::abortCheck()
 	{
 		switch (cmd)
 		{
-		case ENG_quit:
+		case ENG_quit: // Let the comman be in the que.
 			return true;
 		case ENG_debug:
 			debug = true;
@@ -376,6 +425,11 @@ void Engine::sendBestMove()
 {
 	string s;
 
+	if (searchtype != NORMAL_SEARCH)
+	{
+		ei->sendInQue(ENG_string, "bestmove " + theBoard.uciMoveText(bestMove.back()));
+		return;
+	}
 	// Full strength
 	if (strength == 10000)
 	{
@@ -393,4 +447,56 @@ void Engine::sendBestMove()
 	if (mit < 0)
 		mit = 0;
 	ei->sendInQue(ENG_string, "bestmove " + theBoard.uciMoveText(bestMove.list[mit]));
+}
+
+void Engine::sendPV(const MoveList& pvline)
+{
+	string s="";
+	int i=0;
+	while (i < pvline.size)
+	{ 
+		s+=theBoard.uciMoveText(pvline.list[i]);
+		++i;
+		if (i < pvline.size)
+			s += " ";
+	}
+	sprintf_s(sz, 256, "score cp %i nodes %u time %u pv %s", pvline.list[0].score, nodes, watch.read(), s.c_str());
+	ei->sendInQue(ENG_info, sz);
+}
+
+void Engine::orderMoves(MoveList& mlist, const ChessMove& first)
+{
+	int victem[] = { 0,100,300,300,500,9000,0,100,300,300,500,9000,0 };
+	int attacker[] = { 0,1,2,3,4,5,6,1,2,3,4,5,6 };
+	int promotion[] = { 0,0,1,1,2,3,0,0,1,1,2,3,0 };
+	int seevalue[] = { 0,1,3,3,5,9,0,1,3,3,5,9,0 };
+	int i,j;
+
+	if (mlist.size < 2)
+		return;
+	
+	for (i = 0; i < mlist.size; i++)
+	{
+		mlist.list[i].score = 0;
+		if (mlist.list[i].moveType & (CAPTURE | PROMOTE))
+		{
+			j = seevalue[theBoard.board[mlist.list[i].fromSquare]];
+			if (mlist.list[i].moveType&CAPTURE)
+				j += seevalue[mlist.list[i].capturedpiece];
+			if (mlist.list[i].moveType&PROMOTE)
+				j += seevalue[mlist.list[i].promotePiece];
+			j += 2000000000;
+			mlist.list[i].score = j;
+		}
+		else if (mlist.list[i].moveType & CASTLE)
+		{
+			mlist.list[i].score = 1999999999;
+		}
+	}
+
+	i=mlist.find(first);
+	if (i < mlist.size)
+		mlist.list[i].score = 0x7fffffff;
+
+	mlist.sort();
 }

@@ -7,6 +7,9 @@ typedef int typeSquare;
 
 typedef unsigned __int64 HASHKEY;
 
+const int MAX_PLY = 100;
+const int MATE = 32767;    // Mate value
+
 
 // Shortcuts for squares in a 88 board
 enum {

@@ -160,6 +160,7 @@ void FrontEnd::uciUci()
 	sprintf_s(sz, 256, "option name Queen type spin default %i min 0 max 2000", queenValue);
 	uci.write(sz);
 	uci.write("option name UCI_AnalyseMode type check default false");
+
 	//	uci.write("option name UCI_LimitStrength type check default false");
 //	_itoa_s(maxElo, sz, 256, 10);
 //	uci.write("option name UCI_Elo type spin default 2000 min 1000 max "+string(sz));
