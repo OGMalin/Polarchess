@@ -184,6 +184,7 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 {
 	int score;
 	HASHKEY newkey;
+	bool followPV = true;;
 	++nodes;
 	mgen.makeMoves(theBoard, ml[0]);
 	if (!ml[0].size)
@@ -194,6 +195,13 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 			alpha = -MATE;
 		ei->sendInQue(ENG_info, string("string No legal moves, aborting search."));
 		return alpha;
+	}
+	else if ((ml[0].size == 1) && (searchtype == NORMAL_SEARCH))
+	{ // Only one legal move
+		bestMove.push_back(ml[0].list[0]);
+		sendBestMove();
+		return BREAKING;
+
 	}
 
 	// Order moves
@@ -220,7 +228,7 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 		newkey = theBoard.newHashkey(ml[0].list[mit], hashKey);
 		mgen.doMove(theBoard, ml[0].list[mit]);
 		inCheck = mgen.inCheck(theBoard, theBoard.toMove);
-		score = -Search(depth - 1, -beta, -alpha, inCheck, newkey, 1, true);
+		score = -Search(depth - 1, -beta, -alpha, inCheck, newkey, 1,followPV);
 		if (score == -BREAKING)
 			return BREAKING;
 		mgen.undoMove(theBoard, ml[0].list[mit]);
@@ -237,6 +245,7 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 			ml[0].list[mit].score = watch.read();
 			bestMove.push_back(ml[0].list[mit]);
 		}
+		followPV = false;
 	}
 	return alpha;
 }
@@ -305,6 +314,8 @@ int Engine::qSearch(int alpha, int beta, int ply)
 	score = eval.evaluate(theBoard, alpha, beta);
 	if (score >= beta)
 		return beta;
+	if (ply >= MAX_PLY)
+		return score;
 	if (score > alpha)
 		alpha = score;
 
@@ -501,3 +512,11 @@ void Engine::orderMoves(MoveList& mlist, const ChessMove& first)
 
 	mlist.sort();
 }
+
+void Engine::copyPV(MoveList& m1, MoveList& m2, ChessMove& m)
+{
+	m1.clear();
+	m1.push_back(m);
+	for (int i = 0; i<m2.size; i++)
+		m1.push_back(m2.list[i]);
+};

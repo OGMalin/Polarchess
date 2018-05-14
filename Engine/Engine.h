@@ -56,11 +56,5 @@ public:
 	bool abortCheck();
 	void sendBestMove();
 	void sendPV(const MoveList& l);
-	void copyPV(MoveList& m1, MoveList& m2, ChessMove& m)
-	{
-		m1.clear();
-		m1.push_back(m);
-		for (int i = 0; i<m2.size; i++)
-			m1.push_back(m2.list[i]);
-	};
+	void copyPV(MoveList& m1, MoveList& m2, ChessMove& m);
 };

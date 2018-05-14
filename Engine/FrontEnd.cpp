@@ -9,7 +9,7 @@
 
 using namespace std;
 
-const char* ENGINENAME = "PolarChess 3.0";
+const char* ENGINENAME = "PolarChess 2.0 B1";
 
 FrontEnd::FrontEnd()
 {

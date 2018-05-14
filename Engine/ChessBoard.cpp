@@ -215,7 +215,8 @@ const ChessMove ChessBoard::getMoveFromText(const std::string text)
 	typePiece piece, ppiece = EMPTY;
 	char mt[20];
 	int fRow = -1, fFile = -1, tRow = -1, tFile = -1;
-	size_t len, i;
+	size_t len;
+	int i;
 
 	if (text.length()>19)
 		strcpy_s(mt, 20, text.substr(0, 18).c_str());
@@ -260,7 +261,7 @@ const ChessMove ChessBoard::getMoveFromText(const std::string text)
 	else
 	{
 		piece = getPieceFromChar(mt[0]);
-		i = len - 1;
+		i = (int)len - 1;
 		if (isPieceChar(toupper(mt[i])))
 		{
 			ppiece = getPieceFromChar(toupper(mt[i]));

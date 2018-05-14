@@ -88,3 +88,14 @@ Iterative deepening
 function iterative
 	for depth=0 to maxdepth
 		alphabeta(-infinity, infinity, depth)
+
+
+
+Collecting PV
+
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
