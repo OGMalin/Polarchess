@@ -249,9 +249,12 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 			return beta;
 		if (score > alpha)
 		{
-			ml[0].list[mit].score = score;
-			copyPV(pv[0], pv[1], ml[0].list[mit]);
-			sendPV(pv[0], depth);
+			if (depth > 3)
+			{
+				ml[0].list[mit].score = score;
+				copyPV(pv[0], pv[1], ml[0].list[mit]);
+				sendPV(pv[0], depth);
+			}
 
 			alpha = score;
 
@@ -280,8 +283,8 @@ int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey
 		if (abortCheck())
 			return BREAKING;
 
-//	if (drawTable.exist(theBoard, hashKey) || hashDrawTable.exist(hashKey, ply-1))
-//		return (eval.drawscore[theBoard.toMove]);
+	if (drawTable.exist(theBoard, hashKey))// || hashDrawTable.exist(hashKey, ply-1))
+		return (eval.drawscore[theBoard.toMove]);
 
 	if (ply >= MAX_PLY)
 		return eval.evaluate(theBoard, alpha, beta);
@@ -294,7 +297,7 @@ int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey
 	int mit;
 	for (mit = 0; mit < ml[ply].size; mit++)
 	{
-		newkey = theBoard.newHashkey(ml[0].list[mit], hashKey);
+		newkey = theBoard.newHashkey(ml[ply].list[mit], hashKey);
 		mgen.doMove(theBoard, ml[ply].list[mit]);
 		inCheck = mgen.inCheck(theBoard, theBoard.toMove);
 		if (inCheck)

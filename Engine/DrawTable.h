@@ -52,7 +52,7 @@ public:
 	};
 	bool exist(HASHKEY key, int ply)
 	{
-		int it=ply-1;
+		int it=ply;
 		while (it>=0)
 		{
 			if (hTable[it] == key)
