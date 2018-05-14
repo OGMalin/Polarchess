@@ -104,5 +104,6 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Search.txt" />
+    <Text Include="Todo.txt" />
   </ItemGroup>
 </Project>

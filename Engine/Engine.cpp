@@ -128,6 +128,7 @@ Engine::Engine()
 	strength = 10000; // Strength defaults to 100%
 	debug = false;
 	contempt = 0;
+	multiPV = 1;
 }
 
 void Engine::startSearch()
@@ -155,11 +156,16 @@ void Engine::interativeSearch(bool inCheck, HASHKEY hashKey)
 {
 	int depth=1;
 	int score=-MATE;
+	int extention = 0;
+
+	if (inCheck)
+		++extention;
+	
 	for (depth = 1; depth < MAX_DEPTH; depth++)
 	{
 		sprintf_s(sz, 256, "depth %i", depth);
 		ei->sendInQue(ENG_info, sz);
-		score = aspirationSearch(depth, score, inCheck, hashKey);
+		score = aspirationSearch(depth + extention, score, inCheck, hashKey);
 		if (score == BREAKING)
 			return;
 		if (searchtype == DEPTH_SEARCH)
@@ -184,9 +190,14 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 {
 	int score;
 	HASHKEY newkey;
-	bool followPV = true;;
+	bool followPV = true;
+	int extention = 0;
+
 	++nodes;
-	mgen.makeMoves(theBoard, ml[0]);
+	if (searchmoves.size)
+		ml[0] = searchmoves;
+	else
+		mgen.makeMoves(theBoard, ml[0]);
 	if (!ml[0].size)
 	{
 		if (!inCheck) // Stalemate
@@ -201,7 +212,6 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 		bestMove.push_back(ml[0].list[0]);
 		sendBestMove();
 		return BREAKING;
-
 	}
 
 	// Order moves
@@ -217,6 +227,7 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 	}
 
 	// Add the root position to the drawtable
+
 	hashDrawTable.add(hashKey, 0);
 
 	int mit;
@@ -228,7 +239,9 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 		newkey = theBoard.newHashkey(ml[0].list[mit], hashKey);
 		mgen.doMove(theBoard, ml[0].list[mit]);
 		inCheck = mgen.inCheck(theBoard, theBoard.toMove);
-		score = -Search(depth - 1, -beta, -alpha, inCheck, newkey, 1,followPV);
+		if (inCheck)
+			++extention;
+		score = -Search(depth - 1 + extention, -beta, -alpha, inCheck, newkey, 1,followPV);
 		if (score == -BREAKING)
 			return BREAKING;
 		mgen.undoMove(theBoard, ml[0].list[mit]);
@@ -238,13 +251,15 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 		{
 			ml[0].list[mit].score = score;
 			copyPV(pv[0], pv[1], ml[0].list[mit]);
-			sendPV(pv[0]);
+			sendPV(pv[0], depth);
 
 			alpha = score;
 
 			ml[0].list[mit].score = watch.read();
 			bestMove.push_back(ml[0].list[mit]);
 		}
+		if (inCheck)
+			--extention;
 		followPV = false;
 	}
 	return alpha;
@@ -254,6 +269,8 @@ int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey
 {
 	int score;
 	HASHKEY newkey;
+	int extention = 0;
+
 	if (depth == 0)
 		return qSearch(alpha, beta, ply);
 
@@ -263,8 +280,8 @@ int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey
 		if (abortCheck())
 			return BREAKING;
 
-	if (drawTable.exist(theBoard, hashKey) || hashDrawTable.exist(hashKey, ply))
-		return (eval.drawscore[theBoard.toMove]);
+//	if (drawTable.exist(theBoard, hashKey) || hashDrawTable.exist(hashKey, ply-1))
+//		return (eval.drawscore[theBoard.toMove]);
 
 	if (ply >= MAX_PLY)
 		return eval.evaluate(theBoard, alpha, beta);
@@ -280,7 +297,9 @@ int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey
 		newkey = theBoard.newHashkey(ml[0].list[mit], hashKey);
 		mgen.doMove(theBoard, ml[ply].list[mit]);
 		inCheck = mgen.inCheck(theBoard, theBoard.toMove);
-		score = -Search(depth - 1, -beta, -alpha, inCheck, newkey, ply+1, followPV);
+		if (inCheck)
+			++extention;
+		score = -Search(depth - 1 + extention, -beta, -alpha, inCheck, newkey, ply + 1, followPV);
 		if (score == -BREAKING)
 			return BREAKING;
 		mgen.undoMove(theBoard, ml[ply].list[mit]);
@@ -291,6 +310,8 @@ int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey
 			alpha = score;
 			copyPV(pv[ply], pv[ply + 1], ml[ply].list[mit]);
 		}
+		if (inCheck)
+			--extention;
 		followPV = false;
 	}
 	if (mit == 0)
@@ -307,6 +328,8 @@ int Engine::qSearch(int alpha, int beta, int ply)
 {
 	int score;
 
+	pv[ply].clear();
+
 	if (!(++nodes % 0x400))
 		if (abortCheck())
 			return BREAKING;
@@ -314,7 +337,7 @@ int Engine::qSearch(int alpha, int beta, int ply)
 	score = eval.evaluate(theBoard, alpha, beta);
 	if (score >= beta)
 		return beta;
-	if (ply >= MAX_PLY)
+	if (ply >= (MAX_PLY-1))
 		return score;
 	if (score > alpha)
 		alpha = score;
@@ -324,14 +347,17 @@ int Engine::qSearch(int alpha, int beta, int ply)
 	for (mit = 0; mit < ml[ply].size; mit++)
 	{
 		mgen.doMove(theBoard, ml[ply].list[mit]);
-		score = -qSearch(-beta, -alpha, ply+1);
+		score = -qSearch(-beta, -alpha, ply + 1);
 		if (score == -BREAKING)
 			return BREAKING;
 		mgen.undoMove(theBoard, ml[ply].list[mit]);
 		if (score >= beta)
 			return beta;
 		if (score > alpha)
+		{
 			alpha = score;
+			copyPV(pv[ply], pv[ply + 1], ml[ply].list[mit]);
+		}
 	}
 	return alpha;
 }
@@ -461,10 +487,11 @@ void Engine::sendBestMove()
 	ei->sendInQue(ENG_string, "bestmove " + theBoard.uciMoveText(bestMove.list[mit]));
 }
 
-void Engine::sendPV(const MoveList& pvline)
+void Engine::sendPV(const MoveList& pvline, int depth)
 {
 	string s="";
 	int i=0;
+	DWORD t = watch.read();
 	while (i < pvline.size)
 	{ 
 		s+=theBoard.uciMoveText(pvline.list[i]);
@@ -472,7 +499,7 @@ void Engine::sendPV(const MoveList& pvline)
 		if (i < pvline.size)
 			s += " ";
 	}
-	sprintf_s(sz, 256, "score cp %i nodes %u time %u pv %s", pvline.list[0].score, nodes, watch.read(), s.c_str());
+	sprintf_s(sz, 256, "depth %i nps %i score cp %i nodes %u time %u pv %s", depth, (nodes*t)/1000, pvline.list[0].score, nodes, t, s.c_str());
 	ei->sendInQue(ENG_info, sz);
 }
 

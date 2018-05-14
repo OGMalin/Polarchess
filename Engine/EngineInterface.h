@@ -27,6 +27,7 @@ enum ENGINECOMMAND
 enum ENGINEEVAL
 {
 	EVAL_contempt=1,
+	EVAL_multipv,
 	EVAL_pawn,
 	EVAL_knight,
 	EVAL_bishop,

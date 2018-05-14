@@ -147,8 +147,9 @@ void FrontEnd::uciUci()
 	uci.write("id author Odd Gunnar Malin");
 	uci.write("option name UCI_EngineAbout type string default http://polarchess.net");
 	uci.write("option name Ponder type check default false");
-	sprintf_s(sz, 256, "option name Contempt type spin default %i min -500 max 500", pawnValue);
+	sprintf_s(sz, 256, "option name Contempt type spin default %i min -500 max 500", contempt);
 	uci.write(sz);
+	uci.write("option name MultiPV type spin default 1 min 1 max 100");
 	sprintf_s(sz, 256, "option name Pawn type spin default %i min 0 max 2000", pawnValue);
 	uci.write(sz);
 	sprintf_s(sz, 256, "option name Knight type spin default %i min 0 max 2000", knightValue);
@@ -265,6 +266,10 @@ void FrontEnd::uciSetoption(const std::string& s)
 	else if (name == "Queen")
 	{
 		engine.sendOutQue(ENG_eval, EngineEval(EVAL_queen, atoi(value.c_str())));
+	}
+	else if (name == "MultiPV")
+	{
+		engine.sendOutQue(ENG_eval, EngineEval(EVAL_multipv, atoi(value.c_str())));
 	}
 	else if (name == "UCI_AnalyseMode")
 	{

@@ -37,6 +37,7 @@ public:
 	DWORD fixedMate;
 	DWORD fixedDepth;
 	DWORD nodes;
+	DWORD multiPV;
 	MoveList searchmoves;
 	DrawTable drawTable;
 	HashDrawTable hashDrawTable;
@@ -55,6 +56,6 @@ public:
 	void orderMoves(MoveList& mlist, const ChessMove& m);
 	bool abortCheck();
 	void sendBestMove();
-	void sendPV(const MoveList& l);
+	void sendPV(const MoveList& l,int depth);
 	void copyPV(MoveList& m1, MoveList& m2, ChessMove& m);
 };

@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Search.txt" />
+    <Text Include="Todo.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
