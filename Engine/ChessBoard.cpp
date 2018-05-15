@@ -506,19 +506,19 @@ HASHKEY ChessBoard::newHashkey(const ChessMove& m, HASHKEY key)
 		if (m.moveType&CAPTURE)
 		{
 			if (m.moveType&ENPASSANT)
-				key ^= ZobristKey[m.capturedpiece - 1][SQUARE64(m.toSquare) + (toMove == WHITE ? 8 : -8)];
+				key ^= ZobristKey[m.capturedpiece - 1][SQUARE64(m.toSquare) + (toMove == WHITE ? -8 : 8)];
 			else
-				key ^= ZobristKey[board[m.toSquare] - 1][SQUARE64(m.fromSquare)];
+				key ^= ZobristKey[board[m.toSquare] - 1][SQUARE64(m.toSquare)];
 		}
 
 		// Remove piece
-		if (m.moveType&PROMOTE)
-			key ^= ZobristKey[COLORPIECE(PIECECOLOR(m.promotePiece), PAWN) - 1][SQUARE64(m.fromSquare)];
-		else
-			key ^= ZobristKey[board[m.toSquare] - 1][SQUARE64(m.fromSquare)];
+		key ^= ZobristKey[board[m.fromSquare] - 1][SQUARE64(m.fromSquare)];
 
 		// Add piece
-		key ^= ZobristKey[board[m.toSquare] - 1][SQUARE64(m.toSquare)];
+		if (m.moveType&PROMOTE)
+			key ^= ZobristKey[m.promotePiece - 1][SQUARE64(m.toSquare)];
+		else
+			key ^= ZobristKey[board[m.fromSquare] - 1][SQUARE64(m.toSquare)];
 
 		// Move the rook on castle
 		if (m.moveType&CASTLE)
@@ -544,21 +544,79 @@ HASHKEY ChessBoard::newHashkey(const ChessMove& m, HASHKEY key)
 			}
 		}
 
-		// Castle rights
-		if (m.oldCastle != castle)
+		// Castle rights (doing it a little complicated because we don't have the new board.
+		if (castle&whitecastle || castle&blackcastle)
 		{
-			key ^= ZobristKey[12][m.oldCastle];
-			key ^= ZobristKey[12][castle];
+			typeCastle c = -1, d=-1,e;
+
+			switch (board[m.fromSquare])
+			{
+			case whiterook:
+				if ((m.fromSquare == h1) && (castle&whitekingsidecastle))
+					c = castle & 0x0e;
+				else if ((m.fromSquare == a1) && (castle&whitequeensidecastle))
+					c = castle & 0x0d;
+				break;
+			case whiteking:
+				c = castle & 0x0c;
+				break;
+			case blackrook:
+				if ((m.fromSquare == h8) && (castle&blackkingsidecastle))
+					c = castle & 0x0b;
+				else if ((m.fromSquare == a8) && (castle&blackqueensidecastle))
+					c = castle & 0x07;
+				break;
+			case blackking:
+				c = castle & 0x03;
+				break;
+			}
+
+			// Rook are captured on his original square
+			switch (m.toSquare)
+			{
+			case h1:
+				if ((castle&whitekingsidecastle) && (toMove==BLACK))
+					d = castle & 0x0e;
+				break;
+			case a1:
+				if ((castle&whitequeensidecastle) && (toMove == BLACK))
+					d = castle & 0x0d;
+				break;
+			case h8:
+				if ((castle&blackkingsidecastle) && (toMove == WHITE))
+					d = castle & 0x0b;
+				break;
+			case a8:
+				if ((castle&blackqueensidecastle) && (toMove == WHITE))
+					d = castle & 0x07;
+				break;
+			}
+			if ((c != -1) || (d != -1))
+			{
+				if (c == -1)
+					e = d;
+				else if (d == -1)
+					e = c;
+				else
+					e = c & d;
+				key ^= ZobristKey[12][castle];
+				key ^= ZobristKey[12][e];
+			}
 		}
 	}
 
 	// Remove old ep.
-	if (m.oldEnPassant != UNDEF)
-		key ^= ZobristKey[12][17 + FILE(m.oldEnPassant)];
-
-	// Add ep
 	if (enPassant != UNDEF)
 		key ^= ZobristKey[12][17 + FILE(enPassant)];
+
+	// Add ep
+	if (m.moveType&DBLPAWNMOVE)
+	{
+		if (LEGALSQUARE(m.toSquare-1)&& (board[m.toSquare-1]== COLORPIECE(OTHERPLAYER(toMove), PAWN)))
+			key ^= ZobristKey[12][17 + FILE(m.toSquare)];
+		else if ((LEGALSQUARE(m.toSquare + 1)) && (board[m.toSquare + 1] == COLORPIECE(OTHERPLAYER(toMove), PAWN)))
+			key ^= ZobristKey[12][17 + FILE(m.toSquare)];
+	}
 
 	// Change color to move
 	key ^= ZobristKey[12][16];

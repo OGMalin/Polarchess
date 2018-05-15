@@ -2,6 +2,7 @@
 #include <string>
 #include "Engine.h"
 #include "EngineInterface.h"
+#include <assert.h>
 
 using namespace std;
 const int BREAKING = MATE + 400;
@@ -238,6 +239,9 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 		ei->sendInQue(ENG_info, sz);
 		newkey = theBoard.newHashkey(ml[0].list[mit], hashKey);
 		mgen.doMove(theBoard, ml[0].list[mit]);
+
+		assert(theBoard.hashkey() == newkey);
+
 		inCheck = mgen.inCheck(theBoard, theBoard.toMove);
 		if (inCheck)
 			++extention;
@@ -283,7 +287,7 @@ int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey
 		if (abortCheck())
 			return BREAKING;
 
-	if (drawTable.exist(theBoard, hashKey))// || hashDrawTable.exist(hashKey, ply-1))
+	if (drawTable.exist(theBoard, hashKey) || hashDrawTable.exist(hashKey, ply-1))
 		return (eval.drawscore[theBoard.toMove]);
 
 	if (ply >= MAX_PLY)
@@ -299,6 +303,9 @@ int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey
 	{
 		newkey = theBoard.newHashkey(ml[ply].list[mit], hashKey);
 		mgen.doMove(theBoard, ml[ply].list[mit]);
+
+		assert(theBoard.hashkey() == newkey);
+
 		inCheck = mgen.inCheck(theBoard, theBoard.toMove);
 		if (inCheck)
 			++extention;

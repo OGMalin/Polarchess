@@ -29,6 +29,9 @@ enum {
 	blackkingsidecastle = 0x04,
 	blackqueensidecastle = 0x08
 };
+const int whitecastle = 0x03;
+const int blackcastle = 0x0c;
+
 enum { EMPTY, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING };
 enum { WHITE, BLACK };
 enum {
