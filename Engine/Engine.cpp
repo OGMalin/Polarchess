@@ -218,17 +218,16 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 	// Order moves
 	if (depth == 1)
 	{
-		orderMoves(ml[0],emptyMove);
+		orderRootMoves();
 		ml[0].list[0].score = watch.read();
 		bestMove.push_back(ml[0].list[0]);
 	}
 	else
 	{
-		orderMoves(ml[0],bestMove.back());
+		orderMoves(ml[0], bestMove.back());
 	}
 
 	// Add the root position to the drawtable
-
 	hashDrawTable.add(hashKey, 0);
 
 	int mit;
@@ -278,10 +277,11 @@ int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey
 	HASHKEY newkey;
 	int extention = 0;
 
+//	pv[ply].clear();
+
 	if (depth == 0)
 		return qSearch(alpha, beta, ply);
 
-	pv[ply].clear();
 
 	if (!(++nodes % 0x400))
 		if (abortCheck())
@@ -353,6 +353,7 @@ int Engine::qSearch(int alpha, int beta, int ply)
 		alpha = score;
 
 	mgen.makeCaptureMoves(theBoard, ml[ply]);
+	orderQMoves(ml[ply]);
 	int mit;
 	for (mit = 0; mit < ml[ply].size; mit++)
 	{
@@ -509,43 +510,103 @@ void Engine::sendPV(const MoveList& pvline, int depth)
 		if (i < pvline.size)
 			s += " ";
 	}
-	sprintf_s(sz, 256, "depth %i nps %i score cp %i nodes %u time %u pv %s", depth, (nodes*t)/1000, pvline.list[0].score, nodes, t, s.c_str());
+	sprintf_s(sz, 256, "depth %i nps %u score cp %i nodes %u time %u pv %s", depth, (DWORD)(nodes/(double)(t/1000)), pvline.list[0].score, nodes, t, s.c_str());
 	ei->sendInQue(ENG_info, sz);
+}
+
+void Engine::orderRootMoves()
+{
+	int mit;
+	for (mit = 0; mit < ml[0].size; mit++)
+	{
+		mgen.doMove(theBoard, ml[0].list[mit]);
+		ml[0].list[mit].score = -eval.evaluate(theBoard, MATE, -MATE);
+		mgen.undoMove(theBoard, ml[0].list[mit]);
+	}
+	ml[0].sort();
+
 }
 
 void Engine::orderMoves(MoveList& mlist, const ChessMove& first)
 {
-	int victem[] = { 0,100,300,300,500,9000,0,100,300,300,500,9000,0 };
-	int attacker[] = { 0,1,2,3,4,5,6,1,2,3,4,5,6 };
-	int promotion[] = { 0,0,1,1,2,3,0,0,1,1,2,3,0 };
-	int seevalue[] = { 0,1,3,3,5,9,0,1,3,3,5,9,0 };
-	int i,j;
+	static int seevalue[13][13] = { // [victem][attacker]
+		 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  // No capture
+		 0,  6,  5,  4,  3,  2,  1,  6,  5,  4,  3,  2,  1,
+		 0, 12, 11, 10,  9,  8,  7, 12, 11, 10,  9,  8,  7,
+		 0, 18, 17, 16, 15, 14, 13, 18, 17, 16, 15, 14, 13,
+		 0, 24, 23, 22, 21, 20, 19, 24, 23, 22, 21, 20, 19,
+		 0, 30, 29, 28, 27, 26, 25, 30, 29, 28, 27, 26, 25,
+		 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  // King can't be a victem
+		 0,  6,  5,  4,  3,  2,  1,  6,  5,  4,  3,  2,  1,
+		 0, 12, 11, 10,  9,  8,  7, 12, 11, 10,  9,  8,  7,
+		 0, 18, 17, 16, 15, 14, 13, 18, 17, 16, 15, 14, 13,
+		 0, 24, 23, 22, 21, 20, 19, 24, 23, 22, 21, 20, 19,
+		 0, 30, 29, 28, 27, 26, 25, 30, 29, 28, 27, 26, 25,
+		 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 };  // King can't be a victem
+
+	static int promotevalue[13] = { 0,0,1,1,5,30,0,0,1,1,5,30,0 };
+	int mit,score;
 
 	if (mlist.size < 2)
 		return;
 	
-	for (i = 0; i < mlist.size; i++)
+	for (mit = 0; mit < mlist.size; mit++)
 	{
-		mlist.list[i].score = 0;
-		if (mlist.list[i].moveType & (CAPTURE | PROMOTE))
+		mlist.list[mit].score = 0;
+		if (mlist.list[mit].moveType & (CAPTURE | PROMOTE))
 		{
-			j = seevalue[theBoard.board[mlist.list[i].fromSquare]];
-			if (mlist.list[i].moveType&CAPTURE)
-				j += seevalue[mlist.list[i].capturedpiece];
-			if (mlist.list[i].moveType&PROMOTE)
-				j += seevalue[mlist.list[i].promotePiece];
-			j += 2000000000;
-			mlist.list[i].score = j;
+			score = 0;
+			if (mlist.list[mit].moveType&CAPTURE)
+				score += seevalue[mlist.list[mit].capturedpiece][theBoard.board[mlist.list[mit].fromSquare]];
+			if (mlist.list[mit].moveType&PROMOTE)
+				score += promotevalue[mlist.list[mit].promotePiece];
+			mlist.list[mit].score = score;
 		}
-		else if (mlist.list[i].moveType & CASTLE)
+		else if (mlist.list[mit].moveType & CASTLE)
 		{
-			mlist.list[i].score = 1999999999;
+			mlist.list[mit].score = 1;
 		}
 	}
 
-	i=mlist.find(first);
-	if (i < mlist.size)
-		mlist.list[i].score = 0x7fffffff;
+	mit = mlist.find(first);
+	if (mit < mlist.size)
+		mlist.list[mit].score = 1000;
+	mlist.sort();
+}
+
+void Engine::orderQMoves(MoveList& mlist)
+{
+	static int seevalue[13][13] = { // [victem][attacker]
+		0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  // No capture
+		0,  6,  5,  4,  3,  2,  1,  6,  5,  4,  3,  2,  1,
+		0, 12, 11, 10,  9,  8,  7, 12, 11, 10,  9,  8,  7,
+		0, 18, 17, 16, 15, 14, 13, 18, 17, 16, 15, 14, 13,
+		0, 24, 23, 22, 21, 20, 19, 24, 23, 22, 21, 20, 19,
+		0, 30, 29, 28, 27, 26, 25, 30, 29, 28, 27, 26, 25,
+		0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  // King can't be a victem
+		0,  6,  5,  4,  3,  2,  1,  6,  5,  4,  3,  2,  1,
+		0, 12, 11, 10,  9,  8,  7, 12, 11, 10,  9,  8,  7,
+		0, 18, 17, 16, 15, 14, 13, 18, 17, 16, 15, 14, 13,
+		0, 24, 23, 22, 21, 20, 19, 24, 23, 22, 21, 20, 19,
+		0, 30, 29, 28, 27, 26, 25, 30, 29, 28, 27, 26, 25,
+		0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 };  // King can't be a victem
+
+	static int promotevalue[13] = { 0,0,1,1,5,30,0,0,1,1,5,30,0 };
+	int mit, score;
+
+	if (mlist.size < 2)
+		return;
+
+	for (mit = 0; mit < mlist.size; mit++)
+	{
+		mlist.list[mit].score = 0;
+		score = 0;
+		if (mlist.list[mit].moveType&CAPTURE)
+			score += seevalue[mlist.list[mit].capturedpiece][theBoard.board[mlist.list[mit].fromSquare]];
+		if (mlist.list[mit].moveType&PROMOTE)
+			score += promotevalue[mlist.list[mit].promotePiece];
+		mlist.list[mit].score = score;
+	}
 
 	mlist.sort();
 }

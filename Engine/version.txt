@@ -1,0 +1,4 @@
+
+14/5-2018 2.0 B1 Initial version
+
+15/5-2018 2.0 B2 Fixed repetion bug. Added root moveorder based on previous best move.

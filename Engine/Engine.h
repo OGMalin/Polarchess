@@ -51,9 +51,10 @@ public:
 	int rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey);
 	int Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey, int ply, bool followPV);
 	int qSearch(int alpha, int beta, int ply);
-
+	void orderRootMoves();
 	// Order movelist, put m as first move.
 	void orderMoves(MoveList& mlist, const ChessMove& m);
+	void orderQMoves(MoveList& mlist);
 	bool abortCheck();
 	void sendBestMove();
 	void sendPV(const MoveList& l,int depth);
