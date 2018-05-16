@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include <string>
+#include <fstream>
 #include "frontend.h"
 #include "Utility.h"
 #include "ChessBoard.h"
@@ -9,7 +10,7 @@
 
 using namespace std;
 
-const char* ENGINENAME = "PolarChess 2.0 B2";
+const char* ENGINENAME = "PolarChess 2.0 B3";
 
 FrontEnd::FrontEnd()
 {
@@ -47,6 +48,8 @@ int FrontEnd::run()
 	engine.sendOutQue(ENG_eval, EngineEval(EVAL_bishop, bishopValue));
 	engine.sendOutQue(ENG_eval, EngineEval(EVAL_rook, rookValue));
 	engine.sendOutQue(ENG_eval, EngineEval(EVAL_queen, queenValue));
+
+
 	while (1)
 	{
 		dw = WaitForMultipleObjects(2, hs, FALSE, INFINITE);
@@ -119,6 +122,9 @@ int FrontEnd::uciInput()
 			return true;
 		case UCI_movegen:
 			uciMovegen(input);
+			break;
+		case UCI_readfile:
+			uciReadFile(input);
 			break;
 		case UCI_unknown:
 			uci.write(string("info string Unknown command: " + input));
@@ -684,4 +690,31 @@ void FrontEnd::findMaxElo()
 		return;
 	freqMz = pf.QuadPart / 1000;
 	maxElo = (DWORD)freqMz;
+}
+
+void FrontEnd::uciReadFile(const std::string& filename)
+{
+	if (filename.length() < 1)
+	{
+		uci.write("No filename");
+		return;
+	}
+	string line;
+
+	ifstream file(filename);
+	if (file.is_open())
+	{
+		while (getline(file, line))
+		{
+			trim(line);
+			if (line.length())
+				if (line.at(0)!=';')
+					uci.input(line);
+		}
+		file.close();
+	}
+	else
+	{
+		uci.write("info string Unable to open file: " + filename);
+	}
 }

@@ -128,6 +128,8 @@ int UCI::extract(std::string& s)
 		ret = UCI_ucinewgame;
 	if (cmd == "movegen")
 		ret = UCI_movegen;
+	if (cmd == "readfile")
+		ret = UCI_readfile;
 	if (ret != UCI_unknown)
 	{
 		len = cmd.length();

@@ -18,7 +18,8 @@ enum {
 	UCI_setoption,
 	UCI_stop,
 	UCI_uci,
-	UCI_ucinewgame
+	UCI_ucinewgame,
+	UCI_readfile
 };
 
 class UCI

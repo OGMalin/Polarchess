@@ -38,4 +38,5 @@ public:
 	void uciMovegen(const std::string& s);
 	bool isMoveText(const std::string& input);
 	void findMaxElo();
+	void uciReadFile(const std::string& s);
 };
