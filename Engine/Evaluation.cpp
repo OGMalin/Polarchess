@@ -4,9 +4,18 @@
 
 Evaluation::Evaluation()
 {
+	rootcolor = WHITE;
+	// Drawscore are calculated in Engine file (contempt).
 	drawscore[0] = 0;
 	drawscore[1] = 0;
-	rootcolor = WHITE;
+
+	// Default evaluation terms.
+	pawnValue = 100;
+	knightValue = 300;
+	bishopValue = 300;
+	rookValue = 500;
+	queenValue = 900;
+
 }
 
 int Evaluation::evaluate(const ChessBoard& cb, int alpha, int beta)

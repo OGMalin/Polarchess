@@ -101,15 +101,15 @@ void EngineSearchThreadLoop(void* lpv)
 				if (ev.type == EVAL_contempt)
 					eng.contempt = ev.value;
 				else if (ev.type == EVAL_pawn)
-					eng.eval.pawnValue = ev.value;
+					eng.eval.pawnValue = (eng.eval.pawnValue*ev.value) / 100;
 				else if (ev.type == EVAL_knight)
-					eng.eval.knightValue = ev.value;
+					eng.eval.knightValue = (eng.eval.knightValue*ev.value) / 100;
 				else if (ev.type == EVAL_bishop)
-					eng.eval.bishopValue = ev.value;
+					eng.eval.bishopValue = (eng.eval.bishopValue*ev.value) / 100;
 				else if (ev.type == EVAL_rook)
-					eng.eval.rookValue = ev.value;
+					eng.eval.rookValue = (eng.eval.rookValue*ev.value) / 100;
 				else if (ev.type == EVAL_queen)
-					eng.eval.queenValue = ev.value;
+					eng.eval.queenValue = (eng.eval.queenValue*ev.value) / 100;
 				break;
 			default:
 				// Unknown command, remove it.

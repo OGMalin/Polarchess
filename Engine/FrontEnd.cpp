@@ -17,11 +17,6 @@ FrontEnd::FrontEnd()
 	// Default values
 	debug = false;
 	maxElo = 2000;
-	pawnValue = 100;
-	knightValue = 300;
-	bishopValue = 300;
-	rookValue = 500;
-	queenValue = 900;
 	contempt = 0;
 	currentBoard.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 }
@@ -43,12 +38,6 @@ int FrontEnd::run()
 	findMaxElo();
 	engine.sendOutQue(ENG_clearhistory);
 	engine.sendOutQue(ENG_eval, EngineEval(EVAL_contempt, contempt));
-	engine.sendOutQue(ENG_eval, EngineEval(EVAL_pawn, pawnValue));
-	engine.sendOutQue(ENG_eval, EngineEval(EVAL_knight, knightValue));
-	engine.sendOutQue(ENG_eval, EngineEval(EVAL_bishop, bishopValue));
-	engine.sendOutQue(ENG_eval, EngineEval(EVAL_rook, rookValue));
-	engine.sendOutQue(ENG_eval, EngineEval(EVAL_queen, queenValue));
-
 
 	while (1)
 	{
@@ -155,16 +144,12 @@ void FrontEnd::uciUci()
 	uci.write("option name Ponder type check default false");
 	sprintf_s(sz, 256, "option name Contempt type spin default %i min -500 max 500", contempt);
 	uci.write(sz);
-	uci.write("option name MultiPV type spin default 1 min 1 max 100");
-	sprintf_s(sz, 256, "option name Pawn type spin default %i min 0 max 2000", pawnValue);
-	uci.write(sz);
-	sprintf_s(sz, 256, "option name Knight type spin default %i min 0 max 2000", knightValue);
-	uci.write(sz);
-	sprintf_s(sz, 256, "option name Bishop type spin default %i min 0 max 2000", bishopValue);
-	uci.write(sz);
-	sprintf_s(sz, 256, "option name Rook type spin default %i min 0 max 2000", rookValue);
-	uci.write(sz);
-	sprintf_s(sz, 256, "option name Queen type spin default %i min 0 max 2000", queenValue);
+//	uci.write("option name MultiPV type spin default 1 min 1 max 100");
+	uci.write("option name Pawn type spin default 100 min 0 max 200");
+	uci.write("option name Knight type spin default 100 min 0 max 200");
+	uci.write("option name Bishop type spin default 100 min 0 max 200");
+	uci.write("option name Rook type spin default 100 min 0 max 200");
+	uci.write("option name Queen type spin default 100 min 0 max 200");
 	uci.write(sz);
 	uci.write("option name UCI_AnalyseMode type check default false");
 

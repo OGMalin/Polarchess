@@ -51,6 +51,7 @@
     <ClCompile Include="Utility.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="readme.txt" />
     <Text Include="Search.txt" />
     <Text Include="Todo.txt" />
     <Text Include="version.txt" />

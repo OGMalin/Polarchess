@@ -3,5 +3,4 @@ Todo list
 
 - Hash table
 - Killermove
-- Check extention
 - MultiPV support
