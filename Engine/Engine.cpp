@@ -150,6 +150,23 @@ void Engine::startSearch()
 	for (i = 0; i<MAX_PLY; i++)
 		pv[i].clear();
 
+	if (searchmoves.size)
+		ml[0] = searchmoves;
+	else
+		mgen.makeMoves(theBoard, ml[0]);
+
+	if (!ml[0].size)
+	{
+		ei->sendInQue(ENG_info, string("string No legal moves, aborting search."));
+		return;
+	}
+	else if ((ml[0].size == 1) && (searchtype == NORMAL_SEARCH))
+	{ // Only one legal move
+		bestMove.push_back(ml[0].list[0]);
+		sendBestMove();
+		return;
+	}
+
 	interativeSearch(inCheck, hashKey);
 }
 
@@ -182,55 +199,65 @@ void Engine::interativeSearch(bool inCheck, HASHKEY hashKey)
 
 int Engine::aspirationSearch(int depth, int bestscore, bool inCheck, HASHKEY hashKey)
 {
-	int alpha=-MATE;
-	int beta=MATE;
-	return rootSearch(depth, alpha, beta, inCheck, hashKey);
+	int alpha;
+	int beta;
+	int score;
+	if (depth > 1)
+	{
+		alpha = bestscore - 50;
+		beta = bestscore + 50;
+	}
+	else
+	{
+		alpha = -MATE;
+		beta = MATE;
+	}
+	score = rootSearch(depth, alpha, beta, inCheck, hashKey);
+	if (score == BREAKING)
+		return BREAKING;
+	if ((score <= alpha) || (score >= beta))
+	{
+		alpha = -MATE;
+		beta = MATE;
+		if (score<=alpha)
+			pv[0].list[0].score = MATE + 1;
+		else
+			pv[0].list[0].score = MATE + 2;
+		score = rootSearch(depth, alpha, beta, inCheck, hashKey);
+	}
+	return score;
 }
 
 int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey)
 {
 	int score;
+	int mit;
 	HASHKEY newkey;
 	bool followPV = true;
 	int extention = 0;
+	int oldNodes;
 
 	++nodes;
-	if (searchmoves.size)
-		ml[0] = searchmoves;
-	else
-		mgen.makeMoves(theBoard, ml[0]);
-	if (!ml[0].size)
-	{
-		if (!inCheck) // Stalemate
-			alpha = 0;
-		else
-			alpha = -MATE;
-		ei->sendInQue(ENG_info, string("string No legal moves, aborting search."));
-		return alpha;
-	}
-	else if ((ml[0].size == 1) && (searchtype == NORMAL_SEARCH))
-	{ // Only one legal move
-		bestMove.push_back(ml[0].list[0]);
-		sendBestMove();
-		return BREAKING;
-	}
 
 	// Order moves
 	if (depth == 1)
 	{
 		orderRootMoves();
-		ml[0].list[0].score = watch.read();
 		bestMove.push_back(ml[0].list[0]);
+		bestMove.list[bestMove.size - 1].score = watch.read();
 	}
 	else
 	{
-		orderMoves(ml[0], bestMove.back());
+		mit = ml[0].find(bestMove.back());
+		if (mit < ml[0].size)
+			ml[0].list[mit].score = 0x7fffffff;
+		ml[0].sort();
+//		orderMoves(ml[0], bestMove.back());
 	}
 
 	// Add the root position to the drawtable
 	hashDrawTable.add(hashKey, 0);
 
-	int mit;
 	for (mit = 0; mit < ml[0].size; mit++)
 	{
 		// Send UCI info
@@ -244,25 +271,27 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 		inCheck = mgen.inCheck(theBoard, theBoard.toMove);
 		if (inCheck)
 			++extention;
+		oldNodes = nodes;
 		score = -Search(depth - 1 + extention, -beta, -alpha, inCheck, newkey, 1,followPV);
 		if (score == -BREAKING)
 			return BREAKING;
 		mgen.undoMove(theBoard, ml[0].list[mit]);
+		ml[0].list[mit].score = nodes - oldNodes;
 		if (score >= beta)
 			return beta;
 		if (score > alpha)
 		{
 			if (depth > 3)
 			{
-				ml[0].list[mit].score = score;
 				copyPV(pv[0], pv[1], ml[0].list[mit]);
+				pv[0].list[0].score = score;
 				sendPV(pv[0], depth);
 			}
 
 			alpha = score;
 
-			ml[0].list[mit].score = watch.read();
 			bestMove.push_back(ml[0].list[mit]);
+			bestMove.list[bestMove.size - 1].score = watch.read();
 		}
 		if (inCheck)
 			--extention;
@@ -510,7 +539,16 @@ void Engine::sendPV(const MoveList& pvline, int depth)
 		if (i < pvline.size)
 			s += " ";
 	}
-	sprintf_s(sz, 256, "depth %i nps %u score cp %i nodes %u time %u pv %s", depth, (DWORD)(nodes/(double)(t/1000)), pvline.list[0].score, nodes, t, s.c_str());
+	if (pvline.list[0].score == MATE + 1)
+		sprintf_s(sz, 256, "depth %i nps %u score upperbound nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), nodes, t, s.c_str());
+	else if (pvline.list[0].score == MATE + 2)
+		sprintf_s(sz, 256, "depth %i nps %u score lowerbound nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), nodes, t, s.c_str());
+	else if (pvline.list[0].score > MATE - 200)
+		sprintf_s(sz, 256, "depth %i nps %u score mate %i nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), MATE - pvline.list[0].score, nodes, t, s.c_str());
+	else if (pvline.list[0].score < -MATE + 200)
+		sprintf_s(sz, 256, "depth %i nps %u score mate %i nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), pvline.list[0].score - MATE, nodes, t, s.c_str());
+	else
+		sprintf_s(sz, 256, "depth %i nps %u score cp %i nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), pvline.list[0].score, nodes, t, s.c_str());
 	ei->sendInQue(ENG_info, sz);
 }
 

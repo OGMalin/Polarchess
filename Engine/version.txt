@@ -3,4 +3,8 @@
 
  15/5-2018 2.0 B2 - Fixed repetion bug. Added root moveorder based on previous best move.
 
-??/??-???? 2.0 B3 - Added readfile command
+ 17/5-2018 2.0 B3 - Added readfile command.
+                  - Rootmoveordering 1. eval 2-> nodes. The rest is MVV/LVA.
+                  - Added Aspiration search.
+
+           2.0 B4 - Added evaluation of insufficient material.

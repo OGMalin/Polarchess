@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Relations.h"
+
 typedef int typeCastle;
 typedef int typeColor;
 typedef int typePiece;
@@ -58,6 +60,8 @@ enum {
 #define SQUARE(f,r)        (f+(r<<4))
 // Switch player
 #define OTHERPLAYER(c)     (c==WHITE?BLACK:WHITE)
+
+#define SQUARECOLOR(sq)    ((diagonals[sq]&0x5555)?BLACK:WHITE)
 
 // Convert a square from a 64 square board to the 0x88 board
 #define SQUARE128(sq)      ((sq&0x07)+((sq&0xf8)<<1))
