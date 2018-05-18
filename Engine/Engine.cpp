@@ -142,6 +142,7 @@ void Engine::startSearch()
 	eval.rootcolor = theBoard.toMove;
 	eval.drawscore[eval.rootcolor] = -contempt;
 	eval.drawscore[OTHERPLAYER(eval.rootcolor)] = contempt;
+	eval.setup(theBoard);
 
 	inCheck = mgen.inCheck(theBoard, theBoard.toMove);
 	hashKey = theBoard.hashkey();
@@ -223,6 +224,7 @@ int Engine::aspirationSearch(int depth, int bestscore, bool inCheck, HASHKEY has
 			pv[0].list[0].score = MATE + 1;
 		else
 			pv[0].list[0].score = MATE + 2;
+		sendPV(pv[0], depth);
 		score = rootSearch(depth, alpha, beta, inCheck, hashKey);
 	}
 	return score;
@@ -281,12 +283,9 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 			return beta;
 		if (score > alpha)
 		{
-			if (depth > 3)
-			{
-				copyPV(pv[0], pv[1], ml[0].list[mit]);
-				pv[0].list[0].score = score;
-				sendPV(pv[0], depth);
-			}
+			copyPV(pv[0], pv[1], ml[0].list[mit]);
+			pv[0].list[0].score = score;
+			sendPV(pv[0], depth);
 
 			alpha = score;
 

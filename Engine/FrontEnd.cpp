@@ -145,11 +145,11 @@ void FrontEnd::uciUci()
 	sprintf_s(sz, 256, "option name Contempt type spin default %i min -500 max 500", contempt);
 	uci.write(sz);
 //	uci.write("option name MultiPV type spin default 1 min 1 max 100");
-	uci.write("option name Pawn type spin default 100 min 0 max 200");
-	uci.write("option name Knight type spin default 100 min 0 max 200");
-	uci.write("option name Bishop type spin default 100 min 0 max 200");
-	uci.write("option name Rook type spin default 100 min 0 max 200");
-	uci.write("option name Queen type spin default 100 min 0 max 200");
+//	uci.write("option name Pawn type spin default 100 min 0 max 200");
+//	uci.write("option name Knight type spin default 100 min 0 max 200");
+//	uci.write("option name Bishop type spin default 100 min 0 max 200");
+//	uci.write("option name Rook type spin default 100 min 0 max 200");
+//	uci.write("option name Queen type spin default 100 min 0 max 200");
 	uci.write(sz);
 	uci.write("option name UCI_AnalyseMode type check default false");
 
@@ -238,7 +238,7 @@ void FrontEnd::uciSetoption(const std::string& s)
 	{
 		engine.sendOutQue(ENG_eval, EngineEval(EVAL_contempt, atoi(value.c_str())));
 	}
-	else if (name == "Pawn")
+/*	else if (name == "Pawn")
 	{
 		engine.sendOutQue(ENG_eval, EngineEval(EVAL_pawn, atoi(value.c_str())));
 	}
@@ -257,7 +257,7 @@ void FrontEnd::uciSetoption(const std::string& s)
 	else if (name == "Queen")
 	{
 		engine.sendOutQue(ENG_eval, EngineEval(EVAL_queen, atoi(value.c_str())));
-	}
+	} */
 	else if (name == "MultiPV")
 	{
 		engine.sendOutQue(ENG_eval, EngineEval(EVAL_multipv, atoi(value.c_str())));
@@ -530,7 +530,12 @@ void FrontEnd::uciGo(const std::string& input)
 	if (!movestogo)
 		movestogo = 30;
 	// Find time to use for the next move.
-	eg.maxTime = (currentBoard.toMove == WHITE) ? (wtime + (movestogo*winc)) / movestogo : (btime + (movestogo*binc)) / movestogo;
+	wtime = (currentBoard.toMove == WHITE) ? wtime : btime;
+	winc = (currentBoard.toMove == WHITE) ? winc : binc;
+	eg.maxTime = (wtime + (movestogo*winc)) / movestogo;
+	if (eg.maxTime > (wtime / 2))
+		eg.maxTime = wtime;
+
 	eg.fixedTime = movetime;
 	eg.nodes=nodes;
 	eg.depth = depth;
@@ -681,7 +686,8 @@ void FrontEnd::uciReadFile(const std::string& filename)
 {
 	if (filename.length() < 1)
 	{
-		uci.write("No filename");
+		if (debug)
+			uci.write("info string No filename");
 		return;
 	}
 	string line;
@@ -700,6 +706,7 @@ void FrontEnd::uciReadFile(const std::string& filename)
 	}
 	else
 	{
-		uci.write("info string Unable to open file: " + filename);
+		if (debug)
+			uci.write("info string Unable to open file: " + filename);
 	}
 }

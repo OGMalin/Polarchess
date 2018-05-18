@@ -12,20 +12,78 @@ Evaluation::Evaluation()
 
 	// Default evaluation terms.
 	pawnValue = 100;
-	knightValue = 300;
-	bishopValue = 300;
+	knightValue = 325;
+	bishopValue = 335;
 	rookValue = 500;
-	queenValue = 900;
+	queenValue = 950;
+	bishopPair = 40;
+}
+
+void Evaluation::setup(const ChessBoard& cb)
+{
+	int i;
+	for (i = 0; i < MAX_EVAL; i++)
+	{
+		fOpeningGame[i] = NULL;
+		fMiddleGame[i] = NULL;
+		fEndGame[i] = NULL;
+	}
+	scanBoard(cb);
+	if (bishopPair && ((bishoplist[WHITE].size > 1) || (bishoplist[BLACK].size > 1)))
+		addEval(&Evaluation::evalBishopPair, true, true, true);
+	addEval(&Evaluation::evalWantDraw, false, false, true);
+}
+
+void Evaluation::addEval(evalFunction f, bool opening, bool middle, bool end)
+{
+	int i;
+	if (opening)
+	{
+		i = 0;
+		while (fOpeningGame[i])
+		{
+			if (i >= MAX_EVAL)
+				return;
+			++i;
+		}
+		fOpeningGame[i] = f;
+	}
+	if (middle)
+	{
+		i = 0;
+		while (fMiddleGame[i])
+		{
+			if (i >= MAX_EVAL)
+				return;
+			++i;
+		}
+		fMiddleGame[i] = f;
+	}
+	if (end)
+	{
+		i = 0;
+		while (fEndGame[i])
+		{
+			if (i >= MAX_EVAL)
+				return;
+			++i;
+		}
+		fEndGame[i] = f;
+	}
 }
 
 int Evaluation::evaluate(const ChessBoard& cb, int alpha, int beta)
 {
-	int score;
+	int score,i;
+	evalFunction efunc;
+	wantDraw = false;
 	bool endgame = false;
-	position[0] = position[1] = 0;
+
 	if (cb.move50draw > 98)
 		return drawscore[cb.toMove];
+
 	scanBoard(cb);
+
 
 	if ((position[WHITE] + position[BLACK]) < 3000)
 		endgame = true;
@@ -35,13 +93,38 @@ int Evaluation::evaluate(const ChessBoard& cb, int alpha, int beta)
 		if (isDraw(cb))
 			return drawscore[cb.toMove];
 		evalStaticEndgame(cb);
+
+		// try a alphabeta cut
+		score = (cb.toMove == WHITE) ? (position[WHITE] - position[BLACK]) : (position[BLACK] - position[WHITE]);
+		if ((score < (alpha - 300)) || (score > (beta + 300)))
+			return score;
+
+		i = 0;
+		while (efunc = fEndGame[i++])
+			(this->*efunc)(cb);
 	}
 	else
 	{
 		evalStatic(cb);
+
+		// try a alphabeta cut
+		score = (cb.toMove == WHITE) ? (position[WHITE] - position[BLACK]) : (position[BLACK] - position[WHITE]);
+		if ((score < (alpha - 300)) || (score >(beta + 300)))
+			return score;
+
+		i = 0;
+		while (efunc = fOpeningGame[i++])
+			(this->*efunc)(cb);
 	}
 
 	score = (cb.toMove == WHITE) ? (position[WHITE] - position[BLACK]) : (position[BLACK] - position[WHITE]);
+
+	// Correct the score if there isn't any winchances to force 3 fold rep.
+	if (wantDraw)
+	{
+		if (score > drawscore[cb.toMove])
+			score = drawscore[cb.toMove] - 1;
+	}
 	return score;
 }
 
@@ -60,6 +143,8 @@ void Evaluation::scanBoard(const ChessBoard& cb)
 	rooklist[BLACK].size = 0;
 	queenlist[WHITE].size = 0;
 	queenlist[BLACK].size = 0;
+	position[0] = position[1] = 0;
+	gamestage = 0;
 	for (sq = 0; sq < 0x88; sq++)
 	{
 		if (LEGALSQUARE(sq))
@@ -78,18 +163,22 @@ void Evaluation::scanBoard(const ChessBoard& cb)
 				case whiteknight:
 					position[WHITE] += knightValue;
 					knightlist[WHITE].add(sq);
+					gamestage += knightValue;
 					break;
 				case whitebishop:
 					position[WHITE] += bishopValue;
 					bishoplist[WHITE].add(sq);
+					gamestage += bishopValue;
 					break;
 				case whiterook:
 					position[WHITE] += rookValue;
 					rooklist[WHITE].add(sq);
+					gamestage += rookValue;
 					break;
 				case whitequeen:
 					position[WHITE] += queenValue;
 					queenlist[WHITE].add(sq);
+					gamestage += queenValue;
 					break;
 				case whiteking:
 					kingsquare[WHITE] = sq;
@@ -101,18 +190,22 @@ void Evaluation::scanBoard(const ChessBoard& cb)
 				case blackknight:
 					position[BLACK] += knightValue;
 					knightlist[BLACK].add(sq);
+					gamestage += knightValue;
 					break;
 				case blackbishop:
 					position[BLACK] += bishopValue;
 					bishoplist[BLACK].add(sq);
+					gamestage += bishopValue;
 					break;
 				case blackrook:
 					position[BLACK] += rookValue;
 					rooklist[BLACK].add(sq);
+					gamestage += rookValue;
 					break;
 				case blackqueen:
 					position[BLACK] += queenValue;
 					queenlist[BLACK].add(sq);
+					gamestage += queenValue;
 					break;
 				case blackking:
 					kingsquare[BLACK] = sq;
@@ -279,4 +372,33 @@ bool Evaluation::isDraw(const ChessBoard& cb)
 			return true;
 
 	return false;
+}
+
+void Evaluation::evalBishopPair(const ChessBoard& cb)
+{
+	if (bishoplist[WHITE].size > 1)
+		position[WHITE] += bishopPair;
+	if (bishoplist[BLACK].size > 1)
+		position[BLACK] += bishopPair;
+}
+
+void Evaluation::evalWantDraw(const ChessBoard& cb)
+{
+	if (cb.toMove == WHITE)
+	{
+		if (pawnlist[WHITE].size || rooklist[WHITE].size || queenlist[WHITE].size)
+			return;
+		if (bishoplist[WHITE].size > 1)
+			return;
+		if (bishoplist[WHITE].size && knightlist[WHITE].size)
+			return;
+		wantDraw = true;
+	}
+	if (pawnlist[BLACK].size || rooklist[BLACK].size || queenlist[BLACK].size)
+		return;
+	if (bishoplist[BLACK].size > 1)
+		return;
+	if (bishoplist[BLACK].size && knightlist[BLACK].size)
+		return;
+	wantDraw = true;
 }
