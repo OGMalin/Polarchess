@@ -24,30 +24,18 @@ void Evaluation::setup(const ChessBoard& cb)
 	int i;
 	for (i = 0; i < MAX_EVAL; i++)
 	{
-		fOpeningGame[i] = NULL;
 		fMiddleGame[i] = NULL;
 		fEndGame[i] = NULL;
 	}
 	scanBoard(cb);
 	if (bishopPair && ((bishoplist[WHITE].size > 1) || (bishoplist[BLACK].size > 1)))
-		addEval(&Evaluation::evalBishopPair, true, true, true);
-	addEval(&Evaluation::evalWantDraw, false, false, true);
+		addEval(&Evaluation::evalBishopPair, true, true);
+	addEval(&Evaluation::evalWantDraw, false, true);
 }
 
-void Evaluation::addEval(evalFunction f, bool opening, bool middle, bool end)
+void Evaluation::addEval(evalFunction f, bool middle, bool end)
 {
 	int i;
-	if (opening)
-	{
-		i = 0;
-		while (fOpeningGame[i])
-		{
-			if (i >= MAX_EVAL)
-				return;
-			++i;
-		}
-		fOpeningGame[i] = f;
-	}
 	if (middle)
 	{
 		i = 0;
@@ -77,7 +65,6 @@ int Evaluation::evaluate(const ChessBoard& cb, int alpha, int beta)
 	int score,i;
 	evalFunction efunc;
 	wantDraw = false;
-	bool endgame = false;
 
 	if (cb.move50draw > 98)
 		return drawscore[cb.toMove];
@@ -85,10 +72,12 @@ int Evaluation::evaluate(const ChessBoard& cb, int alpha, int beta)
 	scanBoard(cb);
 
 
-	if ((position[WHITE] + position[BLACK]) < 3000)
-		endgame = true;
+	if (gamestage < 3000)
+		isEndgame = true;
+	else
+		isEndgame = false;
 
-	if (endgame)
+	if (isEndgame)
 	{
 		if (isDraw(cb))
 			return drawscore[cb.toMove];
@@ -113,7 +102,7 @@ int Evaluation::evaluate(const ChessBoard& cb, int alpha, int beta)
 			return score;
 
 		i = 0;
-		while (efunc = fOpeningGame[i++])
+		while (efunc = fMiddleGame[i++])
 			(this->*efunc)(cb);
 	}
 

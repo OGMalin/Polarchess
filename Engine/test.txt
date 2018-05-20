@@ -1,4 +1,4 @@
 ; Test kommandoer
 
-position fen 4k3/pppppppp/8/8/8/8/PPPPPPPP/4K3 w - - 0 1
+position fen 4k3/1p6/8/8/8/5B2/8/4K3 w - - 0 1
 go ponder

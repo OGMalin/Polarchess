@@ -30,6 +30,7 @@ public:
 	int queenValue;
 	int bishopPair;
 	int gamestage;
+	bool isEndgame;
 	int pieces[32][2];
 	typeSquare kingsquare[2];
 	PIECELIST pawnlist[2];
@@ -38,12 +39,11 @@ public:
 	PIECELIST rooklist[2];
 	PIECELIST queenlist[2];
 	int position[2]; // The score
-	evalFunction fOpeningGame[MAX_EVAL];
 	evalFunction fMiddleGame[MAX_EVAL];
 	evalFunction fEndGame[MAX_EVAL];
 	Evaluation();
 	void setup(const ChessBoard& cb);
-	void addEval(evalFunction f, bool opening, bool middle, bool end);
+	void addEval(evalFunction f, bool middle, bool end);
 	int evaluate(const ChessBoard& cb, int alpha, int beta);
 	void scanBoard(const ChessBoard& cb);
 	bool isDraw(const ChessBoard& cb);

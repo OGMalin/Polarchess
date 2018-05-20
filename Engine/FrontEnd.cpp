@@ -533,7 +533,7 @@ void FrontEnd::uciGo(const std::string& input)
 	wtime = (currentBoard.toMove == WHITE) ? wtime : btime;
 	winc = (currentBoard.toMove == WHITE) ? winc : binc;
 	eg.maxTime = (wtime + (movestogo*winc)) / movestogo;
-	if (eg.maxTime > (wtime / 2))
+	if (eg.maxTime > (DWORD)(wtime / 2))
 		eg.maxTime = wtime;
 
 	eg.fixedTime = movetime;

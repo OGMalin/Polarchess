@@ -218,13 +218,13 @@ int Engine::aspirationSearch(int depth, int bestscore, bool inCheck, HASHKEY has
 		return BREAKING;
 	if ((score <= alpha) || (score >= beta))
 	{
-		alpha = -MATE;
-		beta = MATE;
 		if (score<=alpha)
 			pv[0].list[0].score = MATE + 1;
 		else
 			pv[0].list[0].score = MATE + 2;
 		sendPV(pv[0], depth);
+		alpha = -MATE;
+		beta = MATE;
 		score = rootSearch(depth, alpha, beta, inCheck, hashKey);
 	}
 	return score;
@@ -539,13 +539,13 @@ void Engine::sendPV(const MoveList& pvline, int depth)
 			s += " ";
 	}
 	if (pvline.list[0].score == MATE + 1)
-		sprintf_s(sz, 256, "depth %i nps %u score upperbound nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), nodes, t, s.c_str());
-	else if (pvline.list[0].score == MATE + 2)
 		sprintf_s(sz, 256, "depth %i nps %u score lowerbound nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), nodes, t, s.c_str());
+	else if (pvline.list[0].score == MATE + 2)
+		sprintf_s(sz, 256, "depth %i nps %u score upperbound nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), nodes, t, s.c_str());
 	else if (pvline.list[0].score > MATE - 200)
-		sprintf_s(sz, 256, "depth %i nps %u score mate %i nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), MATE - pvline.list[0].score, nodes, t, s.c_str());
+		sprintf_s(sz, 256, "depth %i nps %u score mate %i nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), (MATE - pvline.list[0].score)/2+1, nodes, t, s.c_str());
 	else if (pvline.list[0].score < -MATE + 200)
-		sprintf_s(sz, 256, "depth %i nps %u score mate %i nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), pvline.list[0].score - MATE, nodes, t, s.c_str());
+		sprintf_s(sz, 256, "depth %i nps %u score mate %i nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), (MATE + pvline.list[0].score)/2, nodes, t, s.c_str());
 	else
 		sprintf_s(sz, 256, "depth %i nps %u score cp %i nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), pvline.list[0].score, nodes, t, s.c_str());
 	ei->sendInQue(ENG_info, sz);
