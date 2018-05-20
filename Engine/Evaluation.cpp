@@ -13,7 +13,7 @@ Evaluation::Evaluation()
 	// Default evaluation terms.
 	pawnValue = 100;
 	knightValue = 325;
-	bishopValue = 335;
+	bishopValue = 325;
 	rookValue = 500;
 	queenValue = 950;
 	bishopPair = 40;
@@ -30,7 +30,6 @@ void Evaluation::setup(const ChessBoard& cb)
 	scanBoard(cb);
 	if (bishopPair && ((bishoplist[WHITE].size > 1) || (bishoplist[BLACK].size > 1)))
 		addEval(&Evaluation::evalBishopPair, true, true);
-	addEval(&Evaluation::evalWantDraw, false, true);
 }
 
 void Evaluation::addEval(evalFunction f, bool middle, bool end)
@@ -64,7 +63,6 @@ int Evaluation::evaluate(const ChessBoard& cb, int alpha, int beta)
 {
 	int score,i;
 	evalFunction efunc;
-	wantDraw = false;
 
 	if (cb.move50draw > 98)
 		return drawscore[cb.toMove];
@@ -91,6 +89,14 @@ int Evaluation::evaluate(const ChessBoard& cb, int alpha, int beta)
 		i = 0;
 		while (efunc = fEndGame[i++])
 			(this->*efunc)(cb);
+
+		score = (cb.toMove == WHITE) ? (position[WHITE] - position[BLACK]) : (position[BLACK] - position[WHITE]);
+
+		// Correct the score if there isn't any winchances to force 3 fold rep.
+		if (cantWin(cb))
+			score = drawscore[cb.toMove] - 1;
+		else if (cantLose(cb))
+			score = drawscore[cb.toMove] + 1;
 	}
 	else
 	{
@@ -104,16 +110,10 @@ int Evaluation::evaluate(const ChessBoard& cb, int alpha, int beta)
 		i = 0;
 		while (efunc = fMiddleGame[i++])
 			(this->*efunc)(cb);
+		score = (cb.toMove == WHITE) ? (position[WHITE] - position[BLACK]) : (position[BLACK] - position[WHITE]);
 	}
 
-	score = (cb.toMove == WHITE) ? (position[WHITE] - position[BLACK]) : (position[BLACK] - position[WHITE]);
 
-	// Correct the score if there isn't any winchances to force 3 fold rep.
-	if (wantDraw)
-	{
-		if (score > drawscore[cb.toMove])
-			score = drawscore[cb.toMove] - 1;
-	}
 	return score;
 }
 
@@ -174,7 +174,7 @@ void Evaluation::scanBoard(const ChessBoard& cb)
 					break;
 				case blackpawn:
 					position[BLACK] += pawnValue;
-					pawnlist[WHITE].add(sq);
+					pawnlist[BLACK].add(sq);
 					break;
 				case blackknight:
 					position[BLACK] += knightValue;
@@ -371,23 +371,44 @@ void Evaluation::evalBishopPair(const ChessBoard& cb)
 		position[BLACK] += bishopPair;
 }
 
-void Evaluation::evalWantDraw(const ChessBoard& cb)
+bool Evaluation::cantWin(const ChessBoard& cb)
 {
 	if (cb.toMove == WHITE)
 	{
 		if (pawnlist[WHITE].size || rooklist[WHITE].size || queenlist[WHITE].size)
-			return;
+			return false;
 		if (bishoplist[WHITE].size > 1)
-			return;
+			return false;
 		if (bishoplist[WHITE].size && knightlist[WHITE].size)
-			return;
-		wantDraw = true;
+			return false;
+		return true;
 	}
 	if (pawnlist[BLACK].size || rooklist[BLACK].size || queenlist[BLACK].size)
-		return;
+		return false;
 	if (bishoplist[BLACK].size > 1)
-		return;
+		return false;
 	if (bishoplist[BLACK].size && knightlist[BLACK].size)
-		return;
-	wantDraw = true;
+		return false;
+	return true;
+}
+
+bool Evaluation::cantLose(const ChessBoard& cb)
+{
+	if (cb.toMove == WHITE)
+	{
+		if (pawnlist[BLACK].size || rooklist[BLACK].size || queenlist[BLACK].size)
+			return false;
+		if (bishoplist[BLACK].size > 1)
+			return false;
+		if (bishoplist[BLACK].size && knightlist[BLACK].size)
+			return false;
+		return true;
+	}
+	if (pawnlist[WHITE].size || rooklist[WHITE].size || queenlist[WHITE].size)
+		return false;
+	if (bishoplist[WHITE].size > 1)
+		return false;
+	if (bishoplist[WHITE].size && knightlist[WHITE].size)
+		return false;
+	return true;
 }

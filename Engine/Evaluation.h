@@ -22,7 +22,6 @@ public:
 	// Return a score seen from the side to move
 	typeColor rootcolor;
 	int drawscore[2];
-	bool wantDraw;
 	int pawnValue;
 	int knightValue;
 	int bishopValue;
@@ -47,8 +46,9 @@ public:
 	int evaluate(const ChessBoard& cb, int alpha, int beta);
 	void scanBoard(const ChessBoard& cb);
 	bool isDraw(const ChessBoard& cb);
+	bool cantWin(const ChessBoard& cb);
+	bool cantLose(const ChessBoard& cb);
 	void evalStatic(const ChessBoard& cb);
 	void evalStaticEndgame(const ChessBoard& cb);
 	void evalBishopPair(const ChessBoard& cb);
-	void evalWantDraw(const ChessBoard& cb);
 };
