@@ -52,4 +52,17 @@
       <Filter>Translation Files</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="Gui.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon\GB.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icon\NO.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
 </Project>
