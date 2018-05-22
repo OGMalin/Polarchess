@@ -13,10 +13,8 @@ void MainWindow::createMenu()
 {
 	QMenu* fileMenu = menuBar()->addMenu(tr("File"));
 
-	fileMenu->addSeparator();
-	const QIcon exitIcon = QIcon::fromTheme("application-exit");
-	QAction *exitAct = fileMenu->addAction(exitIcon, tr("Exit"), this, &QWidget::close);
-	exitAct->setShortcuts(QKeySequence::Quit);
+//	fileMenu->addSeparator();
+	QAction *exitAct = fileMenu->addAction(tr("Exit"), this, &QWidget::close);
 	exitAct->setStatusTip(tr("Exit the application"));
 }
 
