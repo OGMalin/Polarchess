@@ -1,10 +1,14 @@
 #include "MainWindow.h"
-#include <QtWidgets/QApplication>
+#include <QApplication>
 
 int main(int argc, char *argv[])
 {
-	QApplication a(argc, argv);
+	QApplication app(argc, argv);
+//	QCoreApplication::setOrganizationName("");
+	QCoreApplication::setApplicationName("PolarChess");
+	QCoreApplication::setApplicationVersion("1.0 beta 1");
+
 	MainWindow w;
 	w.show();
-	return a.exec();
+	return app.exec();
 }
