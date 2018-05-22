@@ -130,6 +130,8 @@ int UCI::extract(std::string& s)
 		ret = UCI_movegen;
 	if (cmd == "readfile")
 		ret = UCI_readfile;
+	if (cmd == "eval")
+		ret = UCI_eval;
 	if (ret != UCI_unknown)
 	{
 		len = cmd.length();

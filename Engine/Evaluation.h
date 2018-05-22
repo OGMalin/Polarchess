@@ -38,11 +38,15 @@ public:
 	PIECELIST rooklist[2];
 	PIECELIST queenlist[2];
 	int position[2]; // The score
+	int pawnscore[2];
 	evalFunction fMiddleGame[MAX_EVAL];
 	evalFunction fEndGame[MAX_EVAL];
+	evalFunction fPawnMiddleGame[MAX_EVAL];
+	evalFunction fPawnEndGame[MAX_EVAL];
 	Evaluation();
 	void setup(const ChessBoard& cb);
 	void addEval(evalFunction f, bool middle, bool end);
+	void addPawnEval(evalFunction f, bool middle, bool end);
 	int evaluate(const ChessBoard& cb, int alpha, int beta);
 	void scanBoard(const ChessBoard& cb);
 	bool isDraw(const ChessBoard& cb);
@@ -50,5 +54,6 @@ public:
 	bool cantLose(const ChessBoard& cb);
 	void evalStatic(const ChessBoard& cb);
 	void evalStaticEndgame(const ChessBoard& cb);
+	void evalPawnstructure(const ChessBoard& cb);
 	void evalBishopPair(const ChessBoard& cb);
 };

@@ -19,6 +19,7 @@ enum {
 	UCI_stop,
 	UCI_uci,
 	UCI_ucinewgame,
+	UCI_eval,
 	UCI_readfile
 };
 

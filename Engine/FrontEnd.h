@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <list>
 #include "UCI.h"
 #include "EngineInterface.h"
 #include "ChessBoard.h"
@@ -9,6 +10,7 @@ class FrontEnd
 {
 	DWORD movegenTest(int depth, bool init = true, int ply = 0);
 public:
+	std::list<std::string> personalities;
 	DWORD maxElo;
 	int contempt;
 	ChessBoard currentBoard;
@@ -34,4 +36,6 @@ public:
 	bool isMoveText(const std::string& input);
 	void findMaxElo();
 	void uciReadFile(const std::string& s);
+	void uciEval(const std::string& s);
+	void readIniFiles();
 };

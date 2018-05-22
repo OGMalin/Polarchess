@@ -26,6 +26,8 @@ void Evaluation::setup(const ChessBoard& cb)
 	{
 		fMiddleGame[i] = NULL;
 		fEndGame[i] = NULL;
+		fPawnMiddleGame[i] = NULL;
+		fPawnEndGame[i] = NULL;
 	}
 	scanBoard(cb);
 	if (bishopPair && ((bishoplist[WHITE].size > 1) || (bishoplist[BLACK].size > 1)))
@@ -59,6 +61,33 @@ void Evaluation::addEval(evalFunction f, bool middle, bool end)
 	}
 }
 
+void Evaluation::addPawnEval(evalFunction f, bool middle, bool end)
+{
+	int i;
+	if (middle)
+	{
+		i = 0;
+		while (fPawnMiddleGame[i])
+		{
+			if (i >= MAX_EVAL)
+				return;
+			++i;
+		}
+		fPawnMiddleGame[i] = f;
+	}
+	if (end)
+	{
+		i = 0;
+		while (fEndGame[i])
+		{
+			if (i >= MAX_EVAL)
+				return;
+			++i;
+		}
+		fPawnEndGame[i] = f;
+	}
+}
+
 int Evaluation::evaluate(const ChessBoard& cb, int alpha, int beta)
 {
 	int score,i;
@@ -74,6 +103,8 @@ int Evaluation::evaluate(const ChessBoard& cb, int alpha, int beta)
 		isEndgame = true;
 	else
 		isEndgame = false;
+
+	evalPawnstructure(cb);
 
 	if (isEndgame)
 	{
@@ -411,4 +442,10 @@ bool Evaluation::cantLose(const ChessBoard& cb)
 	if (bishoplist[WHITE].size && knightlist[WHITE].size)
 		return false;
 	return true;
+}
+
+void Evaluation::evalPawnstructure(const ChessBoard& cb)
+{
+	pawnscore[WHITE] = pawnscore[BLACK] = 0;
+
 }

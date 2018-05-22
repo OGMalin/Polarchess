@@ -36,6 +36,9 @@ int FrontEnd::run()
 	hs[1] = engine.hEvent;
 
 	findMaxElo();
+
+	readIniFiles();
+
 	engine.sendOutQue(ENG_clearhistory);
 	engine.sendOutQue(ENG_eval, EngineEval(EVAL_contempt, contempt));
 
@@ -138,12 +141,23 @@ int FrontEnd::uciInput()
 void FrontEnd::uciUci()
 {
 	char sz[256];
+	string s;
+	list<string>::iterator it;
+
 	uci.write("id name " + string(ENGINENAME));
 	uci.write("id author Odd Gunnar Malin");
 	uci.write("option name UCI_EngineAbout type string default http://polarchess.net");
 	uci.write("option name Ponder type check default false");
 	sprintf_s(sz, 256, "option name Contempt type spin default %i min -500 max 500", contempt);
 	uci.write(sz);
+	s = "option name Personality type combo default ";
+	if (find(personalities.begin(), personalities.end(), "Normal") != personalities.end())
+		s += "Normal";
+	else
+		s += "<empty>";
+	for (it = personalities.begin(); it != personalities.end(); it++)
+		s += " var " + *it;
+	uci.write(s);
 //	uci.write("option name MultiPV type spin default 1 min 1 max 100");
 //	uci.write("option name Pawn type spin default 100 min 0 max 200");
 //	uci.write("option name Knight type spin default 100 min 0 max 200");
@@ -236,7 +250,8 @@ void FrontEnd::uciSetoption(const std::string& s)
 
 	if (name == "Contempt")
 	{
-		engine.sendOutQue(ENG_eval, EngineEval(EVAL_contempt, atoi(value.c_str())));
+		contempt = atoi(value.c_str());
+		engine.sendOutQue(ENG_eval, EngineEval(EVAL_contempt, contempt));
 	}
 /*	else if (name == "Pawn")
 	{
@@ -709,4 +724,78 @@ void FrontEnd::uciReadFile(const std::string& filename)
 		if (debug)
 			uci.write("info string Unable to open file: " + filename);
 	}
+}
+
+void FrontEnd::uciEval(const std::string& input)
+{
+	string para, value;
+	para = getWord(input, 1);
+	if (para.length() > 0)
+	{
+		value = getWord(input, 2);
+		if (value.length() > 0)
+		{
+			if (para == "contempt")
+			{
+				contempt = atoi(value.c_str());
+				engine.sendOutQue(ENG_eval, EngineEval(EVAL_contempt, contempt));
+				return;
+			}
+			if (para == "pawn")
+			{
+				engine.sendOutQue(ENG_eval, EngineEval(EVAL_pawn, atoi(value.c_str())));
+				return;
+			}
+			if (para == "knight")
+			{
+				engine.sendOutQue(ENG_eval, EngineEval(EVAL_knight, atoi(value.c_str())));
+				return;
+			}
+			if (para == "bishop")
+			{
+				engine.sendOutQue(ENG_eval, EngineEval(EVAL_bishop, atoi(value.c_str())));
+				return;
+			}
+			if (para == "rook")
+			{
+				engine.sendOutQue(ENG_eval, EngineEval(EVAL_rook, atoi(value.c_str())));
+				return;
+			}
+			if (para == "queen")
+			{
+				engine.sendOutQue(ENG_eval, EngineEval(EVAL_queen, atoi(value.c_str())));
+				return;
+			}
+			uci.write("info string Unknown Eval parametre.");
+			return;
+		}
+	}
+	uci.write("info string wrong eval syntax.");
+}
+
+void FrontEnd::readIniFiles()
+{
+	WIN32_FIND_DATA wfd;
+	HANDLE hFind;
+	string s;
+	//directory_iterator();
+	string path = getProgramPath();
+	path += "personalities\\";
+	s = path + "*.per";
+	hFind=FindFirstFile(s.c_str(),&wfd);
+	if (hFind != INVALID_HANDLE_VALUE)
+	{
+		while (1)
+		{
+			wfd.cFileName[strlen(wfd.cFileName) - 4] = '\0';
+			s = wfd.cFileName;
+			personalities.push_back(string(wfd.cFileName));
+			if (!FindNextFile(hFind, &wfd))
+				break;
+		}
+		FindClose(hFind);
+	}
+	if (find(personalities.begin(), personalities.end(), string("Normal")) != personalities.end())
+		uciReadFile(path + "Normal.per");
+	
 }
