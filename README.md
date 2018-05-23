@@ -9,8 +9,11 @@ The old PolarChess project is renamed to Polarengine.
   <dt>Common</dt>
   <dd>Shared files between Engine and Gui.</dd>
 </dl>
-Engine
-  An UcI chess engine.
-  
-Gui
-  A chess GUI
+<dl>
+  <dt>Engine</dt>
+  <dd>An UcI chess engine.</dd>
+</dl>
+<dl>
+  <dt>Gui</dt>
+  <dd>A chess GUI</dd>
+</dl>
