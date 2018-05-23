@@ -62,12 +62,18 @@
     <ClCompile Include="..\Common\MoveList.cpp">
       <Filter>Common</Filter>
     </ClCompile>
+    <ClCompile Include="Scoresheet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="BoardWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Scoresheet.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

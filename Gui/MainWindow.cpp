@@ -13,15 +13,22 @@ MainWindow::MainWindow(QWidget *parent)
 
 	hSplitter = new QSplitter;
 
-	board = new BoardWindow(this);
-	board->show();
+	boardwindow = new BoardWindow(this);
+	scoresheet = new Scoresheet(this);
+
+	hSplitter->addWidget(boardwindow);
+	hSplitter->addWidget(scoresheet);
+
+//	boardwindow->show();
+//	scoresheet->show();
 	retranslateUi();
 }
 
 MainWindow::~MainWindow()
 {
+	delete boardwindow;
+	delete scoresheet;
 	delete hSplitter;
-	delete board;
 	delete langGroup;
 }
 

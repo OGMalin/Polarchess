@@ -3,6 +3,7 @@
 BoardWindow::BoardWindow(QWidget* parent)
 	:QWidget(parent)
 {
-	setMinimumSize(200, 200);
+	//setMinimumSize(200, 200);
+	setStyle(style);
 	
 }

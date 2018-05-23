@@ -4,6 +4,7 @@
 #include <QtWidgets>
 #include <QString>
 #include "BoardWindow.h"
+#include "Scoresheet.h"
 
 class MainWindow : public QMainWindow
 {
@@ -29,7 +30,8 @@ private:
 	QTranslator translator;
 	QActionGroup * langGroup;
 	QString locale;
-	BoardWindow* board;
+	BoardWindow* boardwindow;
+	Scoresheet* scoresheet;
 	QSplitter* hSplitter;
 	void createMenu();
 	void createStatusBar();
