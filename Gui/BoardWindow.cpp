@@ -3,7 +3,6 @@
 BoardWindow::BoardWindow(QWidget* parent)
 	:QWidget(parent)
 {
-	//setMinimumSize(200, 200);
-//	setStyle(style);
-	
+//	this->setGeometry(100, 100, 200, 200);
+	this->setStyleSheet("background-color:blue;");
 }

@@ -8,5 +8,5 @@ class BoardWindow :public QWidget
 	Q_OBJECT
 public:
 	ChessBoard currentBoard;
-	BoardWindow(QWidget* parent);
+	BoardWindow(QWidget *parent = Q_NULLPTR);
 };

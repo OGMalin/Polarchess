@@ -6,5 +6,5 @@ class Scoresheet :public QWidget
 {
 	Q_OBJECT
 public:
-	Scoresheet(QWidget* parent);
+	Scoresheet(QWidget *parent = Q_NULLPTR);
 };

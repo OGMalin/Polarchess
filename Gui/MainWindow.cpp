@@ -5,31 +5,37 @@ MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
 	// format systems language
-	locale = QLocale::system().name(); // e.g. "de_DE"
-	locale.truncate(locale.lastIndexOf('_')); // e.g. "de"
+	locale = QLocale::system().name();
+	locale.truncate(locale.lastIndexOf('_'));
 	createMenu();
 	createStatusBar();
 	loadLanguage(locale);
 
-	hSplitter = new QSplitter;
+//	this->setStyleSheet("background-color:yellow;");
 
-	boardwindow = new BoardWindow(this);
+//	hSplitter = new QSplitter(this);
+
+	boardwindow = new BoardWindow;
 	scoresheet = new Scoresheet(this);
-
+/*
 	hSplitter->addWidget(boardwindow);
 	hSplitter->addWidget(scoresheet);
-
-//	boardwindow->show();
-//	scoresheet->show();
+	boardwindow->show();
+	scoresheet->show();
+	hSplitter->setStretchFactor(1, 1);*/
+	setCentralWidget(boardwindow);
+//	hSplitter->show();
 	retranslateUi();
 }
 
 MainWindow::~MainWindow()
 {
+	/*
 	delete boardwindow;
 	delete scoresheet;
 	delete hSplitter;
 	delete langGroup;
+*/
 }
 
 void MainWindow::createMenu()
