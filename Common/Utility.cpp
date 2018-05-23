@@ -197,17 +197,3 @@ unsigned __int64 rand64()
 	i64 = (high << 32) | low;
 	return i64;
 }
-
-const std::string getProgramPath()
-{
-	string s;
-	char sz[MAX_PATH];
-	if (!GetModuleFileName(NULL, sz, MAX_PATH))
-		return string("");
-	string::size_type size;
-	s = sz;
-	size = s.find_last_of('\\');
-	if (size != string::npos)
-		return s.substr(0, size + 1);
-	return string("");
-}

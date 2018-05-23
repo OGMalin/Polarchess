@@ -3,7 +3,7 @@
 #include <string>
 
 #include "UCI.h"
-#include "Utility.h"
+#include "../Common/Utility.h"
 
 using namespace std;
 

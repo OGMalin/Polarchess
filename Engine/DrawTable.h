@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ChessBoard.h"
+#include "../Common/ChessBoard.h"
 
 #define MAX_DRAWTABLE 1024
 

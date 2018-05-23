@@ -2,8 +2,8 @@
 
 #include <Windows.h>
 #include <list>
-#include "ChessBoard.h"
-#include "MoveList.h"
+#include "../Common/ChessBoard.h"
+#include "../Common/MoveList.h"
 
 enum ENGINECOMMAND
 {

@@ -4,7 +4,7 @@
 #include <list>
 #include "UCI.h"
 #include "EngineInterface.h"
-#include "ChessBoard.h"
+#include "../Common/ChessBoard.h"
 
 class FrontEnd
 {
@@ -38,4 +38,5 @@ public:
 	void uciReadFile(const std::string& s);
 	void uciEval(const std::string& s);
 	void readIniFiles();
+	const std::string getProgramPath();
 };

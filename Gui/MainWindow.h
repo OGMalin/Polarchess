@@ -3,6 +3,7 @@
 #include <QMainWindow>
 #include <QtWidgets>
 #include <QString>
+#include "BoardWindow.h"
 
 class MainWindow : public QMainWindow
 {
@@ -28,6 +29,8 @@ private:
 	QTranslator translator;
 	QActionGroup * langGroup;
 	QString locale;
+	BoardWindow* board;
+	QSplitter* hSplitter;
 	void createMenu();
 	void createStatusBar();
 	void setLanguage();

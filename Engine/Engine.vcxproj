@@ -19,36 +19,36 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ChessBoard.h" />
-    <ClInclude Include="ChessMove.h" />
-    <ClInclude Include="defs.h" />
+    <ClInclude Include="..\Common\ChessBoard.h" />
+    <ClInclude Include="..\Common\ChessMove.h" />
+    <ClInclude Include="..\Common\defs.h" />
+    <ClInclude Include="..\Common\MoveGenerator.h" />
+    <ClInclude Include="..\Common\MoveList.h" />
+    <ClInclude Include="..\Common\Relations.h" />
+    <ClInclude Include="..\Common\StopWatch.h" />
+    <ClInclude Include="..\Common\Utility.h" />
     <ClInclude Include="DrawTable.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="EngineInterface.h" />
     <ClInclude Include="Evaluation.h" />
     <ClInclude Include="FrontEnd.h" />
-    <ClInclude Include="MoveGenerator.h" />
-    <ClInclude Include="MoveList.h" />
-    <ClInclude Include="Relations.h" />
     <ClInclude Include="StaticEndgame.h" />
     <ClInclude Include="StaticEval.h" />
-    <ClInclude Include="StopWatch.h" />
     <ClInclude Include="UCI.h" />
-    <ClInclude Include="Utility.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ChessBoard.cpp" />
-    <ClCompile Include="ChessMove.cpp" />
+    <ClCompile Include="..\Common\ChessBoard.cpp" />
+    <ClCompile Include="..\Common\ChessMove.cpp" />
+    <ClCompile Include="..\Common\MoveGenerator.cpp" />
+    <ClCompile Include="..\Common\MoveList.cpp" />
+    <ClCompile Include="..\Common\StopWatch.cpp" />
+    <ClCompile Include="..\Common\Utility.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EngineInterface.cpp" />
     <ClCompile Include="Evaluation.cpp" />
     <ClCompile Include="FrontEnd.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MoveGenerator.cpp" />
-    <ClCompile Include="MoveList.cpp" />
-    <ClCompile Include="StopWatch.cpp" />
     <ClCompile Include="UCI.cpp" />
-    <ClCompile Include="Utility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="readme.txt" />

@@ -4,9 +4,9 @@
 #include "DrawTable.h"
 #include "Evaluation.h"
 #include "EngineInterface.h"
-#include "StopWatch.h"
-#include "MoveGenerator.h"
-#include "defs.h"
+#include "../Common/StopWatch.h"
+#include "../Common/MoveGenerator.h"
+#include "../Common/defs.h"
 
 enum SEARCHTYPE
 {

@@ -22,4 +22,4 @@ extern bool existIn(const char* c, const char* str);
 extern unsigned int rand32();
 extern unsigned __int64 rand64();
 
-extern const std::string getProgramPath();
+

@@ -2,11 +2,11 @@
 #include <string>
 #include <fstream>
 #include "frontend.h"
-#include "Utility.h"
-#include "ChessBoard.h"
-#include "MoveList.h"
-#include "MoveGenerator.h"
-#include "StopWatch.h"
+#include "../Common/Utility.h"
+#include "../Common/ChessBoard.h"
+#include "../Common/MoveList.h"
+#include "../Common/MoveGenerator.h"
+#include "../Common/StopWatch.h"
 
 using namespace std;
 
@@ -798,4 +798,18 @@ void FrontEnd::readIniFiles()
 	if (find(personalities.begin(), personalities.end(), string("Normal")) != personalities.end())
 		uciReadFile(path + "Normal.per");
 	
+}
+
+const std::string FrontEnd::getProgramPath()
+{
+	string s;
+	char sz[MAX_PATH];
+	if (!GetModuleFileName(NULL, sz, MAX_PATH))
+		return string("");
+	string::size_type size;
+	s = sz;
+	size = s.find_last_of('\\');
+	if (size != string::npos)
+		return s.substr(0, size + 1);
+	return string("");
 }

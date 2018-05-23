@@ -10,31 +10,37 @@ MainWindow::MainWindow(QWidget *parent)
 	createMenu();
 	createStatusBar();
 	loadLanguage(locale);
+
+	hSplitter = new QSplitter;
+
+	board = new BoardWindow(this);
+	board->show();
 	retranslateUi();
 }
 
 MainWindow::~MainWindow()
 {
+	delete hSplitter;
+	delete board;
 	delete langGroup;
 }
 
 void MainWindow::createMenu()
 {
-	fileMenu = menuBar()->addMenu(tr("File"));
-	settingsMenu = menuBar()->addMenu(tr("Settings"));
-	helpMenu = menuBar()->addMenu(tr("Help"));
+	fileMenu = menuBar()->addMenu("*");
+	settingsMenu = menuBar()->addMenu("*");
+	helpMenu = menuBar()->addMenu("*");
 
 	// File menu
 //	fileMenu->addSeparator();
-	exitAct = fileMenu->addAction(tr("Exit"), this, &QWidget::close);
-	exitAct->setStatusTip(tr("Exit the application"));
+	exitAct = fileMenu->addAction("*", this, &QWidget::close);
 
 	// Settings menu
-	langMenu = settingsMenu->addMenu(tr("Language"));
-	engAct = langMenu->addAction(QIcon(":/icon/GB.png"), tr("English"));
+	langMenu = settingsMenu->addMenu("*");
+	engAct = langMenu->addAction(QIcon(":/icon/GB.png"), "*");
 	engAct->setCheckable(true);
 	engAct->setData("gb");
-	norAct = langMenu->addAction(QIcon(":/icon/NO.png"),tr("Norwegian"));
+	norAct = langMenu->addAction(QIcon(":/icon/NO.png"), "*");
 	norAct->setCheckable(true);
 	norAct->setData("nb");
 	langGroup = new QActionGroup(this);
@@ -47,7 +53,7 @@ void MainWindow::createMenu()
 		engAct->setChecked(true);
 
 	// Help menu
-	aboutAct = helpMenu->addAction(tr("About..."));
+	aboutAct = helpMenu->addAction("*");
 }
 
 void MainWindow::createStatusBar()

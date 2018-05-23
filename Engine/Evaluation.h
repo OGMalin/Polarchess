@@ -1,8 +1,8 @@
 #pragma once
 #include <assert.h>
-#include "ChessBoard.h"
-#include "defs.h"
-#include "MoveList.h"
+#include "../Common/ChessBoard.h"
+#include "../Common/defs.h"
+#include "../Common/MoveList.h"
 
 const int MAX_EVAL = 100;
 class Evaluation;
