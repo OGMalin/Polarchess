@@ -84,11 +84,6 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <None Include="gui_nb.ts">
-      <Filter>Translation Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <QtRcc Include="Gui.qrc">
       <Filter>Resource Files</Filter>
     </QtRcc>
@@ -126,5 +121,10 @@
     <ClInclude Include="..\Common\MoveList.h">
       <Filter>Common</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="language\gui_nb.ts">
+      <Filter>Translation Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
