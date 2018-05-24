@@ -3,5 +3,6 @@
         <file>icon/GB.png</file>
         <file>icon/NO.png</file>
         <file>icon/board24.png</file>
+        <file>gui_nb.qm</file>
     </qresource>
 </RCC>

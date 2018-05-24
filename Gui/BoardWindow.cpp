@@ -14,20 +14,21 @@ void BoardWindow::paintEvent(QPaintEvent* event)
 	int size = qMin(width(), height());
 	squareSize = (size-4)/9;
 	int boardSize = (squareSize * 9) + 2;
-	int origo = (size - boardSize) / 2;
+	int origoX = (width() - boardSize) / 2;
+	int origoY = (height() - boardSize) / 2;
 
 	QPainter painter(this);
 
-	painter.drawRect(origo, origo, boardSize, boardSize);
-	painter.fillRect(origo+1, origo+1, squareSize * 9+2, squareSize * 9+2, borderBrush);
-	painter.drawRect(origo + (squareSize / 2) + 1, origo + (squareSize / 2) + 1, squareSize * 8 + 2, squareSize * 8 + 2);
+	painter.drawRect(origoX, origoY, boardSize, boardSize);
+	painter.fillRect(origoX+1, origoY+1, squareSize * 9+2, squareSize * 9+2, borderBrush);
+	painter.drawRect(origoX + (squareSize / 2) + 1, origoY + (squareSize / 2) + 1, squareSize * 8 + 2, squareSize * 8 + 2);
 	bool light = true;
 	for (i = 0; i < 8; i++)
 	{
-		y = origo+(squareSize / 2)+2 + squareSize * i;
+		y = origoY+(squareSize / 2)+2 + squareSize * i;
 		for (j = 0; j < 8; j++)
 		{
-			x = origo + (squareSize / 2) + 2 + squareSize * j;
+			x = origoX + (squareSize / 2) + 2 + squareSize * j;
 			painter.fillRect(x, y, squareSize, squareSize,light?lightBrush:darkBrush);
 			light = light ? false : true;;
 		}

@@ -9,12 +9,12 @@
         <translation>Fil</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="99"/>
+        <location filename="MainWindow.cpp" line="98"/>
         <source>Settings</source>
         <translation>Oppsett</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="104"/>
+        <location filename="MainWindow.cpp" line="103"/>
         <source>Help</source>
         <translation>Hjelp</translation>
     </message>
@@ -25,43 +25,34 @@
         <translation>Avslutt</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="94"/>
-        <source>Exit the application</source>
-        <translation>Avslutter programmet</translation>
-    </message>
-    <message>
-        <location filename="MainWindow.cpp" line="96"/>
+        <location filename="MainWindow.cpp" line="95"/>
         <source>Game</source>
         <translation>Parti</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="97"/>
+        <location filename="MainWindow.cpp" line="96"/>
         <source>New game</source>
         <translation>Nytt parti</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="100"/>
+        <location filename="MainWindow.cpp" line="99"/>
         <source>Language</source>
         <translation>Språk</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="101"/>
+        <location filename="MainWindow.cpp" line="100"/>
         <source>English</source>
         <translation>Engelsk</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="102"/>
+        <location filename="MainWindow.cpp" line="101"/>
         <source>Norwegian</source>
         <translation>Norsk</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="105"/>
+        <location filename="MainWindow.cpp" line="104"/>
         <source>About...</source>
         <translation>Om....</translation>
-    </message>
-    <message>
-        <source>Ready</source>
-        <translation type="vanished">Klar</translation>
     </message>
 </context>
 </TS>

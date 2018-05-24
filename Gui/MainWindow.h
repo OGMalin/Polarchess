@@ -11,6 +11,8 @@ class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 
+private:
+	void closeEvent(QCloseEvent* event) override;
 protected:
 	void changeEvent(QEvent*);
 
@@ -39,6 +41,9 @@ private:
 	ClockWindow* clockwindow;
 	void createMenu();
 	void setLanguage();
-	void loadLanguage(const QString& lang);
+	void loadLanguage();
 	void retranslateUi();
+	void readSettings();
+	void writeSettings();
+	void setDefaultSettings();
 };

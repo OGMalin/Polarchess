@@ -3,14 +3,12 @@
 
 MainWindow::MainWindow()
 {
-	// Find the systems default language
-	locale = QLocale::system().name();
-	locale.truncate(locale.lastIndexOf('_'));
+	readSettings();
 
 	createMenu();
 
 	statusBar();
-	loadLanguage(locale);
+	loadLanguage();
 
 //	this->setStyleSheet("background-color:yellow;");
 
@@ -91,13 +89,16 @@ void MainWindow::retranslateUi()
 {
 	fileMenu->setTitle(tr("File"));
 	exitAct->setText(tr("Exit"));
-	exitAct->setStatusTip(tr("Exit the application"));
 
 	gameMenu->setTitle(tr("Game"));
 	newGameAct->setText(tr("New game"));
 
 	settingsMenu->setTitle(tr("Settings"));
 	langMenu->setTitle(tr("Language"));
+	if (locale == "nb")
+		langMenu->setIcon(QIcon(":/icon/NO.png"));
+	else
+		langMenu->setIcon(QIcon(":/icon/GB.png"));
 	engAct->setText(tr("English"));
 	norAct->setText(tr("Norwegian"));
 
@@ -114,17 +115,18 @@ void MainWindow::slotLanguageChanged(QAction* action)
 {
 	if (0 != action) {
 		// load the language dependant on the action content
-		loadLanguage(action->data().toString());
+		locale = action->data().toString();
+		loadLanguage();
 	}
 }
 
-void MainWindow::loadLanguage(const QString& lang)
+void MainWindow::loadLanguage()
 {
-	if (lang == "nb")
+	if (locale == "nb")
 	{
 		if (translator.isEmpty())
 		{
-			if (translator.load("gui_nb.qm"))
+			if (translator.load(":/gui_nb.qm"))
 				qApp->installTranslator(&translator);
 		}
 		else
@@ -145,16 +147,15 @@ void MainWindow::changeEvent(QEvent* event)
 		switch (event->type()) {
 			// this event is send if a translator is loaded
 		case QEvent::LanguageChange:
-			menuBar()->repaint();
 			retranslateUi();
 			break;
 
 			// this event is send, if the system, language changes
 		case QEvent::LocaleChange:
 		{
-			QString lang = QLocale::system().name();
-			lang.truncate(lang.lastIndexOf('_'));
-			loadLanguage(lang);
+			locale = QLocale::system().name();
+			locale.truncate(locale.lastIndexOf('_'));
+			loadLanguage();
 		}
 		break;
 		}
@@ -162,3 +163,43 @@ void MainWindow::changeEvent(QEvent* event)
 	QMainWindow::changeEvent(event);
 }
 
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+	writeSettings();
+	event->accept();
+}
+
+void MainWindow::writeSettings()
+{
+	QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+	settings.setValue("geometry", saveGeometry());
+	settings.setValue("language", locale);
+}
+
+void MainWindow::readSettings()
+{
+
+	QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+	const QByteArray geometry = settings.value("geometry", QByteArray()).toByteArray();
+	if (geometry.isEmpty())
+	{
+		setDefaultSettings();
+	}
+	else {
+		restoreGeometry(geometry);
+		locale = settings.value("language", QString("gb")).toString();
+	}
+}
+
+void MainWindow::setDefaultSettings()
+{
+/*
+const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
+resize(availableGeometry.width() / 3, availableGeometry.height() / 2);
+move((availableGeometry.width() - width()) / 2,
+(availableGeometry.height() - height()) / 2);
+*/
+// Find the systems default language
+	locale = QLocale::system().name();
+	locale.truncate(locale.lastIndexOf('_'));
+}
