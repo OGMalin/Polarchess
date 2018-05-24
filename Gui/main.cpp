@@ -1,10 +1,10 @@
-#include "MainWindow.h"
 #include <QApplication>
+#include "MainWindow.h"
 
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
-//	QCoreApplication::setOrganizationName("");
+	QCoreApplication::setOrganizationName("PolarChess");
 	QCoreApplication::setApplicationName("PolarChess");
 	QCoreApplication::setApplicationVersion("1.0 beta 1");
 

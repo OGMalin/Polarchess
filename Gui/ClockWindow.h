@@ -2,9 +2,10 @@
 
 #include <QWidget>
 #include <QTextEdit>
-class Scoresheet :public QTextEdit
+
+class ClockWindow :public QTextEdit
 {
 	Q_OBJECT
 public:
-	Scoresheet(QWidget* parent = 0);
+	ClockWindow(QWidget* parent = 0);
 };

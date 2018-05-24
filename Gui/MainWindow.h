@@ -5,6 +5,7 @@
 #include <QString>
 #include "BoardWindow.h"
 #include "Scoresheet.h"
+#include "ClockWindow.h"
 
 class MainWindow : public QMainWindow
 {
@@ -16,25 +17,27 @@ protected:
 protected slots:
 	void slotLanguageChanged(QAction* action);
 public:
-	MainWindow(QWidget *parent = Q_NULLPTR);
+	MainWindow();
 	virtual ~MainWindow();
 private:
 	QMenu * fileMenu;
 	QMenu* settingsMenu;
 	QMenu* helpMenu;
 	QMenu* langMenu;
+	QMenu* gameMenu;
+	QToolBar* toolbar;
 	QAction* exitAct;
 	QAction* engAct;
 	QAction* norAct;
 	QAction* aboutAct;
+	QAction* newGameAct;
 	QTranslator translator;
 	QActionGroup * langGroup;
 	QString locale;
 	BoardWindow* boardwindow;
 	Scoresheet* scoresheet;
-	QSplitter* hSplitter;
+	ClockWindow* clockwindow;
 	void createMenu();
-	void createStatusBar();
 	void setLanguage();
 	void loadLanguage(const QString& lang);
 	void retranslateUi();

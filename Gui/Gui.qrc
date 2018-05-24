@@ -1,6 +1,7 @@
-﻿<RCC>
-    <qresource>
-		<file>icon/GB.png</file>
-		<file>icon/NO.png</file>
+<RCC>
+    <qresource prefix="/">
+        <file>icon/GB.png</file>
+        <file>icon/NO.png</file>
+        <file>icon/board24.png</file>
     </qresource>
 </RCC>

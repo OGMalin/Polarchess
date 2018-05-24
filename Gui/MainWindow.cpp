@@ -1,30 +1,39 @@
 #include "MainWindow.h"
 #include <QIcon>
 
-MainWindow::MainWindow(QWidget *parent)
-	: QMainWindow(parent)
+MainWindow::MainWindow()
 {
-	// format systems language
+	// Find the systems default language
 	locale = QLocale::system().name();
 	locale.truncate(locale.lastIndexOf('_'));
+
 	createMenu();
-	createStatusBar();
+
+	statusBar();
 	loadLanguage(locale);
 
 //	this->setStyleSheet("background-color:yellow;");
 
-//	hSplitter = new QSplitter(this);
+	QSplitter* hSplitter = new QSplitter(Qt::Horizontal);
+	QSplitter* vSplitter = new QSplitter(Qt::Vertical);
 
 	boardwindow = new BoardWindow;
-	scoresheet = new Scoresheet(this);
-/*
+	scoresheet = new Scoresheet;
+	clockwindow = new ClockWindow;
+
 	hSplitter->addWidget(boardwindow);
-	hSplitter->addWidget(scoresheet);
-	boardwindow->show();
-	scoresheet->show();
-	hSplitter->setStretchFactor(1, 1);*/
-	setCentralWidget(boardwindow);
-//	hSplitter->show();
+	hSplitter->addWidget(vSplitter);
+	vSplitter->addWidget(clockwindow);
+	vSplitter->addWidget(scoresheet);
+
+
+	hSplitter->setStretchFactor(0, 1);
+	hSplitter->setStretchFactor(1, 1);
+	vSplitter->setStretchFactor(0, 1);
+	vSplitter->setStretchFactor(1, 1);
+
+	setCentralWidget(hSplitter);
+
 	retranslateUi();
 }
 
@@ -33,20 +42,24 @@ MainWindow::~MainWindow()
 	/*
 	delete boardwindow;
 	delete scoresheet;
-	delete hSplitter;
 	delete langGroup;
 */
 }
 
+// The text in the menu are set in retranslateUi to be able to switch language 'on the fly'.
 void MainWindow::createMenu()
 {
+	//Main menues
 	fileMenu = menuBar()->addMenu("*");
+	gameMenu = menuBar()->addMenu("*");
 	settingsMenu = menuBar()->addMenu("*");
 	helpMenu = menuBar()->addMenu("*");
 
 	// File menu
 //	fileMenu->addSeparator();
 	exitAct = fileMenu->addAction("*", this, &QWidget::close);
+
+	newGameAct = gameMenu->addAction(QIcon(":/icon/board24.png"),"*");
 
 	// Settings menu
 	langMenu = settingsMenu->addMenu("*");
@@ -67,11 +80,29 @@ void MainWindow::createMenu()
 
 	// Help menu
 	aboutAct = helpMenu->addAction("*");
+
+	// Setting up the toolbar
+	toolbar=addToolBar("Toolbar");
+	toolbar->addAction(newGameAct);
+
 }
 
-void MainWindow::createStatusBar()
+void MainWindow::retranslateUi()
 {
-	statusBar()->showMessage(tr("Ready"));
+	fileMenu->setTitle(tr("File"));
+	exitAct->setText(tr("Exit"));
+	exitAct->setStatusTip(tr("Exit the application"));
+
+	gameMenu->setTitle(tr("Game"));
+	newGameAct->setText(tr("New game"));
+
+	settingsMenu->setTitle(tr("Settings"));
+	langMenu->setTitle(tr("Language"));
+	engAct->setText(tr("English"));
+	norAct->setText(tr("Norwegian"));
+
+	helpMenu->setTitle(tr("Help"));
+	aboutAct->setText(tr("About..."));
 }
 
 void MainWindow::setLanguage()
@@ -89,22 +120,23 @@ void MainWindow::slotLanguageChanged(QAction* action)
 
 void MainWindow::loadLanguage(const QString& lang)
 {
-	if (lang == "gb")
+	if (lang == "nb")
 	{
-		if (!translator.isEmpty())
-			qApp->removeTranslator(&translator);
-		return;
-
-	}
-	if (translator.isEmpty())
-	{
-		if (translator.load("gui_nb.qm"))
+		if (translator.isEmpty())
+		{
+			if (translator.load("gui_nb.qm"))
+				qApp->installTranslator(&translator);
+		}
+		else
+		{
 			qApp->installTranslator(&translator);
+		}
+		return;
 	}
-	else
-	{
-		qApp->installTranslator(&translator);
-	}
+
+	if (!translator.isEmpty())
+		qApp->removeTranslator(&translator);
+	return;
 }
 
 void MainWindow::changeEvent(QEvent* event)
@@ -130,16 +162,3 @@ void MainWindow::changeEvent(QEvent* event)
 	QMainWindow::changeEvent(event);
 }
 
-void MainWindow::retranslateUi()
-{
-	fileMenu->setTitle(tr("File"));
-	settingsMenu->setTitle(tr("Settings"));
-	helpMenu->setTitle(tr("Help"));
-	langMenu->setTitle(tr("Language"));
-
-	exitAct->setText(tr("Exit"));
-	exitAct->setStatusTip(tr("Exit the application"));
-	engAct->setText(tr("English"));
-	norAct->setText(tr("Norwegian"));
-	aboutAct->setText(tr("About..."));
-}
