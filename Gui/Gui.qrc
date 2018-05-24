@@ -1,11 +1,8 @@
 <RCC>
-    <qresource prefix="/"/>
-    <qresource prefix="/icon">
+    <qresource prefix="/">
+        <file>icon/board24.png</file>
         <file>icon/GB.png</file>
         <file>icon/NO.png</file>
-        <file>icon/board24.png</file>
-    </qresource>
-    <qresource prefix="/language">
         <file>language/gui_nb.qm</file>
     </qresource>
 </RCC>

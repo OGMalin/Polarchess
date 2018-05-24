@@ -6,6 +6,7 @@ BoardWindow::BoardWindow(QWidget* parent)
 	:QWidget(parent)
 {
 	setBoardStyle();
+	setMinimumSize(200, 200);
 }
 
 void BoardWindow::paintEvent(QPaintEvent* event)

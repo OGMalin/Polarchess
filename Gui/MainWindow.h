@@ -31,11 +31,14 @@ private:
 	QAction* exitAct;
 	QAction* engAct;
 	QAction* norAct;
+	QAction* defAct;
 	QAction* aboutAct;
 	QAction* newGameAct;
 	QTranslator translator;
 	QActionGroup * langGroup;
 	QString locale;
+	QSplitter* hSplitter;
+	QSplitter* vSplitter;
 	BoardWindow* boardwindow;
 	Scoresheet* scoresheet;
 	ClockWindow* clockwindow;
