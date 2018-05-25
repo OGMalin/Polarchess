@@ -165,11 +165,6 @@ void FrontEnd::uciUci()
 		s += " var " + *it;
 	uci.write(s);
 //	uci.write("option name MultiPV type spin default 1 min 1 max 100");
-//	uci.write("option name Pawn type spin default 100 min 0 max 200");
-//	uci.write("option name Knight type spin default 100 min 0 max 200");
-//	uci.write("option name Bishop type spin default 100 min 0 max 200");
-//	uci.write("option name Rook type spin default 100 min 0 max 200");
-//	uci.write("option name Queen type spin default 100 min 0 max 200");
 	uci.write(sz);
 	uci.write("option name UCI_AnalyseMode type check default false");
 	s = "option name UCI_LimitStrength type check default ";
@@ -286,14 +281,14 @@ void FrontEnd::uciSetoption(const std::string& s)
 	{
 		limitStrength = booleanString(value);
 		if (limitStrength)
-			engine.sendOutQue(ENG_eval, EngineEval(EVAL_strength, calculateStrengt());
+			engine.sendOutQue(ENG_eval, EngineEval(EVAL_strength, calculateStrength()));
 
 	}
 	else if ("UCI_Elo")
 	{
 		currentElo = atoi(value.c_str());
 		if (limitStrength)
-			engine.sendOutQue(ENG_eval,EngineEval(EVAL_strength, calculateStrengt());
+			engine.sendOutQue(ENG_eval,EngineEval(EVAL_strength, calculateStrength()));
 	}
 }
 
@@ -778,7 +773,7 @@ void FrontEnd::uciEval(const std::string& input)
 			{
 				double d = atof(value.c_str());
 				limitStrength = true;
-				engine.sendOutQue(ENG_eval, EngineEval(EVAL_bishoppair, atoi(value.c_str())));
+				engine.sendOutQue(ENG_eval, EngineEval(EVAL_strength, atoi(value.c_str())));
 				return;
 			}
 			uci.write("info string Unknown Eval parametre.");

@@ -18,6 +18,12 @@ enum SEARCHTYPE
 	TIME_SEARCH
 };
 
+enum
+{
+	lowerbound=1,
+	upperbound
+};
+
 class Engine
 {
 	friend void EngineSearchThreadLoop(void* eng);
@@ -57,6 +63,7 @@ public:
 	void orderQMoves(MoveList& mlist);
 	bool abortCheck();
 	void sendBestMove();
-	void sendPV(const MoveList& l,int depth);
+	// Type=0-> Normal, 1=lowerbound, 2=upperbound
+	void sendPV(const MoveList& l, int depth, int score, int type = 0);
 	void copyPV(MoveList& m1, MoveList& m2, ChessMove& m);
 };

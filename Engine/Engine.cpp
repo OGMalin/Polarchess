@@ -223,10 +223,9 @@ int Engine::aspirationSearch(int depth, int bestscore, bool inCheck, HASHKEY has
 	if ((score <= alpha) || (score >= beta))
 	{
 		if (score<=alpha)
-			pv[0].list[0].score = MATE + 1;
+			sendPV(pv[0], depth, score, lowerbound);
 		else
-			pv[0].list[0].score = MATE + 2;
-		sendPV(pv[0], depth);
+			sendPV(pv[0], depth, score, upperbound);
 		alpha = -MATE;
 		beta = MATE;
 		score = rootSearch(depth, alpha, beta, inCheck, hashKey);
@@ -288,8 +287,7 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 		if (score > alpha)
 		{
 			copyPV(pv[0], pv[1], ml[0].list[mit]);
-			pv[0].list[0].score = score;
-			sendPV(pv[0], depth);
+			sendPV(pv[0], depth,score);
 
 			alpha = score;
 
@@ -534,7 +532,7 @@ void Engine::sendBestMove()
 	ei->sendInQue(ENG_string, "bestmove " + theBoard.uciMoveText(bestMove.list[mit]));
 }
 
-void Engine::sendPV(const MoveList& pvline, int depth)
+void Engine::sendPV(const MoveList& pvline, int depth, int score, int type)
 {
 	string s="";
 	int i=0;
@@ -546,16 +544,16 @@ void Engine::sendPV(const MoveList& pvline, int depth)
 		if (i < pvline.size)
 			s += " ";
 	}
-	if (pvline.list[0].score == MATE + 1)
-		sprintf_s(sz, 256, "depth %i nps %u score lowerbound nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), nodes, t, s.c_str());
-	else if (pvline.list[0].score == MATE + 2)
-		sprintf_s(sz, 256, "depth %i nps %u score upperbound nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), nodes, t, s.c_str());
+	if (type==lowerbound)
+		sprintf_s(sz, 256, "depth %i nps %u score lowerbound cp %i nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), score, nodes, t, s.c_str());
+	else if (type==upperbound)
+		sprintf_s(sz, 256, "depth %i nps %u score upperbound cb %i nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), score, nodes, t, s.c_str());
 	else if (pvline.list[0].score > MATE - 200)
-		sprintf_s(sz, 256, "depth %i nps %u score mate %i nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), (MATE - pvline.list[0].score)/2+1, nodes, t, s.c_str());
+		sprintf_s(sz, 256, "depth %i nps %u score mate %i nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), (MATE - score)/2+1, nodes, t, s.c_str());
 	else if (pvline.list[0].score < -MATE + 200)
-		sprintf_s(sz, 256, "depth %i nps %u score mate %i nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), (MATE + pvline.list[0].score)/2, nodes, t, s.c_str());
+		sprintf_s(sz, 256, "depth %i nps %u score mate %i nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), (MATE + score)/2, nodes, t, s.c_str());
 	else
-		sprintf_s(sz, 256, "depth %i nps %u score cp %i nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), pvline.list[0].score, nodes, t, s.c_str());
+		sprintf_s(sz, 256, "depth %i nps %u score cp %i nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), score, nodes, t, s.c_str());
 	ei->sendInQue(ENG_info, sz);
 }
 
