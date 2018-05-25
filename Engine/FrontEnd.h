@@ -12,6 +12,9 @@ class FrontEnd
 public:
 	std::list<std::string> personalities;
 	DWORD maxElo;
+	DWORD currentElo;
+	DWORD minElo;
+	bool limitStrength;
 	int contempt;
 	ChessBoard currentBoard;
 	UCI uci;
@@ -37,6 +40,7 @@ public:
 	void findMaxElo();
 	void uciReadFile(const std::string& s);
 	void uciEval(const std::string& s);
+	DWORD calculateStrength();
 	void readIniFiles();
 	const std::string getProgramPath();
 };

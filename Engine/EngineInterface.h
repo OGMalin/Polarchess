@@ -32,7 +32,9 @@ enum ENGINEEVAL
 	EVAL_knight,
 	EVAL_bishop,
 	EVAL_rook,
-	EVAL_queen
+	EVAL_queen,
+	EVAL_bishoppair,
+	EVAL_strength
 };
 
 struct EngineEval

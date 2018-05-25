@@ -17,6 +17,9 @@ FrontEnd::FrontEnd()
 	// Default values
 	debug = false;
 	maxElo = 2000;
+	currentElo = maxElo;
+	minElo = 600;
+	limitStrength = false;
 	contempt = 0;
 	currentBoard.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 }
@@ -118,6 +121,9 @@ int FrontEnd::uciInput()
 		case UCI_readfile:
 			uciReadFile(input);
 			break;
+		case UCI_eval:
+			uciEval(input);
+			break;
 		case UCI_unknown:
 			uci.write(string("info string Unknown command: " + input));
 			break;
@@ -166,10 +172,14 @@ void FrontEnd::uciUci()
 //	uci.write("option name Queen type spin default 100 min 0 max 200");
 	uci.write(sz);
 	uci.write("option name UCI_AnalyseMode type check default false");
-
-	//	uci.write("option name UCI_LimitStrength type check default false");
-//	_itoa_s(maxElo, sz, 256, 10);
-//	uci.write("option name UCI_Elo type spin default 2000 min 1000 max "+string(sz));
+	s = "option name UCI_LimitStrength type check default ";
+	if (limitStrength)
+		s += "true";
+	else
+		s += "false";
+	uci.write(s);
+	sprintf_s(sz, 256, "option name UCI_Elo type spin default %u min %u max %u", currentElo, minElo, maxElo);
+	uci.write(sz);
 
 	uci.write("uciok");
 }
@@ -253,26 +263,6 @@ void FrontEnd::uciSetoption(const std::string& s)
 		contempt = atoi(value.c_str());
 		engine.sendOutQue(ENG_eval, EngineEval(EVAL_contempt, contempt));
 	}
-/*	else if (name == "Pawn")
-	{
-		engine.sendOutQue(ENG_eval, EngineEval(EVAL_pawn, atoi(value.c_str())));
-	}
-	else if (name == "Knight")
-	{
-		engine.sendOutQue(ENG_eval, EngineEval(EVAL_knight, atoi(value.c_str())));
-	}
-	else if (name == "Bishop")
-	{
-		engine.sendOutQue(ENG_eval, EngineEval(EVAL_bishop, atoi(value.c_str())));
-	}
-	else if (name == "Rook")
-	{
-		engine.sendOutQue(ENG_eval, EngineEval(EVAL_rook, atoi(value.c_str())));
-	}
-	else if (name == "Queen")
-	{
-		engine.sendOutQue(ENG_eval, EngineEval(EVAL_queen, atoi(value.c_str())));
-	} */
 	else if (name == "MultiPV")
 	{
 		engine.sendOutQue(ENG_eval, EngineEval(EVAL_multipv, atoi(value.c_str())));
@@ -291,6 +281,19 @@ void FrontEnd::uciSetoption(const std::string& s)
 			ev.value = contempt;
 			engine.sendOutQue(ENG_eval, ev);
 		}
+	}
+	else if ("UCI_LimitStrength")
+	{
+		limitStrength = booleanString(value);
+		if (limitStrength)
+			engine.sendOutQue(ENG_eval, EngineEval(EVAL_strength, calculateStrengt());
+
+	}
+	else if ("UCI_Elo")
+	{
+		currentElo = atoi(value.c_str());
+		if (limitStrength)
+			engine.sendOutQue(ENG_eval,EngineEval(EVAL_strength, calculateStrengt());
 	}
 }
 
@@ -766,6 +769,18 @@ void FrontEnd::uciEval(const std::string& input)
 				engine.sendOutQue(ENG_eval, EngineEval(EVAL_queen, atoi(value.c_str())));
 				return;
 			}
+			if (para == "bishoppair")
+			{
+				engine.sendOutQue(ENG_eval, EngineEval(EVAL_bishoppair, atoi(value.c_str())));
+				return;
+			}
+			if (para == "strength")
+			{
+				double d = atof(value.c_str());
+				limitStrength = true;
+				engine.sendOutQue(ENG_eval, EngineEval(EVAL_bishoppair, atoi(value.c_str())));
+				return;
+			}
 			uci.write("info string Unknown Eval parametre.");
 			return;
 		}
@@ -812,4 +827,12 @@ const std::string FrontEnd::getProgramPath()
 	if (size != string::npos)
 		return s.substr(0, size + 1);
 	return string("");
+}
+
+DWORD FrontEnd::calculateStrength()
+{
+	DWORD half=100;
+	int diff = maxElo - currentElo;
+	double fact = 50.0; // test
+	return (DWORD)(fact * 100);
 }

@@ -101,15 +101,19 @@ void EngineSearchThreadLoop(void* lpv)
 				if (ev.type == EVAL_contempt)
 					eng.contempt = ev.value;
 				else if (ev.type == EVAL_pawn)
-					eng.eval.pawnValue = eng.eval.pawnValue*ev.value;
+					eng.eval.pawnValue = eng.eval.pawnValue;
 				else if (ev.type == EVAL_knight)
-					eng.eval.knightValue = eng.eval.knightValue*ev.value;
+					eng.eval.knightValue = eng.eval.knightValue;
 				else if (ev.type == EVAL_bishop)
-					eng.eval.bishopValue = eng.eval.bishopValue*ev.value;
+					eng.eval.bishopValue = eng.eval.bishopValue;
 				else if (ev.type == EVAL_rook)
-					eng.eval.rookValue = eng.eval.rookValue*ev.value;
+					eng.eval.rookValue = eng.eval.rookValue;
 				else if (ev.type == EVAL_queen)
-					eng.eval.queenValue = eng.eval.queenValue*ev.value;
+					eng.eval.queenValue = eng.eval.queenValue;
+				else if (ev.type == EVAL_bishoppair)
+					eng.eval.queenValue = eng.eval.bishopPair;
+				else if (ev.type == EVAL_strength)
+					eng.strength = ev.value;
 				break;
 			default:
 				// Unknown command, remove it.
@@ -477,17 +481,21 @@ bool Engine::abortCheck()
 		case ENG_eval:
 			ei->getOutQue(ev);
 			if (ev.type == EVAL_contempt)
-				contempt = ev.value;
+				eng.contempt = ev.value;
 			else if (ev.type == EVAL_pawn)
-				eval.pawnValue = ev.value;
+				eng.eval.pawnValue = eng.eval.pawnValue;
 			else if (ev.type == EVAL_knight)
-				eval.knightValue = ev.value;
+				eng.eval.knightValue = eng.eval.knightValue;
 			else if (ev.type == EVAL_bishop)
-				eval.bishopValue = ev.value;
+				eng.eval.bishopValue = eng.eval.bishopValue;
 			else if (ev.type == EVAL_rook)
-				eval.rookValue = ev.value;
+				eng.eval.rookValue = eng.eval.rookValue;
 			else if (ev.type == EVAL_queen)
-				eval.queenValue = ev.value;
+				eng.eval.queenValue = eng.eval.queenValue;
+			else if (ev.type == EVAL_bishoppair)
+				eng.eval.queenValue = eng.eval.bishopPair;
+			else if (ev.type == EVAL_strength)
+				eng.strength = ev.value;
 			break;
 		default:
 			// Unknown command, remove it.

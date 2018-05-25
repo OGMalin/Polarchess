@@ -106,31 +106,31 @@ int UCI::extract(std::string& s)
 	cmd=getWord(s, 1);
 	if (cmd == "debug")
 		ret = UCI_debug;
-	if (cmd == "go")
+	else if (cmd == "go")
 		ret = UCI_go;
-	if (cmd == "isready")
+	else if (cmd == "isready")
 		ret = UCI_isready;
-	if (cmd == "ponderhit")
+	else if (cmd == "ponderhit")
 		ret = UCI_ponderhit;
-	if (cmd == "position")
+	else if (cmd == "position")
 		ret = UCI_position;
-	if (cmd == "quit")
+	else if (cmd == "quit")
 		ret = UCI_quit;
-	if (cmd == "register")
+	else if (cmd == "register")
 		ret = UCI_register;
-	if (cmd == "stop")
+	else if (cmd == "stop")
 		ret = UCI_stop;
-	if (cmd == "uci")
+	else if (cmd == "uci")
 		ret = UCI_uci;
-	if (cmd == "setoption")
+	else if (cmd == "setoption")
 		ret = UCI_setoption;
-	if (cmd == "ucinewgame")
+	else if (cmd == "ucinewgame")
 		ret = UCI_ucinewgame;
-	if (cmd == "movegen")
+	else if (cmd == "movegen")
 		ret = UCI_movegen;
-	if (cmd == "readfile")
+	else if (cmd == "readfile")
 		ret = UCI_readfile;
-	if (cmd == "eval")
+	else if (cmd == "eval")
 		ret = UCI_eval;
 	if (ret != UCI_unknown)
 	{
