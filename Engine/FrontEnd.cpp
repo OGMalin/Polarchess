@@ -238,20 +238,22 @@ void FrontEnd::uciSetoption(const std::string& s)
 	EngineEval ev;
 
 	i = 2;
-	while ((ss = getWord(s, i)).length())
+	while ((ss = getWord(s, i++)).length())
 	{
-		if (s == "value")
+		if (ss == "value")
 			break;
-		name += lowercase(ss);
-		++i;
+		name += ss;
+		name += ' ';
 	}
 
-	while ((ss = getWord(s, i)).length())
+	while ((ss = getWord(s, i++)).length())
 	{
 		value += ss;
 		value += ' ';
-		++i;
 	}
+
+	name = trim(name);
+	value = trim(value);
 
 	if (name == "Contempt")
 	{
@@ -261,6 +263,14 @@ void FrontEnd::uciSetoption(const std::string& s)
 	else if (name == "MultiPV")
 	{
 		engine.sendOutQue(ENG_eval, EngineEval(EVAL_multipv, atoi(value.c_str())));
+	}
+	else if (name == "Personality")
+	{
+		string path = getProgramPath();
+		path += "personalities\\";
+		path += value;
+		path += ".per";
+		uciReadFile(path);
 	}
 	else if (name == "UCI_AnalyseMode")
 	{
@@ -771,9 +781,11 @@ void FrontEnd::uciEval(const std::string& input)
 			}
 			if (para == "strength")
 			{
+				// 10000
 				double d = atof(value.c_str());
 				limitStrength = true;
-				engine.sendOutQue(ENG_eval, EngineEval(EVAL_strength, atoi(value.c_str())));
+				int v = (int)((d+0.005) * 100);
+				engine.sendOutQue(ENG_eval, EngineEval(EVAL_strength, v));
 				return;
 			}
 			uci.write("info string Unknown Eval parametre.");

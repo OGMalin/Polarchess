@@ -537,6 +537,7 @@ void Engine::sendPV(const MoveList& pvline, int depth, int score, int type)
 	string s="";
 	int i=0;
 	DWORD t = watch.read();
+	double ts = t / 1000;
 	while (i < pvline.size)
 	{ 
 		s+=theBoard.uciMoveText(pvline.list[i]);
@@ -545,15 +546,15 @@ void Engine::sendPV(const MoveList& pvline, int depth, int score, int type)
 			s += " ";
 	}
 	if (type==lowerbound)
-		sprintf_s(sz, 256, "depth %i nps %u score lowerbound cp %i nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), score, nodes, t, s.c_str());
+		sprintf_s(sz, 256, "depth %i nps %u score lowerbound cp %i nodes %u time %u pv %s", depth, (DWORD)(nodes / ts), score, nodes, t, s.c_str());
 	else if (type==upperbound)
-		sprintf_s(sz, 256, "depth %i nps %u score upperbound cb %i nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), score, nodes, t, s.c_str());
-	else if (pvline.list[0].score > MATE - 200)
-		sprintf_s(sz, 256, "depth %i nps %u score mate %i nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), (MATE - score)/2+1, nodes, t, s.c_str());
-	else if (pvline.list[0].score < -MATE + 200)
-		sprintf_s(sz, 256, "depth %i nps %u score mate %i nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), (MATE + score)/2, nodes, t, s.c_str());
+		sprintf_s(sz, 256, "depth %i nps %u score upperbound cb %i nodes %u time %u pv %s", depth, (DWORD)(nodes / ts), score, nodes, t, s.c_str());
+	else if (score > MATE - 200)
+		sprintf_s(sz, 256, "depth %i nps %u score mate %i nodes %u time %u pv %s", depth, (DWORD)(nodes / ts), (MATE - score)/2+1, nodes, t, s.c_str());
+	else if (score < -MATE + 200)
+		sprintf_s(sz, 256, "depth %i nps %u score mate %i nodes %u time %u pv %s", depth, (DWORD)(nodes / ts), (MATE + score)/2, nodes, t, s.c_str());
 	else
-		sprintf_s(sz, 256, "depth %i nps %u score cp %i nodes %u time %u pv %s", depth, (DWORD)(nodes / (double)(t / 1000)), score, nodes, t, s.c_str());
+		sprintf_s(sz, 256, "depth %i nps %u score cp %i nodes %u time %u pv %s", depth, (DWORD)(nodes / ts), score, nodes, t, s.c_str());
 	ei->sendInQue(ENG_info, sz);
 }
 
