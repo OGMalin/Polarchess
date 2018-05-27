@@ -1,0 +1,38 @@
+Todo list
+
+* Main
+	- DGT support with button on the toolbar and in settingsmenu
+	- Game database to keep record of played games.
+	- Game analysis
+	- User selection
+	- Rating raport
+		Keep different rating for blitz, rapid, and clasical.
+	- Help files
+	- Update function.
+	- Window to display info for a few second without interaction.
+	- Possible to analyse games with engine (Stockfish?)
+
+* Engine support
+	- Own engine for playing with predefined personalities
+	- Foreign engine for analysis?.
+
+* Clock
+
+* Scoresheet
+	- Tabed scoresheet to view as gamescore or analysed game. (log time spendt on each move to the database).
+
+* Board
+	Who to move indicator
+	Last move indicator
+
+* Setup dialog
+	- BoardWindow
+		Auto promote to queen
+		Board theme
+		Show last move indicator
+
+* New game dialog
+	Select opponent (auto or by choice)
+	Select timecontrol.
+	Play as white, black or auto.
+

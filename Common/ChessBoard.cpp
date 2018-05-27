@@ -205,6 +205,16 @@ bool ChessBoard::doMove(ChessMove& m, bool legalcheck)
 	return true;
 }
 
+
+bool ChessBoard::isLegal(ChessMove& m)
+{
+	MoveGenerator gen;
+	ChessMove mm;
+	string sm=uciMoveText(m);
+	mm=getMoveFromText(sm);
+	return (mm.score == 0) ? true : false;
+}
+
 const ChessMove ChessBoard::getMoveFromText(const std::string text)
 {
 	int moveit;
@@ -628,6 +638,8 @@ const std::string ChessBoard::uciMoveText(const ChessMove& m)
 {
 	// d7d8q
 	string s;
+	if (m.moveType&NULL_MOVE)
+		return "0000";
 	char file[] = "abcdefgh ";
 	char rank[] = "12345678 ";
 	char piece[] = " pnbrqk";

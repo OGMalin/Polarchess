@@ -9,6 +9,7 @@ BoardWindow::BoardWindow(QWidget* parent)
 {
 	whiteAtBottom = true;
 	dragPiece = EMPTY;
+	autoQueen = true;
 	currentBoard.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 	setBoardTheme();
 	setMinimumSize(200, 200);
@@ -248,14 +249,41 @@ void BoardWindow::mouseReleaseEvent(QMouseEvent* event)
 		{
 			if (sq >= 0)
 			{
-				currentBoard.board[SQUARE128(dragFromSquare)] = EMPTY;
-				currentBoard.board[SQUARE128(sq)] = dragPiece;
+				ChessMove m;
+				m.fromSquare = SQUARE128(dragFromSquare);
+				m.toSquare = SQUARE128(sq);
+				// Promotion
+				if (((dragPiece == whitepawn) && (sq>55)) || ((dragPiece == blackpawn) && (sq<8)))
+				{
+					if (autoQueen)
+					{
+						m.promotePiece = (dragPiece == whitepawn) ? whitequeen : blackqueen;
+						m.moveType |= PROMOTE;
+					}
+					else
+					{
+						// Make a dialog to get the promoting piece
+					}
+				}
+				if (currentBoard.isLegal(m))
+				{
+					// Trix to fill out the rest of the move (castle, ep etc.);
+					m=currentBoard.getMoveFromText(currentBoard.uciMoveText(m));
+					
+					currentBoard.doMove(m,false);
+					currentBoard.board[SQUARE128(dragFromSquare)] = EMPTY;
+					if (m.moveType&PROMOTE)
+						currentBoard.board[SQUARE128(sq)] = m.promotePiece;
+					else
+						currentBoard.board[SQUARE128(sq)] = dragPiece;
+				}
 			}
 		}
 		dragPiece = EMPTY;
-		update(dragPieceRect);
-		update(squareRect(dragFromSquare));
-		update(squareRect(sq));
+		update();
+//		update(dragPieceRect);
+//		update(squareRect(dragFromSquare));
+//		update(squareRect(sq));
 		QWidget::mouseReleaseEvent(event);
 	}
 }
@@ -265,7 +293,7 @@ int BoardWindow::findSquare(const QPoint& point)
 	if (boardRect.contains(point.x(), point.y()))
 	{
 		int sq;
-		for (sq = 0; sq < 63; sq++)
+		for (sq = 0; sq < 64; sq++)
 		{
 			if (squareRect(sq).contains(point.x(), point.y()))
 				return sq;

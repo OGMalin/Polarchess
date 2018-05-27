@@ -36,6 +36,7 @@ private:
 	BOARDTHEMA theme;
 	typePiece dragPiece;
 	QRect dragPieceRect;
+	bool autoQueen;
 	int dragFromSquare;
 	void drawBorder(QPaintEvent* event, QPainter& painter);
 	void drawCoordinates(QPaintEvent* event, QPainter& painter);

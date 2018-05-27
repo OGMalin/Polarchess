@@ -50,6 +50,7 @@ public:
 	EngineInterface* ei;
 	int contempt;
 	ChessBoard theBoard;
+	ChessBoard tempBoard;
 	Engine();
 	void startSearch();
 	void interativeSearch(bool inCheck, HASHKEY hashKey);

@@ -27,6 +27,9 @@ public:
 	virtual int compare(const ChessBoard& b);
 	void setFen(const char* szFen);
 	bool doMove(ChessMove& m, bool legalcheck);
+	// Checking from square, to square, castle and promoting (defaults to queen)
+	bool isLegal(ChessMove& m);
+	// If illegal move the move.score>0
 	const ChessMove getMoveFromText(const std::string text);
 	// Strip 'non' important characters from a movestring
 	char* stripMoveText(char* mt);

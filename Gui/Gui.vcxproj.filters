@@ -130,4 +130,7 @@
       <Filter>Translation Files</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="ToDo.txt" />
+  </ItemGroup>
 </Project>

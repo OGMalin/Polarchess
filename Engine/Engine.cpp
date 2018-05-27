@@ -2,6 +2,7 @@
 #include <string>
 #include "Engine.h"
 #include "EngineInterface.h"
+#include "../Common/utility.h"
 #include <assert.h>
 
 using namespace std;
@@ -222,10 +223,13 @@ int Engine::aspirationSearch(int depth, int bestscore, bool inCheck, HASHKEY has
 		return BREAKING;
 	if ((score <= alpha) || (score >= beta))
 	{
-		if (score<=alpha)
-			sendPV(pv[0], depth, score, lowerbound);
-		else
-			sendPV(pv[0], depth, score, upperbound);
+		if (debug || (watch.read()>999))
+		{
+			if (score <= alpha)
+				sendPV(pv[0], depth, score, lowerbound);
+			else
+				sendPV(pv[0], depth, score, upperbound);
+		}
 		alpha = -MATE;
 		beta = MATE;
 		score = rootSearch(depth, alpha, beta, inCheck, hashKey);
@@ -263,11 +267,15 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 	// Add the root position to the drawtable
 	hashDrawTable.add(hashKey, 0);
 
+	bool sendinfo = (watch.read() > 999) ? true : false;
 	for (mit = 0; mit < ml[0].size; mit++)
 	{
 		// Send UCI info
-		sprintf_s(sz, 256, "currmove %s currmovenumber %i", theBoard.uciMoveText(ml[0].list[mit]).c_str(), mit+1);
-		ei->sendInQue(ENG_info, sz);
+		if (debug || sendinfo)
+		{
+			sprintf_s(sz, 256, "currmove %s currmovenumber %i", theBoard.uciMoveText(ml[0].list[mit]).c_str(), mit + 1);
+			ei->sendInQue(ENG_info, sz);
+		}
 		newkey = theBoard.newHashkey(ml[0].list[mit], hashKey);
 		mgen.doMove(theBoard, ml[0].list[mit]);
 
@@ -287,7 +295,8 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 		if (score > alpha)
 		{
 			copyPV(pv[0], pv[1], ml[0].list[mit]);
-			sendPV(pv[0], depth,score);
+			if (debug || sendinfo)
+				sendPV(pv[0], depth,score);
 
 			alpha = score;
 
@@ -534,27 +543,34 @@ void Engine::sendBestMove()
 
 void Engine::sendPV(const MoveList& pvline, int depth, int score, int type)
 {
-	string s="";
-	int i=0;
+	string pvstring = "";
+	string s;
+	int i = 0;
 	DWORD t = watch.read();
 	double ts = t / 1000;
+	tempBoard = theBoard;
+	ChessMove m;
 	while (i < pvline.size)
-	{ 
-		s+=theBoard.uciMoveText(pvline.list[i]);
+	{
+		m = pvline.list[i];
+		s = tempBoard.uciMoveText(m);
+		if (!tempBoard.doMove(m, true))
+			break;
+		pvstring += s;
+		pvstring += " ";
 		++i;
-		if (i < pvline.size)
-			s += " ";
 	}
+	pvstring = trim(pvstring);
 	if (type==lowerbound)
-		sprintf_s(sz, 256, "depth %i nps %u score lowerbound cp %i nodes %u time %u pv %s", depth, (DWORD)(nodes / ts), score, nodes, t, s.c_str());
+		sprintf_s(sz, 256, "depth %i nps %u score lowerbound cp %i nodes %u time %u pv %s", depth, (DWORD)(nodes / ts), score, nodes, t, pvstring.c_str());
 	else if (type==upperbound)
-		sprintf_s(sz, 256, "depth %i nps %u score upperbound cb %i nodes %u time %u pv %s", depth, (DWORD)(nodes / ts), score, nodes, t, s.c_str());
+		sprintf_s(sz, 256, "depth %i nps %u score upperbound cb %i nodes %u time %u pv %s", depth, (DWORD)(nodes / ts), score, nodes, t, pvstring.c_str());
 	else if (score > MATE - 200)
-		sprintf_s(sz, 256, "depth %i nps %u score mate %i nodes %u time %u pv %s", depth, (DWORD)(nodes / ts), (MATE - score)/2+1, nodes, t, s.c_str());
+		sprintf_s(sz, 256, "depth %i nps %u score mate %i nodes %u time %u pv %s", depth, (DWORD)(nodes / ts), (MATE - score)/2+1, nodes, t, pvstring.c_str());
 	else if (score < -MATE + 200)
-		sprintf_s(sz, 256, "depth %i nps %u score mate %i nodes %u time %u pv %s", depth, (DWORD)(nodes / ts), (MATE + score)/2, nodes, t, s.c_str());
+		sprintf_s(sz, 256, "depth %i nps %u score mate %i nodes %u time %u pv %s", depth, (DWORD)(nodes / ts), (MATE + score)/2, nodes, t, pvstring.c_str());
 	else
-		sprintf_s(sz, 256, "depth %i nps %u score cp %i nodes %u time %u pv %s", depth, (DWORD)(nodes / ts), score, nodes, t, s.c_str());
+		sprintf_s(sz, 256, "depth %i nps %u score cp %i nodes %u time %u pv %s", depth, (DWORD)(nodes / ts), score, nodes, t, pvstring.c_str());
 	ei->sendInQue(ENG_info, sz);
 }
 

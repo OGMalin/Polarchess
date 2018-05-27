@@ -38,8 +38,12 @@ int FrontEnd::run()
 	hs[0] = uci.hEvent;
 	hs[1] = engine.hEvent;
 
-	findMaxElo();
+#ifdef _DEBUG
+	debug = true;
+	engine.sendOutQue(ENG_debug);
+#endif
 
+	findMaxElo();
 	readIniFiles();
 
 	engine.sendOutQue(ENG_clearhistory);
