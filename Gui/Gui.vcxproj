@@ -134,6 +134,7 @@
     <Image Include="icon\board24.png" />
     <Image Include="icon\GB.png" />
     <Image Include="icon\NO.png" />
+    <Image Include="images\pieces.png" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="BoardWindow.h">

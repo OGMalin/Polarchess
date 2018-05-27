@@ -26,6 +26,7 @@ private:
 	QMenu* settingsMenu;
 	QMenu* helpMenu;
 	QMenu* langMenu;
+	QMenu* boardMenu;
 	QMenu* gameMenu;
 	QToolBar* toolbar;
 	QAction* exitAct;
@@ -34,6 +35,7 @@ private:
 	QAction* defAct;
 	QAction* aboutAct;
 	QAction* newGameAct;
+	QAction* flipAct;
 	QTranslator translator;
 	QActionGroup * langGroup;
 	QString locale;
@@ -49,4 +51,6 @@ private:
 	void readSettings();
 	void writeSettings();
 	void setDefaultSettings();
+	void flipBoard();
+	void newGame();
 };

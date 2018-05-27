@@ -1,5 +1,6 @@
 #include "BoardWindow.h"
 #include <QPaintEvent>
+#include <QResizeEvent>
 #include <QPainter>
 #include "../Common/defs.h"
 
@@ -7,8 +8,11 @@ BoardWindow::BoardWindow(QWidget* parent)
 	:QWidget(parent)
 {
 	whiteAtBottom = true;
+	dragPiece = EMPTY;
+	currentBoard.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 	setBoardTheme();
 	setMinimumSize(200, 200);
+	readImgPieces();
 }
 
 void BoardWindow::paintEvent(QPaintEvent* event)
@@ -19,10 +23,12 @@ void BoardWindow::paintEvent(QPaintEvent* event)
 		return;
 
 	QPainter painter(this);
-
 	drawBorder(event, painter);
 	drawBoard(event, painter);
 	drawCoordinates(event, painter);
+	painter.setRenderHint(QPainter::SmoothPixmapTransform);
+	drawPieces(event, painter);
+	drawDragPiece(event, painter);
 }
 
 void BoardWindow::setBoardTheme()
@@ -93,6 +99,44 @@ void BoardWindow::drawBoard(QPaintEvent* event, QPainter& painter)
 	}
 }
 
+void BoardWindow::drawPieces(QPaintEvent* event, QPainter& painter)
+{
+	typePiece p;
+	int sq;
+	for (sq = 0; sq < 64; sq++)
+	{
+		p = currentBoard.board[SQUARE128(sq)];
+		if (p != EMPTY) 
+		{
+			if ((dragPiece==EMPTY) || (dragFromSquare!=sq))
+				painter.drawPixmap(squareRect(sq), imgPieces[p - 1]);
+		}
+	}
+}
+
+void BoardWindow::drawSquare(QPaintEvent* event, QPainter& painter, int sq, bool clear)
+{
+	QRect sqR = squareRect(sq);
+	painter.fillRect(sqR, (SQUARECOLOR(SQUARE128(sq)) == WHITE) ? theme.lightBrush : theme.darkBrush);
+	if (!clear)
+	{
+		typePiece p = currentBoard.board[SQUARE128(sq)];
+		if (p != EMPTY)
+			painter.drawPixmap(sqR, imgPieces[p - 1]);
+	}
+}
+
+void BoardWindow::drawDragPiece(QPaintEvent* event, QPainter& painter)
+{
+	if (dragPiece == EMPTY)
+		return;
+	if (event->rect().intersects(dragPieceRect))
+	{
+		painter.drawPixmap(dragPieceRect, imgPieces[dragPiece-1]);
+	}
+
+}
+
 void BoardWindow::calculateBoard()
 {
 	int size = qMin(width(), height());
@@ -125,4 +169,115 @@ QRect BoardWindow::squareRect(int sq)
 	rect.setWidth(squareSize);
 	rect.setHeight(squareSize);
 	return rect;
+}
+
+void BoardWindow::flip()
+{
+	flip(whiteAtBottom ? true : false);
+}
+
+void BoardWindow::flip(bool inv)
+{
+	whiteAtBottom = inv ? false : true;
+	repaint();
+}
+
+void BoardWindow::readImgPieces()
+{
+	int i;
+	QPixmap allPieces;
+	allPieces.load(":/images/pieces.png");
+	int w = allPieces.width() / 12;
+	for (i = 0; i < 12; i++)
+	{
+		imgPieces[i] = allPieces.copy(i*w, 0, w, w);
+	}
+}
+
+void BoardWindow::mousePressEvent(QMouseEvent* event)
+{
+	if (event->buttons() == Qt::LeftButton)
+	{
+		int sq = findSquare(event->pos());
+		if (sq >= 0)
+		{
+			typePiece p = currentBoard.board[SQUARE128(sq)];
+			if (p != EMPTY)
+			{
+				dragPieceRect.setX(event->pos().x() - squareSize / 2);
+				dragPieceRect.setY(event->pos().y() - squareSize / 2);
+				dragPieceRect.setWidth(squareSize);
+				dragPieceRect.setHeight(squareSize);
+
+				dragPiece = p;
+				dragFromSquare = sq;
+
+				update(dragPieceRect);
+				update(squareRect(sq));
+				QWidget::mousePressEvent(event);
+				return;
+			}
+		}
+	}
+	dragPiece = EMPTY;
+	QWidget::mousePressEvent(event);
+}
+
+void BoardWindow::mouseMoveEvent(QMouseEvent* event)
+{
+	if ((event->buttons() & Qt::LeftButton) && (dragPiece!=EMPTY))
+	{
+		QRect rect = dragPieceRect;
+		dragPieceRect.setX(event->pos().x() - squareSize / 2);
+		dragPieceRect.setY(event->pos().y() - squareSize / 2);
+		dragPieceRect.setWidth(squareSize);
+		dragPieceRect.setHeight(squareSize);
+		update(rect);
+		update(dragPieceRect);
+	}
+
+	QWidget::mouseMoveEvent(event);
+}
+
+void BoardWindow::mouseReleaseEvent(QMouseEvent* event)
+{
+	if (!(event->buttons() & Qt::LeftButton))
+	{
+		int sq = findSquare(event->pos());
+		if (dragPiece != EMPTY)
+		{
+			if (sq >= 0)
+			{
+				currentBoard.board[SQUARE128(dragFromSquare)] = EMPTY;
+				currentBoard.board[SQUARE128(sq)] = dragPiece;
+			}
+		}
+		dragPiece = EMPTY;
+		update(dragPieceRect);
+		update(squareRect(dragFromSquare));
+		update(squareRect(sq));
+		QWidget::mouseReleaseEvent(event);
+	}
+}
+
+int BoardWindow::findSquare(const QPoint& point)
+{
+	if (boardRect.contains(point.x(), point.y()))
+	{
+		int sq;
+		for (sq = 0; sq < 63; sq++)
+		{
+			if (squareRect(sq).contains(point.x(), point.y()))
+				return sq;
+		}
+	}
+	return -1;
+}
+
+void BoardWindow::newGame()
+{
+	whiteAtBottom = true;
+	dragPiece = EMPTY;
+	currentBoard.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+	update();
 }

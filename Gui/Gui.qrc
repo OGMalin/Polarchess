@@ -4,5 +4,6 @@
         <file>icon/GB.png</file>
         <file>icon/NO.png</file>
         <file>language/gui_nb.qm</file>
+        <file>images/pieces.png</file>
     </qresource>
 </RCC>

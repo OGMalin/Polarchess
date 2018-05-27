@@ -53,8 +53,11 @@ void MainWindow::createMenu()
 	fileMenu = menuBar()->addMenu("*");
 	exitAct = fileMenu->addAction("*", this, &QWidget::close);
 
+	boardMenu = menuBar()->addMenu("*");
+	flipAct = boardMenu->addAction("*", this, &MainWindow::flipBoard);
+
 	gameMenu = menuBar()->addMenu("*");
-	newGameAct = gameMenu->addAction(QIcon(":/icon/board24.png"),"*");
+	newGameAct = gameMenu->addAction(QIcon(":/icon/board24.png"),"*",this,&MainWindow::newGame);
 
 	// Settings menu
 	settingsMenu = menuBar()->addMenu("*");
@@ -90,6 +93,9 @@ void MainWindow::retranslateUi()
 {
 	fileMenu->setTitle(tr("File"));
 	exitAct->setText(tr("Exit"));
+
+	boardMenu->setTitle(tr("Board"));
+	flipAct->setText(tr("Flip board"));
 
 	gameMenu->setTitle(tr("Game"));
 	newGameAct->setText(tr("New game"));
@@ -226,4 +232,16 @@ void MainWindow::setDefaultSettings()
 	locale = QLocale::system().name();
 	locale.truncate(locale.lastIndexOf('_'));
 	retranslateUi();
+}
+
+void MainWindow::flipBoard()
+{
+	boardwindow->flip();
+	boardwindow->update();
+}
+
+void MainWindow::newGame()
+{
+	boardwindow->newGame();
+
 }
