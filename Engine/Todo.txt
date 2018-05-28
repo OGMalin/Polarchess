@@ -4,3 +4,12 @@ Todo list
 - Hash table
 - Killermove
 - MultiPV support
+
+Evaluation
+	Mobility
+	Openfiles
+	Bad bishop
+	Double pawn
+	passed pawn
+	isolated pawn
+	king safety

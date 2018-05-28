@@ -268,7 +268,7 @@ void BoardWindow::mouseReleaseEvent(QMouseEvent* event)
 				if (currentBoard.isLegal(m))
 				{
 					// Trix to fill out the rest of the move (castle, ep etc.);
-					m=currentBoard.getMoveFromText(currentBoard.uciMoveText(m));
+					m=currentBoard.getMoveFromText(currentBoard.makeMoveText(m,UCI));
 					
 					currentBoard.doMove(m,false);
 					currentBoard.board[SQUARE128(dragFromSquare)] = EMPTY;

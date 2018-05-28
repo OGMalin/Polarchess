@@ -792,6 +792,11 @@ void FrontEnd::uciEval(const std::string& input)
 				engine.sendOutQue(ENG_eval, EngineEval(EVAL_strength, v));
 				return;
 			}
+			if (para == "mobility")
+			{
+				engine.sendOutQue(ENG_eval, EngineEval(EVAL_mobility, atoi(value.c_str())));
+				return;
+			}
 			uci.write("info string Unknown Eval parametre.");
 			return;
 		}

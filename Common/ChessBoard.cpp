@@ -67,6 +67,93 @@ int ChessBoard::compare(const ChessBoard& b)
 	return 0;
 }
 
+std::string ChessBoard::getFen()
+{
+	char sz[128];
+	return getFen(sz);
+}
+
+char* ChessBoard::getFen(char* szFen)
+{
+	int file, rank, empty, cp;
+	typePiece piece;
+	char c;
+	char sz[16];
+	cp = 0;
+	for (rank = 7; rank >= 0; rank--)
+	{
+		empty = 0;
+		for (file = 0; file<8; file++)
+		{
+			piece = board[SQUARE(file, rank)];
+			if (piece != EMPTY)
+			{
+				if (empty)
+				{
+					_itoa_s(empty, sz, 16, 10);
+					szFen[cp++] = sz[0];
+					empty = 0;
+				}
+				c = getCharFromPiece(piece);
+				if (c == ' ')
+					c = 'P';
+				if (PIECECOLOR(piece) == BLACK)
+					c = tolower(c);
+				szFen[cp++] = c;
+			}
+			else
+			{
+				empty++;
+			}
+		}
+		if (empty)
+		{
+			_itoa_s(empty, sz, 16, 10);
+			szFen[cp++] = sz[0];
+			empty = 0;
+		}
+		if (rank)
+			szFen[cp++] = '/';
+	}
+	szFen[cp++] = ' ';
+	if (toMove == WHITE)
+		szFen[cp++] = 'w';
+	else
+		szFen[cp++] = 'b';
+	szFen[cp++] = ' ';
+	if (castle)
+	{
+		if (castle&whitekingsidecastle)
+			szFen[cp++] = 'K';
+		if (castle&whitequeensidecastle)
+			szFen[cp++] = 'Q';
+		if (castle&blackkingsidecastle)
+			szFen[cp++] = 'k';
+		if (castle&blackqueensidecastle)
+			szFen[cp++] = 'q';
+	}
+	else
+	{
+		szFen[cp++] = '-';
+	}
+	szFen[cp++] = ' ';
+	if (enPassant != UNDEF)
+	{
+		szFen[cp++] = (char)(FILE(enPassant) + 'a');
+		szFen[cp++] = (char)(RANK(enPassant) + '1');
+	}
+	else
+	{
+		szFen[cp++] = '-';
+	}
+	szFen[cp++] = ' ';
+	szFen[cp++] = '0';
+	szFen[cp++] = ' ';
+	szFen[cp++] = '1';
+	szFen[cp] = '\0';
+	return szFen;
+}
+
 
 void ChessBoard::setFen(const char* szFen)
 {
@@ -190,6 +277,16 @@ void ChessBoard::setFen(const char* szFen)
 		enPassant = UNDEF;
 }
 
+bool ChessBoard::doMove(const char* sz)
+{
+	ChessMove m;
+	if (strcmp(sz, "0000"))
+		m.moveType = NULL_MOVE;
+	else
+		m = getMoveFromText(sz);
+	return doMove(m, true);
+}
+
 bool ChessBoard::doMove(ChessMove& m, bool legalcheck)
 {
 	MoveGenerator gen;
@@ -205,12 +302,11 @@ bool ChessBoard::doMove(ChessMove& m, bool legalcheck)
 	return true;
 }
 
-
 bool ChessBoard::isLegal(ChessMove& m)
 {
 	MoveGenerator gen;
 	ChessMove mm;
-	string sm=uciMoveText(m);
+	string sm=makeMoveText(m,UCI);
 	mm=getMoveFromText(sm);
 	return (mm.score == 0) ? true : false;
 }
@@ -634,20 +730,179 @@ HASHKEY ChessBoard::newHashkey(const ChessMove& m, HASHKEY key)
 	return key;
 }
 
-const std::string ChessBoard::uciMoveText(const ChessMove& m)
+const std::string ChessBoard::makeMoveText(const ChessMove& m, int type)
 {
-	// d7d8q
-	string s;
-	if (m.moveType&NULL_MOVE)
-		return "0000";
-	char file[] = "abcdefgh ";
-	char rank[] = "12345678 ";
-	char piece[] = " pnbrqk";
-	s += file[FILE(m.fromSquare)];
-	s += rank[RANK(m.fromSquare)];
-	s += file[FILE(m.toSquare)];
-	s += rank[RANK(m.toSquare)];
-	if (m.promotePiece)
-		s += piece[PIECE(m.promotePiece)];
-	return s;
+	char buf[16];
+	return makeMoveText(m, buf, 16, type);
 }
+
+char* ChessBoard::makeMoveText(const ChessMove& cm, char* buf, int bufsize, int type)
+{
+	int it, cnt, f, r;
+	int p = 0;
+	typePiece piece;
+	std::string mt;
+	ChessMove m;
+	buf[0] = '\0';
+
+	// Uci format allow null move
+	if ((cm.moveType == NULL_MOVE) && (type == UCI))
+	{
+		strcpy_s(buf, bufsize, "0000");
+		return buf;
+	}
+
+	// Be sure that all field in the move is filled (capture, ep etc.)
+	mt = 'a' + FILE(cm.fromSquare);
+	mt += '1' + RANK(cm.fromSquare);
+	mt += 'a' + FILE(cm.toSquare);
+	mt += '1' + RANK(cm.toSquare);
+	if (cm.moveType&PROMOTE)
+		mt += tolower(getCharFromPiece(cm.promotePiece));
+	if (type == UCI)
+	{
+		strcpy_s(buf, bufsize, mt.c_str());
+		return buf;
+	}
+
+	m = getMoveFromText(mt);
+	if (m.empty())
+		return buf;
+
+	// For coordinate system there isn't needed more work
+	if (type == COOR)
+	{
+		strcpy_s(buf, bufsize, mt.c_str());
+		return buf;
+	}
+	m.score = cm.score;
+
+	MoveList ml1, ml2;
+	MoveGenerator mg;
+	piece = PIECE(board[m.fromSquare]);
+	switch (piece)
+	{
+	case PAWN:
+		if ((type == LAN) || (m.moveType&CAPTURE))
+		{
+			buf[p++] = 'a' + FILE(m.fromSquare);
+			if (type == LAN)
+			{
+				buf[p++] = '1' + RANK(m.fromSquare);
+			}
+		}
+		break;
+	case KNIGHT:
+	case BISHOP:
+	case ROOK:
+	case QUEEN:
+		buf[p++] = getCharFromPiece(piece);
+		if (type == LAN)
+		{
+			buf[p++] = 'a' + FILE(m.fromSquare);
+			buf[p++] = '1' + RANK(m.fromSquare);
+			break;
+		}
+		mg.makeMoves(*this, ml1);
+		it = 0;
+		while (it<ml1.size)
+		{
+			if ((ml1.list[it].toSquare == m.toSquare) && (PIECE(board[ml1.list[it].fromSquare]) == piece))
+				ml2.push_back(ml1.list[it]);
+			it++;
+		};
+		if (ml2.size>1)
+		{
+			f = FILE(m.fromSquare);
+			r = RANK(m.fromSquare);
+			it = 0;
+			cnt = 0;
+			while (it<ml2.size)
+			{
+				if (FILE(ml2.list[it].fromSquare) == f)
+					cnt++;
+				it++;
+			};
+			if (cnt == 1)
+			{
+				buf[p++] = 'a' + f;
+				break;
+			}
+			buf[p++] = '1' + r;
+		}
+		break;
+	case KING:
+		if (m.moveType&CASTLE)
+		{
+			strcpy_s(buf, bufsize, "O-O");
+			if (FILE(m.toSquare) == 2)
+				strcat_s(buf, bufsize, "-O");
+			mg.doMove(*this, m);
+			if (mg.inCheck(*this, toMove))
+				strcat_s(buf, bufsize, "+");
+			mg.undoMove(*this, m);
+			return buf;
+		}
+		buf[p++] = 'K';
+		if (type == LAN)
+		{
+			buf[p++] = 'a' + FILE(m.fromSquare);
+			buf[p++] = '1' + RANK(m.fromSquare);
+		}
+		break;
+	}
+
+	if (m.moveType&CAPTURE)
+		buf[p++] = 'x';
+	else if (type == LAN)
+		buf[p++] = '-';
+
+	buf[p++] = 'a' + FILE(m.toSquare);
+	buf[p++] = '1' + RANK(m.toSquare);
+	if (m.moveType&PROMOTE)
+	{
+		if (type == SAN)
+			buf[p++] = '=';
+		buf[p++] = getCharFromPiece(m.promotePiece);
+	}
+	mg.doMove(*this, m);
+	if (mg.inCheck(*this, toMove))
+	{
+		mg.makeMoves(*this, ml1);
+		if (ml1.size == 0)
+			buf[p++] = '#';
+		else
+			buf[p++] = '+';
+	}
+	mg.undoMove(*this, m);
+	if ((type == FIDE) && (m.moveType&ENPASSANT))
+	{
+		//    buf[p++]=' '; // Could gives unwanted linebreak
+		buf[p++] = 'e';
+		buf[p++] = '.';
+		buf[p++] = 'p';
+		buf[p++] = '.';
+	}
+	buf[p++] = '\0';
+	return buf;
+}
+
+char ChessBoard::getCharFromPiece(typePiece p)
+{
+	switch (PIECE(p))
+	{
+	case KNIGHT:
+		return 'N';
+	case BISHOP:
+		return 'B';
+	case ROOK:
+		return 'R';
+	case QUEEN:
+		return 'Q';
+	case KING:
+		return 'K';
+	default:
+		return ' ';
+	};
+};
+

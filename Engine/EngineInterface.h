@@ -34,7 +34,8 @@ enum ENGINEEVAL
 	EVAL_rook,
 	EVAL_queen,
 	EVAL_bishoppair,
-	EVAL_strength
+	EVAL_strength,
+	EVAL_mobility
 };
 
 struct EngineEval

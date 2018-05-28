@@ -1,6 +1,7 @@
 #include "Evaluation.h"
 #include "StaticEval.h"
 #include "StaticEndgame.h"
+#include "../Common/MoveGenerator.h"
 
 Evaluation::Evaluation()
 {
@@ -17,9 +18,10 @@ Evaluation::Evaluation()
 	rookValue = 500;
 	queenValue = 950;
 	bishopPair = 40;
+	mobilityScore = 2;
 }
 
-void Evaluation::setup(const ChessBoard& cb)
+void Evaluation::setup(ChessBoard& cb)
 {
 	int i;
 	for (i = 0; i < MAX_EVAL; i++)
@@ -32,6 +34,8 @@ void Evaluation::setup(const ChessBoard& cb)
 	scanBoard(cb);
 	if (bishopPair && ((bishoplist[WHITE].size > 1) || (bishoplist[BLACK].size > 1)))
 		addEval(&Evaluation::evalBishopPair, true, true);
+	if (mobilityScore)
+		addEval(&Evaluation::evalMobility, true, true);
 }
 
 void Evaluation::addEval(evalFunction f, bool middle, bool end)
@@ -88,7 +92,7 @@ void Evaluation::addPawnEval(evalFunction f, bool middle, bool end)
 	}
 }
 
-int Evaluation::evaluate(const ChessBoard& cb, int alpha, int beta)
+int Evaluation::evaluate(ChessBoard& cb, int alpha, int beta)
 {
 	int score,i;
 	evalFunction efunc;
@@ -148,7 +152,7 @@ int Evaluation::evaluate(const ChessBoard& cb, int alpha, int beta)
 	return score;
 }
 
-void Evaluation::scanBoard(const ChessBoard& cb)
+void Evaluation::scanBoard(ChessBoard& cb)
 {
 	typeSquare sq;
 	typePiece piece;
@@ -238,7 +242,7 @@ void Evaluation::scanBoard(const ChessBoard& cb)
 		pieces[j][0] = 0;
 }
 
-void Evaluation::evalStatic(const ChessBoard& cb)
+void Evaluation::evalStatic(ChessBoard& cb)
 {
 	int i = 0;
 	while (pieces[i][0])
@@ -289,7 +293,7 @@ void Evaluation::evalStatic(const ChessBoard& cb)
 
 }
 
-void Evaluation::evalStaticEndgame(const ChessBoard& cb)
+void Evaluation::evalStaticEndgame(ChessBoard& cb)
 {
 	int i = 0;
 	while (pieces[i][0])
@@ -340,7 +344,7 @@ void Evaluation::evalStaticEndgame(const ChessBoard& cb)
 
 }
 
-bool Evaluation::isDraw(const ChessBoard& cb)
+bool Evaluation::isDraw(ChessBoard& cb)
 {
 	int wp, bp;
 	// No insufficient material if there are rooks, queens or pawns on the board
@@ -394,7 +398,7 @@ bool Evaluation::isDraw(const ChessBoard& cb)
 	return false;
 }
 
-void Evaluation::evalBishopPair(const ChessBoard& cb)
+void Evaluation::evalBishopPair(ChessBoard& cb)
 {
 	if (bishoplist[WHITE].size > 1)
 		position[WHITE] += bishopPair;
@@ -402,7 +406,7 @@ void Evaluation::evalBishopPair(const ChessBoard& cb)
 		position[BLACK] += bishopPair;
 }
 
-bool Evaluation::cantWin(const ChessBoard& cb)
+bool Evaluation::cantWin(ChessBoard& cb)
 {
 	if (cb.toMove == WHITE)
 	{
@@ -423,7 +427,7 @@ bool Evaluation::cantWin(const ChessBoard& cb)
 	return true;
 }
 
-bool Evaluation::cantLose(const ChessBoard& cb)
+bool Evaluation::cantLose(ChessBoard& cb)
 {
 	if (cb.toMove == WHITE)
 	{
@@ -444,8 +448,20 @@ bool Evaluation::cantLose(const ChessBoard& cb)
 	return true;
 }
 
-void Evaluation::evalPawnstructure(const ChessBoard& cb)
+void Evaluation::evalPawnstructure(ChessBoard& cb)
 {
 	pawnscore[WHITE] = pawnscore[BLACK] = 0;
 
+}
+
+void Evaluation::evalMobility(ChessBoard& cb)
+{
+	testGen.makeAllMoves(cb, testList);
+	mobility[cb.toMove] = testList.size;
+	testGen.doNullMove(cb, testMove);
+	testGen.makeAllMoves(cb, testList);
+	mobility[cb.toMove] = testList.size;
+	testGen.undoNullMove(cb, testMove);
+	position[WHITE] += mobility[WHITE];
+	position[BLACK] += mobility[BLACK];
 }

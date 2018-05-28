@@ -17,7 +17,7 @@ public:
 	bool limitStrength;
 	int contempt;
 	ChessBoard currentBoard;
-	UCI uci;
+	Uci uci;
 	EngineInterface engine;
 	bool debug;
 	FrontEnd();

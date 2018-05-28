@@ -34,7 +34,7 @@
     <ClInclude Include="FrontEnd.h" />
     <ClInclude Include="StaticEndgame.h" />
     <ClInclude Include="StaticEval.h" />
-    <ClInclude Include="UCI.h" />
+    <ClInclude Include="Uci.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Common\ChessBoard.cpp" />
@@ -48,7 +48,7 @@
     <ClCompile Include="Evaluation.cpp" />
     <ClCompile Include="FrontEnd.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="UCI.cpp" />
+    <ClCompile Include="Uci.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="readme.txt" />

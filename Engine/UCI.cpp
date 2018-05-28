@@ -2,17 +2,17 @@
 #include <process.h>
 #include <string>
 
-#include "UCI.h"
+#include "Uci.h"
 #include "../Common/Utility.h"
 
 using namespace std;
 
 CRITICAL_SECTION uciCS;
 
-void UCI::threadLoop(void* lpv)
+void Uci::threadLoop(void* lpv)
 {
 	char   c;
-	UCI* it = (UCI*)lpv;
+	Uci* it = (Uci*)lpv;
 	string line = "";
 	DWORD dwRead;
 	DWORD dwError;
@@ -43,7 +43,7 @@ void UCI::threadLoop(void* lpv)
 	_endthread();
 }
 
-UCI::UCI()
+Uci::Uci()
 {
 	InitializeCriticalSection(&uciCS);
 
@@ -54,16 +54,16 @@ UCI::UCI()
 	hWrite = GetStdHandle(STD_OUTPUT_HANDLE);
 
 	// Start the thread to wait for user.
-	hThread = (HANDLE)_beginthread(UCI::threadLoop, 0, this);
+	hThread = (HANDLE)_beginthread(Uci::threadLoop, 0, this);
 }
 
-UCI::~UCI()
+Uci::~Uci()
 {
 	DeleteCriticalSection(&uciCS);
 	CloseHandle(hEvent);
 }
 
-int UCI::get(std::string& s)
+int Uci::get(std::string& s)
 {
 	int ret = UCI_none;
 	EnterCriticalSection(&uciCS);
@@ -77,7 +77,7 @@ int UCI::get(std::string& s)
 	return ret;
 }
 
-bool UCI::input(const std::string& s)
+bool Uci::input(const std::string& s)
 {
 	if (s.length() == 0)
 		return true;
@@ -90,14 +90,14 @@ bool UCI::input(const std::string& s)
 	return true;
 }
 
-void UCI::write(const std::string& s)
+void Uci::write(const std::string& s)
 {
 	DWORD dw;
 	WriteFile(hWrite, s.c_str(), (DWORD)s.length(), &dw, NULL);
 	WriteFile(hWrite, "\n", 1, &dw, NULL);
 }
 
-int UCI::extract(std::string& s)
+int Uci::extract(std::string& s)
 {
 
 	int ret = UCI_unknown;

@@ -23,7 +23,7 @@ enum {
 	UCI_readfile
 };
 
-class UCI
+class Uci
 {
 public:
 	HANDLE hRead,hWrite;
@@ -33,8 +33,8 @@ public:
 
 	static void threadLoop(void* lpv);
 	bool input(const std::string& s);
-	UCI();
-	virtual ~UCI();
+	Uci();
+	virtual ~Uci();
 	int get(std::string& s);
 	int extract(std::string& s);
 

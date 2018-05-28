@@ -4,6 +4,8 @@
 #include "defs.h"
 #include "ChessMove.h"
 
+enum { FIDE, SAN, LAN, COOR, UCI };
+
 class ChessBoard
 {
 public:
@@ -26,7 +28,11 @@ public:
 	//          4 - The color to move is different.
 	virtual int compare(const ChessBoard& b);
 	void setFen(const char* szFen);
+	// Get the fen-string for current position
+	char* getFen(char* buffer);
+	std::string getFen();
 	bool doMove(ChessMove& m, bool legalcheck);
+	bool doMove(const char* sz);
 	// Checking from square, to square, castle and promoting (defaults to queen)
 	bool isLegal(ChessMove& m);
 	// If illegal move the move.score>0
@@ -37,7 +43,16 @@ public:
 	bool isFileChar(char c);
 	bool isPieceChar(char c);
 	typePiece getPieceFromChar(char c);
+	char getCharFromPiece(typePiece p);
 	HASHKEY hashkey();
 	HASHKEY newHashkey(const ChessMove& m, HASHKEY oldkey);
-	const std::string uciMoveText(const ChessMove& m);
+
+	// Type:
+	//  FIDE - Fide standard
+	//  SAN  - PGN standard
+	//  LAN  - Long algebraic Notation
+	//  COOR - Coordinate system (Winboard standard)
+	//  UCI  - UCI standard
+	char* makeMoveText(const ChessMove& cm, char* buf, int bufsize, int type);
+	const std::string makeMoveText(const ChessMove& m, int type);
 };

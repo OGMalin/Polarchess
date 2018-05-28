@@ -102,19 +102,21 @@ void EngineSearchThreadLoop(void* lpv)
 				if (ev.type == EVAL_contempt)
 					eng.contempt = ev.value;
 				else if (ev.type == EVAL_pawn)
-					eng.eval.pawnValue = eng.eval.pawnValue;
+					eng.eval.pawnValue = ev.value;
 				else if (ev.type == EVAL_knight)
-					eng.eval.knightValue = eng.eval.knightValue;
+					eng.eval.knightValue = ev.value;
 				else if (ev.type == EVAL_bishop)
-					eng.eval.bishopValue = eng.eval.bishopValue;
+					eng.eval.bishopValue = ev.value;
 				else if (ev.type == EVAL_rook)
-					eng.eval.rookValue = eng.eval.rookValue;
+					eng.eval.rookValue = ev.value;
 				else if (ev.type == EVAL_queen)
-					eng.eval.queenValue = eng.eval.queenValue;
+					eng.eval.queenValue = ev.value;
 				else if (ev.type == EVAL_bishoppair)
-					eng.eval.queenValue = eng.eval.bishopPair;
+					eng.eval.bishopValue = ev.value;
 				else if (ev.type == EVAL_strength)
 					eng.strength = ev.value;
+				else if (ev.type == EVAL_mobility)
+					eng.eval.mobilityScore = ev.value;
 				break;
 			default:
 				// Unknown command, remove it.
@@ -273,7 +275,7 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 		// Send UCI info
 		if (debug || sendinfo)
 		{
-			sprintf_s(sz, 256, "currmove %s currmovenumber %i", theBoard.uciMoveText(ml[0].list[mit]).c_str(), mit + 1);
+			sprintf_s(sz, 256, "currmove %s currmovenumber %i", theBoard.makeMoveText(ml[0].list[mit],UCI).c_str(), mit + 1);
 			ei->sendInQue(ENG_info, sz);
 		}
 		newkey = theBoard.newHashkey(ml[0].list[mit], hashKey);
@@ -488,21 +490,23 @@ bool Engine::abortCheck()
 		case ENG_eval:
 			ei->getOutQue(ev);
 			if (ev.type == EVAL_contempt)
-				eng.contempt = ev.value;
+				contempt = ev.value;
 			else if (ev.type == EVAL_pawn)
-				eng.eval.pawnValue = eng.eval.pawnValue;
+				eval.pawnValue = ev.value;
 			else if (ev.type == EVAL_knight)
-				eng.eval.knightValue = eng.eval.knightValue;
+				eval.knightValue = ev.value;
 			else if (ev.type == EVAL_bishop)
-				eng.eval.bishopValue = eng.eval.bishopValue;
+				eval.bishopValue = ev.value;
 			else if (ev.type == EVAL_rook)
-				eng.eval.rookValue = eng.eval.rookValue;
+				eval.rookValue = ev.value;
 			else if (ev.type == EVAL_queen)
-				eng.eval.queenValue = eng.eval.queenValue;
+				eval.queenValue = ev.value;
 			else if (ev.type == EVAL_bishoppair)
-				eng.eval.queenValue = eng.eval.bishopPair;
+				eval.bishopValue = ev.value;
 			else if (ev.type == EVAL_strength)
-				eng.strength = ev.value;
+				strength = ev.value;
+			else if (ev.type == EVAL_mobility)
+				eval.mobilityScore = ev.value;
 			break;
 		default:
 			// Unknown command, remove it.
@@ -519,13 +523,15 @@ void Engine::sendBestMove()
 
 	if (searchtype != NORMAL_SEARCH)
 	{
-		ei->sendInQue(ENG_string, "bestmove " + theBoard.uciMoveText(bestMove.back()));
+		s = theBoard.makeMoveText(bestMove.back(), UCI);
+		assert(s.length());
+		ei->sendInQue(ENG_string, "bestmove " + theBoard.makeMoveText(bestMove.back(),UCI));
 		return;
 	}
 	// Full strength
 	if (strength == 10000)
 	{
-		ei->sendInQue(ENG_string, "bestmove " + theBoard.uciMoveText(bestMove.back()));
+		ei->sendInQue(ENG_string, "bestmove " + theBoard.makeMoveText(bestMove.back(),UCI));
 		return;
 	}
 	DWORD dw = (DWORD)((DOUBLE)watch.read()*((double)strength/10000));
@@ -538,7 +544,7 @@ void Engine::sendBestMove()
 	--mit;
 	if (mit < 0)
 		mit = 0;
-	ei->sendInQue(ENG_string, "bestmove " + theBoard.uciMoveText(bestMove.list[mit]));
+	ei->sendInQue(ENG_string, "bestmove " + theBoard.makeMoveText(bestMove.list[mit],UCI));
 }
 
 void Engine::sendPV(const MoveList& pvline, int depth, int score, int type)
@@ -553,7 +559,7 @@ void Engine::sendPV(const MoveList& pvline, int depth, int score, int type)
 	while (i < pvline.size)
 	{
 		m = pvline.list[i];
-		s = tempBoard.uciMoveText(m);
+		s = tempBoard.makeMoveText(m,UCI);
 		if (!tempBoard.doMove(m, true))
 			break;
 		pvstring += s;
