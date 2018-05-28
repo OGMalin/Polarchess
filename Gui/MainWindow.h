@@ -6,6 +6,7 @@
 #include "BoardWindow.h"
 #include "Scoresheet.h"
 #include "ClockWindow.h"
+#include "Engine.h"
 
 class MainWindow : public QMainWindow
 {
@@ -44,6 +45,7 @@ private:
 	BoardWindow* boardwindow;
 	Scoresheet* scoresheet;
 	ClockWindow* clockwindow;
+	Engine engine;
 	void createMenu();
 	void setLanguage();
 	void loadLanguage();
