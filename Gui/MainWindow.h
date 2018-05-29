@@ -6,6 +6,7 @@
 #include "BoardWindow.h"
 #include "Scoresheet.h"
 #include "ClockWindow.h"
+#include "EngineWindow.h"
 #include "Engine.h"
 
 class MainWindow : public QMainWindow
@@ -17,8 +18,9 @@ private:
 protected:
 	void changeEvent(QEvent*);
 
-protected slots:
+public slots:
 	void slotLanguageChanged(QAction* action);
+	void slotEngineMessage(const QString&);
 public:
 	MainWindow();
 	virtual ~MainWindow();
@@ -45,7 +47,9 @@ private:
 	BoardWindow* boardwindow;
 	Scoresheet* scoresheet;
 	ClockWindow* clockwindow;
-	Engine engine;
+	EngineWindow* enginewindow;
+	Engine* playEngine;
+	Engine* analysisEngine;
 	void createMenu();
 	void setLanguage();
 	void loadLanguage();

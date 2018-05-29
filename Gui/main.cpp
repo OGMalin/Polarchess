@@ -8,6 +8,7 @@ int main(int argc, char *argv[])
 	QCoreApplication::setApplicationName("Gui");
 	QCoreApplication::setApplicationVersion("1.0 beta 1");
 
+	char* psz = new char[10];
 	MainWindow w;
 	w.show();
 	return app.exec();

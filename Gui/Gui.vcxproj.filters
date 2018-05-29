@@ -74,6 +74,9 @@
     <ClCompile Include="ChessGame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="EngineWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -89,6 +92,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Engine.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="EngineWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

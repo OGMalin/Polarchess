@@ -18,21 +18,28 @@ MainWindow::MainWindow()
 	boardwindow = new BoardWindow;
 	scoresheet = new Scoresheet;
 	clockwindow = new ClockWindow;
+	enginewindow = new EngineWindow;
 
 	hSplitter->addWidget(boardwindow);
 	hSplitter->addWidget(vSplitter);
 	vSplitter->addWidget(clockwindow);
 	vSplitter->addWidget(scoresheet);
+	vSplitter->addWidget(enginewindow);
 
 
 	hSplitter->setStretchFactor(0, 1);
 	hSplitter->setStretchFactor(1, 1);
 	vSplitter->setStretchFactor(0, 1);
 	vSplitter->setStretchFactor(1, 1);
+	vSplitter->setStretchFactor(2, 1);
 
 	setCentralWidget(hSplitter);
 
 	retranslateUi();
+
+	playEngine = new Engine();
+
+	connect(playEngine, SIGNAL(engineMessage(const QString&)), this, SLOT(slotEngineMessage(const QString&)));
 }
 
 MainWindow::~MainWindow()
@@ -42,6 +49,7 @@ MainWindow::~MainWindow()
 	delete scoresheet;
 	delete langGroup;
 */
+	delete playEngine;
 }
 
 // The text in the menu are set in retranslateUi to be able to switch language 'on the fly'.
@@ -242,6 +250,16 @@ void MainWindow::flipBoard()
 
 void MainWindow::newGame()
 {
+	statusBar()->showMessage("Try to start engine.");
 	boardwindow->newGame();
+	QString name = "Engine.exe";
+	QString dir = "c:\\Engines\\Polarchess\\";
+	playEngine->setEngine(name, dir);
+	playEngine->load();
 
+}
+
+void MainWindow::slotEngineMessage(const QString& msg)
+{
+	statusBar()->showMessage(msg);
 }
