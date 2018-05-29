@@ -15,6 +15,7 @@ class MainWindow : public QMainWindow
 
 private:
 	void closeEvent(QCloseEvent* event) override;
+	void aboutDialog();
 protected:
 	void changeEvent(QEvent*);
 

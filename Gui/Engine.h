@@ -13,7 +13,7 @@ private:
 	QString workingDir;
 	QProcess* process;
 	QString lasterror;
-public slots:
+private slots:
 	// From QProcess
 	void slotErrorOccurred(QProcess::ProcessError error);
 	void slotFinished(int exitCode, QProcess::ExitStatus exitStatus);

@@ -22,11 +22,16 @@ public:
 	void flip();
 	void flip(bool inv);
 	void newGame();
+
 protected:
 	void paintEvent(QPaintEvent* event) override;
 	void mousePressEvent(QMouseEvent* event) override;
 	void mouseMoveEvent(QMouseEvent* event) override;
 	void mouseReleaseEvent(QMouseEvent* event) override;
+
+signals:
+	void moveEntered(ChessMove&);
+
 private:
 	ChessBoard currentBoard;
 	bool whiteAtBottom;

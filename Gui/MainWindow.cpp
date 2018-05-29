@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "AboutDialog.h"
 #include <QIcon>
 
 MainWindow::MainWindow()
@@ -89,11 +90,7 @@ void MainWindow::createMenu()
 
 	// Help menu
 	helpMenu = menuBar()->addMenu("*");
-	aboutAct = helpMenu->addAction("*");
-
-	// Setting up the toolbar
-	toolbar=addToolBar("Toolbar");
-	toolbar->addAction(newGameAct);
+	aboutAct = helpMenu->addAction("*", this, &MainWindow::aboutDialog);
 
 }
 
@@ -262,4 +259,10 @@ void MainWindow::newGame()
 void MainWindow::slotEngineMessage(const QString& msg)
 {
 	statusBar()->showMessage(msg);
+}
+
+void MainWindow::aboutDialog()
+{
+	AboutDialog dialog(this);
+	dialog.exec();
 }

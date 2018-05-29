@@ -276,6 +276,7 @@ void BoardWindow::mouseReleaseEvent(QMouseEvent* event)
 						currentBoard.board[SQUARE128(sq)] = m.promotePiece;
 					else
 						currentBoard.board[SQUARE128(sq)] = dragPiece;
+					emit moveEntered(m);
 				}
 			}
 		}
