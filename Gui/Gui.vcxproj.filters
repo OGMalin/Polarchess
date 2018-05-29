@@ -80,6 +80,9 @@
     <ClCompile Include="AboutDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NewGameDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -101,6 +104,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="AboutDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="NewGameDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

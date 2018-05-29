@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "AboutDialog.h"
+#include "NewGameDialog.h"
 #include <QIcon>
 
 MainWindow::MainWindow()
@@ -92,6 +93,9 @@ void MainWindow::createMenu()
 	helpMenu = menuBar()->addMenu("*");
 	aboutAct = helpMenu->addAction("*", this, &MainWindow::aboutDialog);
 
+	// Setting up the toolbar
+	toolbar = addToolBar("Toolbar");
+	toolbar->addAction(newGameAct);
 }
 
 void MainWindow::retranslateUi()
@@ -247,13 +251,18 @@ void MainWindow::flipBoard()
 
 void MainWindow::newGame()
 {
-	statusBar()->showMessage("Try to start engine.");
+	NewGameDialog dialog(this);
+	if (dialog.exec() == QDialog::Rejected)
+		return;
+	currentGame.clear();
 	boardwindow->newGame();
+	/*
+	statusBar()->showMessage("Try to start engine.");
 	QString name = "Engine.exe";
 	QString dir = "c:\\Engines\\Polarchess\\";
 	playEngine->setEngine(name, dir);
 	playEngine->load();
-
+	*/
 }
 
 void MainWindow::slotEngineMessage(const QString& msg)

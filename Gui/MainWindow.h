@@ -7,6 +7,7 @@
 #include "Scoresheet.h"
 #include "ClockWindow.h"
 #include "EngineWindow.h"
+#include "ChessGame.h"
 #include "Engine.h"
 
 class MainWindow : public QMainWindow
@@ -16,6 +17,7 @@ class MainWindow : public QMainWindow
 private:
 	void closeEvent(QCloseEvent* event) override;
 	void aboutDialog();
+
 protected:
 	void changeEvent(QEvent*);
 
@@ -23,6 +25,7 @@ public slots:
 	void slotLanguageChanged(QAction* action);
 	void slotEngineMessage(const QString&);
 public:
+	ChessGame currentGame;
 	MainWindow();
 	virtual ~MainWindow();
 private:
