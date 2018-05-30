@@ -9,6 +9,7 @@
 #include "EngineWindow.h"
 #include "ChessGame.h"
 #include "Engine.h"
+#include "NewGameDialog.h"
 
 class MainWindow : public QMainWindow
 {
@@ -54,6 +55,7 @@ private:
 	EngineWindow* enginewindow;
 	Engine* playEngine;
 	Engine* analysisEngine;
+	NewGameSetting gameSetting;
 	void createMenu();
 	void setLanguage();
 	void loadLanguage();

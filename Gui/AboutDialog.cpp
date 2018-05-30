@@ -6,7 +6,7 @@ AboutDialog::AboutDialog(QWidget *parent)
 	: QDialog(parent)
 {
 	QGridLayout* grid = new QGridLayout;
-	
+	resize(300, 200);
 	QPushButton* ok = new QPushButton("Ok", this);
 	ok->setDefault(true);
 
@@ -14,7 +14,7 @@ AboutDialog::AboutDialog(QWidget *parent)
 
 	setLayout(grid);
 
-	connect(ok, SIGNAL(clicked(bool)), this, SLOT(slotOk(bool)));
+	connect(ok, SIGNAL(clicked()), this, SLOT(accept()));
 	setSizeGripEnabled(true);
 }
 
@@ -22,7 +22,3 @@ AboutDialog::~AboutDialog()
 {
 }
 
-void AboutDialog::slotOk(bool)
-{
-	accept();
-}

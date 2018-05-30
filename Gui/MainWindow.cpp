@@ -252,6 +252,7 @@ void MainWindow::flipBoard()
 void MainWindow::newGame()
 {
 	NewGameDialog dialog(this);
+	dialog.setDefault(gameSetting);
 	if (dialog.exec() == QDialog::Rejected)
 		return;
 	currentGame.clear();
