@@ -212,7 +212,7 @@ void MainWindow::writeSettings()
 
 void MainWindow::readSettings()
 {
-	QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+	QSettings settings("PolarChess", "Gui");
 	QByteArray maingeometry = settings.value("maingeometry", QByteArray()).toByteArray();
 //	QByteArray hgeometry = settings.value("hgeometry", QByteArray()).toByteArray();
 //	QByteArray vgeometry = settings.value("vgeometry", QByteArray()).toByteArray();
@@ -271,6 +271,7 @@ void MainWindow::newGame()
 	dialog.setDefault(gameSetting);
 	if (dialog.exec() == QDialog::Rejected)
 		return;
+	gameSetting=dialog.getSetting();
 	currentGame.clear();
 	boardwindow->newGame();
 	/*

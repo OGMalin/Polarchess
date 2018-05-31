@@ -1,8 +1,8 @@
 #include "ChessGame.h"
-#include "../Common/Relations.h"
+#include "Relations.h"
 #include <iostream>
 #include <vector>
-#include "../Common/Utility.h"
+#include "Utility.h"
 
 using namespace std;
 

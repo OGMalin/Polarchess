@@ -2,9 +2,9 @@
 
 #include <string>
 #include <vector>
-#include "../Common/ChessBoard.h"
-#include "../Common/ChessMove.h"
-#include "../Common/MoveList.h"
+#include "ChessBoard.h"
+#include "ChessMove.h"
+#include "MoveList.h"
 #include <windows.h>
 
 struct ChessGameMove

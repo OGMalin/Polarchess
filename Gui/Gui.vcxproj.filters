@@ -71,9 +71,6 @@
     <ClCompile Include="Engine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ChessGame.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="EngineWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -81,6 +78,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NewGameDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\ChessGame.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -107,6 +110,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="NewGameDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="PlayerDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -151,8 +157,8 @@
     <ClInclude Include="..\Common\MoveList.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="ChessGame.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\Common\ChessGame.h">
+      <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

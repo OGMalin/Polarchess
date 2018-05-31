@@ -37,6 +37,7 @@ private:
 	QTimeEdit* starttimeinc;
 	QTimeEdit* suddendeath;
 	QLabel* gametype;
+	QLabel* computerelo;
 	
 	const QStringList getEnginePlayers();
 	void setGameType();
@@ -45,6 +46,7 @@ private slots:
 	void slotSelectPlayer();
 	void slotTimeChanged(const QTime&);
 	void slotPreTime(int);
+	void slotComputerChanged(int);
 
 public:
 	NewGameDialog(QWidget *parent);

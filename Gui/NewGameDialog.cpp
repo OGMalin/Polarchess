@@ -1,4 +1,5 @@
 #include "NewGameDialog.h"
+#include "PlayerDialog.h"
 #include <QGridLayout>
 #include <QPushButton>
 #include <QLineEdit>
@@ -8,24 +9,15 @@
 #include <QLabel>
 #include <QGroupBox>
 #include <QDir>
+#include <QMap>
+#include <QFile>
+#include <QTextStream>
 
 NewGameDialog::NewGameDialog(QWidget *parent)
 	: QDialog(parent)
 {
 	setWindowTitle(tr("New game"));
 	setSizeGripEnabled(true);
-/*
-	QString engineName;
-	QString player;
-	int gameType;
-	int moves;
-	int startTime;
-	int startTimeInc;
-	int suddenDeathTime;
-	bool rated;
-	// 0=white, 1=black, 2=random
-	int color;
-*/
 	QGridLayout* grid = new QGridLayout;
 	QHBoxLayout* hbox;
 	QVBoxLayout* vbox;
@@ -56,9 +48,12 @@ NewGameDialog::NewGameDialog(QWidget *parent)
 	computer->addItems(getEnginePlayers());
 	hbox = new QHBoxLayout;
 	hbox->addWidget(computer);
+	computerelo = new QLabel();
+	hbox->addWidget(computerelo);
 	hbox->addStretch(1);
 	group->setLayout(hbox);
 	grid->addWidget(group, 1, 0, Qt::AlignLeft);
+	connect(computer, SIGNAL(currentIndexChanged(int)), this, SLOT(slotComputerChanged(int)));
 
 	rated = new QCheckBox(tr("Rated game"));
 	grid->addWidget(rated, 2, 0, Qt::AlignLeft);
@@ -120,8 +115,8 @@ NewGameDialog::NewGameDialog(QWidget *parent)
 	connect(suddendeath, SIGNAL(timeChanged(const QTime&)), this, SLOT(slotTimeChanged(const QTime&)));
 
 	hbox = new QHBoxLayout;
-	button1 = new QPushButton(tr("Cancel"), this);
-	button2 = new QPushButton(tr("Ok"), this);
+	button1 = new QPushButton(tr("Cancel"));
+	button2 = new QPushButton(tr("Ok"));
 	hbox->addWidget(button2);
 	hbox->addWidget(button1);
 	grid->addLayout(hbox, 4, 1, Qt::AlignRight | Qt::AlignBottom);
@@ -138,17 +133,62 @@ NewGameDialog::~NewGameDialog()
 
 void NewGameDialog::slotOk(bool)
 {
-
+	setting.color = color->currentIndex();
+	setting.computer = computer->currentText();
+	setting.player = playername->text();
+	setting.startTime = -starttime->time().secsTo(QTime(0, 0, 0));
+	setting.startTimeInc = -starttimeinc->time().secsTo(QTime(0, 0, 0));
+	if (moves->isChecked())
+		setting.suddenDeathTime = -suddendeath->time().secsTo(QTime(0, 0, 0));
+	else
+		setting.suddenDeathTime = 0;
+	setting.rated = rated->isChecked();
 	accept();
 }
 
 void NewGameDialog::slotSelectPlayer()
 {
+	PlayerDialog dialog(this);
+	if (dialog.exec() == QDialog::Rejected)
+		return;
 }
 
 void NewGameDialog::slotTimeChanged(const QTime&)
 {
 	setGameType();
+}
+
+void NewGameDialog::slotComputerChanged(int)
+{
+	static bool needread = true;
+	int i;
+	static QMap<QString, QString> map;
+	QString comp = setting.computer = computer->currentText();
+	if (comp.isEmpty())
+		return;
+	if (needread)
+	{
+#ifdef _DEBUG
+		QFile file("../x64/Debug/personalities/elo.ini");
+#else
+		QFile file("personalities/elo.ini");
+#endif
+		if (!file.open(QFile::ReadOnly | QFile::Text))
+			return;
+		QTextStream in(&file);
+		QString line;
+		while (!in.atEnd())
+		{
+			line = in.readLine();
+			i = line.lastIndexOf("=");
+			if (i > 1)
+				map.insert(line.left(i).trimmed(), line.mid(i + 1).trimmed());
+		}
+		file.close();
+	}
+
+	QString val = map[comp];
+	computerelo->setText("Elo:\n" + val);
 }
 
 void NewGameDialog::slotPreTime(int index)
@@ -211,13 +251,25 @@ void NewGameDialog::setGameType()
 	int tb = t + sti.hour() * 3600 * 40 + sti.minute() * 60 * 40 + sti.second() * 40;
 	t += sti.hour() * 3600 * 60 + sti.minute() * 60 * 60 + sti.second() * 60;
 	if (tb < 180)
+	{
 		gametype->setText(tr("Bullet chess"));
+		setting.gameType = BULLET;
+	}
 	else if (t <= 600)
+	{
 		gametype->setText(tr("Blitz chess"));
+		setting.gameType = BLITZ;
+	}
 	else if (t < 3600)
+	{
 		gametype->setText(tr("Rapid chess"));
+		setting.gameType = RAPID;
+	}
 	else
+	{
 		gametype->setText(tr("Classical chess"));
+		setting.gameType = CLASSICAL;
+	}
 }
 
 const NewGameSetting NewGameDialog::getSetting()
@@ -249,26 +301,20 @@ void NewGameDialog::setDefault(const NewGameSetting& newsetting)
 	if (setting.suddenDeathTime > 0)
 	{
 		moves->setChecked(true);
-		h = setting.suddenDeathTime / 3600;
-		m = (setting.suddenDeathTime - (h * 3600)) / 60;
-		s = setting.suddenDeathTime - (h * 3600) - (m * 60);
-		suddendeath->setTime(QTime(h, m, s));
+		suddendeath->setTime(QTime(0, 0, 0).addSecs(setting.suddenDeathTime));
 	}
 	else
 	{
 		moves->setChecked(false);
 		suddendeath->setEnabled(false);
+		suddendeath->setTime(QTime(0, 0, 0));
 	}
-	h = setting.startTime / 3600;
-	m = (setting.startTime - (h * 3600)) / 60;
-	s = setting.startTime - (h * 3600) - (m * 60);
-	starttime->setTime(QTime(h, m, s));
-	h = setting.startTimeInc / 3600;
-	m = (setting.startTimeInc - (h * 3600)) / 60;
-	s = setting.startTimeInc - (h * 3600) - (m * 60);
-	starttimeinc->setTime(QTime(h, m, s));
+
+	starttime->setTime(QTime(0, 0, 0).addSecs(setting.startTime));
+	starttimeinc->setTime(QTime(0, 0, 0).addSecs(setting.startTimeInc));
 
 	setGameType();
+	slotComputerChanged(0);
 	resize(minimumSizeHint());
 }
 

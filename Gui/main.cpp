@@ -5,7 +5,7 @@ int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
 	QCoreApplication::setOrganizationName("PolarChess");
-	QCoreApplication::setApplicationName("Gui");
+	QCoreApplication::setApplicationName("PolarChess");
 	QCoreApplication::setApplicationVersion("1.0 beta 1");
 	app.setApplicationDisplayName("Polarchess");
 	char* psz = new char[10];

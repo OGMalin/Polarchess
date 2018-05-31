@@ -3,7 +3,7 @@
 #include <QMainWindow>
 #include <QString>
 #include <QTranslator>
-#include "ChessGame.h"
+#include "../Common/ChessGame.h"
 #include "NewGameDialog.h"
 
 class QMenu;
