@@ -3,14 +3,17 @@
 #include <QDialog>
 
 class QLineEdit;
+class QComboBox;
+class QCheckBox;
+class QTimeEdit;
+class QLabel;
 
 enum { BULLET, BLITZ, RAPID, CLASSICAL };
 struct NewGameSetting
 {
-	QString engineName;
+	QString computer;
 	QString player;
 	int gameType;
-	int moves;
 	int startTime;
 	int startTimeInc;
 	int suddenDeathTime;
@@ -26,10 +29,22 @@ class NewGameDialog : public QDialog
 private:
 	NewGameSetting setting;
 	QLineEdit* playername;
-	const QStringList& getEnginePlayers();
+	QComboBox* computer;
+	QComboBox* color;
+	QCheckBox* rated;
+	QCheckBox* moves;
+	QTimeEdit* starttime;
+	QTimeEdit* starttimeinc;
+	QTimeEdit* suddendeath;
+	QLabel* gametype;
+	
+	const QStringList getEnginePlayers();
+	void setGameType();
 private slots:
 	void slotOk(bool);
 	void slotSelectPlayer();
+	void slotTimeChanged(const QTime&);
+	void slotPreTime(int);
 
 public:
 	NewGameDialog(QWidget *parent);

@@ -1,7 +1,23 @@
 #include "MainWindow.h"
 #include "AboutDialog.h"
 #include "NewGameDialog.h"
+#include "BoardWindow.h"
+#include "Scoresheet.h"
+#include "ClockWindow.h"
+#include "EngineWindow.h"
+#include "Engine.h"
 #include <QIcon>
+#include <QSplitter>
+#include <QMenuBar>
+#include <QToolBar>
+#include <QEvent>
+#include <QSettings>
+#include <QCoreApplication>
+#include <QLocale>
+#include <QCloseEvent>
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QStatusBar>
 
 MainWindow::MainWindow()
 {

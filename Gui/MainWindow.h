@@ -1,15 +1,21 @@
 #pragma once
 
 #include <QMainWindow>
-#include <QtWidgets>
 #include <QString>
-#include "BoardWindow.h"
-#include "Scoresheet.h"
-#include "ClockWindow.h"
-#include "EngineWindow.h"
+#include <QTranslator>
 #include "ChessGame.h"
-#include "Engine.h"
 #include "NewGameDialog.h"
+
+class QMenu;
+class QToolBar;
+class QAction;
+class QActionGroup;
+class QSplitter;
+class BoardWindow;
+class Scoresheet;
+class ClockWindow;
+class EngineWindow;
+class Engine;
 
 class MainWindow : public QMainWindow
 {
