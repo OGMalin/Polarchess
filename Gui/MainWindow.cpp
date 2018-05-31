@@ -203,7 +203,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::writeSettings()
 {
-	QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+	QSettings settings; (QCoreApplication::organizationName(), QCoreApplication::applicationName());
 	settings.setValue("maingeometry", saveGeometry());
 //	settings.setValue("hgeometry", hSplitter->saveState());
 //	settings.setValue("vgeometry", vSplitter->saveState());
@@ -212,7 +212,7 @@ void MainWindow::writeSettings()
 
 void MainWindow::readSettings()
 {
-	QSettings settings("PolarChess", "Gui");
+	QSettings settings;
 	QByteArray maingeometry = settings.value("maingeometry", QByteArray()).toByteArray();
 //	QByteArray hgeometry = settings.value("hgeometry", QByteArray()).toByteArray();
 //	QByteArray vgeometry = settings.value("vgeometry", QByteArray()).toByteArray();

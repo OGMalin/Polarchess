@@ -148,7 +148,7 @@ void NewGameDialog::slotOk(bool)
 
 void NewGameDialog::slotSelectPlayer()
 {
-	PlayerDialog dialog(this);
+	PlayerDialog dialog(this, playername->text());
 	if (dialog.exec() == QDialog::Rejected)
 		return;
 }
