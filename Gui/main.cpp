@@ -6,10 +6,11 @@ int main(int argc, char *argv[])
 	QApplication app(argc, argv);
 	QCoreApplication::setOrganizationName("PolarChess");
 	QCoreApplication::setApplicationName("Gui");
-	QCoreApplication::setApplicationVersion("1.0 beta 1");
+	QCoreApplication::setApplicationVersion("0.1");
 	app.setApplicationDisplayName("Polarchess");
-	char* psz = new char[10];
+
 	MainWindow w;
 	w.show();
+	w.firstTime();
 	return app.exec();
 }

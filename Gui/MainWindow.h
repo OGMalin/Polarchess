@@ -5,6 +5,7 @@
 #include <QTranslator>
 #include "../Common/ChessGame.h"
 #include "NewGameDialog.h"
+#include "Player.h"
 
 class QMenu;
 class QToolBar;
@@ -16,6 +17,7 @@ class Scoresheet;
 class ClockWindow;
 class EngineWindow;
 class Engine;
+class Database;
 
 class MainWindow : public QMainWindow
 {
@@ -35,6 +37,7 @@ public:
 	ChessGame currentGame;
 	MainWindow();
 	virtual ~MainWindow();
+	void firstTime();
 private:
 	QMenu * fileMenu;
 	QMenu* settingsMenu;
@@ -61,7 +64,9 @@ private:
 	EngineWindow* enginewindow;
 	Engine* playEngine;
 	Engine* analysisEngine;
+	Database* database;
 	NewGameSetting gameSetting;
+	Player player;
 	void createMenu();
 	void setLanguage();
 	void loadLanguage();

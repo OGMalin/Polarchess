@@ -6,6 +6,7 @@
 #include "ClockWindow.h"
 #include "EngineWindow.h"
 #include "Engine.h"
+#include "Database.h"
 #include <QIcon>
 #include <QSplitter>
 #include <QMenuBar>
@@ -56,6 +57,7 @@ MainWindow::MainWindow()
 	retranslateUi();
 
 	playEngine = new Engine();
+	database = new Database();
 
 	connect(playEngine, SIGNAL(engineMessage(const QString&)), this, SLOT(slotEngineMessage(const QString&)));
 }
@@ -203,11 +205,13 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::writeSettings()
 {
-	QSettings settings; (QCoreApplication::organizationName(), QCoreApplication::applicationName());
+	player.save();
+	QSettings settings;
 	settings.setValue("maingeometry", saveGeometry());
 //	settings.setValue("hgeometry", hSplitter->saveState());
 //	settings.setValue("vgeometry", vSplitter->saveState());
 	settings.setValue("language", locale);
+	settings.setValue("player", gameSetting.player);
 }
 
 void MainWindow::readSettings()
@@ -217,6 +221,7 @@ void MainWindow::readSettings()
 //	QByteArray hgeometry = settings.value("hgeometry", QByteArray()).toByteArray();
 //	QByteArray vgeometry = settings.value("vgeometry", QByteArray()).toByteArray();
 	locale = settings.value("language", QString()).toString();
+	gameSetting.player = settings.value("player", QString()).toString();
 	if (maingeometry.isEmpty())
 	{
 		const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
@@ -244,6 +249,8 @@ void MainWindow::readSettings()
 	{
 		locale = settings.value("language", QString("gb")).toString();
 	}
+
+	player.load(gameSetting.player);
 }
 
 void MainWindow::setDefaultSettings()
@@ -292,4 +299,34 @@ void MainWindow::aboutDialog()
 {
 	AboutDialog dialog(this);
 	dialog.exec();
+}
+
+void MainWindow::firstTime()
+{
+	QSettings settings;
+	QString version = settings.value("Version",QString()).toString();
+
+	// First time setup
+	if (version.isEmpty())
+	{
+		player.newPlayer(this);
+		if (player.name().isEmpty())
+		{
+			QString p = getenv("USER");
+			if (p.isEmpty())
+				p = getenv("USERNAME");
+			player.name(p);
+		}
+		gameSetting.player = player.name();
+
+		// Creating database
+		database->create();
+		settings.setValue("Version", QCoreApplication::applicationVersion());
+	}
+
+	// Allready installed
+	if (version == QCoreApplication::applicationVersion())
+		return;
+
+	// Uppgrade
 }

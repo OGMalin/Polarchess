@@ -14,12 +14,12 @@ struct NewGameSetting
 	QString computer;
 	QString player;
 	int gameType;
-	int startTime;
-	int startTimeInc;
-	int suddenDeathTime;
-	bool rated;
+	int startTime=900;
+	int startTimeInc=10;
+	int suddenDeathTime=0;
+	bool rated=false;
 	// 0=white, 1=black, 2=random
-	int color;
+	int color=2;
 };
 
 class NewGameDialog : public QDialog

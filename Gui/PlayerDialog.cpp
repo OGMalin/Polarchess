@@ -1,4 +1,5 @@
 #include "PlayerDialog.h"
+#include "Player.h"
 #include <QComboBox>
 #include <QGridLayout>
 #include <QLabel>
@@ -21,7 +22,8 @@ PlayerDialog::PlayerDialog(QWidget *parent, QString& current)
 	label = new QLabel;
 	label->setText(tr("Players"));
 	playerlist = new QComboBox;
-	playerlist->addItems(getPlayers());
+	playerlist->addItems(Player().getAll());
+	playerlist->setCurrentText(current);
 	grid->addWidget(label, 0, 0, Qt::AlignLeft);
 	grid->addWidget(playerlist, 1, 0, 2, 1, Qt::AlignLeft);
 
@@ -55,24 +57,21 @@ void PlayerDialog::slotOk(bool)
 	accept();
 }
 
+const QString PlayerDialog::text()
+{
+	return playerlist->currentText();
+}
+
 void PlayerDialog::slotAdd()
 {
-	QInputDialog input(this);
-	input.setWindowTitle(tr("Add new player"));
-	input.setCancelButtonText(tr("Cancel"));
-	input.setInputMode(QInputDialog::TextInput);
-	input.setLabelText(tr("New name"));
-	if (input.exec() == QDialog::Rejected)
-		return;
-	QString player=input.textValue();
-	if (player.isEmpty())
+	Player pl;
+	pl.newPlayer(this);
+	if (pl.name().isEmpty())
 		return;
 
-	if (playerlist->findText(player, Qt::MatchExactly) == -1)
-		playerlist->addItem(player);
-	playerlist->setCurrentText(player);
-	//	QSettings settings;
-//	settings.setValue("");
+	if (playerlist->findText(pl.name(), Qt::MatchExactly) == -1)
+		playerlist->addItem(pl.name());
+	playerlist->setCurrentText(pl.name());
 }
 
 void PlayerDialog::slotRemove()
@@ -82,10 +81,3 @@ void PlayerDialog::slotRemove()
 		playerlist->removeItem(i);
 }
 
-const QStringList PlayerDialog::getPlayers()
-{
-	
-	QSettings settings;
-	settings.beginGroup("players");
-	return settings.allKeys();
-}

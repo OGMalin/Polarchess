@@ -11,7 +11,6 @@ class PlayerDialog : public QDialog
 	Q_OBJECT
 private:
 	QComboBox * playerlist;
-	const QStringList getPlayers();
 public slots:
 	void slotOk(bool);
 	void slotAdd();
@@ -19,4 +18,5 @@ public slots:
 public:
 	PlayerDialog(QWidget *parent, QString& current);
 	~PlayerDialog();
+	const QString text();
 };

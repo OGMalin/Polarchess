@@ -86,6 +86,12 @@
     <ClCompile Include="PlayerDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Database.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -113,6 +119,12 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="PlayerDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Player.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Database.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

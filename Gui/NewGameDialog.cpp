@@ -12,6 +12,7 @@
 #include <QMap>
 #include <QFile>
 #include <QTextStream>
+#include <QCoreApplication>
 
 NewGameDialog::NewGameDialog(QWidget *parent)
 	: QDialog(parent)
@@ -151,6 +152,7 @@ void NewGameDialog::slotSelectPlayer()
 	PlayerDialog dialog(this, playername->text());
 	if (dialog.exec() == QDialog::Rejected)
 		return;
+	playername->setText(dialog.text());
 }
 
 void NewGameDialog::slotTimeChanged(const QTime&)
@@ -168,11 +170,8 @@ void NewGameDialog::slotComputerChanged(int)
 		return;
 	if (needread)
 	{
-#ifdef _DEBUG
-		QFile file("../x64/Debug/personalities/elo.ini");
-#else
-		QFile file("personalities/elo.ini");
-#endif
+		QString path = QCoreApplication::applicationDirPath();
+		QFile file(path+"/personalities/elo.ini");
 		if (!file.open(QFile::ReadOnly | QFile::Text))
 			return;
 		QTextStream in(&file);
@@ -282,16 +281,6 @@ void NewGameDialog::setDefault(const NewGameSetting& newsetting)
 {
 	int h, m, s;
 	setting = newsetting;
-	if (setting.player.isEmpty())
-	{
-		setting.player = getenv("USER");
-		if (setting.player.isEmpty())
-			setting.player = getenv("USERNAME");
-		setting.startTime = 45 * 60;
-		setting.startTimeInc = 45;
-		setting.suddenDeathTime = 0;
-		setting.rated = false;
-	}
 	playername->setText(setting.player);
 	if (!setting.computer.isEmpty())
 		computer->setCurrentText(setting.computer);
@@ -320,11 +309,8 @@ void NewGameDialog::setDefault(const NewGameSetting& newsetting)
 
 const QStringList NewGameDialog::getEnginePlayers()
 {
-#ifdef _DEBUG
-	QDir dir("../x64/Debug/personalities");
-#else
-	QDir dir("personalities");
-#endif
+	QString path = QCoreApplication::applicationDirPath();
+	QDir dir(path+"/personalities");
 
 	if (!dir.exists())
 		return QStringList();
