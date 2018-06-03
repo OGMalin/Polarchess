@@ -319,10 +319,11 @@ void MainWindow::firstTime()
 		}
 		gameSetting.player = player.name();
 
-		// Creating database
-		database->create();
 		settings.setValue("Version", QCoreApplication::applicationVersion());
 	}
+
+	// Creating database
+	database->create();
 
 	// Allready installed
 	if (version == QCoreApplication::applicationVersion())

@@ -71,7 +71,8 @@ struct ChessGameInfo
   std::string   BlackElo;
   std::string   WhiteType;  // Human or computer
   std::string   BlackType;  // Human or computer
-  std::string   TimeControl;
+  std::string   WhiteTimeControl;
+  std::string   BlackTimeControl;
   std::string   ECO;
   std::string   Opening;
   std::string   Variation;
@@ -92,8 +93,9 @@ struct ChessGameInfo
     BlackElo.erase();
     WhiteType.erase();
     BlackType.erase();
-    TimeControl.erase();
-    ECO.erase();
+	WhiteTimeControl.erase();
+	BlackTimeControl.erase();
+	ECO.erase();
     Opening.erase();
     Variation.erase();
     SubVariation.erase();
@@ -114,8 +116,9 @@ struct ChessGameInfo
     BlackElo=b.BlackElo;
     WhiteType=b.WhiteType;
     BlackType=b.BlackType;
-    TimeControl=b.TimeControl;
-    ECO=b.ECO;
+	WhiteTimeControl = b.WhiteTimeControl;
+	BlackTimeControl = b.BlackTimeControl;
+	ECO=b.ECO;
     Opening=b.Opening;
     Variation=b.Variation;
     SubVariation=b.SubVariation;
@@ -142,8 +145,11 @@ public:
   bool goTo(const ChessBoard& cb, bool strict=true);
   void setDate(const SYSTEMTIME& st);
   void getDate(SYSTEMTIME& st);
-  void setTimeControl(int m1,int t1,int i1=0,int m2=0,int t2=0,int i2=0,int m3=0,int t3=0,int i3=0);
-  void getTimeControl(int& m1,int& t1,int& i1,int& m2,int& t2,int& i2,int& m3,int& t3,int& i3);
+  void setTimeControl(const std::string& tc);
+  void setWhiteTimeControl(const std::string& tc);
+  void setBlackTimeControl(const std::string& tc);
+  const std::string getWhiteTimeControl();
+  const std::string getBlackTimeControl();
   // Return number of halfmoves in mainline.
   size_t  mainMoves();
   std::string toString();

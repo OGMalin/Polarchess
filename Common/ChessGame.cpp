@@ -497,11 +497,29 @@ std::string ChessGame::toString()
     s+=info.WhiteType;
     s+="\"]\n";
   }
-  if (info.TimeControl.length()>0)
+  if (info.WhiteTimeControl != info.BlackTimeControl)
   {
-    s+="[TimeControl \"";
-    s+=info.TimeControl;
-    s+="\"]\n";
+	  if (info.WhiteTimeControl.length() > 0)
+	  {
+		  s += "[WhiteTimeControl \"";
+		  s += info.WhiteTimeControl;
+		  s += "\"]\n";
+	  }
+	  if (info.BlackTimeControl.length() > 0)
+	  {
+		  s += "[BlackTimeControl \"";
+		  s += info.BlackTimeControl;
+		  s += "\"]\n";
+	  }
+  }
+  else
+  {
+	  if (info.WhiteTimeControl.length() > 0)
+	  {
+		  s += "[TimeControl \"";
+		  s += info.WhiteTimeControl;
+		  s += "\"]\n";
+	  }
   }
   if (info.Annotator.length()>0)
   {
@@ -916,145 +934,30 @@ void ChessGame::setDate(const SYSTEMTIME& st)
   info.Date+=sz;
 }
 
-void ChessGame::setTimeControl(int m1,int t1,int i1,int m2,int t2,int i2,int m3,int t3,int i3)
+void ChessGame::setTimeControl(const std::string& tc)
 {
-  char sz[32];
-  info.TimeControl="";
-  if (m1)
-  {
-    if (!_itoa_s(m1,sz,32,10))
-      info.TimeControl+=sz;
-    info.TimeControl+='/';
-    if (!_itoa_s(t1,sz,32,10))
-      info.TimeControl+=sz;
-    if (i1)
-    {
-      info.TimeControl+='+';
-      if (!_itoa_s(i1,sz,32,10))
-      info.TimeControl+=sz;
-    }
-  }else
-  {
-    if (!_itoa_s(t1,sz,32,10))
-      info.TimeControl+=sz;
-    if (i1)
-    {
-      info.TimeControl+='+';
-      if (!_itoa_s(i1,sz,32,10))
-        info.TimeControl+=sz;
-    }
-    return;
-  }
-  if (m2)
-  {
-    info.TimeControl+=':';
-    if (!_itoa_s(m2,sz,32,10))
-      info.TimeControl+=sz;
-    info.TimeControl+='/';
-    if (!_itoa_s(t2,sz,32,10))
-      info.TimeControl+=sz;
-    if (i2)
-    {
-      info.TimeControl+='+';
-      if (!_itoa_s(i2,sz,32,10))
-        info.TimeControl+=sz;
-    }
-  }else if (t2)
-  {
-    info.TimeControl+=':';
-    if (!_itoa_s(t2,sz,32,10))
-      info.TimeControl+=sz;
-    if (i2)
-    {
-      info.TimeControl+='+';
-      if (!_itoa_s(i2,sz,32,10))
-        info.TimeControl+=sz;
-    }
-    return;
-  }else
-  {
-    return;
-  };
-  if (m3)
-  {
-    info.TimeControl+=':';
-    if (!_itoa_s(m3,sz,32,10))
-      info.TimeControl+=sz;
-    info.TimeControl+='/';
-    if (!_itoa_s(t3,sz,32,10))
-      info.TimeControl+=sz;
-    if (i3)
-    {
-      info.TimeControl+='+';
-      if (!_itoa_s(i3,sz,32,10))
-        info.TimeControl+=sz;
-    }
-  }else if (t3)
-  {
-    info.TimeControl+=':';
-    if (!_itoa_s(t3,sz,32,10))
-      info.TimeControl+=sz;
-    if (i3)
-    {
-      info.TimeControl+='+';
-      if (!_itoa_s(i3,sz,32,10))
-        info.TimeControl+=sz;
-    }
-  }
+	info.WhiteTimeControl = tc;
+	info.BlackTimeControl = tc;
 }
 
-void ChessGame::getTimeControl(int& m1,int& t1,int& i1,int& m2,int& t2,int& i2,int& m3,int& t3,int& i3)
+void ChessGame::setWhiteTimeControl(const std::string& tc)
 {
-  string s;
-  int i;
-  string::size_type p1,p2;
-  int mv[3],tm[3],in[3];
-  for (i=0;i<3;i++)
-    mv[i]=tm[i]=in[i]=0;
-  i=0;
-  while ((s=getWord(info.TimeControl,i+1,":")).length())
-  {
-    p1=s.find('/');
-    if (p1==string::npos)
-    {
-      mv[i]=0;
-      p2=s.find('+');
-      if (p2==string::npos)
-      {
-        tm[i]=atoi(s.c_str());
-        in[i]=0;
-      }else
-      {
-        tm[i]=atoi(s.substr(0,p2).c_str());
-        in[i]=atoi(s.substr(p2+1).c_str());
-      }
-    }else
-    {
-      mv[i]=atoi(s.substr(0,p1).c_str());
-      p2=s.find('+',p1);
-      if (p2==string::npos)
-      {
-        tm[i]=atoi(s.substr(p1+1).c_str());
-        in[i]=0;
-      }else
-      {
-        tm[i]=atoi(s.substr(p1+1,p2-p1).c_str());
-        in[i]=atoi(s.substr(p2+1).c_str());
-      }
-    }
-    ++i;
-    if (i>2)
-      break;
-  }
-  m1=mv[0];
-  m2=mv[1];
-  m3=mv[2];
-  t1=tm[0];
-  t2=tm[1];
-  t3=tm[2];
-  i1=in[0];
-  i2=in[1];
-  i3=in[2];
+	info.WhiteTimeControl = tc;
+}
+
+void ChessGame::setBlackTimeControl(const std::string& tc)
+{
+	info.BlackTimeControl = tc;
+}
+
+const std::string ChessGame::getWhiteTimeControl()
+{
+	return info.WhiteTimeControl;
+}
+
+const std::string ChessGame::getBlackTimeControl()
+{
+	return info.BlackTimeControl;
 }
 
 int ChessGame::isDraw()
