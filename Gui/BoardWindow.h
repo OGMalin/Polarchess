@@ -22,6 +22,7 @@ public:
 	void flip();
 	void flip(bool inv);
 	void newGame();
+	void setPosition(QString& fen);
 
 protected:
 	void paintEvent(QPaintEvent* event) override;

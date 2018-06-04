@@ -3,7 +3,6 @@
 #include <QMainWindow>
 #include <QString>
 #include <QTranslator>
-#include "../Common/ChessGame.h"
 #include "NewGameDialog.h"
 #include "Player.h"
 
@@ -18,6 +17,7 @@ class ClockWindow;
 class EngineWindow;
 class Engine;
 class Database;
+class QChessGame;
 
 class MainWindow : public QMainWindow
 {
@@ -30,11 +30,14 @@ private:
 protected:
 	void changeEvent(QEvent*);
 
+signals:
+	void clearGame(QString& fen);
+
 public slots:
 	void slotLanguageChanged(QAction* action);
 	void slotEngineMessage(const QString&);
 public:
-	ChessGame currentGame;
+	QChessGame* currentGame;
 	MainWindow();
 	virtual ~MainWindow();
 	void firstTime();

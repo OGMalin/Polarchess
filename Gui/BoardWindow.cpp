@@ -310,3 +310,10 @@ void BoardWindow::newGame()
 	currentBoard.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 	update();
 }
+
+void BoardWindow::setPosition(QString& fen)
+{
+	dragPiece = EMPTY;
+	currentBoard.setFen(fen.toLatin1());
+	update();
+}

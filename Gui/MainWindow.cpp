@@ -7,6 +7,7 @@
 #include "EngineWindow.h"
 #include "Engine.h"
 #include "Database.h"
+#include "QChessGame.h"
 #include <QIcon>
 #include <QSplitter>
 #include <QMenuBar>
@@ -19,9 +20,12 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QStatusBar>
+#include <QRandomGenerator>
+#include <QDate>
 
 MainWindow::MainWindow()
 {
+	currentGame = new QChessGame();
 	readSettings();
 
 	createMenu();
@@ -58,7 +62,6 @@ MainWindow::MainWindow()
 
 	playEngine = new Engine();
 	database = new Database();
-
 	connect(playEngine, SIGNAL(engineMessage(const QString&)), this, SLOT(slotEngineMessage(const QString&)));
 }
 
@@ -69,6 +72,7 @@ MainWindow::~MainWindow()
 	delete scoresheet;
 	delete langGroup;
 */
+	delete currentGame;
 	delete playEngine;
 }
 
@@ -279,8 +283,25 @@ void MainWindow::newGame()
 	if (dialog.exec() == QDialog::Rejected)
 		return;
 	gameSetting=dialog.getSetting();
-	currentGame.clear();
-	boardwindow->newGame();
+	QString fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1";
+	boardwindow->setPosition(fen);
+	currentGame->clear();
+	currentGame->setStartposition(fen);
+	int color = gameSetting.color;
+	if (color == 2)
+		color = QRandomGenerator::global()->bounded(0, 1);
+	if (color = WHITE)
+	{
+		currentGame->white(gameSetting.player);
+		currentGame->black(gameSetting.computer);
+	}
+	else
+	{
+		currentGame->white(gameSetting.computer);
+		currentGame->black(gameSetting.player);
+	}
+	currentGame->date(QDate().currentDate().toString("YYYY.MM.DD"));
+	
 	/*
 	statusBar()->showMessage("Try to start engine.");
 	QString name = "Engine.exe";
