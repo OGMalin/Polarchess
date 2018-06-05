@@ -79,5 +79,5 @@ public:
 	const QString eco() { return _eco; };
 
 	const QChessPosition getPosition();
-	const QList<QChessMove> getMovelist();
+	void getMovelist(QList<QString>& list);
 };

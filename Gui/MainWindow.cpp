@@ -26,6 +26,9 @@
 MainWindow::MainWindow()
 {
 	currentGame = new QChessGame();
+	QString fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1";
+	currentGame->clear();
+	currentGame->setStartposition(fen);
 	readSettings();
 	running = false;
 	createMenu();
@@ -292,7 +295,7 @@ void MainWindow::newGame()
 	int color = gameSetting.color;
 	if (color == 2)
 		color = QRandomGenerator::global()->bounded(0, 1);
-	if (color = WHITE)
+	if (color == WHITE)
 	{
 		currentGame->white(gameSetting.player);
 		currentGame->black(gameSetting.computer);

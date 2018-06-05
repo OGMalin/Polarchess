@@ -2,18 +2,14 @@
 
 #include <QWidget>
 
-class QLabel;
-class QTableWidget;
 class QChessGame;
+class QTableWidget;
 
 class Scoresheet :public QWidget
 {
 	Q_OBJECT
 private:
-	QLabel * white;
-	QLabel * black;
-	QTableWidget* sheet;
-
+	QTableWidget * sheet;
 public:
 	Scoresheet(QWidget* parent = 0);
 	void updateGame(QChessGame*);

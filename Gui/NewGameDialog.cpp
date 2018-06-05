@@ -302,6 +302,7 @@ void NewGameDialog::setDefault(const NewGameSetting& newsetting)
 	starttime->setTime(QTime(0, 0, 0).addSecs(setting.startTime));
 	starttimeinc->setTime(QTime(0, 0, 0).addSecs(setting.startTimeInc));
 
+	color->setCurrentIndex(setting.color);
 	setGameType();
 	slotComputerChanged(0);
 	resize(minimumSizeHint());

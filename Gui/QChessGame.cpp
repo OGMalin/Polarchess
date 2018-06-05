@@ -68,8 +68,6 @@ const QChessPosition QChessGame::getPosition()
 	return game[currentPosition];
 }
 
-const QList<QChessMove> QChessGame::getMovelist()
+void QChessGame::getMovelist(QList<QString>& list)
 {
-	QList<QChessMove> ml;
-	return ml;
 }
