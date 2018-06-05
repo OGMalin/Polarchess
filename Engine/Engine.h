@@ -36,6 +36,7 @@ public:
 	SEARCHTYPE searchtype;
 	MoveList pv[MAX_PLY];
 	MoveList ml[MAX_PLY];
+	ChessMove nullmove[MAX_PLY];
 	bool debug;
 	DWORD fixedTime;
 	DWORD maxTime;
@@ -51,12 +52,13 @@ public:
 	int contempt;
 	ChessBoard theBoard;
 	ChessBoard tempBoard;
+	int material[13];
 	Engine();
 	void startSearch();
 	void interativeSearch(bool inCheck, HASHKEY hashKey);
 	int aspirationSearch(int depth, int bestscore, bool inCheck, HASHKEY hashKey);
 	int rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey);
-	int Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey, int ply, bool followPV);
+	int Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey, int ply, bool followPV, bool doNullmove);
 	int qSearch(int alpha, int beta, int ply);
 	void orderRootMoves();
 	// Order movelist, put m as first move.

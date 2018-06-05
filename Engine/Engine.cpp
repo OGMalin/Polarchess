@@ -13,6 +13,14 @@ Engine eng;
 char sz[256];
 ChessMove emptyMove;
 
+#define whitemateriale (material[whiteknight]+material[whitebishop]+material[whiterook]+material[whitequeen])
+#define blackmateriale (material[blackknight]+material[blackbishop]+material[blackrook]+material[blackqueen])
+// Heinz adaptive null-move reduction, p.35 in SSCC
+// 2 if (depth<=6) or ((depth<=8)&(max_pieces_per_side<3))
+// 3 if (depth>8) or ((depth>6)&(max_pieces_per_side>=3))
+#define nullMoveReduction(depth,mat) (2+((depth)>(6+(((mat)<3)?2:0)))) 
+//#define nullMoveReduction(depth,material) (2)
+
 void EngineSearchThreadLoop(void* lpv)
 {
 	ENGINECOMMAND cmd=ENG_none;
@@ -142,6 +150,8 @@ Engine::Engine()
 void Engine::startSearch()
 {
 	int i;
+	typePiece p;
+	typeSquare sq;
 	bool inCheck;
 	HASHKEY hashKey;
 	nodes = 0;
@@ -154,9 +164,19 @@ void Engine::startSearch()
 	inCheck = mgen.inCheck(theBoard, theBoard.toMove);
 	hashKey = theBoard.hashkey();
 
-	// Clear pv
-	for (i = 0; i<MAX_PLY; i++)
+	// Clear pv and nullmove
+	for (i = 0; i < MAX_PLY; i++)
+	{
 		pv[i].clear();
+		nullmove[i].clear();
+		nullmove[i].moveType = NULL_MOVE;
+	}
+
+	// Scan pieces
+	for (i = 0; i < 12; i++)
+		material[i] = 0;
+	for (sq = 0; sq < 63; sq++)
+		++material[theBoard.board[SQUARE128(i)]];
 
 	if (searchmoves.size)
 		ml[0] = searchmoves;
@@ -280,17 +300,18 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 		}
 		newkey = theBoard.newHashkey(ml[0].list[mit], hashKey);
 		mgen.doMove(theBoard, ml[0].list[mit]);
-
+		++material[ml[0].list[mit].capturedpiece];
 		assert(theBoard.hashkey() == newkey);
 
 		inCheck = mgen.inCheck(theBoard, theBoard.toMove);
 		if (inCheck)
 			++extention;
 		oldNodes = nodes;
-		score = -Search(depth - 1 + extention, -beta, -alpha, inCheck, newkey, 1,followPV);
+		score = -Search(depth - 1 + extention, -beta, -alpha, inCheck, newkey, 1,followPV, true);
 		if (score == -BREAKING)
 			return BREAKING;
 		mgen.undoMove(theBoard, ml[0].list[mit]);
+		--material[ml[0].list[mit].capturedpiece];
 		ml[0].list[mit].score = nodes - oldNodes;
 		if (score >= beta)
 			return beta;
@@ -312,7 +333,7 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 	return alpha;
 }
 
-int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey, int ply, bool followPV)
+int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey, int ply, bool followPV, bool doNullmove)
 {
 	int score;
 	HASHKEY newkey;
@@ -337,6 +358,21 @@ int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey
 	// Add position to the drawtable
 	hashDrawTable.add(hashKey, ply);
 
+	// Null move
+	if (!inCheck && doNullmove && whitemateriale && blackmateriale)
+	{
+
+		newkey = theBoard.newHashkey(nullmove[ply],hashKey);
+		mgen.doNullMove(theBoard, nullmove[ply]);
+		score = -Search(__max(depth - 1 - nullMoveReduction(depth,__min(whitemateriale,blackmateriale)),0), -beta, -alpha, false, newkey, ply + 1, false, false);
+//		score = -Search(__max(depth - 4, 0), -beta, -alpha, false, newkey, ply + 1, false, false);
+		if (score == -BREAKING)
+			return BREAKING;
+		mgen.undoNullMove(theBoard, nullmove[ply]);
+		if (score >= beta)
+			return beta;
+	}
+
 	mgen.makeMoves(theBoard, ml[ply]);
 	orderMoves(ml[ply], followPV?pv[ply].front():emptyMove);
 	int mit;
@@ -344,16 +380,18 @@ int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey
 	{
 		newkey = theBoard.newHashkey(ml[ply].list[mit], hashKey);
 		mgen.doMove(theBoard, ml[ply].list[mit]);
+		++material[ml[ply].list[mit].capturedpiece];
 
 		assert(theBoard.hashkey() == newkey);
 
 		inCheck = mgen.inCheck(theBoard, theBoard.toMove);
 		if (inCheck)
 			++extention;
-		score = -Search(depth - 1 + extention, -beta, -alpha, inCheck, newkey, ply + 1, followPV);
+		score = -Search(depth - 1 + extention, -beta, -alpha, inCheck, newkey, ply + 1, followPV,true);
 		if (score == -BREAKING)
 			return BREAKING;
 		mgen.undoMove(theBoard, ml[ply].list[mit]);
+		--material[ml[ply].list[mit].capturedpiece];
 		if (score >= beta)
 			return beta;
 		if (score > alpha)
