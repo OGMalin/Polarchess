@@ -4,6 +4,7 @@
 #include <QPixmap>
 //#include <QTextEdit>
 #include "../Common/ChessBoard.h"
+#include "../Common/ChessMove.h"
 
 struct BOARDTHEMA
 {
@@ -23,6 +24,7 @@ public:
 	void flip(bool inv);
 	void newGame();
 	void setPosition(QString& fen);
+	void setPosition(ChessBoard& cb);
 
 protected:
 	void paintEvent(QPaintEvent* event) override;

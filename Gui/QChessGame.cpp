@@ -24,6 +24,7 @@ void QChessGame::clear()
 	_whitetimecontrol.clear();
 	_blacktimecontrol.clear();
 	_rated.clear();
+	_eco.clear();
 }
 
 void QChessGame::setStartposition(QString& fen)
@@ -52,11 +53,23 @@ bool QChessGame::doMove(QChessMove& move)
 	pos.board = game[currentPosition].board;
 	if (!pos.board.doMove(move.move, true))
 		return false;
-	game.push_back(pos);
 	move.next = game.size();
+	game.push_back(pos);
 	game[currentPosition].moves.push_back(move);
 	currentPosition = move.next;
 	line.push_back(currentPosition);
 	return true;
 }
 
+const QChessPosition QChessGame::getPosition()
+{
+	if (currentPosition < 0)
+		return QChessPosition();
+	return game[currentPosition];
+}
+
+const QList<QChessMove> QChessGame::getMovelist()
+{
+	QList<QChessMove> ml;
+	return ml;
+}

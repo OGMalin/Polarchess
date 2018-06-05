@@ -5,6 +5,7 @@
 #include <QTranslator>
 #include "NewGameDialog.h"
 #include "Player.h"
+#include "../Common/ChessMove.h"
 
 class QMenu;
 class QToolBar;
@@ -36,6 +37,8 @@ signals:
 public slots:
 	void slotLanguageChanged(QAction* action);
 	void slotEngineMessage(const QString&);
+	void clockAlarm(int);
+	void moveEntered(ChessMove&);
 public:
 	QChessGame* currentGame;
 	MainWindow();
@@ -70,6 +73,7 @@ private:
 	Database* database;
 	NewGameSetting gameSetting;
 	Player player;
+	bool running;
 	void createMenu();
 	void setLanguage();
 	void loadLanguage();

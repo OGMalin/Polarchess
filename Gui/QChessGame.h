@@ -40,6 +40,7 @@ private:
 	QString _whitetimecontrol;
 	QString _blacktimecontrol;
 	QString _rated; //Blank, BULLET, BLITZ, RAPID, CLASSICAL
+	QString _eco;
 public:
 	QChessGame(QObject *parent=0);
 	~QChessGame();
@@ -60,6 +61,7 @@ public:
 	void blacktimecontrol(QString& s) { _blacktimecontrol = s; };
 	void timecontrol(QString& s) { _whitetimecontrol=_blacktimecontrol = s; };
 	void rated(QString& s) { _rated = s; };
+	void eco(QString& s) { _eco = s; };
 
 	const QString site() { return _site; };
 	const QString event() { return _event; };
@@ -74,4 +76,8 @@ public:
 	const QString blacktimecontrol() { return _blacktimecontrol; };
 	const QString timecontrol() { return _whitetimecontrol; };
 	const QString rated() { return _rated; };
+	const QString eco() { return _eco; };
+
+	const QChessPosition getPosition();
+	const QList<QChessMove> getMovelist();
 };

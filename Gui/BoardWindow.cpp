@@ -317,3 +317,10 @@ void BoardWindow::setPosition(QString& fen)
 	currentBoard.setFen(fen.toLatin1());
 	update();
 }
+
+void BoardWindow::setPosition(ChessBoard& cb)
+{
+	dragPiece = EMPTY;
+	currentBoard = cb;
+	update();
+}

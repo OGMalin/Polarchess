@@ -27,7 +27,7 @@ MainWindow::MainWindow()
 {
 	currentGame = new QChessGame();
 	readSettings();
-
+	running = false;
 	createMenu();
 
 	statusBar();
@@ -47,7 +47,7 @@ MainWindow::MainWindow()
 	hSplitter->addWidget(vSplitter);
 	vSplitter->addWidget(clockwindow);
 	vSplitter->addWidget(scoresheet);
-	vSplitter->addWidget(enginewindow);
+//	vSplitter->addWidget(enginewindow);
 
 
 	hSplitter->setStretchFactor(0, 1);
@@ -63,6 +63,8 @@ MainWindow::MainWindow()
 	playEngine = new Engine();
 	database = new Database();
 	connect(playEngine, SIGNAL(engineMessage(const QString&)), this, SLOT(slotEngineMessage(const QString&)));
+	connect(clockwindow, SIGNAL(clockAlarm(int)),this, SLOT(clockAlarm(int)));
+	connect(boardwindow, SIGNAL(moveEntered(ChessMove&)), this, SLOT(moveEntered(ChessMove&)));
 }
 
 MainWindow::~MainWindow()
@@ -301,7 +303,11 @@ void MainWindow::newGame()
 		currentGame->black(gameSetting.player);
 	}
 	currentGame->date(QDate().currentDate().toString("YYYY.MM.DD"));
-	
+	running = true;
+	clockwindow->settime(gameSetting.startTime*1000, gameSetting.startTime*1000);
+	clockwindow->start(currentGame->getPosition().board.toMove);
+	scoresheet->updateGame(currentGame);
+
 	/*
 	statusBar()->showMessage("Try to start engine.");
 	QString name = "Engine.exe";
@@ -353,4 +359,23 @@ void MainWindow::firstTime()
 
 
 	// Uppgrade
+}
+
+void MainWindow::clockAlarm(int color)
+{
+
+}
+
+void MainWindow::moveEntered(ChessMove& move)
+{
+	if (!currentGame->doMove(move))
+	{
+		QChessPosition pos = currentGame->getPosition();
+		boardwindow->setPosition(pos.board);
+		return;
+	}
+	if (!running)
+		return;
+	clockwindow->start(currentGame->getPosition().board.toMove);
+	scoresheet->updateGame(currentGame);
 }
