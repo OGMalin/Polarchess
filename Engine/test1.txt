@@ -1,0 +1,4 @@
+; Test kommandoer
+
+position fen r1r3k1/2qbbppp/p2p1n2/npp1p3/3PP3/2P2N1P/PPB2PP1/R1BQRNK1 w - - 0 1
+go ponder

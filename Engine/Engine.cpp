@@ -1,9 +1,18 @@
+#define _DEBUG_SEARCH
+
 #include <process.h>
 #include <string>
 #include "Engine.h"
 #include "EngineInterface.h"
 #include "../Common/utility.h"
 #include <assert.h>
+
+#ifdef _DEBUG_SEARCH
+#include <iostream>
+int highestsearchply;
+int highestqsearchply;
+#endif
+
 
 using namespace std;
 const int BREAKING = MATE + 400;
@@ -150,7 +159,6 @@ Engine::Engine()
 void Engine::startSearch()
 {
 	int i;
-	typePiece p;
 	typeSquare sq;
 	bool inCheck;
 	HASHKEY hashKey;
@@ -195,10 +203,10 @@ void Engine::startSearch()
 		return;
 	}
 
-	interativeSearch(inCheck, hashKey);
+	iterativeSearch(inCheck, hashKey);
 }
 
-void Engine::interativeSearch(bool inCheck, HASHKEY hashKey)
+void Engine::iterativeSearch(bool inCheck, HASHKEY hashKey)
 {
 	int depth=1;
 	int score=-MATE;
@@ -211,9 +219,16 @@ void Engine::interativeSearch(bool inCheck, HASHKEY hashKey)
 	{
 		sprintf_s(sz, 256, "depth %i", depth);
 		ei->sendInQue(ENG_info, sz);
+#ifdef _DEBUG_SEARCH
+		highestsearchply = highestqsearchply = 0;
+#endif
 		score = aspirationSearch(depth + extention, score, inCheck, hashKey);
 		if (score == BREAKING)
 			return;
+#ifdef _DEBUG_SEARCH
+		cout << "Max ply: " << highestsearchply << ", Max qply: " << highestqsearchply << endl;
+#endif
+
 		if (searchtype == DEPTH_SEARCH)
 		{
 			if (depth == fixedDepth)
@@ -240,6 +255,8 @@ int Engine::aspirationSearch(int depth, int bestscore, bool inCheck, HASHKEY has
 		alpha = -MATE;
 		beta = MATE;
 	}
+	if (inCheck)
+		++depth;
 	score = rootSearch(depth, alpha, beta, inCheck, hashKey);
 	if (score == BREAKING)
 		return BREAKING;
@@ -301,13 +318,13 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 		newkey = theBoard.newHashkey(ml[0].list[mit], hashKey);
 		mgen.doMove(theBoard, ml[0].list[mit]);
 		++material[ml[0].list[mit].capturedpiece];
+
 		assert(theBoard.hashkey() == newkey);
 
 		inCheck = mgen.inCheck(theBoard, theBoard.toMove);
-		if (inCheck)
-			++extention;
+		extention = moveExtention(inCheck, ml[0].list[mit], emptyMove, ml[0].size);
 		oldNodes = nodes;
-		score = -Search(depth - 1 + extention, -beta, -alpha, inCheck, newkey, 1,followPV, true);
+		score = -Search(depth - 1 + extention, -beta, -alpha, inCheck, newkey, 1,followPV, true, ml[0].list[mit]);
 		if (score == -BREAKING)
 			return BREAKING;
 		mgen.undoMove(theBoard, ml[0].list[mit]);
@@ -333,7 +350,7 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 	return alpha;
 }
 
-int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey, int ply, bool followPV, bool doNullmove)
+int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey, int ply, bool followPV, bool doNullmove, ChessMove& lastmove)
 {
 	int score;
 	HASHKEY newkey;
@@ -359,12 +376,12 @@ int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey
 	hashDrawTable.add(hashKey, ply);
 
 	// Null move
-	if (!inCheck && doNullmove && whitemateriale && blackmateriale)
+	if (!followPV, !inCheck && doNullmove && whitemateriale && blackmateriale)
 	{
 
 		newkey = theBoard.newHashkey(nullmove[ply],hashKey);
 		mgen.doNullMove(theBoard, nullmove[ply]);
-		score = -Search(__max(depth - 1 - nullMoveReduction(depth,__min(whitemateriale,blackmateriale)),0), -beta, -alpha, false, newkey, ply + 1, false, false);
+		score = -Search(__max(depth - 1 - nullMoveReduction(depth,__min(whitemateriale,blackmateriale)),0), -beta, -alpha, false, newkey, ply + 1, false, false,nullmove[ply]);
 //		score = -Search(__max(depth - 4, 0), -beta, -alpha, false, newkey, ply + 1, false, false);
 		if (score == -BREAKING)
 			return BREAKING;
@@ -385,9 +402,11 @@ int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey
 		assert(theBoard.hashkey() == newkey);
 
 		inCheck = mgen.inCheck(theBoard, theBoard.toMove);
-		if (inCheck)
-			++extention;
-		score = -Search(depth - 1 + extention, -beta, -alpha, inCheck, newkey, ply + 1, followPV,true);
+		extention = moveExtention(inCheck, ml[ply].list[mit], lastmove, ml[ply].size);
+#ifdef _DEBUG_SEARCH
+		highestsearchply = __max(ply+1, highestsearchply);
+#endif
+		score = -Search(depth - 1 + extention, -beta, -alpha, inCheck, newkey, ply + 1, followPV,true, ml[ply].list[mit]);
 		if (score == -BREAKING)
 			return BREAKING;
 		mgen.undoMove(theBoard, ml[ply].list[mit]);
@@ -424,10 +443,12 @@ int Engine::qSearch(int alpha, int beta, int ply)
 			return BREAKING;
 
 	score = eval.evaluate(theBoard, alpha, beta);
+
 	if (score >= beta)
 		return beta;
 	if (ply >= (MAX_PLY-1))
 		return score;
+
 	if (score > alpha)
 		alpha = score;
 
@@ -437,6 +458,9 @@ int Engine::qSearch(int alpha, int beta, int ply)
 	for (mit = 0; mit < ml[ply].size; mit++)
 	{
 		mgen.doMove(theBoard, ml[ply].list[mit]);
+#ifdef _DEBUG_SEARCH
+		highestqsearchply = __max(ply+1, highestqsearchply);
+#endif
 		score = -qSearch(-beta, -alpha, ply + 1);
 		if (score == -BREAKING)
 			return BREAKING;
@@ -562,7 +586,9 @@ void Engine::sendBestMove()
 	if (searchtype != NORMAL_SEARCH)
 	{
 		s = theBoard.makeMoveText(bestMove.back(), UCI);
+
 		assert(s.length());
+
 		ei->sendInQue(ENG_string, "bestmove " + theBoard.makeMoveText(bestMove.back(),UCI));
 		return;
 	}
@@ -722,3 +748,17 @@ void Engine::copyPV(MoveList& m1, MoveList& m2, ChessMove& m)
 	for (int i = 0; i<m2.size; i++)
 		m1.push_back(m2.list[i]);
 };
+
+int Engine::moveExtention(bool inCheck, ChessMove& move, ChessMove& lastmove, int moves)
+{
+	if (move.toSquare == lastmove.toSquare)
+		return 1;
+	if (inCheck)
+		return 1;
+	if (move.moveType&PAWNMOVE)
+		if ((move.toSquare > h6) || (move.toSquare < a3))
+		return 1;
+	if (moves == 1)
+		return 1;
+	return 0;
+}

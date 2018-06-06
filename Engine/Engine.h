@@ -55,10 +55,10 @@ public:
 	int material[13];
 	Engine();
 	void startSearch();
-	void interativeSearch(bool inCheck, HASHKEY hashKey);
+	void iterativeSearch(bool inCheck, HASHKEY hashKey);
 	int aspirationSearch(int depth, int bestscore, bool inCheck, HASHKEY hashKey);
 	int rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey);
-	int Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey, int ply, bool followPV, bool doNullmove);
+	int Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey, int ply, bool followPV, bool doNullmovem, ChessMove& lastmove);
 	int qSearch(int alpha, int beta, int ply);
 	void orderRootMoves();
 	// Order movelist, put m as first move.
@@ -69,4 +69,5 @@ public:
 	// Type=0-> Normal, 1=lowerbound, 2=upperbound
 	void sendPV(const MoveList& l, int depth, int score, int type = 0);
 	void copyPV(MoveList& m1, MoveList& m2, ChessMove& m);
+	int moveExtention(bool inCheck, ChessMove& move, ChessMove& lastmove, int moves);
 };

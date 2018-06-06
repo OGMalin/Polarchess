@@ -462,6 +462,6 @@ void Evaluation::evalMobility(ChessBoard& cb)
 	testGen.makeAllMoves(cb, testList);
 	mobility[cb.toMove] = testList.size;
 	testGen.undoNullMove(cb, testMove);
-	position[WHITE] += mobility[WHITE];
-	position[BLACK] += mobility[BLACK];
+	position[WHITE] += mobility[WHITE]*mobilityScore;
+	position[BLACK] += mobility[BLACK]*mobilityScore;
 }
