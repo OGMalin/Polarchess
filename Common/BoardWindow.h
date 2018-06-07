@@ -5,6 +5,7 @@
 //#include <QTextEdit>
 #include "../Common/ChessBoard.h"
 #include "../Common/ChessMove.h"
+#include "QChessGame.h"
 
 struct BOARDTHEMA
 {
@@ -23,8 +24,9 @@ public:
 	void flip();
 	void flip(bool inv);
 	void newGame();
-	void setPosition(QString& fen);
-	void setPosition(ChessBoard& cb);
+	void setPosition(const QString& fen);
+	void setPosition(const ChessBoard& cb);
+	void setPosition(const QChessPosition& pos);
 
 protected:
 	void paintEvent(QPaintEvent* event) override;

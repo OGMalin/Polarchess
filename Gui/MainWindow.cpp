@@ -1,13 +1,13 @@
 #include "MainWindow.h"
 #include "AboutDialog.h"
 #include "NewGameDialog.h"
-#include "BoardWindow.h"
-#include "Scoresheet.h"
 #include "ClockWindow.h"
 #include "EngineWindow.h"
-#include "Engine.h"
 #include "Database.h"
-#include "QChessGame.h"
+#include "../Common/BoardWindow.h"
+#include "../Common/Scoresheet.h"
+#include "../Common/Engine.h"
+#include "../Common/QChessGame.h"
 #include <QIcon>
 #include <QSplitter>
 #include <QMenuBar>
@@ -26,9 +26,7 @@
 MainWindow::MainWindow()
 {
 	currentGame = new QChessGame();
-	QString fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1";
-	currentGame->clear();
-	currentGame->setStartposition(fen);
+	currentGame->newGame();
 	readSettings();
 	running = false;
 	createMenu();
@@ -36,7 +34,6 @@ MainWindow::MainWindow()
 	statusBar();
 	loadLanguage();
 
-//	this->setStyleSheet("background-color:yellow;");
 
 	hSplitter = new QSplitter(Qt::Horizontal);
 	vSplitter = new QSplitter(Qt::Vertical);
@@ -51,13 +48,6 @@ MainWindow::MainWindow()
 	vSplitter->addWidget(clockwindow);
 	vSplitter->addWidget(scoresheet);
 //	vSplitter->addWidget(enginewindow);
-
-
-	hSplitter->setStretchFactor(0, 1);
-	hSplitter->setStretchFactor(1, 1);
-	vSplitter->setStretchFactor(0, 1);
-	vSplitter->setStretchFactor(1, 1);
-	vSplitter->setStretchFactor(2, 1);
 
 	setCentralWidget(hSplitter);
 
@@ -288,10 +278,8 @@ void MainWindow::newGame()
 	if (dialog.exec() == QDialog::Rejected)
 		return;
 	gameSetting=dialog.getSetting();
-	QString fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1";
-	boardwindow->setPosition(fen);
-	currentGame->clear();
-	currentGame->setStartposition(fen);
+	currentGame->newGame();
+	boardwindow->setPosition(currentGame->getPosition().board());
 	int color = gameSetting.color;
 	if (color == 2)
 		color = QRandomGenerator::global()->bounded(0, 1);
@@ -308,7 +296,7 @@ void MainWindow::newGame()
 	currentGame->date(QDate().currentDate().toString("YYYY.MM.DD"));
 	running = true;
 	clockwindow->settime(gameSetting.startTime*1000, gameSetting.startTime*1000);
-	clockwindow->start(currentGame->getPosition().board.toMove);
+	clockwindow->start(currentGame->getPosition().board().toMove);
 	scoresheet->updateGame(currentGame);
 
 	/*
@@ -374,11 +362,11 @@ void MainWindow::moveEntered(ChessMove& move)
 	if (!currentGame->doMove(move))
 	{
 		QChessPosition pos = currentGame->getPosition();
-		boardwindow->setPosition(pos.board);
+		boardwindow->setPosition(pos);
 		return;
 	}
+	scoresheet->updateGame(currentGame);
 	if (!running)
 		return;
-	clockwindow->start(currentGame->getPosition().board.toMove);
-	scoresheet->updateGame(currentGame);
+	clockwindow->start(currentGame->toMove());
 }

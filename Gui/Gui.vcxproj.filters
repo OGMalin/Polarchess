@@ -44,9 +44,6 @@
     <ClCompile Include="MainWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BoardWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\Common\ChessBoard.cpp">
       <Filter>Common</Filter>
     </ClCompile>
@@ -62,13 +59,7 @@
     <ClCompile Include="..\Common\MoveList.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="Scoresheet.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ClockWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="EngineWindow.cpp">
@@ -92,24 +83,24 @@
     <ClCompile Include="Database.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="QChessGame.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\Common\BoardWindow.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Engine.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\QChessGame.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Scoresheet.cpp">
+      <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="BoardWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Scoresheet.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="ClockWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Engine.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="EngineWindow.h">
@@ -130,8 +121,17 @@
     <QtMoc Include="Database.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="QChessGame.h">
-      <Filter>Header Files</Filter>
+    <QtMoc Include="..\Common\BoardWindow.h">
+      <Filter>Common</Filter>
+    </QtMoc>
+    <QtMoc Include="..\Common\Engine.h">
+      <Filter>Common</Filter>
+    </QtMoc>
+    <QtMoc Include="..\Common\QChessGame.h">
+      <Filter>Common</Filter>
+    </QtMoc>
+    <QtMoc Include="..\Common\Scoresheet.h">
+      <Filter>Common</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

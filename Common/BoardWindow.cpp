@@ -311,16 +311,21 @@ void BoardWindow::newGame()
 	update();
 }
 
-void BoardWindow::setPosition(QString& fen)
+void BoardWindow::setPosition(const QString& fen)
 {
 	dragPiece = EMPTY;
 	currentBoard.setFen(fen.toLatin1());
 	update();
 }
 
-void BoardWindow::setPosition(ChessBoard& cb)
+void BoardWindow::setPosition(const ChessBoard& cb)
 {
 	dragPiece = EMPTY;
 	currentBoard = cb;
 	update();
+}
+
+void BoardWindow::setPosition(const QChessPosition& pos)
+{
+	setPosition(pos.board());
 }

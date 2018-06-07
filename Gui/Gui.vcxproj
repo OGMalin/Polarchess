@@ -117,25 +117,25 @@
     </QtRcc>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Common\BoardWindow.cpp" />
     <ClCompile Include="..\Common\ChessBoard.cpp" />
     <ClCompile Include="..\Common\ChessGame.cpp" />
     <ClCompile Include="..\Common\ChessMove.cpp" />
+    <ClCompile Include="..\Common\Engine.cpp" />
     <ClCompile Include="..\Common\MoveGenerator.cpp" />
     <ClCompile Include="..\Common\MoveList.cpp" />
+    <ClCompile Include="..\Common\QChessGame.cpp" />
+    <ClCompile Include="..\Common\Scoresheet.cpp" />
     <ClCompile Include="..\Common\Utility.cpp" />
     <ClCompile Include="AboutDialog.cpp" />
-    <ClCompile Include="BoardWindow.cpp" />
     <ClCompile Include="ClockWindow.cpp" />
     <ClCompile Include="Database.cpp" />
-    <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EngineWindow.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="NewGameDialog.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerDialog.cpp" />
-    <ClCompile Include="QChessGame.cpp" />
-    <ClCompile Include="Scoresheet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h" />
@@ -150,32 +150,45 @@
     <Image Include="images\pieces.png" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="BoardWindow.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\Common\ChessBoard.h" />
-    <ClInclude Include="..\Common\ChessGame.h" />
-    <ClInclude Include="..\Common\ChessMove.h" />
-    <ClInclude Include="..\Common\defs.h" />
-    <ClInclude Include="..\Common\MoveGenerator.h" />
-    <ClInclude Include="..\Common\MoveList.h" />
-    <ClInclude Include="..\Common\Relations.h" />
-    <ClInclude Include="..\Common\Utility.h" />
-    <QtMoc Include="QChessGame.h">
+    <QtMoc Include="..\Common\BoardWindow.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
       <Define Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;QT_SQL_LIB</Define>
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
       <Define Condition="'$(Configuration)|$(Platform)'=='Release|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;QT_SQL_LIB</Define>
     </QtMoc>
+    <ClInclude Include="..\Common\ChessBoard.h" />
+    <ClInclude Include="..\Common\ChessGame.h" />
+    <ClInclude Include="..\Common\ChessMove.h" />
+    <ClInclude Include="..\Common\defs.h" />
+    <QtMoc Include="..\Common\Engine.h">
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
+      <Define Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;QT_SQL_LIB</Define>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
+      <Define Condition="'$(Configuration)|$(Platform)'=='Release|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;QT_SQL_LIB</Define>
+    </QtMoc>
+    <ClInclude Include="..\Common\MoveGenerator.h" />
+    <ClInclude Include="..\Common\MoveList.h" />
+    <QtMoc Include="..\Common\QChessGame.h">
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
+      <Define Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;QT_SQL_LIB</Define>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
+      <Define Condition="'$(Configuration)|$(Platform)'=='Release|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;QT_SQL_LIB</Define>
+    </QtMoc>
+    <ClInclude Include="..\Common\Relations.h" />
+    <QtMoc Include="..\Common\Scoresheet.h">
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
+      <Define Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;QT_SQL_LIB</Define>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
+      <Define Condition="'$(Configuration)|$(Platform)'=='Release|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;QT_SQL_LIB</Define>
+    </QtMoc>
+    <ClInclude Include="..\Common\Utility.h" />
     <QtMoc Include="Database.h" />
     <QtMoc Include="Player.h" />
     <QtMoc Include="PlayerDialog.h" />
     <QtMoc Include="NewGameDialog.h" />
     <QtMoc Include="AboutDialog.h" />
     <QtMoc Include="EngineWindow.h" />
-    <QtMoc Include="Engine.h" />
     <QtMoc Include="ClockWindow.h" />
-    <QtMoc Include="Scoresheet.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="language\gui_nb.ts" />
