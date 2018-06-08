@@ -45,7 +45,7 @@ bool Database::create()
 
 	QSqlQuery query;
 	query.exec("CREATE TABLE `info` ( `id`	INTEGER, `version` TEXT, PRIMARY KEY(`id`));");
-	query.exec("INSERT INTO `info` (`version`) VALUES ( `1.0`));");
+	query.exec("INSERT INTO `info` (`version`) VALUES ( `1.0`);");
 	query.exec("CREATE TABLE `games` ( "
 		"`id`	INTEGER,"
 		"`event`	TEXT,"
