@@ -19,6 +19,14 @@ using namespace std;
 
 const char* ENGINENAME = "PolarChess 2.0 B4";
 
+// To calculate rating
+// Testmachine speed in MHz
+const DWORD testFrequence = 2100;
+// Full strength rating on test machine
+const DWORD testElo = 2000;
+// Rating difference when doubling speed
+const double halfSpeed = 100.0;
+
 FrontEnd::FrontEnd()
 {
 	// Default values
@@ -710,16 +718,25 @@ bool FrontEnd::isMoveText(const std::string& input)
 void FrontEnd::findMaxElo()
 {
 	LARGE_INTEGER pf;
-	unsigned long long freqMz;
+	LONGLONG freqMz;
 	if (!QueryPerformanceFrequency(&pf))
 		return;
 	freqMz = pf.QuadPart / 1000;
+	double fact;
+	if (freqMz<testFrequence)
+		fact = (double)freqMz/testFrequence;
+	else
+		fact = (double)testFrequence/freqMz;
+
+
+	int elodiff=(int)testElo*log(1 / fact) / log(2);
 	// Test machine
 	//
-	DWORD testFrequence = 2100000;
-	DWORD testelo = 2000;
 	maxElo = 2000;// (DWORD)freqMz;
-}
+#ifdef _DEBUG_STRENGTH
+	cout << "Test fq: " << testFrequence << ", this fq: " << freqMz << ", factor: " << (double)freqMz / testFrequence << ", Diff: " << elodiff << endl;
+#endif
+}  
 
 void FrontEnd::uciReadFile(const std::string& filename)
 {
@@ -798,6 +815,8 @@ void FrontEnd::uciEval(const std::string& input)
 			if (para == "elo")
 			{
 				int elo = atoi(value.c_str());
+				if (elo > maxElo)
+					elo = maxElo;
 				limitStrength = true;
 				engine.sendOutQue(ENG_eval, EngineEval(EVAL_strength, calculateStrength(elo)));
 				return;
@@ -806,6 +825,10 @@ void FrontEnd::uciEval(const std::string& input)
 			{
 				// 1 000 000
 				double d = atof(value.c_str());
+				if (d > 100.0)
+					d = 100.0;
+				if (d < 0.0)
+					d = 0.0;
 				limitStrength = true;
 				int v = (int)(d * 10000);
 				engine.sendOutQue(ENG_eval, EngineEval(EVAL_strength, v));
@@ -816,7 +839,7 @@ void FrontEnd::uciEval(const std::string& input)
 				engine.sendOutQue(ENG_eval, EngineEval(EVAL_mobility, atoi(value.c_str())));
 				return;
 			}
-			uci.write("info string Unknown Eval parametre.");
+			uci.write("info string Unknown Eval parameter.");
 			return;
 		}
 	}
@@ -866,11 +889,10 @@ const std::string FrontEnd::getProgramPath()
 
 DWORD FrontEnd::calculateStrength(int elo)
 {
-	DWORD half=100;
 	int diff = maxElo - elo;
-	if (diff < 0)
+	if (diff <= 0)
 		return FULL_STRENGTH;
-	double f1 = diff / half; // test
+	double f1 = diff / halfSpeed;
 	double f2 = 1 / (pow(2,f1));
 #ifdef _DEBUG_STRENGTH
 	cout << "Elo: " << elo << " Strength: " << (int)((FULL_STRENGTH * f2)+0.5) << " (" << 100*f2 << "%)" << endl;
