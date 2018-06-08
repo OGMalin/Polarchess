@@ -2,11 +2,17 @@
 
 #include <Windows.h>
 
+namespace WatchPrecicion {
+	enum { Millisecond, Microsecond, Second };
+};
+
 class StopWatch
 {
-	DWORD starttime;
+	bool usePrecision;
+	ULONGLONG starttime;
+	ULONGLONG frequency;
 public:
-	StopWatch() { starttime = 0; };
+	StopWatch();
 	void start();
-	DWORD read();
+	ULONGLONG read(int type);
 };

@@ -2,11 +2,18 @@
 #include <string>
 #include <fstream>
 #include "frontend.h"
+#include "engine.h"
 #include "../Common/Utility.h"
 #include "../Common/ChessBoard.h"
 #include "../Common/MoveList.h"
 #include "../Common/MoveGenerator.h"
 #include "../Common/StopWatch.h"
+
+#define _DEBUG_STRENGTH
+
+#ifdef _DEBUG_STRENGTH
+#include <iostream>
+#endif
 
 using namespace std;
 
@@ -295,14 +302,14 @@ void FrontEnd::uciSetoption(const std::string& s)
 	{
 		limitStrength = booleanString(value);
 		if (limitStrength)
-			engine.sendOutQue(ENG_eval, EngineEval(EVAL_strength, calculateStrength()));
+			engine.sendOutQue(ENG_eval, EngineEval(EVAL_strength, calculateStrength(currentElo)));
 
 	}
 	else if ("UCI_Elo")
 	{
 		currentElo = atoi(value.c_str());
 		if (limitStrength)
-			engine.sendOutQue(ENG_eval,EngineEval(EVAL_strength, calculateStrength()));
+			engine.sendOutQue(ENG_eval,EngineEval(EVAL_strength, calculateStrength(currentElo)));
 	}
 }
 
@@ -614,14 +621,15 @@ void FrontEnd::uciPonderhit()
 
 void FrontEnd::uciMovegen(const std::string& s)
 {
-	DWORD i,t;
+	DWORD i;
+	ULONGLONG t;
 	char sz[256];
 	StopWatch st;
 	int depth = atoi(getWord(s, 1).c_str());
 	st.start();
 	i = movegenTest(depth);
-	t = st.read();
-	sprintf_s(sz, 256, "%u nodes in %u ms", i, t);
+	t = st.read(WatchPrecicion::Microsecond);
+	sprintf_s(sz, 256, "%u nodes in %llu ms", i, t/1000);
 	uci.write(string(sz));
 }
 
@@ -706,7 +714,11 @@ void FrontEnd::findMaxElo()
 	if (!QueryPerformanceFrequency(&pf))
 		return;
 	freqMz = pf.QuadPart / 1000;
-	maxElo = (DWORD)freqMz;
+	// Test machine
+	//
+	DWORD testFrequence = 2100000;
+	DWORD testelo = 2000;
+	maxElo = 2000;// (DWORD)freqMz;
 }
 
 void FrontEnd::uciReadFile(const std::string& filename)
@@ -783,12 +795,19 @@ void FrontEnd::uciEval(const std::string& input)
 				engine.sendOutQue(ENG_eval, EngineEval(EVAL_bishoppair, atoi(value.c_str())));
 				return;
 			}
+			if (para == "elo")
+			{
+				int elo = atoi(value.c_str());
+				limitStrength = true;
+				engine.sendOutQue(ENG_eval, EngineEval(EVAL_strength, calculateStrength(elo)));
+				return;
+			}
 			if (para == "strength")
 			{
-				// 10000
+				// 1 000 000
 				double d = atof(value.c_str());
 				limitStrength = true;
-				int v = (int)((d+0.005) * 100);
+				int v = (int)(d * 10000);
 				engine.sendOutQue(ENG_eval, EngineEval(EVAL_strength, v));
 				return;
 			}
@@ -845,10 +864,16 @@ const std::string FrontEnd::getProgramPath()
 	return string("");
 }
 
-DWORD FrontEnd::calculateStrength()
+DWORD FrontEnd::calculateStrength(int elo)
 {
 	DWORD half=100;
-	int diff = maxElo - currentElo;
-	double fact = 50.0; // test
-	return (DWORD)(fact * 100);
+	int diff = maxElo - elo;
+	if (diff < 0)
+		return FULL_STRENGTH;
+	double f1 = diff / half; // test
+	double f2 = 1 / (pow(2,f1));
+#ifdef _DEBUG_STRENGTH
+	cout << "Elo: " << elo << " Strength: " << (int)((FULL_STRENGTH * f2)+0.5) << " (" << 100*f2 << "%)" << endl;
+#endif
+	return (DWORD)((FULL_STRENGTH * f2)+0.5);
 }

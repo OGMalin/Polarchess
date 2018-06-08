@@ -71,6 +71,16 @@ void MoveList::push_back(const ChessMove& m)
 	}
 }
 
+void MoveList::push_back(const ChessMove& m, int score)
+{
+	if (size<MOVELISTSIZE)
+	{
+		list[size] = m;
+		list[size].score = score;
+		size++;
+	}
+}
+
 void MoveList::push_front(const ChessMove& m)
 {
 	int i = size;
@@ -82,6 +92,23 @@ void MoveList::push_front(const ChessMove& m)
 		--i;
 	}
 	list[0] = m;
+	size++;
+	if (size>MOVELISTSIZE)
+		size = MOVELISTSIZE;
+};
+
+void MoveList::push_front(const ChessMove& m, int score)
+{
+	int i = size;
+	if (i >= MOVELISTSIZE)
+		i = MOVELISTSIZE - 1;
+	while (i>0)
+	{
+		list[i] = list[i - 1];
+		--i;
+	}
+	list[0] = m;
+	list[0].score = score;
 	size++;
 	if (size>MOVELISTSIZE)
 		size = MOVELISTSIZE;

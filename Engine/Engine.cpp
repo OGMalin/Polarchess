@@ -1,4 +1,5 @@
 #define _DEBUG_SEARCH
+#define _DEBUG_STRENGTH
 
 #include <process.h>
 #include <string>
@@ -76,8 +77,8 @@ void EngineSearchThreadLoop(void* lpv)
 				eng.ei->getOutQue(eg);
 				eng.fixedMate = eg.mate;
 				eng.fixedNodes = eg.nodes;
-				eng.fixedTime = eg.fixedTime;
-				eng.maxTime = eg.maxTime;
+				eng.fixedTime = eg.fixedTime*1000;
+				eng.maxTime = eg.maxTime*1000;
 				eng.fixedDepth = eg.depth;
 				eng.searchmoves = eg.searchmoves;
 				if (eng.fixedMate)
@@ -97,8 +98,8 @@ void EngineSearchThreadLoop(void* lpv)
 				eng.ei->getOutQue(eg);
 				eng.fixedMate = eg.mate;
 				eng.fixedNodes = eg.nodes;
-				eng.fixedTime = eg.fixedTime;
-				eng.maxTime = eg.maxTime;
+				eng.fixedTime = eg.fixedTime*1000;
+				eng.maxTime = eg.maxTime*1000;
 				eng.searchmoves = eg.searchmoves;
 				if (eng.fixedMate)
 					eng.searchtype = MATE_SEARCH;
@@ -150,7 +151,7 @@ void EngineSearchThreadLoop(void* lpv)
 
 Engine::Engine()
 {
-	strength = 10000; // Strength defaults to 100%
+	strength = FULL_STRENGTH; // Strength defaults to 100%
 	debug = false;
 	contempt = 0;
 	multiPV = 1;
@@ -198,7 +199,7 @@ void Engine::startSearch()
 	}
 	else if ((ml[0].size == 1) && (searchtype == NORMAL_SEARCH))
 	{ // Only one legal move
-		bestMove.push_back(ml[0].list[0]);
+		bestMove.push_back(BestMove(ml[0].list[0],0));
 		sendBestMove();
 		return;
 	}
@@ -262,7 +263,7 @@ int Engine::aspirationSearch(int depth, int bestscore, bool inCheck, HASHKEY has
 		return BREAKING;
 	if ((score <= alpha) || (score >= beta))
 	{
-		if (debug || (watch.read()>999))
+		if (debug || (watch.read(WatchPrecicion::Millisecond)>500))
 		{
 			if (score <= alpha)
 				sendPV(pv[0], depth, score, lowerbound);
@@ -291,12 +292,11 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 	if (depth == 1)
 	{
 		orderRootMoves();
-		bestMove.push_back(ml[0].list[0]);
-		bestMove.list[bestMove.size - 1].score = watch.read();
+		bestMove.push_back(BestMove(ml[0].list[0], watch.read(WatchPrecicion::Microsecond)));
 	}
 	else
 	{
-		mit = ml[0].find(bestMove.back());
+		mit = ml[0].find(bestMove.back().move);
 		if (mit < ml[0].size)
 			ml[0].list[mit].score = 0x7fffffff;
 		ml[0].sort();
@@ -306,7 +306,7 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 	// Add the root position to the drawtable
 	hashDrawTable.add(hashKey, 0);
 
-	bool sendinfo = (watch.read() > 999) ? true : false;
+	bool sendinfo = (watch.read(WatchPrecicion::Millisecond) > 999) ? true : false;
 	for (mit = 0; mit < ml[0].size; mit++)
 	{
 		// Send UCI info
@@ -335,13 +335,13 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 		if (score > alpha)
 		{
 			copyPV(pv[0], pv[1], ml[0].list[mit]);
+#ifndef _DEBUG_SEARCH
 			if (debug || sendinfo)
+#endif
 				sendPV(pv[0], depth,score);
-
 			alpha = score;
 
-			bestMove.push_back(ml[0].list[mit]);
-			bestMove.list[bestMove.size - 1].score = watch.read();
+			bestMove.push_back(BestMove(ml[0].list[mit], watch.read(WatchPrecicion::Microsecond)));
 		}
 		if (inCheck)
 			--extention;
@@ -492,14 +492,14 @@ bool Engine::abortCheck()
 		}
 		break;
 	case TIME_SEARCH:
-		if (watch.read() >= fixedTime)
+		if (watch.read(WatchPrecicion::Microsecond) >= fixedTime)
 		{
 			sendBestMove();
 			return true;
 		};
 		break;
 	case NORMAL_SEARCH:
-		if (watch.read() >= maxTime)
+		if (watch.read(WatchPrecicion::Microsecond) >= maxTime)
 		{
 			sendBestMove();
 			return true;
@@ -534,7 +534,7 @@ bool Engine::abortCheck()
 			break;
 		case ENG_ponderhit:
 			ei->getOutQue();
-			maxTime+=watch.read();
+			maxTime+=watch.read(WatchPrecicion::Microsecond);
 			searchtype=NORMAL_SEARCH;
 			break;
 		case ENG_clearhash:
@@ -582,33 +582,47 @@ bool Engine::abortCheck()
 void Engine::sendBestMove()
 {
 	string s;
+#ifdef _DEBUG_STRENGTH
+
+	list<BestMove>::iterator _mit = bestMove.begin();
+	ChessMove _m = bestMove.front().move;
+	cout << "BestMove list"  << endl;
+	while (_mit != bestMove.end())
+	{
+		s = theBoard.makeMoveText(_mit->move, UCI);
+		cout << s << " (" << _mit->score << ")" << endl;
+		++_mit;
+	}
+
+#endif
 
 	if (searchtype != NORMAL_SEARCH)
 	{
-		s = theBoard.makeMoveText(bestMove.back(), UCI);
+		s = theBoard.makeMoveText(bestMove.back().move, UCI);
 
 		assert(s.length());
 
-		ei->sendInQue(ENG_string, "bestmove " + theBoard.makeMoveText(bestMove.back(),UCI));
+		ei->sendInQue(ENG_string, "bestmove " + theBoard.makeMoveText(bestMove.back().move,UCI));
 		return;
 	}
 	// Full strength
-	if (strength == 10000)
+	if (strength == FULL_STRENGTH)
 	{
-		ei->sendInQue(ENG_string, "bestmove " + theBoard.makeMoveText(bestMove.back(),UCI));
+		ei->sendInQue(ENG_string, "bestmove " + theBoard.makeMoveText(bestMove.back().move,UCI));
 		return;
 	}
-	DWORD dw = (DWORD)((DOUBLE)watch.read()*((double)strength/10000));
-	int mit;
-	for (mit = 0; mit < bestMove.size; mit++)
+	ULONGLONG ull = (watch.read(WatchPrecicion::Microsecond)*strength)/ FULL_STRENGTH;
+	list<BestMove>::iterator mit=bestMove.begin();
+	ChessMove m=bestMove.front().move;
+	while (mit!=bestMove.end())
 	{
-		if ((DWORD)bestMove.list[mit].score > dw)
+		if (mit->score > ull)
 			break;
+		m = mit->move;
+		++mit;
 	}
-	--mit;
-	if (mit < 0)
-		mit = 0;
-	ei->sendInQue(ENG_string, "bestmove " + theBoard.makeMoveText(bestMove.list[mit],UCI));
+
+	ei->sendInQue(ENG_string, "bestmove " + theBoard.makeMoveText(m,UCI));
 }
 
 void Engine::sendPV(const MoveList& pvline, int depth, int score, int type)
@@ -616,8 +630,8 @@ void Engine::sendPV(const MoveList& pvline, int depth, int score, int type)
 	string pvstring = "";
 	string s;
 	int i = 0;
-	DWORD t = watch.read();
-	double ts = t / 1000;
+	ULONGLONG t = watch.read(WatchPrecicion::Microsecond);
+	double ts = t / 1000000.0;
 	tempBoard = theBoard;
 	ChessMove m;
 	while (i < pvline.size)
@@ -631,16 +645,17 @@ void Engine::sendPV(const MoveList& pvline, int depth, int score, int type)
 		++i;
 	}
 	pvstring = trim(pvstring);
+	t /= 1000; //Use milliseconds in pv
 	if (type==lowerbound)
-		sprintf_s(sz, 256, "depth %i nps %u score lowerbound cp %i nodes %u time %u pv %s", depth, (DWORD)(nodes / ts), score, nodes, t, pvstring.c_str());
+		sprintf_s(sz, 256, "depth %u nps %u score lowerbound cp %i nodes %u time %llu pv %s", depth, (DWORD)(nodes / ts), score, nodes, t, pvstring.c_str());
 	else if (type==upperbound)
-		sprintf_s(sz, 256, "depth %i nps %u score upperbound cb %i nodes %u time %u pv %s", depth, (DWORD)(nodes / ts), score, nodes, t, pvstring.c_str());
+		sprintf_s(sz, 256, "depth %u nps %u score upperbound cb %i nodes %u time %llu pv %s", depth, (DWORD)(nodes / ts), score, nodes, t, pvstring.c_str());
 	else if (score > MATE - 200)
-		sprintf_s(sz, 256, "depth %i nps %u score mate %i nodes %u time %u pv %s", depth, (DWORD)(nodes / ts), (MATE - score)/2+1, nodes, t, pvstring.c_str());
+		sprintf_s(sz, 256, "depth %u nps %u score mate %i nodes %u time %llu pv %s", depth, (DWORD)(nodes / ts), (MATE - score)/2+1, nodes, t, pvstring.c_str());
 	else if (score < -MATE + 200)
-		sprintf_s(sz, 256, "depth %i nps %u score mate %i nodes %u time %u pv %s", depth, (DWORD)(nodes / ts), (MATE + score)/2, nodes, t, pvstring.c_str());
+		sprintf_s(sz, 256, "depth %u nps %u score mate %i nodes %u time %llu pv %s", depth, (DWORD)(nodes / ts), (MATE + score)/2, nodes, t, pvstring.c_str());
 	else
-		sprintf_s(sz, 256, "depth %i nps %u score cp %i nodes %u time %u pv %s", depth, (DWORD)(nodes / ts), score, nodes, t, pvstring.c_str());
+		sprintf_s(sz, 256, "depth %u nps %u score cp %i nodes %u time %llu pv %s", depth, (DWORD)(nodes / ts), score, nodes, t, pvstring.c_str());
 	ei->sendInQue(ENG_info, sz);
 }
 

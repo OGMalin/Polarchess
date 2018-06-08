@@ -40,7 +40,7 @@ public:
 	void findMaxElo();
 	void uciReadFile(const std::string& s);
 	void uciEval(const std::string& s);
-	DWORD calculateStrength();
+	DWORD calculateStrength(int elo);
 	void readIniFiles();
 	const std::string getProgramPath();
 };
