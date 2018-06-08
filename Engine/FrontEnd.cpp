@@ -722,19 +722,15 @@ void FrontEnd::findMaxElo()
 	if (!QueryPerformanceFrequency(&pf))
 		return;
 	freqMz = pf.QuadPart / 1000;
-	double fact;
-	if (freqMz<testFrequence)
-		fact = (double)freqMz/testFrequence;
-	else
-		fact = (double)testFrequence/freqMz;
+	double fact = (double)freqMz / testFrequence;
 
 
-	int elodiff=(int)testElo*log(1 / fact) / log(2);
+	int elodiff=(int)halfSpeed*log(1 / fact) / log(2);
+	maxElo = testElo-elodiff;
 	// Test machine
 	//
-	maxElo = 2000;// (DWORD)freqMz;
 #ifdef _DEBUG_STRENGTH
-	cout << "Test fq: " << testFrequence << ", this fq: " << freqMz << ", factor: " << (double)freqMz / testFrequence << ", Diff: " << elodiff << endl;
+	cout << "Test fq: " << testFrequence << ", this fq: " << freqMz << ", factor: " << (double)freqMz / testFrequence << ", Diff: " << elodiff << ", Max elo: " << maxElo << endl;
 #endif
 }  
 
