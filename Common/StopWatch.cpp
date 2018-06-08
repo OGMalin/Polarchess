@@ -1,10 +1,5 @@
 #include "StopWatch.h"
 
-
-StopWatch::StopWatch()
-{
-}
-
 void StopWatch::start()
 {
 	LARGE_INTEGER f;
@@ -23,7 +18,7 @@ void StopWatch::start()
 	}
 }
 
-ULONGLONG StopWatch::read(int type)
+ULONGLONG StopWatch::read(int precision)
 {
 	ULONGLONG r;
 	if (usePrecision)
@@ -39,9 +34,9 @@ ULONGLONG StopWatch::read(int type)
 		r = GetTickCount64();
 		r -= starttime;
 	}
-	if (type == WatchPrecicion::Second)
+	if (precision == WatchPrecision::Second)
 		r /= 1000000;
-	else if (type == WatchPrecicion::Millisecond)
+	else if (precision == WatchPrecision::Millisecond)
 		r /= 1000;
 	return r;
 }

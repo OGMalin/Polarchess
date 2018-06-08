@@ -636,7 +636,7 @@ void FrontEnd::uciMovegen(const std::string& s)
 	int depth = atoi(getWord(s, 1).c_str());
 	st.start();
 	i = movegenTest(depth);
-	t = st.read(WatchPrecicion::Microsecond);
+	t = st.read(WatchPrecision::Microsecond);
 	sprintf_s(sz, 256, "%u nodes in %llu ms", i, t/1000);
 	uci.write(string(sz));
 }
@@ -725,7 +725,7 @@ void FrontEnd::findMaxElo()
 	double fact = (double)freqMz / testFrequence;
 
 
-	int elodiff=(int)halfSpeed*log(1 / fact) / log(2);
+	int elodiff=(int)(halfSpeed*log(1 / fact) / log(2));
 	maxElo = testElo-elodiff;
 	// Test machine
 	//
@@ -811,7 +811,7 @@ void FrontEnd::uciEval(const std::string& input)
 			if (para == "elo")
 			{
 				int elo = atoi(value.c_str());
-				if (elo > maxElo)
+				if (elo > (int)maxElo)
 					elo = maxElo;
 				limitStrength = true;
 				engine.sendOutQue(ENG_eval, EngineEval(EVAL_strength, calculateStrength(elo)));

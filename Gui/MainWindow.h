@@ -83,4 +83,5 @@ private:
 	void setDefaultSettings();
 	void flipBoard();
 	void newGame();
+	void endGame();
 };

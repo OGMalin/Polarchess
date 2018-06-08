@@ -1,6 +1,8 @@
 #include "Database.h"
 #include <QCoreApplication>
 #include <QSqlQuery>
+#include <QStandardPaths>
+#include <QDir>
 #include <QDebug>
 
 Database::Database(QObject *parent)
@@ -11,11 +13,25 @@ Database::Database(QObject *parent)
 		qWarning("No SQLITE driver available.");
 		return;
 	}
+	QString path = QStandardPaths::locate(QStandardPaths::DocumentsLocation,"/Polarchess", QStandardPaths::LocateDirectory);
+	if (path.isEmpty())
+	{
+		QStringList l = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation);
+		if (l.size())
+		{
+			path = l.front();
+			path += "/Polarchess";
+			QDir().mkdir(path);
+		}
 
-	QString path = QCoreApplication::applicationDirPath();
-	path += "/data/games.db";
+	}
+		
+	path += "/MyGames.db";
 	db = QSqlDatabase::addDatabase("QSQLITE");
 	db.setDatabaseName(path);
+	path = QStandardPaths::locate(QStandardPaths::DocumentsLocation, "/Polarchess/MyGames.db", QStandardPaths::LocateFile);
+	if (path.isEmpty())
+		create();
 }
 
 Database::~Database()
@@ -28,6 +44,8 @@ bool Database::create()
 		return false;
 
 	QSqlQuery query;
+	query.exec("CREATE TABLE `info` ( `id`	INTEGER, `version` TEXT, PRIMARY KEY(`id`));");
+	query.exec("INSERT INTO `info` (`version`) VALUES ( `1.0`));");
 	query.exec("CREATE TABLE `games` ( "
 		"`id`	INTEGER,"
 		"`event`	TEXT,"
@@ -41,14 +59,10 @@ bool Database::create()
 		"`blackelo`	TEXT,"
 		"`eco`	TEXT,"
 		"`annotator`	TEXT,"
-		"`whitetype`	TEXT,"
-		"`blacktype`	TEXT,"
 		"`whitetimecontrol`	TEXT,"
 		"`blacktimecontrol`	TEXT,"
-		"`opening`	TEXT,"
-		"`variation`	TEXT,"
-		"`subvariation`	TEXT,"
-		"`remark`	TEXT,"
+		"`rated`	TEXT,"
+		"`analysisengine`	TEXT,"
 		"`movetext`	BLOB,"
 		"PRIMARY KEY(`id`,`white`,`black`,`date`)"
 		"); ");
@@ -56,9 +70,10 @@ bool Database::create()
 	return true;
 }
 
-bool Database::addGame(ChessGame& game)
+bool Database::addGame(QChessGame* game)
 {
-	char sz[1024];
+/*
+char sz[1024];
 	QSqlQuery query;
 	if (!db.open())
 		return false;
@@ -86,5 +101,6 @@ bool Database::addGame(ChessGame& game)
 		game.info.Remark.c_str(),
 		game.info.Annotator.c_str(),
 		game.toString().c_str());
+		*/
 	return true;
 }

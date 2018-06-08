@@ -12,15 +12,18 @@ class QChessMove
 private:
 	ChessMove _move;
 	QString _comment;
+	int _second;
 	int _next;
 public:
-	QChessMove() { _next = -1; _move.clear(); };
+	QChessMove() { _next = -1; _move.clear(); _second = -1; };
 	ChessMove  move() const{ return _move; };
 	QString comment() const { return _comment; };
+	int second() const { return _second; };
 	int nextposition() { return _next; };
 	bool isEmpty() { return _move.empty(); };
 	void move(const ChessMove& m) { _move = m; };
 	void comment(const QString& s) { _comment = s; };
+	void second(const int n) { _second=n; };
 	void nextposition(const int n) { _next = n; };
 };
 
@@ -71,6 +74,7 @@ private:
 	QString _rated; //Blank, BULLET, BLITZ, RAPID, CLASSICAL
 	QString _eco;
 	QString _analysisengine;
+	QString _annotator;
 public:
 	QChessGame(QObject *parent=0);
 	~QChessGame();
@@ -82,6 +86,7 @@ public:
 	bool doMove(const QChessMove& move);
 	bool doMove(const ChessMove& move);
 	typeColor toMove();
+	void addComment(QString& comment, int index = -1);
 
 	void site(QString& s) { _site = s; };
 	void event(QString& s) { _event = s; };
@@ -98,6 +103,7 @@ public:
 	void rated(QString& s) { _rated = s; };
 	void eco(QString& s) { _eco = s; };
 	void analysisengine(QString& s) { _analysisengine = s; };
+	void annotator(QString& s) { _annotator = s; };
 
 	const QString site() { return _site; };
 	const QString event() { return _event; };
@@ -113,5 +119,5 @@ public:
 	const QString timecontrol() { return _whitetimecontrol; };
 	const QString rated() { return _rated; };
 	const QString eco() { return _eco; };
-	const QString analysisengine() { return _analysisengine; };	
+	const QString annotator() { return _annotator; };
 };

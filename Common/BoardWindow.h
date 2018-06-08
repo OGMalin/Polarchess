@@ -2,7 +2,6 @@
 
 #include <QWidget>
 #include <QPixmap>
-//#include <QTextEdit>
 #include "../Common/ChessBoard.h"
 #include "../Common/ChessMove.h"
 #include "QChessGame.h"

@@ -3,7 +3,7 @@
 #include <QObject>
 #include <QSqlDatabase>
 #include <QString>
-#include "../Common/ChessGame.h"
+#include "../Common/QChessGame.h"
 
 class Database : public QObject
 {
@@ -18,5 +18,5 @@ public:
 	Database(QObject *parent=0);
 	~Database();
 	bool create();
-	bool addGame(ChessGame& game);
+	bool addGame(QChessGame* game);
 };

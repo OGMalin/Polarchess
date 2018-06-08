@@ -354,7 +354,12 @@ void MainWindow::firstTime()
 
 void MainWindow::clockAlarm(int color)
 {
-
+	currentGame->addComment(tr("Lost on time."));
+	if (color == WHITE)
+		currentGame->result(QString("0-1"));
+	else
+		currentGame->result(QString("1-0"));
+	endGame();
 }
 
 void MainWindow::moveEntered(ChessMove& move)
@@ -369,4 +374,10 @@ void MainWindow::moveEntered(ChessMove& move)
 	if (!running)
 		return;
 	clockwindow->start(currentGame->toMove());
+}
+
+void MainWindow::endGame()
+{
+	database->addGame(currentGame);
+	running = false;
 }

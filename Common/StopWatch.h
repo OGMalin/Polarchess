@@ -2,7 +2,7 @@
 
 #include <Windows.h>
 
-namespace WatchPrecicion {
+namespace WatchPrecision {
 	enum { Millisecond, Microsecond, Second };
 };
 
@@ -12,7 +12,6 @@ class StopWatch
 	ULONGLONG starttime;
 	ULONGLONG frequency;
 public:
-	StopWatch();
 	void start();
-	ULONGLONG read(int type);
+	ULONGLONG read(int precision);
 };

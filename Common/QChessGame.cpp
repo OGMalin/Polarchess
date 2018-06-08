@@ -36,6 +36,9 @@ void QChessGame::clear()
 	_rated.clear();
 	_eco.clear();
 	_analysisengine.clear();
+	_annotator.clear();
+	game.clear();
+	line.clear();
 }
 
 void QChessGame::newGame(const QString& fen)
@@ -123,4 +126,13 @@ void QChessGame::getMovelist(QStringList& list)
 typeColor QChessGame::toMove()
 {
 	return getPosition().board().toMove;
+}
+
+void QChessGame::addComment(QString& comment, int index)
+{
+	if (line.size() == 0)
+		return;
+	if (index == -1)
+		index = line.back();
+	game[index].comment(comment);
 }

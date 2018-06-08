@@ -263,7 +263,7 @@ int Engine::aspirationSearch(int depth, int bestscore, bool inCheck, HASHKEY has
 		return BREAKING;
 	if ((score <= alpha) || (score >= beta))
 	{
-		if (debug || (watch.read(WatchPrecicion::Millisecond)>500))
+		if (debug || (watch.read(WatchPrecision::Millisecond)>500))
 		{
 			if (score <= alpha)
 				sendPV(pv[0], depth, score, lowerbound);
@@ -292,7 +292,7 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 	if (depth == 1)
 	{
 		orderRootMoves();
-		bestMove.push_back(BestMove(ml[0].list[0], watch.read(WatchPrecicion::Microsecond)));
+		bestMove.push_back(BestMove(ml[0].list[0], watch.read(WatchPrecision::Microsecond)));
 	}
 	else
 	{
@@ -306,7 +306,7 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 	// Add the root position to the drawtable
 	hashDrawTable.add(hashKey, 0);
 
-	bool sendinfo = (watch.read(WatchPrecicion::Millisecond) > 999) ? true : false;
+	bool sendinfo = (watch.read(WatchPrecision::Millisecond) > 999) ? true : false;
 	for (mit = 0; mit < ml[0].size; mit++)
 	{
 		// Send UCI info
@@ -341,7 +341,7 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 				sendPV(pv[0], depth,score);
 			alpha = score;
 
-			bestMove.push_back(BestMove(ml[0].list[mit], watch.read(WatchPrecicion::Microsecond)));
+			bestMove.push_back(BestMove(ml[0].list[mit], watch.read(WatchPrecision::Microsecond)));
 		}
 		if (inCheck)
 			--extention;
@@ -492,14 +492,14 @@ bool Engine::abortCheck()
 		}
 		break;
 	case TIME_SEARCH:
-		if (watch.read(WatchPrecicion::Microsecond) >= fixedTime)
+		if (watch.read(WatchPrecision::Microsecond) >= fixedTime)
 		{
 			sendBestMove();
 			return true;
 		};
 		break;
 	case NORMAL_SEARCH:
-		if (watch.read(WatchPrecicion::Microsecond) >= maxTime)
+		if (watch.read(WatchPrecision::Microsecond) >= maxTime)
 		{
 			sendBestMove();
 			return true;
@@ -534,7 +534,7 @@ bool Engine::abortCheck()
 			break;
 		case ENG_ponderhit:
 			ei->getOutQue();
-			maxTime+=watch.read(WatchPrecicion::Microsecond);
+			maxTime+=watch.read(WatchPrecision::Microsecond);
 			searchtype=NORMAL_SEARCH;
 			break;
 		case ENG_clearhash:
@@ -611,7 +611,7 @@ void Engine::sendBestMove()
 		ei->sendInQue(ENG_string, "bestmove " + theBoard.makeMoveText(bestMove.back().move,UCI));
 		return;
 	}
-	ULONGLONG ull = (watch.read(WatchPrecicion::Microsecond)*strength)/ FULL_STRENGTH;
+	ULONGLONG ull = (watch.read(WatchPrecision::Microsecond)*strength)/ FULL_STRENGTH;
 	list<BestMove>::iterator mit=bestMove.begin();
 	ChessMove m=bestMove.front().move;
 	while (mit!=bestMove.end())
@@ -630,7 +630,7 @@ void Engine::sendPV(const MoveList& pvline, int depth, int score, int type)
 	string pvstring = "";
 	string s;
 	int i = 0;
-	ULONGLONG t = watch.read(WatchPrecicion::Microsecond);
+	ULONGLONG t = watch.read(WatchPrecision::Microsecond);
 	double ts = t / 1000000.0;
 	tempBoard = theBoard;
 	ChessMove m;

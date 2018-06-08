@@ -12,11 +12,12 @@ private:
 	QLCDNumber* clock[2];
 	int time[2];
 	int running;
-
+	 
 public slots:
 	void showtime();
 signals:
-	void clockAlarm(int);
+	// One clock run out of time.
+	void clockAlarm(int /*color*/);
 
 public:
 	ClockWindow(QWidget* parent = 0);
