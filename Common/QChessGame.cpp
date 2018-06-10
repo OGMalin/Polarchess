@@ -47,7 +47,7 @@ void QChessGame::newGame(const QString& fen)
 	line.clear();
 	QChessPosition pos;
 	if (fen.isEmpty())
-		pos.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1");
+		pos.setFen(STARTFEN);
 	else
 		pos.setFen(fen);
 	game.push_back(pos);
@@ -95,7 +95,7 @@ const QChessPosition QChessGame::getStartPosition()
 	return game[line.front()];
 }
 
-void QChessGame::getMovelist(QStringList& list)
+void QChessGame::getMovelist(QStringList& list, int type)
 {
 	QString piecechartr(tr("NBRQK"));
 	QString piecechar("NBRQK");
@@ -114,7 +114,7 @@ void QChessGame::getMovelist(QStringList& list)
 		m=game[current].move(next);
 		if (m.isEmpty())
 			break;
-		qs = game[current].board().makeMoveText(m.move(), FIDE).c_str();
+		qs = game[current].board().makeMoveText(m.move(), type).c_str();
 		for (i = 0; i < 5; i++)
 			qs.replace(piecechar.at(i), piecechartr.at(i));
 		list.append(qs);
@@ -135,4 +135,26 @@ void QChessGame::addComment(QString& comment, int index)
 	if (index == -1)
 		index = line.back();
 	game[index].comment(comment);
+}
+
+int QChessGame::moveCount(int color)
+{
+	if (line.size() == 0)
+		return 0;
+	int mc;
+	if (getStartPosition().board().toMove == WHITE)
+	{
+		if (color==WHITE)
+			mc = line.size() / 2;
+		else
+			mc = (line.size()-1) / 2;
+	}
+	else
+	{
+		if (color == BLACK)
+			mc = line.size() / 2;
+		else
+			mc = (line.size() - 1) / 2;
+	}
+	return mc;
 }

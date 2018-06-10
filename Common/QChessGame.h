@@ -1,5 +1,6 @@
 #pragma once
 
+const char STARTFEN[] = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1";
 #include <QObject>
 #include <QString>
 #include <QVector>
@@ -82,12 +83,12 @@ public:
 	void newGame(const QString& fen=QString());
 	const QChessPosition getPosition();
 	const QChessPosition getStartPosition();
-	void getMovelist(QStringList& list);
+	void getMovelist(QStringList& list, int type=FIDE);
 	bool doMove(const QChessMove& move);
 	bool doMove(const ChessMove& move);
 	typeColor toMove();
 	void addComment(QString& comment, int index = -1);
-
+	int moveCount(int color);
 	void site(QString& s) { _site = s; };
 	void event(QString& s) { _event = s; };
 	void round(QString& s) { _round = s; };

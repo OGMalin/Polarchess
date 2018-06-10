@@ -1,9 +1,16 @@
 #include <QProcess>
 #include "Engine.h"
 
+#include <string>
+
+#include "../Common/Utility.h"
+
+using namespace std;
+
 Engine::Engine()
 {
 	process = NULL;
+	readyok = false;
 }
 
 Engine::~Engine()
@@ -17,8 +24,9 @@ void Engine::setEngine(QString& name, QString& dir)
 	workingDir = dir;
 }
 
-bool Engine::load()
+bool Engine::load(QString& setup)
 {
+	readyok = false;
 	if (process)
 		return false;
 
@@ -73,20 +81,43 @@ void Engine::slotErrorOccurred(QProcess::ProcessError e)
 
 void Engine::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-
 }
 
 void Engine::slotReadyStandardOutput()
 {
-	QString msg;
-
+	char sz[1024];
+	string input, cmd, value;
+	__int64 readlen;
 	while (process && process->canReadLine())
 	{
-		msg = process->readLine().simplified();
-		emit engineMessage(msg);
+		readlen = process->readLine(sz, 1024);
+		if (readlen)
+		{
+			input = trim(sz);
+			cmd = getWord(input, 1);
+
+			if (cmd == "uciok")
+			{
+				if (!setup.isEmpty())
+					process->write(setup.toLatin1());
+				process->write("isready\n");
+			}
+			else if (cmd == "readyok")
+			{
+				if (!waitCommand.isEmpty())
+				{
+					process->write(waitCommand.toLatin1());
+					waitCommand.clear();
+				}
+				readyok = true;
+				emit engineReady();
+			}
+			else if (cmd == "bestmove")
+			{
+				emit engineMove(QString(getWord(input, 2).c_str()), QString(getWord(input, 4).c_str()));
+			}
+		}
 	}
-//	QByteArray data = process->readAllStandardOutput();
-//	process->readLine().simplified();
 }
 
 void Engine::slotStarted()
@@ -102,5 +133,53 @@ void Engine::slotStateChanged(QProcess::ProcessState newState)
 
 void Engine::slotReadyRead()
 {
+}
 
+void Engine::write(QString& cmd)
+{
+	process->write(cmd.toLatin1());
+	process->write("\n");
+}
+
+void Engine::search(QChessGame* game, SEARCHTYPE searchtype, int wtime, int winc, int btime, int binc, int movestogo)
+{
+	QString cmd;
+	QStringList list;
+	game->getMovelist(list,UCI);
+	string s=game->getStartPosition().board().getFen();
+	cmd = "position fen ";
+	if (s == STARTFEN)
+		cmd += "startfen";
+	else
+		cmd += s.c_str();
+	if (list.size())
+	{
+		cmd += " moves";
+		QStringList::iterator lit = list.begin();
+		while (lit != list.end())
+		{
+			cmd += " ";
+			cmd += *lit;
+			++lit;
+		}
+	}
+	cmd += "\n";
+	if (readyok)
+		process->write(cmd.toLatin1());
+	else
+		waitCommand += cmd;
+	cmd="go";
+	if (searchtype == PONDER_SEARCH)
+		cmd += " ponder";
+	cmd += " wtime " + QString().setNum(wtime);
+	cmd += " btime " + QString().setNum(btime);
+	cmd += " winc " + QString().setNum(winc);
+	cmd += " binc " + QString().setNum(binc);
+	if (movestogo)
+		cmd += "movestogo " + QString().setNum(movestogo);
+	cmd += "\n";
+	if (readyok)
+		process->write(cmd.toLatin1());
+	else
+		waitCommand += cmd;
 }

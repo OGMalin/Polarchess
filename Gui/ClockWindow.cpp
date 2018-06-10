@@ -70,3 +70,13 @@ void ClockWindow::start(int color)
 	clock[WHITE]->setStyleSheet("background-color:white;");
 	clock[BLACK]->setStyleSheet("background-color:white;");
 }
+
+int ClockWindow::gettime(int color)
+{
+	return time[color];
+}
+
+void ClockWindow::addtime(int t, int color)
+{
+	time[color]+=t;
+}

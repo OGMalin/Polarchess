@@ -36,9 +36,12 @@ signals:
 
 public slots:
 	void slotLanguageChanged(QAction* action);
-	void slotEngineMessage(const QString&);
+	void playEngineMessage(const QString&);
+	void playEngineReady();
+	void playEngineMove(const QString&, const QString&);
 	void clockAlarm(int);
 	void moveEntered(ChessMove&);
+
 public:
 	QChessGame* currentGame;
 	MainWindow();

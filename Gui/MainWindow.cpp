@@ -54,8 +54,14 @@ MainWindow::MainWindow()
 	retranslateUi();
 
 	playEngine = new Engine();
+	QString name = "Engine.exe";
+	QString dir = QCoreApplication::applicationDirPath();
+	playEngine->setEngine(name, dir);
+
 	database = new Database();
-	connect(playEngine, SIGNAL(engineMessage(const QString&)), this, SLOT(slotEngineMessage(const QString&)));
+	connect(playEngine, SIGNAL(engineMessage(const QString&)), this, SLOT(splayEngineMessage(const QString&)));
+	connect(playEngine, SIGNAL(engineReady()), this, SLOT(playEngineReady()));
+	connect(playEngine, SIGNAL(engineMove(const QString&, const QString&)), this, SLOT(playEngineMove(const QString&, const QString&)));
 	connect(clockwindow, SIGNAL(clockAlarm(int)),this, SLOT(clockAlarm(int)));
 	connect(boardwindow, SIGNAL(moveEntered(ChessMove&)), this, SLOT(moveEntered(ChessMove&)));
 }
@@ -298,17 +304,23 @@ void MainWindow::newGame()
 	clockwindow->settime(gameSetting.startTime*1000, gameSetting.startTime*1000);
 	clockwindow->start(currentGame->getPosition().board().toMove);
 	scoresheet->updateGame(currentGame);
-
-	/*
-	statusBar()->showMessage("Try to start engine.");
-	QString name = "Engine.exe";
-	QString dir = "c:\\Engines\\Polarchess\\";
-	playEngine->setEngine(name, dir);
-	playEngine->load();
-	*/
+	QString setup = "setoption name Personality value ";
+	setup += gameSetting.computer;
+	setup += "\n";
+	if (gameSetting.color == BLACK)
+	{
+		int mtg=0;
+		if (gameSetting.suddenDeathTime)
+		{
+			mtg = 40 - currentGame->moveCount(WHITE);
+		}
+		playEngine->search(currentGame, NORMAL_SEARCH, gameSetting.startTime * 1000, gameSetting.startTimeInc * 1000, gameSetting.startTime * 1000, gameSetting.startTimeInc * 1000, mtg);
+	}
+	playEngine->load(setup);
+	
 }
 
-void MainWindow::slotEngineMessage(const QString& msg)
+void MainWindow::playEngineMessage(const QString& msg)
 {
 	statusBar()->showMessage(msg);
 }
@@ -338,10 +350,6 @@ void MainWindow::firstTime()
 		gameSetting.player = player.name();
 
 		settings.setValue("Version", QCoreApplication::applicationVersion());
-
-		// Creating database
-		database->create();
-
 	}
 
 	// Allready installed
@@ -364,6 +372,13 @@ void MainWindow::clockAlarm(int color)
 
 void MainWindow::moveEntered(ChessMove& move)
 {
+	int player = currentGame->toMove();
+	if (running && (player != gameSetting.color))
+	{
+		QChessPosition pos = currentGame->getPosition();
+		boardwindow->setPosition(pos);
+		return;
+	}
 	if (!currentGame->doMove(move))
 	{
 		QChessPosition pos = currentGame->getPosition();
@@ -373,11 +388,46 @@ void MainWindow::moveEntered(ChessMove& move)
 	scoresheet->updateGame(currentGame);
 	if (!running)
 		return;
+
+	if (gameSetting.startTimeInc)
+		clockwindow->addtime(gameSetting.startTimeInc * 1000, player);
+	if (gameSetting.suddenDeathTime && currentGame->moveCount(player) == 40)
+		clockwindow->addtime(gameSetting.suddenDeathTime * 1000, player);
+
 	clockwindow->start(currentGame->toMove());
+	int mtg = 0;
+	if (gameSetting.suddenDeathTime)
+	{
+		mtg = 40 - currentGame->moveCount(currentGame->toMove());
+		if (mtg < 0)
+			mtg = 0;
+	}
+	playEngine->search(currentGame, NORMAL_SEARCH, clockwindow->gettime(WHITE), gameSetting.startTimeInc * 1000, clockwindow->gettime(BLACK), gameSetting.startTimeInc * 1000, mtg);
 }
 
 void MainWindow::endGame()
 {
 	database->addGame(currentGame);
 	running = false;
+}
+
+void MainWindow::playEngineReady()
+{
+}
+
+void MainWindow::playEngineMove(const QString& move, const QString& ponder)
+{
+	if (!running)
+		return;
+	int player = currentGame->toMove();
+	ChessMove m=currentGame->getPosition().board().getMoveFromText(move.toStdString());
+	currentGame->doMove(m);
+	boardwindow->setPosition(currentGame->getPosition().board());
+	scoresheet->updateGame(currentGame);
+	if (gameSetting.startTimeInc)
+		clockwindow->addtime(gameSetting.startTimeInc * 1000, player);
+	if (gameSetting.suddenDeathTime && currentGame->moveCount(player) == 40)
+		clockwindow->addtime(gameSetting.suddenDeathTime * 1000, player);
+
+	clockwindow->start(currentGame->toMove());
 }
