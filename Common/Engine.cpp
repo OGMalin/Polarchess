@@ -164,6 +164,7 @@ void Engine::search(QChessGame* game, SEARCHTYPE searchtype, int wtime, int winc
 		}
 	}
 	cmd += "\n";
+	// If engine playing white it is most probaly not ready yet.
 	if (readyok)
 		process->write(cmd.toLatin1());
 	else

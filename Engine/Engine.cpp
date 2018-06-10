@@ -1,5 +1,5 @@
-#define _DEBUG_SEARCH
-#define _DEBUG_STRENGTH
+//#define _DEBUG_SEARCH
+//#define _DEBUG_STRENGTH
 
 #include <process.h>
 #include <string>
@@ -211,10 +211,6 @@ void Engine::iterativeSearch(bool inCheck, HASHKEY hashKey)
 {
 	int depth=1;
 	int score=-MATE;
-	int extention = 0;
-
-	if (inCheck)
-		++extention;
 	
 	for (depth = 1; depth < MAX_DEPTH; depth++)
 	{
@@ -223,7 +219,7 @@ void Engine::iterativeSearch(bool inCheck, HASHKEY hashKey)
 #ifdef _DEBUG_SEARCH
 		highestsearchply = highestqsearchply = 0;
 #endif
-		score = aspirationSearch(depth + extention, score, inCheck, hashKey);
+		score = aspirationSearch(depth, score, inCheck, hashKey);
 		if (score == BREAKING)
 			return;
 #ifdef _DEBUG_SEARCH
@@ -256,8 +252,6 @@ int Engine::aspirationSearch(int depth, int bestscore, bool inCheck, HASHKEY has
 		alpha = -MATE;
 		beta = MATE;
 	}
-	if (inCheck)
-		++depth;
 	score = rootSearch(depth, alpha, beta, inCheck, hashKey);
 	if (score == BREAKING)
 		return BREAKING;
@@ -288,7 +282,7 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 
 	++nodes;
 
-	// Order moves
+	// Order moves. Do not extend before this
 	if (depth == 1)
 	{
 		orderRootMoves();
@@ -302,6 +296,9 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 		ml[0].sort();
 //		orderMoves(ml[0], bestMove.back());
 	}
+
+	if (inCheck)
+		++depth;
 
 	// Add the root position to the drawtable
 	hashDrawTable.add(hashKey, 0);

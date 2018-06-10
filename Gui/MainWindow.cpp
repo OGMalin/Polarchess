@@ -54,7 +54,7 @@ MainWindow::MainWindow()
 	retranslateUi();
 
 	playEngine = new Engine();
-	QString name = "Engine.exe";
+	QString name = "InBetween.exe";
 	QString dir = QCoreApplication::applicationDirPath();
 	playEngine->setEngine(name, dir);
 
@@ -299,6 +299,7 @@ void MainWindow::newGame()
 		currentGame->white(gameSetting.computer);
 		currentGame->black(gameSetting.player);
 	}
+	engineColor = OTHERPLAYER(color);
 	currentGame->date(QDate().currentDate().toString("YYYY.MM.DD"));
 	running = true;
 	clockwindow->settime(gameSetting.startTime*1000, gameSetting.startTime*1000);
@@ -307,7 +308,7 @@ void MainWindow::newGame()
 	QString setup = "setoption name Personality value ";
 	setup += gameSetting.computer;
 	setup += "\n";
-	if (gameSetting.color == BLACK)
+	if (engineColor == WHITE)
 	{
 		int mtg=0;
 		if (gameSetting.suddenDeathTime)
@@ -315,6 +316,7 @@ void MainWindow::newGame()
 			mtg = 40 - currentGame->moveCount(WHITE);
 		}
 		playEngine->search(currentGame, NORMAL_SEARCH, gameSetting.startTime * 1000, gameSetting.startTimeInc * 1000, gameSetting.startTime * 1000, gameSetting.startTimeInc * 1000, mtg);
+		boardwindow->flip(true);
 	}
 	playEngine->load(setup);
 	
@@ -372,8 +374,8 @@ void MainWindow::clockAlarm(int color)
 
 void MainWindow::moveEntered(ChessMove& move)
 {
-	int player = currentGame->toMove();
-	if (running && (player != gameSetting.color))
+	int tomove = currentGame->toMove();
+	if (running && (tomove == engineColor))
 	{
 		QChessPosition pos = currentGame->getPosition();
 		boardwindow->setPosition(pos);
@@ -390,9 +392,9 @@ void MainWindow::moveEntered(ChessMove& move)
 		return;
 
 	if (gameSetting.startTimeInc)
-		clockwindow->addtime(gameSetting.startTimeInc * 1000, player);
-	if (gameSetting.suddenDeathTime && currentGame->moveCount(player) == 40)
-		clockwindow->addtime(gameSetting.suddenDeathTime * 1000, player);
+		clockwindow->addtime(gameSetting.startTimeInc * 1000, tomove);
+	if (gameSetting.suddenDeathTime && currentGame->moveCount(tomove) == 40)
+		clockwindow->addtime(gameSetting.suddenDeathTime * 1000, tomove);
 
 	clockwindow->start(currentGame->toMove());
 	int mtg = 0;

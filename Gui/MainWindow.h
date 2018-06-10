@@ -76,6 +76,7 @@ private:
 	Database* database;
 	NewGameSetting gameSetting;
 	Player player;
+	int engineColor;
 	bool running;
 	void createMenu();
 	void setLanguage();

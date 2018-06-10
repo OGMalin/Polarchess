@@ -9,7 +9,7 @@
 #include "../Common/MoveGenerator.h"
 #include "../Common/StopWatch.h"
 
-#define _DEBUG_STRENGTH
+//#define _DEBUG_STRENGTH
 
 #ifdef _DEBUG_STRENGTH
 #include <iostream>

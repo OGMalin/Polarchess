@@ -1,5 +1,7 @@
 #include "QChessGame.h"
 
+const char* STARTFEN="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1";
+
 const QChessMove QChessPosition::move(int nextpos)
 {
 	QChessMoveList::iterator mit=_moves.begin();

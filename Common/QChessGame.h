@@ -1,12 +1,13 @@
 #pragma once
 
-const char STARTFEN[] = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1";
 #include <QObject>
 #include <QString>
 #include <QVector>
 #include <QStringList>
 #include "../Common/ChessBoard.h"
 #include "../Common/ChessMove.h"
+
+extern const char* STARTFEN;
 
 class QChessMove
 {
