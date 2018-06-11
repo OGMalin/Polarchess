@@ -2,7 +2,7 @@
 #include <QPaintEvent>
 #include <QResizeEvent>
 #include <QPainter>
-#include "../Common/defs.h"
+#include "defs.h"
 
 BoardWindow::BoardWindow(QWidget* parent)
 	:QWidget(parent)
@@ -323,9 +323,4 @@ void BoardWindow::setPosition(const ChessBoard& cb)
 	dragPiece = EMPTY;
 	currentBoard = cb;
 	update();
-}
-
-void BoardWindow::setPosition(const QChessPosition& pos)
-{
-	setPosition(pos.board());
 }

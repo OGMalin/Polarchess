@@ -234,6 +234,13 @@ void Engine::iterativeSearch(bool inCheck, HASHKEY hashKey)
 				return;
 			}
 		}
+
+		// Is there time enough to make a new iteration
+		if ((searchtype == NORMAL_SEARCH) && (watch.read(WatchPrecision::Microsecond) > (maxTime / 2)))
+		{
+			sendBestMove();
+			return;
+		}
 	}
 }
 

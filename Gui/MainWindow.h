@@ -61,6 +61,8 @@ private:
 	QAction* defAct;
 	QAction* aboutAct;
 	QAction* newGameAct;
+	QAction* resignAct;
+	QAction* abortAct;
 	QAction* flipAct;
 	QTranslator translator;
 	QActionGroup * langGroup;
@@ -87,5 +89,8 @@ private:
 	void setDefaultSettings();
 	void flipBoard();
 	void newGame();
+	void resign();
+	void abort();
 	void endGame();
+	void saveGame();
 };

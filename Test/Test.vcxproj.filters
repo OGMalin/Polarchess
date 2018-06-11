@@ -43,7 +43,7 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <QtRcc Include="MainWindow.qrc">
+    <QtRcc Include="Test.qrc">
       <Filter>Resource Files</Filter>
     </QtRcc>
   </ItemGroup>

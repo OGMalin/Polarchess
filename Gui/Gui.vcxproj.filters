@@ -77,9 +77,6 @@
     <ClCompile Include="PlayerDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Resource Files</Filter>
-    </ClCompile>
     <ClCompile Include="Database.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -94,6 +91,9 @@
     </ClCompile>
     <ClCompile Include="..\Common\Scoresheet.cpp">
       <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -140,20 +140,6 @@
     </QtRcc>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="icon\GB.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="icon\NO.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="icon\board24.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="images\pieces.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\Common\ChessBoard.h">
       <Filter>Common</Filter>
     </ClInclude>
@@ -186,5 +172,25 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="ToDo.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon\abort48.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icon\board48.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icon\GB.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icon\NO.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icon\resign48.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="images\pieces.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

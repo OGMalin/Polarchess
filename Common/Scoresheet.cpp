@@ -55,5 +55,11 @@ void Scoresheet::updateGame(QChessGame* game)
 		}
 		++lit;
 	}
+	if (!game->result().isEmpty())
+	{
+		item = new QTableWidgetItem(game->result());
+		item->setTextAlignment(Qt::AlignCenter);
+		sheet->setItem(row, col, item);
+	}
 	sheet->scrollToItem(item);
 }

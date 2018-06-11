@@ -22,6 +22,7 @@
 #include <QStatusBar>
 #include <QRandomGenerator>
 #include <QDate>
+#include <QMessageBox>
 
 MainWindow::MainWindow()
 {
@@ -54,7 +55,7 @@ MainWindow::MainWindow()
 	retranslateUi();
 
 	playEngine = new Engine();
-	QString name = "InBetween.exe";
+	QString name = "Engine.exe";
 	QString dir = QCoreApplication::applicationDirPath();
 	playEngine->setEngine(name, dir);
 
@@ -90,7 +91,9 @@ void MainWindow::createMenu()
 	flipAct = boardMenu->addAction("*", this, &MainWindow::flipBoard);
 
 	gameMenu = menuBar()->addMenu("*");
-	newGameAct = gameMenu->addAction(QIcon(":/icon/board24.png"),"*",this,&MainWindow::newGame);
+	newGameAct = gameMenu->addAction(QIcon(":/icon/board48.png"),"*",this,&MainWindow::newGame);
+	abortAct = gameMenu->addAction(QIcon(":/icon/abort48.png"), "*", this, &MainWindow::abort);
+	resignAct = gameMenu->addAction(QIcon(":/icon/resign48.png"), "*", this, &MainWindow::resign);
 
 	// Settings menu
 	settingsMenu = menuBar()->addMenu("*");
@@ -119,6 +122,10 @@ void MainWindow::createMenu()
 	// Setting up the toolbar
 	toolbar = addToolBar("Toolbar");
 	toolbar->addAction(newGameAct);
+	toolbar->addSeparator();
+	toolbar->addSeparator();
+	toolbar->addAction(abortAct);
+	toolbar->addAction(resignAct);
 }
 
 void MainWindow::retranslateUi()
@@ -131,6 +138,8 @@ void MainWindow::retranslateUi()
 
 	gameMenu->setTitle(tr("Game"));
 	newGameAct->setText(tr("New game"));
+	abortAct->setText(tr("Abort"));
+	resignAct->setText(tr("Resign"));
 
 	settingsMenu->setTitle(tr("Settings"));
 	langMenu->setTitle(tr("Language"));
@@ -279,6 +288,9 @@ void MainWindow::flipBoard()
 
 void MainWindow::newGame()
 {
+	if (running)
+		return;
+	playEngine->unload();
 	NewGameDialog dialog(this);
 	dialog.setDefault(gameSetting);
 	if (dialog.exec() == QDialog::Rejected)
@@ -378,13 +390,13 @@ void MainWindow::moveEntered(ChessMove& move)
 	if (running && (tomove == engineColor))
 	{
 		QChessPosition pos = currentGame->getPosition();
-		boardwindow->setPosition(pos);
+		boardwindow->setPosition(pos.board());
 		return;
 	}
 	if (!currentGame->doMove(move))
 	{
 		QChessPosition pos = currentGame->getPosition();
-		boardwindow->setPosition(pos);
+		boardwindow->setPosition(pos.board());
 		return;
 	}
 	scoresheet->updateGame(currentGame);
@@ -409,8 +421,11 @@ void MainWindow::moveEntered(ChessMove& move)
 
 void MainWindow::endGame()
 {
-	database->addGame(currentGame);
+	playEngine->unload();
+	saveGame();
+	scoresheet->updateGame(currentGame);
 	running = false;
+	clockwindow->stop();
 }
 
 void MainWindow::playEngineReady()
@@ -432,4 +447,39 @@ void MainWindow::playEngineMove(const QString& move, const QString& ponder)
 		clockwindow->addtime(gameSetting.suddenDeathTime * 1000, player);
 
 	clockwindow->start(currentGame->toMove());
+}
+
+void MainWindow::resign()
+{
+	if (!running)
+		return;
+	if (engineColor==WHITE)
+		currentGame->result(QString("1-0"));
+	else
+		currentGame->result(QString("0-1"));
+	endGame();
+}
+
+void MainWindow::abort()
+{
+	if (!running)
+		return;
+	if (gameSetting.rated)
+	{
+		if (currentGame->moveCount(OTHERPLAYER(engineColor)) > 1)
+		{
+			QMessageBox msgbox;
+			msgbox.setText(tr("You can't abort a rated game after move 1"));
+			msgbox.exec();
+			return;
+		}
+	}
+	playEngine->unload();
+	running = false;
+	clockwindow->stop();
+}
+
+void MainWindow::saveGame()
+{
+	database->addGame(currentGame);
 }

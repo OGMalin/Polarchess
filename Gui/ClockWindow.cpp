@@ -71,6 +71,11 @@ void ClockWindow::start(int color)
 	clock[BLACK]->setStyleSheet("background-color:white;");
 }
 
+void ClockWindow::stop()
+{
+	running = -1;
+}
+
 int ClockWindow::gettime(int color)
 {
 	return time[color];

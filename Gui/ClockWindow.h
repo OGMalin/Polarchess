@@ -24,6 +24,7 @@ public:
 	void displaytime(int color);
 	void settime(int w, int b);
 	void start(int color);
+	void stop();
 	// Return time in ms
 	int gettime(int color);
 	void addtime(int t, int color);

@@ -2,9 +2,8 @@
 
 #include <QWidget>
 #include <QPixmap>
-#include "../Common/ChessBoard.h"
-#include "../Common/ChessMove.h"
-#include "QChessGame.h"
+#include "ChessBoard.h"
+#include "ChessMove.h"
 
 struct BOARDTHEMA
 {
@@ -25,7 +24,6 @@ public:
 	void newGame();
 	void setPosition(const QString& fen);
 	void setPosition(const ChessBoard& cb);
-	void setPosition(const QChessPosition& pos);
 
 protected:
 	void paintEvent(QPaintEvent* event) override;
