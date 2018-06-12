@@ -3,7 +3,14 @@
 #include <QSqlQuery>
 #include <QStandardPaths>
 #include <QDir>
+#include <QVariant>
 #include <QDebug>
+
+const char* GAMEDBVERSION = "1.0";
+const char* GAMEDBTYPE = "GAMEDB";
+const char* BOOKDBVERSION = "1.0";
+const char* BOOKDBTYPE = "BOOKDB";
+
 
 Database::Database(QObject *parent)
 	: QObject(parent)
@@ -26,12 +33,12 @@ Database::Database(QObject *parent)
 
 	}
 		
-	path += "/MyGames.db";
-	db = QSqlDatabase::addDatabase("QSQLITE");
-	db.setDatabaseName(path);
-	path = QStandardPaths::locate(QStandardPaths::DocumentsLocation, "/Polarchess/MyGames.db", QStandardPaths::LocateFile);
+	gamedb = QSqlDatabase::addDatabase("QSQLITE");
+	gamedb.setDatabaseName(path+ "/Polarchess.games");
+	path = QStandardPaths::locate(QStandardPaths::DocumentsLocation, "/Polarchess/Polarchess.games", QStandardPaths::LocateFile);
 	if (path.isEmpty())
 		create();
+	bookdb.setDatabaseName(path + "/Polarchess.book");
 }
 
 Database::~Database()
@@ -40,12 +47,16 @@ Database::~Database()
 
 bool Database::create()
 {
-	if (!db.open())
+	if (!gamedb.open())
 		return false;
 
-	QSqlQuery query;
-	query.exec("CREATE TABLE `info` ( `id`	INTEGER, `version` TEXT, PRIMARY KEY(`id`));");
-	query.exec("INSERT INTO `info` (`version`) VALUES ( `1.0`);");
+	QSqlQuery query(gamedb);
+	query.exec("CREATE TABLE info ( type TEXT, version TEXT);");
+	query.prepare("INSERT INTO info (type, version) VALUES ( :type, :version);");
+	query.bindValue(":type", GAMEDBTYPE);
+	query.bindValue(":version", GAMEDBVERSION);
+	query.exec();
+
 	query.exec("CREATE TABLE `games` ( "
 		"`id`	INTEGER,"
 		"`event`	TEXT,"
@@ -66,7 +77,7 @@ bool Database::create()
 		"`movetext`	BLOB,"
 		"PRIMARY KEY(`id`,`white`,`black`,`date`)"
 		"); ");
-	db.close();
+	gamedb.close();
 	return true;
 }
 

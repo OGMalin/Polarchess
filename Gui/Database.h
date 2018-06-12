@@ -10,7 +10,8 @@ class Database : public QObject
 	Q_OBJECT
 
 private:
-	QSqlDatabase db;
+	QSqlDatabase gamedb;
+	QSqlDatabase bookdb;
 signals:
 	void databaseMessage(const QString& msg);
 
