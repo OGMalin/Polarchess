@@ -14,6 +14,9 @@
 #include <QDesktopWidget>
 #include <QCloseEvent>
 #include <QSplitter>
+#include <QFileDialog>
+#include <QStandardPaths>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
@@ -95,10 +98,38 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::fileOpen()
 {
+	QString path = QStandardPaths::locate(QStandardPaths::DocumentsLocation, "/Polarchess", QStandardPaths::LocateDirectory);
+	path = QFileDialog::getOpenFileName(this, "Open book", path, "Book files (*.book)");
+	if (!path.isEmpty())
+	{
+		if (!database->open(path))
+		{
+			QMessageBox msgbox;
+			msgbox.setText("Can't open book");
+			msgbox.exec();
+			return;
+		}
+	}
 }
 
 void MainWindow::fileNew()
 {
+	QString path = QStandardPaths::locate(QStandardPaths::DocumentsLocation, "/Polarchess", QStandardPaths::LocateDirectory);
+	path = QFileDialog::getSaveFileName(this, "Create book", path, "Book files (*.book)");
+	if (!path.isEmpty())
+	{
+		QFile file(path);
+		if (file.exists())
+		{
+			QMessageBox msgbox;
+			msgbox.setText("The book allready exist. Do you want to delete it?");
+			msgbox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+			if (msgbox.exec() != QMessageBox::Ok)
+				return;
+			file.remove();
+		}
+		database->create(path);
+	}
 }
 
 void MainWindow::bookReadonly()

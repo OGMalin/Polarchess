@@ -5,6 +5,7 @@
 #include <QTranslator>
 #include "NewGameDialog.h"
 #include "Player.h"
+#include "EnginePlayer.h"
 #include "../Common/ChessMove.h"
 
 class QMenu;
@@ -78,6 +79,7 @@ private:
 	Database* database;
 	NewGameSetting gameSetting;
 	Player player;
+	EnginePlayers engines;
 	int engineColor;
 	bool running;
 	void createMenu();

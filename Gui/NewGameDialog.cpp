@@ -13,6 +13,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QCoreApplication>
+#include <QSettings>
 
 NewGameDialog::NewGameDialog(QWidget *parent)
 	: QDialog(parent)
@@ -162,32 +163,12 @@ void NewGameDialog::slotTimeChanged(const QTime&)
 
 void NewGameDialog::slotComputerChanged(int)
 {
-	static bool needread = true;
-	int i;
-	static QMap<QString, QString> map;
+	QSettings settings("Engine.ini", QSettings::IniFormat);
 	QString comp = setting.computer = computer->currentText();
 	if (comp.isEmpty())
 		return;
-	if (needread)
-	{
-		QString path = QCoreApplication::applicationDirPath();
-		QFile file(path+"/personalities/elo.ini");
-		if (!file.open(QFile::ReadOnly | QFile::Text))
-			return;
-		QTextStream in(&file);
-		QString line;
-		while (!in.atEnd())
-		{
-			line = in.readLine();
-			i = line.lastIndexOf("=");
-			if (i > 1)
-				map.insert(line.left(i).trimmed(), line.mid(i + 1).trimmed());
-		}
-		file.close();
-	}
-
-	QString val = map[comp];
-	computerelo->setText("Elo:\n" + val);
+	EnginePlayer ep = engines.getEngine(comp);
+	computerelo->setText("Elo:\n" + QString().number(ep.elo()));
 }
 
 void NewGameDialog::slotPreTime(int index)
@@ -277,10 +258,11 @@ const NewGameSetting NewGameDialog::getSetting()
 
 }
 
-void NewGameDialog::setDefault(const NewGameSetting& newsetting)
+void NewGameDialog::setDefault(const NewGameSetting& newsetting, const EnginePlayers& eng)
 {
 	int h, m, s;
 	setting = newsetting;
+	engines = eng;
 	playername->setText(setting.player);
 	if (!setting.computer.isEmpty())
 		computer->setCurrentText(setting.computer);
@@ -310,17 +292,6 @@ void NewGameDialog::setDefault(const NewGameSetting& newsetting)
 
 const QStringList NewGameDialog::getEnginePlayers()
 {
-	QString path = QCoreApplication::applicationDirPath();
-	QDir dir(path+"/personalities");
-
-	if (!dir.exists())
-		return QStringList();
-	QStringList list;
-	list.append("*.per");
-	dir.setSorting(QDir::IgnoreCase);
-	dir.setNameFilters(list);
-	list = dir.entryList();
-	list.replaceInStrings(".per", "", Qt::CaseInsensitive);
-	return list;
+	return engines.getAll();
 }
 

@@ -95,6 +95,9 @@
     <ClCompile Include="Player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="EnginePlayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -163,6 +166,9 @@
     </ClInclude>
     <ClInclude Include="..\Common\ChessGame.h">
       <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="EnginePlayer.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -4,8 +4,8 @@
 #include <QStandardPaths>
 #include <QDir>
 #include <QVariant>
-
-//#include <QDebug>
+#include <QSqlError>
+#include <QDebug>
 
 const char* DBVERSION = "1.0";
 const char* DBTYPE = "BOOKDB";
@@ -13,32 +13,13 @@ const char* DBTYPE = "BOOKDB";
 Database::Database(QObject *parent)
 	: QObject(parent)
 {
+	opened = false;
 	if (!QSqlDatabase::isDriverAvailable("QSQLITE"))
 	{
 		qWarning("No SQLITE driver available.");
 		return;
 	}
-	/*
-	QString path = QStandardPaths::locate(QStandardPaths::DocumentsLocation, "/Polarchess", QStandardPaths::LocateDirectory);
-	if (path.isEmpty())
-	{
-		QStringList l = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation);
-		if (l.size())
-		{
-			path = l.front();
-			path += "/Polarchess";
-			QDir().mkdir(path);
-		}
-
-	}
-
-	path += "/Book.db";
-	db = QSqlDatabase::addDatabase("QSQLITE");
-	db.setDatabaseName(path);
-	path = QStandardPaths::locate(QStandardPaths::DocumentsLocation, "/Polarchess/Book.db", QStandardPaths::LocateFile);
-	if (path.isEmpty())
-		create();
-		*/
+	bookdb = QSqlDatabase::addDatabase("QSQLITE");
 }
 
 Database::~Database()
@@ -50,8 +31,11 @@ bool Database::open(const QString& path)
 	bookdb.setDatabaseName(path);
 
 	if (!bookdb.open())
+	{
 		return false;
+	}
 	bookdb.close();
+	opened = true;
 	return true;
 }
 
@@ -60,10 +44,12 @@ bool Database::create(const QString& path)
 	bookdb.setDatabaseName(path);
 	
 	if (!bookdb.open())
+	{
+		qDebug() << "Create database error. Database: " << bookdb.lastError().databaseText() << "Driver: " << bookdb.lastError().driverText();
 		return false;
-
+	}
 	QSqlQuery query(bookdb);
-	query.exec("CREATE TABLE info ( id INTEGER, type TEXT, version TEXT);");
+	query.exec("CREATE TABLE info ( id INTEGER, type TEXT, version TEXT, PRIMARY KEY(id));");
 	query.prepare("INSERT INTO info (type, version) VALUES ( :type, :version);");
 	query.bindValue(":type", DBTYPE);
 	query.bindValue(":version", DBVERSION);
@@ -80,11 +66,14 @@ bool Database::create(const QString& path)
 		"PRIMARY KEY(id,fen)"
 		"); ");
 	bookdb.close();
+	opened = true;
 	return true;
 }
 
 bool Database::add(BookDBEntry& data)
 {
+	if (!opened)
+		return false;
 	if (!bookdb.open())
 		return false;
 	QSqlQuery query(bookdb);

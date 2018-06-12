@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QDialog>
+#include "EnginePlayer.h"
 
 class QLineEdit;
 class QComboBox;
@@ -28,6 +29,7 @@ class NewGameDialog : public QDialog
 
 private:
 	NewGameSetting setting;
+	EnginePlayers engines;
 	QLineEdit* playername;
 	QComboBox* computer;
 	QComboBox* color;
@@ -52,5 +54,5 @@ public:
 	NewGameDialog(QWidget *parent);
 	~NewGameDialog();
 	const NewGameSetting getSetting();
-	void setDefault(const NewGameSetting& newsetting);
+	void setDefault(const NewGameSetting& newsetting, const EnginePlayers& eng);
 };

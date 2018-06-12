@@ -292,7 +292,7 @@ void MainWindow::newGame()
 		return;
 	playEngine->unload();
 	NewGameDialog dialog(this);
-	dialog.setDefault(gameSetting);
+	dialog.setDefault(gameSetting,engines);
 	if (dialog.exec() == QDialog::Rejected)
 		return;
 	gameSetting=dialog.getSetting();
@@ -451,6 +451,19 @@ void MainWindow::playEngineMove(const QString& move, const QString& ponder)
 
 void MainWindow::resign()
 {
+	// Test
+	QSettings settings("Engine.ini", QSettings::IniFormat);
+	settings.beginGroup("PolarChess");
+	settings.setValue("path", "Engine.exe");
+	settings.setValue("book", "Polarchess");
+	settings.setValue("bookdepth", 10);
+	settings.setValue("Elo", 1600);
+	settings.beginWriteArray("option");
+	settings.setValue("UCI_LimitStrength", true);
+	settings.setValue("UCI_Elo", 1600);
+	settings.endArray();
+	settings.endGroup();
+
 	if (!running)
 		return;
 	if (engineColor==WHITE)

@@ -36,5 +36,7 @@ public:
 	bool add(BookDBEntry& data);
 
 private:
+	bool opened;
 	QSqlDatabase bookdb;
+
 };
