@@ -63,22 +63,41 @@ bool Database::create(const QString& path)
 		return false;
 
 	QSqlQuery query(bookdb);
-	query.exec("CREATE TABLE info ( type TEXT, version TEXT);");
+	query.exec("CREATE TABLE info ( id INTEGER, type TEXT, version TEXT);");
 	query.prepare("INSERT INTO info (type, version) VALUES ( :type, :version);");
 	query.bindValue(":type", DBTYPE);
 	query.bindValue(":version", DBVERSION);
 	query.exec();
 	query.exec("CREATE TABLE `positions` ( "
-		"`id`	INTEGER,"
-		"`fen`	TEXT,"
-		"`opening`	TEXT,"
-		"`variation`	TEXT,"
-		"`subvariation`	TEXT,"
-		"`eco`	TEXT,"
-		"`comment`	TEXT,"
-		"`movelist`	BLOB,"
-		"PRIMARY KEY(`id`,`fen`)"
+		"id	INTEGER,"
+		"fen	TEXT,"
+		"opening	TEXT,"
+		"variation	TEXT,"
+		"subvariation	TEXT,"
+		"eco	TEXT,"
+		"comment	TEXT,"
+		"movelist	BLOB,"
+		"PRIMARY KEY(id,fen)"
 		"); ");
+	bookdb.close();
+	return true;
+}
+
+bool Database::add(BookDBEntry& data)
+{
+	if (!bookdb.open())
+		return false;
+	QSqlQuery query(bookdb);
+
+	if (data.id)
+	{
+
+	}
+	else
+	{
+
+	}
+	query.prepare("");
 	bookdb.close();
 	return true;
 }

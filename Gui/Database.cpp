@@ -51,7 +51,7 @@ bool Database::create()
 		return false;
 
 	QSqlQuery query(gamedb);
-	query.exec("CREATE TABLE info ( type TEXT, version TEXT);");
+	query.exec("CREATE TABLE info ( id INTEGER, type TEXT, version TEXT);");
 	query.prepare("INSERT INTO info (type, version) VALUES ( :type, :version);");
 	query.bindValue(":type", GAMEDBTYPE);
 	query.bindValue(":version", GAMEDBVERSION);
