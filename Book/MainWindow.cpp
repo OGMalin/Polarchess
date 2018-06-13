@@ -3,7 +3,6 @@
 #include "OpeningWindow.h"
 #include "CommentWindow.h"
 #include "AboutDialog.h"
-#include "Database.h"
 #include "../Common/BoardWindow.h"
 #include <QMenu>
 #include <QAction>
@@ -109,6 +108,12 @@ void MainWindow::fileOpen()
 			msgbox.exec();
 			return;
 		}
+		current.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1");
+		bde = database->find(QString(current.getFen(true).c_str()));
+		boardwindow->setPosition(bde.fen);
+		movewindow->update(bde);
+		openingwindow->update(bde);
+		commentwindow->update(bde);
 	}
 }
 
@@ -129,6 +134,12 @@ void MainWindow::fileNew()
 			file.remove();
 		}
 		database->create(path);
+		current.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1");
+		bde.clear();
+		bde.fen=current.getFen(true).c_str();
+		bde.eco = "A00";
+		database->add(bde);
+		boardwindow->setPosition(bde.fen);
 	}
 }
 

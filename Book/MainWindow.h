@@ -1,5 +1,8 @@
 #pragma once
+
+#include "Database.h"
 #include "../Common/ChessMove.h"
+#include "../Common/ChessBoard.h"
 #include <QMainWindow>
 
 class QMenu;
@@ -10,7 +13,7 @@ class BoardWindow;
 class MoveWindow;
 class OpeningWindow;
 class CommentWindow;
-class Database;
+
 
 class MainWindow : public QMainWindow
 {
@@ -40,6 +43,8 @@ private:
 	OpeningWindow* openingwindow;
 	CommentWindow* commentwindow;
 	Database* database;
+	ChessBoard current;
+	BookDBEntry bde;
 	bool readonly;
 	void createMenu();
 	void writeSettings();

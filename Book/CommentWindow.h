@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Database.h"
 #include <QTextEdit>
 
 class CommentWindow : public QTextEdit
@@ -9,4 +10,5 @@ class CommentWindow : public QTextEdit
 public:
 	CommentWindow(QWidget *parent=0);
 	~CommentWindow();
+	void update(BookDBEntry& data);
 };

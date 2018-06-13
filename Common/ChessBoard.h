@@ -29,8 +29,8 @@ public:
 	virtual int compare(const ChessBoard& b);
 	void setFen(const char* szFen);
 	// Get the fen-string for current position
-	char* getFen(char* buffer);
-	std::string getFen();
+	char* getFen(char* buffer, bool skipmovecount = false);
+	std::string getFen(bool skipmovecount=false);
 	bool doMove(ChessMove& m, bool legalcheck);
 	bool doMove(const char* sz);
 	// Checking from square, to square, castle and promoting (defaults to queen)

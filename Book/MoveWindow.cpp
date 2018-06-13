@@ -20,3 +20,7 @@ MoveWindow::MoveWindow(QWidget *parent)
 MoveWindow::~MoveWindow()
 {
 }
+
+void MoveWindow::update(BookDBEntry& data)
+{
+}

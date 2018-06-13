@@ -8,3 +8,8 @@ CommentWindow::CommentWindow(QWidget *parent)
 CommentWindow::~CommentWindow()
 {
 }
+
+void CommentWindow::update(BookDBEntry& data)
+{
+	setText(data.comment);
+}

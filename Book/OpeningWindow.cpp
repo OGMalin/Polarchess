@@ -30,3 +30,11 @@ OpeningWindow::OpeningWindow(QWidget *parent)
 OpeningWindow::~OpeningWindow()
 {
 }
+
+void OpeningWindow::update(BookDBEntry& data)
+{
+	opening->setText(data.opening);
+	variation->setText(data.variation);
+	subvariation->setText(data.subvariation);
+	eco->setText(data.eco);
+}

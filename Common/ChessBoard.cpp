@@ -67,13 +67,13 @@ int ChessBoard::compare(const ChessBoard& b)
 	return 0;
 }
 
-std::string ChessBoard::getFen()
+std::string ChessBoard::getFen(bool skipmovecount)
 {
 	char sz[128];
-	return getFen(sz);
+	return getFen(sz, skipmovecount);
 }
 
-char* ChessBoard::getFen(char* szFen)
+char* ChessBoard::getFen(char* szFen, bool skipmovecount)
 {
 	int file, rank, empty, cp;
 	typePiece piece;
@@ -145,6 +145,11 @@ char* ChessBoard::getFen(char* szFen)
 	else
 	{
 		szFen[cp++] = '-';
+	}
+	if (skipmovecount)
+	{
+		szFen[cp] = '\0';
+		return szFen;
 	}
 	szFen[cp++] = ' ';
 	szFen[cp++] = '0';
