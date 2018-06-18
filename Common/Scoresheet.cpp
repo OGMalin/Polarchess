@@ -1,7 +1,7 @@
 #include "Scoresheet.h"
 #include "QChessGame.h"
-#include <QTableWidget>
-#include <QTableWidgetItem>
+#include <QTableView>
+#include <QStandardItemModel>
 #include <QStringList>
 #include <QVBoxLayout>
 #include <QHeaderView>
@@ -9,19 +9,19 @@
 Scoresheet::Scoresheet(QWidget* parent)
 	:QWidget(parent)
 {
-	sheet = new QTableWidget(60,2);
-	sheet->setColumnWidth(0, 200); // Maybe look for some automatic adjustement
-	sheet->setColumnWidth(1, 200);
+	QVBoxLayout* vbox = new QVBoxLayout;
+	model = new QStandardItemModel(60, 2);
+	table = new QTableView;
+	table->setModel(model);
 	QFont f;
-	f = sheet->font();
+	f = table->font();
 	f.setPointSize(14);
-	sheet->setFont(f);
-	QHeaderView* h = sheet->horizontalHeader();
+	table->setFont(f);
+	QHeaderView* h = table->horizontalHeader();
 	f.setBold(true);
 	h->setFont(f);
 
-	QVBoxLayout* vbox = new QVBoxLayout;
-	vbox->addWidget(sheet);
+	vbox->addWidget(table);
 	setLayout(vbox);
 	
 //	resize(minimumSizeHint());
@@ -29,24 +29,24 @@ Scoresheet::Scoresheet(QWidget* parent)
 
 void Scoresheet::updateGame(QChessGame* game)
 {
-	QTableWidgetItem* item1 = new QTableWidgetItem(game->white());
-	QTableWidgetItem* item2 = new QTableWidgetItem(game->black());
-	sheet->setHorizontalHeaderItem(0, item1);
-	sheet->setHorizontalHeaderItem(1, item2);
+	QStringList header;
+	header << game->white() << game->black();
+	model->setHorizontalHeaderLabels(header);
+
 	QStringList list;
 	game->getMovelist(list);
 	int i;
 	int row = 0, col = 0;
-	QTableWidgetItem* item;
+	QStandardItem* item;
 	if (list.size()>120)
-		sheet->setRowCount((list.size()+1)/2);
+		model->setRowCount((list.size()+1)/2);
 	QStringList::iterator lit=list.begin();
-	item = sheet->itemAt(0, 0);
 	while(lit!=list.end())
 	{
-		item = new QTableWidgetItem(*lit);
+		item = new QStandardItem(*lit);
+		item->setEditable(false);
 		item->setTextAlignment(Qt::AlignCenter);
-		sheet->setItem(row, col, item);
+		model->setItem(row, col, item);
 		++col;
 		if (col > 1)
 		{
@@ -57,9 +57,8 @@ void Scoresheet::updateGame(QChessGame* game)
 	}
 	if (!game->result().isEmpty())
 	{
-		item = new QTableWidgetItem(game->result());
+		item = new QStandardItem(game->result());
 		item->setTextAlignment(Qt::AlignCenter);
-		sheet->setItem(row, col, item);
+		model->setItem(row, col, item);
 	}
-	sheet->scrollToItem(item);
 }

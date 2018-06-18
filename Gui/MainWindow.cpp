@@ -60,7 +60,7 @@ MainWindow::MainWindow()
 	playEngine->setEngine(name, dir);
 
 	database = new Database();
-	connect(playEngine, SIGNAL(engineMessage(const QString&)), this, SLOT(splayEngineMessage(const QString&)));
+	connect(playEngine, SIGNAL(engineMessage(const QString&)), this, SLOT(playEngineMessage(const QString&)));
 	connect(playEngine, SIGNAL(engineReady()), this, SLOT(playEngineReady()));
 	connect(playEngine, SIGNAL(engineMove(const QString&, const QString&)), this, SLOT(playEngineMove(const QString&, const QString&)));
 	connect(clockwindow, SIGNAL(clockAlarm(int)),this, SLOT(clockAlarm(int)));

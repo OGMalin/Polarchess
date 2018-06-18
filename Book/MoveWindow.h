@@ -3,7 +3,8 @@
 #include "Database.h"
 #include <QWidget>
 
-class QTableWidget;
+class QTableView;
+class QStandardItemModel;
 
 class MoveWindow : public QWidget
 {
@@ -15,5 +16,6 @@ public:
 	void update(BookDBEntry& data);
 
 private:
-	QTableWidget * moves;
+	QTableView * table;
+	QStandardItemModel* model;
 };

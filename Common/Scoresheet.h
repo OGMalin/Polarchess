@@ -3,13 +3,15 @@
 #include <QWidget>
 
 class QChessGame;
-class QTableWidget;
+class QTableView;
+class QStandardItemModel;
 
 class Scoresheet :public QWidget
 {
 	Q_OBJECT
 private:
-	QTableWidget * sheet;
+	QTableView * table;
+	QStandardItemModel* model;
 public:
 	Scoresheet(QWidget* parent = 0);
 	void updateGame(QChessGame*);
