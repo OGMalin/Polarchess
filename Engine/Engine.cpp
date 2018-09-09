@@ -385,8 +385,8 @@ int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey
 
 		newkey = theBoard.newHashkey(nullmove[ply],hashKey);
 		mgen.doNullMove(theBoard, nullmove[ply]);
-		score = -Search(__max(depth - 1 - nullMoveReduction(depth,__min(whitemateriale,blackmateriale)),0), -beta, -alpha, false, newkey, ply + 1, false, false,nullmove[ply]);
-//		score = -Search(__max(depth - 4, 0), -beta, -alpha, false, newkey, ply + 1, false, false);
+		score = -Search(__max(depth - 1 - nullMoveReduction(depth,__min(whitemateriale,blackmateriale)),0), -beta, -beta+1, false, newkey, ply + 1, false, false,nullmove[ply]);
+//		score = -Search(__max(depth - 4, 0), -beta, -beta+1, false, newkey, ply + 1, false, false);
 		if (score == -BREAKING)
 			return BREAKING;
 		mgen.undoNullMove(theBoard, nullmove[ply]);
