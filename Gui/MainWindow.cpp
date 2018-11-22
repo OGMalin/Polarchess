@@ -387,28 +387,38 @@ void MainWindow::clockAlarm(int color)
 void MainWindow::moveEntered(ChessMove& move)
 {
 	int tomove = currentGame->toMove();
+
+	// Move not allowed, engine to move.
 	if (running && (tomove == engineColor))
 	{
 		QChessPosition pos = currentGame->getPosition();
 		boardwindow->setPosition(pos.board());
 		return;
 	}
+
+	// Do the move if it is legal
 	if (!currentGame->doMove(move))
 	{
 		QChessPosition pos = currentGame->getPosition();
 		boardwindow->setPosition(pos.board());
 		return;
 	}
+
 	scoresheet->updateGame(currentGame);
+
 	if (!running)
 		return;
 
+	// Update clock if needed
 	if (gameSetting.startTimeInc)
 		clockwindow->addtime(gameSetting.startTimeInc * 1000, tomove);
 	if (gameSetting.suddenDeathTime && currentGame->moveCount(tomove) == 40)
 		clockwindow->addtime(gameSetting.suddenDeathTime * 1000, tomove);
 
+	// Switch the clock
 	clockwindow->start(currentGame->toMove());
+
+	// Let the engine find a move
 	int mtg = 0;
 	if (gameSetting.suddenDeathTime)
 	{

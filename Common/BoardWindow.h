@@ -25,14 +25,14 @@ public:
 	void setPosition(const QString& fen);
 	void setPosition(const ChessBoard& cb);
 
+signals:
+	void moveEntered(ChessMove&);
+
 protected:
 	void paintEvent(QPaintEvent* event) override;
 	void mousePressEvent(QMouseEvent* event) override;
 	void mouseMoveEvent(QMouseEvent* event) override;
 	void mouseReleaseEvent(QMouseEvent* event) override;
-
-signals:
-	void moveEntered(ChessMove&);
 
 private:
 	ChessBoard currentBoard;
