@@ -4,12 +4,12 @@
 <context>
     <name>Engine</name>
     <message>
-        <location filename="../../Common/Engine.cpp" line="69"/>
+        <location filename="../../Common/Engine.cpp" line="77"/>
         <source>Error message: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../Common/Engine.cpp" line="94"/>
+        <location filename="../../Common/Engine.cpp" line="125"/>
         <source>Engine started</source>
         <translation type="unfinished"></translation>
     </message>
@@ -17,213 +17,251 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../MainWindow.cpp" line="128"/>
+        <location filename="../MainWindow.cpp" line="133"/>
         <source>File</source>
         <translation>Fil</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="137"/>
+        <location filename="../MainWindow.cpp" line="144"/>
         <source>Settings</source>
         <translation>Oppsett</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="146"/>
+        <location filename="../MainWindow.cpp" line="153"/>
         <source>Help</source>
         <translation>Hjelp</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="129"/>
+        <location filename="../MainWindow.cpp" line="134"/>
         <source>Exit</source>
         <oldsource>E&amp;xit</oldsource>
         <translation>Avslutt</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="131"/>
+        <location filename="../MainWindow.cpp" line="136"/>
         <source>Board</source>
         <translation>Brett</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="132"/>
+        <location filename="../MainWindow.cpp" line="137"/>
         <source>Flip board</source>
         <translation>Snu brettet</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="134"/>
+        <location filename="../MainWindow.cpp" line="139"/>
         <source>Game</source>
         <translation>Parti</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="135"/>
+        <location filename="../MainWindow.cpp" line="140"/>
         <source>New game</source>
         <translation>Nytt parti</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="138"/>
+        <location filename="../MainWindow.cpp" line="141"/>
+        <source>Abort</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="142"/>
+        <source>Resign</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="145"/>
         <source>Language</source>
         <translation>Språk</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="143"/>
+        <location filename="../MainWindow.cpp" line="150"/>
         <source>English</source>
         <translation>Engelsk</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="144"/>
+        <location filename="../MainWindow.cpp" line="151"/>
         <source>Norwegian</source>
         <translation>Norsk</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="145"/>
+        <location filename="../MainWindow.cpp" line="152"/>
         <source>Set default settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="147"/>
+        <location filename="../MainWindow.cpp" line="154"/>
         <source>About...</source>
         <translation>Om....</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="379"/>
+        <source>Lost on time.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="495"/>
+        <source>You can&apos;t abort a rated game after move 1</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>NewGameDialog</name>
     <message>
-        <location filename="../NewGameDialog.cpp" line="20"/>
+        <location filename="../NewGameDialog.cpp" line="21"/>
         <source>New game</source>
         <translation>Nytt parti</translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="35"/>
+        <location filename="../NewGameDialog.cpp" line="36"/>
         <source>Your name</source>
         <translation>Ditt navn</translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="40"/>
+        <location filename="../NewGameDialog.cpp" line="41"/>
         <source>Change player</source>
         <translation>Endre spiller</translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="47"/>
+        <location filename="../NewGameDialog.cpp" line="48"/>
         <source>Opponent</source>
         <translation>Motstander</translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="59"/>
+        <location filename="../NewGameDialog.cpp" line="60"/>
         <source>Rated game</source>
         <translation>Ratet parti</translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="62"/>
+        <location filename="../NewGameDialog.cpp" line="63"/>
         <source>Color</source>
         <translation>Farge</translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="64"/>
+        <location filename="../NewGameDialog.cpp" line="65"/>
         <source>White</source>
         <translation>Hvit</translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="65"/>
+        <location filename="../NewGameDialog.cpp" line="66"/>
         <source>Black</source>
         <translation>Sort</translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="66"/>
+        <location filename="../NewGameDialog.cpp" line="67"/>
         <source>Random</source>
         <translation>Tilfeldig</translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="73"/>
+        <location filename="../NewGameDialog.cpp" line="74"/>
         <source>Timecontrol</source>
         <translation>Tidskontroll</translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="75"/>
+        <location filename="../NewGameDialog.cpp" line="76"/>
         <source>Predefined timecontrols:</source>
         <translation>Forhåndsinnstillinger:</translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="78"/>
+        <location filename="../NewGameDialog.cpp" line="79"/>
         <source>90 min. + 30 sec.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="79"/>
+        <location filename="../NewGameDialog.cpp" line="80"/>
         <source>30 min.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="80"/>
+        <location filename="../NewGameDialog.cpp" line="81"/>
         <source>15 min. + 10 sec.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="81"/>
+        <location filename="../NewGameDialog.cpp" line="82"/>
         <source>5 min.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="82"/>
+        <location filename="../NewGameDialog.cpp" line="83"/>
         <source>3 min. + 2 sec.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="83"/>
+        <location filename="../NewGameDialog.cpp" line="84"/>
         <source>1 min. + 2 sec.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="84"/>
+        <location filename="../NewGameDialog.cpp" line="85"/>
         <source>Start time:</source>
         <translation>Start tid:</translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="88"/>
+        <location filename="../NewGameDialog.cpp" line="89"/>
         <source>Increment:</source>
         <translation>Tillegg per trekk:</translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="93"/>
+        <location filename="../NewGameDialog.cpp" line="94"/>
         <source>New time at 40 moves</source>
         <translation>Ny tid ved 40 trekk</translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="94"/>
+        <location filename="../NewGameDialog.cpp" line="95"/>
         <source>Sudden death:</source>
         <translation>Tid for avslutning:</translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="97"/>
+        <location filename="../NewGameDialog.cpp" line="98"/>
         <source>Rating categori:</source>
         <translation>Rating kategori:</translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="119"/>
+        <location filename="../NewGameDialog.cpp" line="120"/>
         <source>Cancel</source>
         <translation>Avbryt</translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="120"/>
+        <location filename="../NewGameDialog.cpp" line="121"/>
         <source>Ok</source>
         <translation>Ok</translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="254"/>
+        <location filename="../NewGameDialog.cpp" line="235"/>
         <source>Bullet chess</source>
         <translation>Bulletsjakk</translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="259"/>
+        <location filename="../NewGameDialog.cpp" line="240"/>
         <source>Blitz chess</source>
         <translation>Lynsjakk</translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="264"/>
+        <location filename="../NewGameDialog.cpp" line="245"/>
         <source>Rapid chess</source>
         <translation>Hurtigsjakk</translation>
     </message>
     <message>
-        <location filename="../NewGameDialog.cpp" line="269"/>
+        <location filename="../NewGameDialog.cpp" line="250"/>
         <source>Classical chess</source>
         <translation>Langsjakk</translation>
+    </message>
+</context>
+<context>
+    <name>Player</name>
+    <message>
+        <location filename="../Player.cpp" line="87"/>
+        <source>Add new player</source>
+        <translation type="unfinished">Legg til spiller</translation>
+    </message>
+    <message>
+        <location filename="../Player.cpp" line="88"/>
+        <source>Cancel</source>
+        <translation type="unfinished">Avbryt</translation>
+    </message>
+    <message>
+        <location filename="../Player.cpp" line="90"/>
+        <source>New name</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -251,7 +289,7 @@
     <message>
         <location filename="../PlayerDialog.cpp" line="38"/>
         <source>Cancel</source>
-        <translation>AvbrytAvbryt</translation>
+        <translation type="unfinished">Avbryt</translation>
     </message>
     <message>
         <location filename="../PlayerDialog.cpp" line="39"/>
@@ -262,7 +300,7 @@
 <context>
     <name>QChessGame</name>
     <message>
-        <location filename="../../Common/QChessGame.cpp" line="97"/>
+        <location filename="../../Common/QChessGame.cpp" line="102"/>
         <source>NBRQK</source>
         <translation>SLTDK</translation>
     </message>
