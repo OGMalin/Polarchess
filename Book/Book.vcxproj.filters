@@ -72,6 +72,9 @@
     <ClCompile Include="Database.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Common\PolyglotBook.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -116,6 +119,9 @@
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="..\Common\Utility.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\PolyglotBook.h">
       <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>

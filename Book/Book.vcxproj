@@ -118,6 +118,7 @@
     <ClCompile Include="..\Common\ChessMove.cpp" />
     <ClCompile Include="..\Common\MoveGenerator.cpp" />
     <ClCompile Include="..\Common\MoveList.cpp" />
+    <ClCompile Include="..\Common\PolyglotBook.cpp" />
     <ClCompile Include="..\Common\Utility.cpp" />
     <ClCompile Include="AboutDialog.cpp" />
     <ClCompile Include="CommentWindow.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="..\Common\defs.h" />
     <ClInclude Include="..\Common\MoveGenerator.h" />
     <ClInclude Include="..\Common\MoveList.h" />
+    <ClInclude Include="..\Common\PolyglotBook.h" />
     <ClInclude Include="..\Common\Relations.h" />
     <ClInclude Include="..\Common\Utility.h" />
     <QtMoc Include="Database.h">
