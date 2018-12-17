@@ -97,13 +97,13 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::fileOpen()
 {
+	QMessageBox msgbox;
 	QString path = QStandardPaths::locate(QStandardPaths::DocumentsLocation, "/Polarchess", QStandardPaths::LocateDirectory);
 	path = QFileDialog::getOpenFileName(this, "Open book", path, "Book files (*.book)");
 	if (!path.isEmpty())
 	{
 		if (!database->open(path))
 		{
-			QMessageBox msgbox;
 			msgbox.setText("Can't open book");
 			msgbox.exec();
 			return;
