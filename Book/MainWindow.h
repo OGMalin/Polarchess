@@ -2,7 +2,6 @@
 
 #include "Database.h"
 #include "../Common/ChessMove.h"
-#include "../Common/ChessBoard.h"
 #include <QMainWindow>
 
 class QMenu;
@@ -13,6 +12,7 @@ class BoardWindow;
 class MoveWindow;
 class OpeningWindow;
 class CommentWindow;
+class QChessGame;
 
 
 class MainWindow : public QMainWindow
@@ -27,6 +27,7 @@ public slots:
 	void moveEntered(ChessMove&);
 
 public:
+	QChessGame* currentGame;
 	MainWindow(QWidget *parent = Q_NULLPTR);
 
 private:
@@ -43,7 +44,6 @@ private:
 	OpeningWindow* openingwindow;
 	CommentWindow* commentwindow;
 	Database* database;
-	ChessBoard current;
 	BookDBEntry bde;
 	bool readonly;
 	void createMenu();

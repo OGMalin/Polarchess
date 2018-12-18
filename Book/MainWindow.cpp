@@ -4,6 +4,7 @@
 #include "CommentWindow.h"
 #include "AboutDialog.h"
 #include "../Common/BoardWindow.h"
+#include "../Common/QChessGame.h"
 #include <QMenu>
 #include <QAction>
 #include <QMenuBar>
@@ -108,8 +109,8 @@ void MainWindow::fileOpen()
 			msgbox.exec();
 			return;
 		}
-		current.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1");
-		bde = database->find(QString(current.getFen(true).c_str()));
+		currentGame->newGame();
+		bde = database->find(QString(currentGame->getStartPosition().board().getFen(true).c_str()));
 		boardwindow->setPosition(bde.fen);
 		movewindow->update(bde);
 		openingwindow->update(bde);
@@ -134,9 +135,9 @@ void MainWindow::fileNew()
 			file.remove();
 		}
 		database->create(path);
-		current.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1");
+		currentGame->newGame();
 		bde.clear();
-		bde.fen=current.getFen(true).c_str();
+		bde.fen=currentGame->getStartPosition().board().getFen(true).c_str();
 		bde.eco = "A00";
 		database->add(bde);
 		boardwindow->setPosition(bde.fen);
@@ -163,4 +164,25 @@ void MainWindow::aboutDialog()
 
 void MainWindow::moveEntered(ChessMove& move)
 {
+	int tomove = currentGame->toMove();
+
+	// Do the move if it is legal
+	if (!currentGame->doMove(move))
+	{
+		QChessPosition pos = currentGame->getPosition();
+		boardwindow->setPosition(pos.board());
+		return;
+	}
+
+	// Save the move if it doesn't exist
+	if (!readonly)
+	{
+		// Do the move exist
+//		bde.movelist.e
+	}
+	bde = database->find(QString(currentGame->getStartPosition().board().getFen(true).c_str()));
+	boardwindow->setPosition(bde.fen);
+	movewindow->update(bde);
+	openingwindow->update(bde);
+	commentwindow->update(bde);
 }

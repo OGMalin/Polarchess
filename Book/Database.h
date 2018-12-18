@@ -26,6 +26,7 @@ struct BookDBEntry
 	bool dirty;
 	BookDBEntry() { dirty = false; };
 	void clear() { fen.clear(); opening.clear(); variation.clear(); subvariation.clear(); eco.clear(); comment.clear(); movelist.clear(); dirty = false; };
+//	bool moveExist(QString)
 };
 
 class Database : public QObject
