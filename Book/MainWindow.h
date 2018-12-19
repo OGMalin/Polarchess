@@ -29,6 +29,7 @@ public slots:
 public:
 	QChessGame* currentGame;
 	MainWindow(QWidget *parent = Q_NULLPTR);
+	virtual ~MainWindow();
 
 private:
 	QMenu* fileMenu;

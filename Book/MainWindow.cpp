@@ -44,7 +44,13 @@ MainWindow::MainWindow(QWidget *parent)
 	setCentralWidget(hSplitter);
 
 	database = new Database();
+	currentGame = new QChessGame();
 	connect(boardwindow, SIGNAL(moveEntered(ChessMove&)), this, SLOT(moveEntered(ChessMove&)));
+}
+
+MainWindow::~MainWindow()
+{
+	delete currentGame;
 }
 
 void MainWindow::createMenu()
@@ -165,11 +171,11 @@ void MainWindow::aboutDialog()
 void MainWindow::moveEntered(ChessMove& move)
 {
 	int tomove = currentGame->toMove();
-
+	QChessPosition pos = currentGame->getPosition();
+	BookDBMove bm;
 	// Do the move if it is legal
 	if (!currentGame->doMove(move))
 	{
-		QChessPosition pos = currentGame->getPosition();
 		boardwindow->setPosition(pos.board());
 		return;
 	}
@@ -177,8 +183,13 @@ void MainWindow::moveEntered(ChessMove& move)
 	// Save the move if it doesn't exist
 	if (!readonly)
 	{
-		// Do the move exist
-//		bde.movelist.e
+		if (!bde.moveExist(move))
+		{
+			bm.cmove=pos.board().makeMoveText(move, FIDE).c_str();
+			bm.score = 0;
+			bde.movelist.append(bm);
+			database->add(bde);
+		}
 	}
 	bde = database->find(QString(currentGame->getStartPosition().board().getFen(true).c_str()));
 	boardwindow->setPosition(bde.fen);

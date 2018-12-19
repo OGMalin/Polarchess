@@ -7,6 +7,7 @@
 #include <QSqlError>
 #include <QIODevice>
 #include <QDebug>
+#include "../Common/ChessBoard.h"
 
 const char* DBVERSION = "1.0";
 const char* DBTYPE = "BOOKDB";
@@ -165,3 +166,18 @@ QVector<BookDBMove> Database::fromDBFormat(const QByteArray& data)
 	return res;
 }
 
+bool BookDBEntry::moveExist(ChessMove& move)
+{
+	ChessBoard board;
+	ChessMove m;
+	board.setFen(fen.toStdString().c_str());
+	QVector<BookDBMove>::iterator it = movelist.begin();
+	while (it != movelist.end())
+	{
+		board.getMoveFromText(it->cmove.toStdString());
+		if (m == move)
+			return true;
+		++it;
+	}
+	return false;
+}
