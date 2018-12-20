@@ -5,6 +5,7 @@
 #include <QMainWindow>
 
 class QMenu;
+class QToolBar;
 class QAction;
 class QCloseEvent;
 class QSplitter;
@@ -34,24 +35,25 @@ public:
 private:
 	QMenu* fileMenu;
 	QMenu* bookMenu;
+	QToolBar* toolbar;
 	QAction* openAct;
 	QAction* newAct;
 	QAction* exitAct;
-	QAction* readonlyAct;
+	QAction* readwriteAct;
 	QSplitter* hSplitter;
 	QSplitter* vSplitter;
 	BoardWindow* boardwindow;
 	MoveWindow* movewindow;
-	OpeningWindow* openingwindow;
 	CommentWindow* commentwindow;
+	OpeningWindow* openingwindow;
 	Database* database;
 	BookDBEntry bde;
-	bool readonly;
+	bool readwrite;
 	void createMenu();
 	void writeSettings();
 	void readSettings();
 	void flipBoard();
 	void fileOpen();
 	void fileNew();
-	void bookReadonly();
+	void bookReadWrite();
 };

@@ -7,27 +7,30 @@
 #include <QByteArray>
 #include <QDataStream>
 #include "../Common/ChessMove.h"
+#include "../Common/ChessBoard.h"
 
 struct BookDBMove
 {
-	QString cmove;
+	ChessMove move;
 	QString comment;
 	int score;
+	int repertoire;
+	void clear() { move.clear(); comment.clear(); score = 0; repertoire = 0; };
 };
 
 struct BookDBEntry
 {
-	QString fen;
+	ChessBoard board;
 	QString opening;
-	QString variation;
-	QString subvariation;
 	QString eco;
 	QString comment;
 	QVector<BookDBMove> movelist;
 	bool dirty;
 	BookDBEntry() { dirty = false; };
-	void clear() { fen.clear(); opening.clear(); variation.clear(); subvariation.clear(); eco.clear(); comment.clear(); movelist.clear(); dirty = false; };
+	void clear() { board.clear(); opening.clear(); eco.clear(); comment.clear(); movelist.clear(); dirty = false; };
 	bool moveExist(ChessMove& move);
+	void convertToMoveList(QVector<BookDBMove>&, const QString&);
+	void convertFromMoveList(const QVector<BookDBMove>&, QString&);
 };
 
 class Database : public QObject
@@ -40,13 +43,11 @@ public:
 	bool create(const QString& path);
 	bool open(const QString& path);
 	bool add(BookDBEntry& data);
-	BookDBEntry find(QString& fen);
+	BookDBEntry find(ChessBoard& board);
 
 private:
 	bool opened;
 	QSqlDatabase bookdb;
 
-	bool exist(QString& fen);
-	QByteArray toDBFormat(const QVector<BookDBMove>& data);
-	QVector<BookDBMove> fromDBFormat(const QByteArray& data);
+	bool exist(ChessBoard& board);
 };

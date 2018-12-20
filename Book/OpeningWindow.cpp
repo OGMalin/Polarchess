@@ -8,21 +8,13 @@ OpeningWindow::OpeningWindow(QWidget *parent)
 {
 	QGridLayout* grid = new QGridLayout;
 	opening = new QLineEdit;
-	variation = new QLineEdit;
-	subvariation = new QLineEdit;
 	eco = new QLineEdit;
 	QLabel* label1 = new QLabel("Opening");
-	QLabel* label2 = new QLabel("Variation");
-	QLabel* label3 = new QLabel("Subvariation");
-	QLabel* label4 = new QLabel("Eco");
+	QLabel* label2 = new QLabel("Eco");
 	grid->addWidget(label1, 0, 0);
 	grid->addWidget(label2, 0, 1);
-	grid->addWidget(label3, 0, 2);
-	grid->addWidget(label4, 0, 3);
 	grid->addWidget(opening, 1, 0);
-	grid->addWidget(variation, 1, 1);
-	grid->addWidget(subvariation, 1, 2);
-	grid->addWidget(eco, 1, 3);
+	grid->addWidget(eco, 1, 1);
 
 	setLayout(grid);
 }
@@ -34,7 +26,5 @@ OpeningWindow::~OpeningWindow()
 void OpeningWindow::update(BookDBEntry& data)
 {
 	opening->setText(data.opening);
-	variation->setText(data.variation);
-	subvariation->setText(data.subvariation);
 	eco->setText(data.eco);
 }

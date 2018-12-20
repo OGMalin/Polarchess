@@ -6,6 +6,7 @@
 #include "../Common/BoardWindow.h"
 #include "../Common/QChessGame.h"
 #include <QMenu>
+#include <QToolBar>
 #include <QAction>
 #include <QMenuBar>
 #include <QSettings>
@@ -21,7 +22,7 @@
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
-	readonly = true;
+	readwrite = false;
 	createMenu();
 	readSettings();
 
@@ -46,6 +47,9 @@ MainWindow::MainWindow(QWidget *parent)
 	database = new Database();
 	currentGame = new QChessGame();
 	connect(boardwindow, SIGNAL(moveEntered(ChessMove&)), this, SLOT(moveEntered(ChessMove&)));
+
+	movewindow->setVisible(false);
+	commentwindow->setVisible(false);
 }
 
 MainWindow::~MainWindow()
@@ -63,10 +67,14 @@ void MainWindow::createMenu()
 	exitAct = fileMenu->addAction("Exit", this, &QWidget::close);
 
 	bookMenu = menuBar()->addMenu("Book");
-	readonlyAct = bookMenu->addAction("Readonly", this, &MainWindow::bookReadonly);
-	readonlyAct->setCheckable(true);
-	if (readonly)
-		readonlyAct->setChecked(true);
+	readwriteAct = bookMenu->addAction("Read/Write", this, &MainWindow::bookReadWrite);
+	readwriteAct->setCheckable(true);
+	if (readwrite)
+		readwriteAct->setChecked(true);
+
+	// Setting up the toolbar
+	toolbar = addToolBar("Toolbar");
+	toolbar->addAction(readwriteAct);
 }
 
 void MainWindow::writeSettings()
@@ -116,11 +124,14 @@ void MainWindow::fileOpen()
 			return;
 		}
 		currentGame->newGame();
-		bde = database->find(QString(currentGame->getStartPosition().board().getFen(true).c_str()));
-		boardwindow->setPosition(bde.fen);
+		bde = database->find(currentGame->getStartPosition().board());
+		boardwindow->setPosition(bde.board);
 		movewindow->update(bde);
 		openingwindow->update(bde);
 		commentwindow->update(bde);
+
+		movewindow->setVisible(true);
+		commentwindow->setVisible(true);
 	}
 }
 
@@ -143,17 +154,20 @@ void MainWindow::fileNew()
 		database->create(path);
 		currentGame->newGame();
 		bde.clear();
-		bde.fen=currentGame->getStartPosition().board().getFen(true).c_str();
+		bde.board=currentGame->getStartPosition().board();
 		bde.eco = "A00";
 		database->add(bde);
-		boardwindow->setPosition(bde.fen);
+		boardwindow->setPosition(bde.board);
+
+		movewindow->setVisible(true);
+		commentwindow->setVisible(true);
 	}
 }
 
-void MainWindow::bookReadonly()
+void MainWindow::bookReadWrite()
 {
-	readonly = readonly ? false : true;
-	readonlyAct->setChecked(readonly);
+	readwrite = readwrite ? false : true;
+	readwriteAct->setChecked(readwrite);
 }
 
 void MainWindow::flipBoard()
@@ -181,18 +195,19 @@ void MainWindow::moveEntered(ChessMove& move)
 	}
 
 	// Save the move if it doesn't exist
-	if (!readonly)
+	if (readwrite)
 	{
 		if (!bde.moveExist(move))
 		{
-			bm.cmove=pos.board().makeMoveText(move, FIDE).c_str();
+			bm.move = move;
 			bm.score = 0;
+			bm.repertoire = 0;
 			bde.movelist.append(bm);
 			database->add(bde);
 		}
 	}
-	bde = database->find(QString(currentGame->getStartPosition().board().getFen(true).c_str()));
-	boardwindow->setPosition(bde.fen);
+	bde = database->find(currentGame->getPosition().board());
+	boardwindow->setPosition(bde.board);
 	movewindow->update(bde);
 	openingwindow->update(bde);
 	commentwindow->update(bde);

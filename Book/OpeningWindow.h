@@ -15,8 +15,6 @@ public:
 
 private:
 	QLineEdit* opening;
-	QLineEdit* variation;
-	QLineEdit* subvariation;
 	QLineEdit* eco;
 
 };
