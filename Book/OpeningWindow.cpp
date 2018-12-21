@@ -6,25 +6,22 @@
 OpeningWindow::OpeningWindow(QWidget *parent)
 	: QWidget(parent)
 {
-	QGridLayout* grid = new QGridLayout;
-	opening = new QLineEdit;
-	eco = new QLineEdit;
-	QLabel* label1 = new QLabel("Opening");
-	QLabel* label2 = new QLabel("Eco");
-	grid->addWidget(label1, 0, 0);
-	grid->addWidget(label2, 0, 1);
-	grid->addWidget(opening, 1, 0);
-	grid->addWidget(eco, 1, 1);
-
-	setLayout(grid);
 }
 
 OpeningWindow::~OpeningWindow()
 {
 }
 
-void OpeningWindow::update(BookDBEntry& data)
+void OpeningWindow::update(BookDBEntry& theory, BookDBEntry& rep)
 {
-	opening->setText(data.opening);
-	eco->setText(data.eco);
+	QString qs;
+	if (theory.eco.isEmpty())
+		qs += rep.eco + ": ";
+	else
+		qs += theory.eco + ": ";
+
+	if (theory.opening.isEmpty())
+		qs += rep.opening;
+	else
+		qs += theory.opening;
 }

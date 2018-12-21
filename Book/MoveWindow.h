@@ -13,7 +13,7 @@ class MoveWindow : public QWidget
 public:
 	MoveWindow(QWidget *parent=0);
 	~MoveWindow();
-	void update(BookDBEntry& data);
+	void update(BookDBEntry& theory, BookDBEntry& rep);
 
 private:
 	QTableView * table;

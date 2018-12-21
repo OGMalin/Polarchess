@@ -22,6 +22,6 @@ MoveWindow::~MoveWindow()
 {
 }
 
-void MoveWindow::update(BookDBEntry& data)
+void MoveWindow::update(BookDBEntry& theory, BookDBEntry& rep)
 {
 }

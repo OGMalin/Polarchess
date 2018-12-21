@@ -78,6 +78,12 @@
     <ClCompile Include="..\Common\QChessGame.cpp">
       <Filter>Common</Filter>
     </ClCompile>
+    <ClCompile Include="PathWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -103,6 +109,12 @@
     </QtMoc>
     <QtMoc Include="..\Common\QChessGame.h">
       <Filter>Common</Filter>
+    </QtMoc>
+    <QtMoc Include="EngineWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="PathWindow.h">
+      <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

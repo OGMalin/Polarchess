@@ -10,5 +10,5 @@ class CommentWindow : public QTextEdit
 public:
 	CommentWindow(QWidget *parent=0);
 	~CommentWindow();
-	void update(BookDBEntry& data);
+	void update(BookDBEntry& theory, BookDBEntry& rep);
 };

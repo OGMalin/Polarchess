@@ -9,7 +9,7 @@ CommentWindow::~CommentWindow()
 {
 }
 
-void CommentWindow::update(BookDBEntry& data)
+void CommentWindow::update(BookDBEntry& theory, BookDBEntry& rep)
 {
-	setText(data.comment);
+	setText(theory.comment+"\n"+rep.comment);
 }
