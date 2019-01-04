@@ -59,8 +59,8 @@ MainWindow::MainWindow(QWidget *parent)
 	currentGame = new QChessGame();
 	connect(boardwindow, SIGNAL(moveEntered(ChessMove&)), this, SLOT(moveEntered(ChessMove&)));
 
-	enginewindow->setVisible(false);
-	openingwindow->setVisible(false);
+//	enginewindow->setVisible(false);
+//	openingwindow->setVisible(false);
 //	movewindow->setVisible(false);
 //	commentwindow->setVisible(false);
 }
