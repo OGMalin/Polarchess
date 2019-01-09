@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Database.h"
-#include <QWidget>
+#include <QLineEdit>
 
 class QLineEdit;
-class OpeningWindow : public QWidget
+class OpeningWindow : public QLineEdit
 {
 	Q_OBJECT
 

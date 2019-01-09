@@ -25,6 +25,9 @@
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
+	QSettings settings;
+	restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
+
 	writeTheory = false;
 	writeRep = false;
 	createMenu();
@@ -63,6 +66,8 @@ MainWindow::MainWindow(QWidget *parent)
 //	openingwindow->setVisible(false);
 //	movewindow->setVisible(false);
 //	commentwindow->setVisible(false);
+
+	restoreState(settings.value("mainWindowState").toByteArray());
 }
 
 MainWindow::~MainWindow()
@@ -106,13 +111,15 @@ void MainWindow::createMenu()
 }
 
 void MainWindow::writeSettings()
-{
+{/*
 	QSettings settings;
 	settings.setValue("maingeometry", saveGeometry());
+	*/
 }
 
 void MainWindow::readSettings()
 {
+	/*
 	QSettings settings;
 	QByteArray maingeometry = settings.value("maingeometry", QByteArray()).toByteArray();
 	if (maingeometry.isEmpty())
@@ -129,13 +136,16 @@ void MainWindow::readSettings()
 	QString version = settings.value("Version", QString()).toString();
 	if (version.isEmpty())
 		settings.setValue("Version", QCoreApplication::applicationVersion());
-
+		*/
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-	writeSettings();
-	event->accept();
+	QSettings settings;
+	settings.setValue("mainWindowGeometry", saveGeometry());
+	settings.setValue("mainWindowState", saveState());
+//	writeSettings();
+//	event->accept();
 }
 
 void MainWindow::fileOpenTheory()
@@ -157,12 +167,13 @@ void MainWindow::fileOpenTheory()
 		movewindow->update(bdeTheory, bdeRep);
 		openingwindow->update(bdeTheory, bdeRep);
 		commentwindow->update(bdeTheory, bdeRep);
-
+/*
 		movewindow->setVisible(true);
 		commentwindow->setVisible(true);
 
 		closeTheoryAct->setDisabled(false);
 		writeTheoryAct->setDisabled(false);
+		*/
 	}
 }
 
@@ -185,12 +196,13 @@ void MainWindow::fileOpenRep()
 		movewindow->update(bdeTheory, bdeRep);
 		openingwindow->update(bdeTheory, bdeRep);
 		commentwindow->update(bdeTheory, bdeRep);
-
+		/*
 		movewindow->setVisible(true);
 		commentwindow->setVisible(true);
 
 		closeRepAct->setDisabled(false);
 		writeRepAct->setDisabled(false);
+		*/
 	}
 }
 
@@ -220,12 +232,13 @@ void MainWindow::fileNewTheory()
 		movewindow->update(bdeTheory, bdeRep);
 		openingwindow->update(bdeTheory, bdeRep);
 		commentwindow->update(bdeTheory, bdeRep);
-
+		/*
 		movewindow->setVisible(true);
 		commentwindow->setVisible(true);
 
 		closeTheoryAct->setDisabled(false);
 		writeTheoryAct->setDisabled(false);
+		*/
 	}
 }
 
@@ -255,12 +268,13 @@ void MainWindow::fileNewRep()
 		movewindow->update(bdeTheory, bdeRep);
 		openingwindow->update(bdeTheory, bdeRep);
 		commentwindow->update(bdeTheory, bdeRep);
-
+		/*
 		movewindow->setVisible(true);
 		commentwindow->setVisible(true);
 
 		closeRepAct->setDisabled(false);
 		writeRepAct->setDisabled(false);
+		*/
 	}
 }
 

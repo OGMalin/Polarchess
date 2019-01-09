@@ -4,7 +4,7 @@
 #include <QGridLayout>
 
 OpeningWindow::OpeningWindow(QWidget *parent)
-	: QWidget(parent)
+	: QLineEdit(parent)
 {
 }
 
@@ -24,4 +24,5 @@ void OpeningWindow::update(BookDBEntry& theory, BookDBEntry& rep)
 		qs += rep.opening;
 	else
 		qs += theory.opening;
+	setText(qs);
 }
