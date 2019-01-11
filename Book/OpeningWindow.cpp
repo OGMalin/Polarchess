@@ -1,11 +1,14 @@
 #include "OpeningWindow.h"
 #include <QLineEdit>
-#include <QLabel>
-#include <QGridLayout>
+#include <QHBoxLayout>
 
 OpeningWindow::OpeningWindow(QWidget *parent)
-	: QLineEdit(parent)
+	: QWidget(parent)
 {
+	QHBoxLayout* hbox = new QHBoxLayout;
+	openingline = new QLineEdit;
+	hbox->addWidget(openingline);
+	setLayout(hbox);
 }
 
 OpeningWindow::~OpeningWindow()
@@ -24,5 +27,5 @@ void OpeningWindow::update(BookDBEntry& theory, BookDBEntry& rep)
 		qs += rep.opening;
 	else
 		qs += theory.opening;
-	setText(qs);
+	openingline->setText(qs);
 }
