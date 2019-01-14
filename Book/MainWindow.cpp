@@ -166,14 +166,14 @@ void MainWindow::fileOpenTheory()
 		boardwindow->setPosition(currentGame->getStartPosition().board());
 		movewindow->update(bdeTheory, bdeRep);
 		openingwindow->update(bdeTheory, bdeRep);
-		commentwindow->update(bdeTheory, bdeRep);
+		commentwindow->update(bdeTheory.comment, bdeRep.comment);
 /*
 		movewindow->setVisible(true);
 		commentwindow->setVisible(true);
+		*/
 
 		closeTheoryAct->setDisabled(false);
 		writeTheoryAct->setDisabled(false);
-		*/
 	}
 }
 
@@ -195,14 +195,14 @@ void MainWindow::fileOpenRep()
 		boardwindow->setPosition(currentGame->getStartPosition().board());
 		movewindow->update(bdeTheory, bdeRep);
 		openingwindow->update(bdeTheory, bdeRep);
-		commentwindow->update(bdeTheory, bdeRep);
+		commentwindow->update(bdeTheory.comment, bdeRep.comment);
 		/*
 		movewindow->setVisible(true);
 		commentwindow->setVisible(true);
+		*/
 
 		closeRepAct->setDisabled(false);
 		writeRepAct->setDisabled(false);
-		*/
 	}
 }
 
@@ -231,7 +231,7 @@ void MainWindow::fileNewTheory()
 		boardwindow->setPosition(currentGame->getStartPosition().board());
 		movewindow->update(bdeTheory, bdeRep);
 		openingwindow->update(bdeTheory, bdeRep);
-		commentwindow->update(bdeTheory, bdeRep);
+		commentwindow->update(bdeTheory.comment, bdeRep.comment);
 		/*
 		movewindow->setVisible(true);
 		commentwindow->setVisible(true);
@@ -267,7 +267,7 @@ void MainWindow::fileNewRep()
 		boardwindow->setPosition(currentGame->getStartPosition().board());
 		movewindow->update(bdeTheory, bdeRep);
 		openingwindow->update(bdeTheory, bdeRep);
-		commentwindow->update(bdeTheory, bdeRep);
+		commentwindow->update(bdeTheory.comment, bdeRep.comment);
 		/*
 		movewindow->setVisible(true);
 		commentwindow->setVisible(true);
@@ -284,6 +284,8 @@ void MainWindow::fileCloseTheory()
 	closeTheoryAct->setDisabled(true);
 	writeTheoryAct->setDisabled(true);
 
+	if (writeTheory)
+		commentwindow->setWriteTheory(false);
 	writeTheory = false;
 	writeTheoryAct->setChecked(false);
 }
@@ -294,6 +296,8 @@ void MainWindow::fileCloseRep()
 	closeRepAct->setDisabled(true);
 	writeRepAct->setDisabled(true);
 
+	if (writeRep)
+		commentwindow->setWriteRep(false);
 	writeRep = false;
 	writeRepAct->setChecked(false);
 }
@@ -304,6 +308,7 @@ void MainWindow::bookWriteTheory()
 	writeTheoryAct->setChecked(writeTheory);
 	writeRep = false;
 	writeRepAct->setChecked(false);
+	commentwindow->setWriteTheory(writeTheory);
 }
 
 void MainWindow::bookWriteRep()
@@ -312,6 +317,7 @@ void MainWindow::bookWriteRep()
 	writeRepAct->setChecked(writeRep);
 	writeTheory = false;
 	writeTheoryAct->setChecked(false);
+	commentwindow->setWriteRep(writeRep);
 }
 
 void MainWindow::flipBoard()
@@ -367,5 +373,5 @@ void MainWindow::moveEntered(ChessMove& move)
 	boardwindow->setPosition(board);
 	movewindow->update(bdeTheory, bdeRep);
 	openingwindow->update(bdeTheory, bdeRep);
-	commentwindow->update(bdeTheory, bdeRep);
+	commentwindow->update(bdeTheory.comment, bdeRep.comment);
 }
