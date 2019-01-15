@@ -61,6 +61,7 @@ MainWindow::MainWindow(QWidget *parent)
 	repBase = new Database(QString("rep"));
 	currentGame = new QChessGame();
 	connect(boardwindow, SIGNAL(moveEntered(ChessMove&)), this, SLOT(moveEntered(ChessMove&)));
+	connect(pathwindow, SIGNAL(pathSelected(int)), this, SLOT(pathSelected(int)));
 
 //	enginewindow->setVisible(false);
 //	openingwindow->setVisible(false);
@@ -161,9 +162,7 @@ void MainWindow::fileOpenTheory()
 			msgbox.exec();
 			return;
 		}
-		currentGame->newGame();
 		bdeTheory = theoryBase->find(currentGame->getStartPosition().board());
-		boardwindow->setPosition(currentGame->getStartPosition().board());
 		movewindow->update(bdeTheory, bdeRep);
 		openingwindow->update(bdeTheory, bdeRep);
 		commentwindow->update(bdeTheory.comment, bdeRep.comment);
@@ -190,9 +189,7 @@ void MainWindow::fileOpenRep()
 			msgbox.exec();
 			return;
 		}
-		currentGame->newGame();
 		bdeRep = repBase->find(currentGame->getStartPosition().board());
-		boardwindow->setPosition(currentGame->getStartPosition().board());
 		movewindow->update(bdeTheory, bdeRep);
 		openingwindow->update(bdeTheory, bdeRep);
 		commentwindow->update(bdeTheory.comment, bdeRep.comment);
@@ -223,12 +220,10 @@ void MainWindow::fileNewTheory()
 			file.remove();
 		}
 		theoryBase->create(path);
-		currentGame->newGame();
 		bdeTheory.clear();
 		bdeTheory.board=currentGame->getStartPosition().board();
 		bdeTheory.eco = "A00";
 		theoryBase->add(bdeTheory);
-		boardwindow->setPosition(currentGame->getStartPosition().board());
 		movewindow->update(bdeTheory, bdeRep);
 		openingwindow->update(bdeTheory, bdeRep);
 		commentwindow->update(bdeTheory.comment, bdeRep.comment);
@@ -259,7 +254,6 @@ void MainWindow::fileNewRep()
 			file.remove();
 		}
 		repBase->create(path);
-		currentGame->newGame();
 		bdeRep.clear();
 		bdeRep.board = currentGame->getStartPosition().board();
 		bdeRep.eco = "A00";
@@ -337,6 +331,7 @@ void MainWindow::moveEntered(ChessMove& move)
 	int tomove = currentGame->toMove();
 	QChessPosition pos = currentGame->getPosition();
 	BookDBMove bm;
+
 	// Do the move if it is legal
 	if (!currentGame->doMove(move))
 	{
@@ -366,6 +361,8 @@ void MainWindow::moveEntered(ChessMove& move)
 			repBase->add(bdeRep);
 		}
 	}
+
+
 	// Change to read from both db
 	ChessBoard board = currentGame->getPosition().board();
 	bdeTheory = theoryBase->find(board);
@@ -374,4 +371,22 @@ void MainWindow::moveEntered(ChessMove& move)
 	movewindow->update(bdeTheory, bdeRep);
 	openingwindow->update(bdeTheory, bdeRep);
 	commentwindow->update(bdeTheory.comment, bdeRep.comment);
+	pathwindow->update(currentGame);
+}
+
+void MainWindow::pathSelected(int ply)
+{
+	if (ply < 1)
+		currentGame->newGame();
+	else
+		currentGame->gotoMove(ply);
+
+	ChessBoard board = currentGame->getPosition().board();
+	bdeTheory = theoryBase->find(board);
+	bdeRep = repBase->find(board);
+	boardwindow->setPosition(board);
+	movewindow->update(bdeTheory, bdeRep);
+	openingwindow->update(bdeTheory, bdeRep);
+	commentwindow->update(bdeTheory.comment, bdeRep.comment);
+	pathwindow->update(currentGame);
 }

@@ -88,6 +88,7 @@ public:
 	bool doMove(const QChessMove& move);
 	bool doMove(const ChessMove& move);
 	typeColor toMove();
+	void gotoMove(int ply);
 	void addComment(QString& comment, int index = -1);
 	int moveCount(int color);
 	void site(QString& s) { _site = s; };
@@ -121,5 +122,6 @@ public:
 	const QString timecontrol() { return _whitetimecontrol; };
 	const QString rated() { return _rated; };
 	const QString eco() { return _eco; };
+	const QString analysisengine() { return _analysisengine; };
 	const QString annotator() { return _annotator; };
 };

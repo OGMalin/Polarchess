@@ -16,6 +16,7 @@ const QChessMove QChessPosition::move(int nextpos)
 QChessGame::QChessGame(QObject *parent)
 	: QObject(parent)
 {
+	newGame();
 }
 
 QChessGame::~QChessGame()
@@ -159,4 +160,20 @@ int QChessGame::moveCount(int color)
 			mc = (line.size() - 1) / 2;
 	}
 	return mc;
+}
+
+void QChessGame::gotoMove(int ply)
+{
+	int i;
+	QList<int> newline;
+	for (i = 0; i < ply+1; i++)
+	{
+		if (i<line.size())
+			newline.push_back(line[i]);
+	}
+	if (!newline.isEmpty())
+	{
+//		newline.back();
+		line = newline;
+	}
 }

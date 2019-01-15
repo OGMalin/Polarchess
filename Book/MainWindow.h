@@ -28,6 +28,7 @@ private:
 
 public slots:
 	void moveEntered(ChessMove&);
+	void pathSelected(int);
 
 public:
 	QChessGame* currentGame;
