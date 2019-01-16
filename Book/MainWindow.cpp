@@ -6,7 +6,7 @@
 #include "EngineWindow.h"
 #include "AboutDialog.h"
 #include "../Common/BoardWindow.h"
-#include "../Common/QChessGame.h"
+#include "Path.h"
 #include <QMenu>
 #include <QToolBar>
 #include <QAction>
@@ -59,7 +59,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 	theoryBase = new Database(QString("theory"));
 	repBase = new Database(QString("rep"));
-	currentGame = new QChessGame();
+	currentPath = new Path();
+
 	connect(boardwindow, SIGNAL(moveEntered(ChessMove&)), this, SLOT(moveEntered(ChessMove&)));
 	connect(pathwindow, SIGNAL(pathSelected(int)), this, SLOT(pathSelected(int)));
 
@@ -73,7 +74,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-	delete currentGame;
+	delete currentPath;
 }
 
 void MainWindow::createMenu()
@@ -162,7 +163,7 @@ void MainWindow::fileOpenTheory()
 			msgbox.exec();
 			return;
 		}
-		bdeTheory = theoryBase->find(currentGame->getStartPosition().board());
+		bdeTheory = theoryBase->find(currentPath->getPosition());
 		movewindow->update(bdeTheory, bdeRep);
 		openingwindow->update(bdeTheory, bdeRep);
 		commentwindow->update(bdeTheory.comment, bdeRep.comment);
@@ -173,6 +174,13 @@ void MainWindow::fileOpenTheory()
 
 		closeTheoryAct->setDisabled(false);
 		writeTheoryAct->setDisabled(false);
+
+		if (writeTheory)
+		{
+			commentwindow->setWriteTheory(false);
+			writeTheory = false;
+			writeTheoryAct->setChecked(false);
+		}
 	}
 }
 
@@ -189,7 +197,7 @@ void MainWindow::fileOpenRep()
 			msgbox.exec();
 			return;
 		}
-		bdeRep = repBase->find(currentGame->getStartPosition().board());
+		bdeRep = repBase->find(currentPath->getPosition());
 		movewindow->update(bdeTheory, bdeRep);
 		openingwindow->update(bdeTheory, bdeRep);
 		commentwindow->update(bdeTheory.comment, bdeRep.comment);
@@ -200,6 +208,13 @@ void MainWindow::fileOpenRep()
 
 		closeRepAct->setDisabled(false);
 		writeRepAct->setDisabled(false);
+
+		if (writeRep)
+		{
+			commentwindow->setWriteRep(false);
+			writeRep = false;
+			writeRepAct->setChecked(false);
+		}
 	}
 }
 
@@ -221,9 +236,12 @@ void MainWindow::fileNewTheory()
 		}
 		theoryBase->create(path);
 		bdeTheory.clear();
-		bdeTheory.board=currentGame->getStartPosition().board();
+		bdeTheory.board = currentPath->getStartPosition();
 		bdeTheory.eco = "A00";
 		theoryBase->add(bdeTheory);
+
+		bdeTheory= theoryBase->find(currentPath->getPosition());
+		
 		movewindow->update(bdeTheory, bdeRep);
 		openingwindow->update(bdeTheory, bdeRep);
 		commentwindow->update(bdeTheory.comment, bdeRep.comment);
@@ -234,6 +252,13 @@ void MainWindow::fileNewTheory()
 		closeTheoryAct->setDisabled(false);
 		writeTheoryAct->setDisabled(false);
 		*/
+
+		if (writeTheory)
+		{
+			commentwindow->setWriteTheory(false);
+			writeTheory = false;
+			writeTheoryAct->setChecked(false);
+		}
 	}
 }
 
@@ -255,10 +280,12 @@ void MainWindow::fileNewRep()
 		}
 		repBase->create(path);
 		bdeRep.clear();
-		bdeRep.board = currentGame->getStartPosition().board();
+		bdeRep.board = currentPath->getStartPosition();
 		bdeRep.eco = "A00";
 		repBase->add(bdeRep);
-		boardwindow->setPosition(currentGame->getStartPosition().board());
+
+		bdeRep = repBase->find(currentPath->getPosition());
+
 		movewindow->update(bdeTheory, bdeRep);
 		openingwindow->update(bdeTheory, bdeRep);
 		commentwindow->update(bdeTheory.comment, bdeRep.comment);
@@ -269,6 +296,13 @@ void MainWindow::fileNewRep()
 		closeRepAct->setDisabled(false);
 		writeRepAct->setDisabled(false);
 		*/
+
+		if (writeRep)
+		{
+			commentwindow->setWriteRep(false);
+			writeRep = false;
+			writeRepAct->setChecked(false);
+		}
 	}
 }
 
@@ -279,9 +313,11 @@ void MainWindow::fileCloseTheory()
 	writeTheoryAct->setDisabled(true);
 
 	if (writeTheory)
+	{
 		commentwindow->setWriteTheory(false);
-	writeTheory = false;
-	writeTheoryAct->setChecked(false);
+		writeTheory = false;
+		writeTheoryAct->setChecked(false);
+	}
 }
 
 void MainWindow::fileCloseRep()
@@ -291,9 +327,11 @@ void MainWindow::fileCloseRep()
 	writeRepAct->setDisabled(true);
 
 	if (writeRep)
+	{
 		commentwindow->setWriteRep(false);
-	writeRep = false;
-	writeRepAct->setChecked(false);
+		writeRep = false;
+		writeRepAct->setChecked(false);
+	}
 }
 
 void MainWindow::bookWriteTheory()
@@ -328,65 +366,76 @@ void MainWindow::aboutDialog()
 
 void MainWindow::moveEntered(ChessMove& move)
 {
-	int tomove = currentGame->toMove();
-	QChessPosition pos = currentGame->getPosition();
+	ChessBoard board = currentPath->getPosition();
 	BookDBMove bm;
 
+	BookDBEntry bde;
 	// Do the move if it is legal
-	if (!currentGame->doMove(move))
+	if (!currentPath->add(move))
 	{
-		boardwindow->setPosition(pos.board());
+		boardwindow->setPosition(board);
 		return;
 	}
 
 	// Save the move if it doesn't exist
+	PathEntry pe;
 	if (writeTheory)
 	{
-		if (!bdeTheory.moveExist(move))
+		for (int i = 0; i < currentPath->size(); i++)
 		{
-			bm.move = move;
-			bm.score = 0;
-			bm.repertoire = 0;
-			bdeTheory.movelist.append(bm);
-			theoryBase->add(bdeTheory);
+			pe = currentPath->getEntry(i);
+			bde = theoryBase->find(pe.board);
+			if (!bde.moveExist(move))
+			{
+				bm.move = move;
+				bm.score = 0;
+				bm.repertoire = 0;
+				bde.movelist.append(bm);
+				theoryBase->add(bde);
+			}
 		}
 	} else if (writeRep)
 	{
-		if (!bdeRep.moveExist(move))
+		for (int i = 0; i < currentPath->size(); i++)
 		{
-			bm.move = move;
-			bm.score = 0;
-			bm.repertoire = 0;
-			bdeRep.movelist.append(bm);
-			repBase->add(bdeRep);
+			pe = currentPath->getEntry(i);
+			bde = repBase->find(pe.board);
+			if (!bde.moveExist(move))
+			{
+				bm.move = move;
+				bm.score = 0;
+				bm.repertoire = 0;
+				bdeRep.movelist.append(bm);
+				repBase->add(bdeRep);
+			}
 		}
 	}
 
 
 	// Change to read from both db
-	ChessBoard board = currentGame->getPosition().board();
+	board = currentPath->getPosition();
 	bdeTheory = theoryBase->find(board);
 	bdeRep = repBase->find(board);
 	boardwindow->setPosition(board);
 	movewindow->update(bdeTheory, bdeRep);
 	openingwindow->update(bdeTheory, bdeRep);
 	commentwindow->update(bdeTheory.comment, bdeRep.comment);
-	pathwindow->update(currentGame);
+	pathwindow->update(currentPath);
 }
 
 void MainWindow::pathSelected(int ply)
 {
 	if (ply < 1)
-		currentGame->newGame();
+		currentPath->clear();
 	else
-		currentGame->gotoMove(ply);
+		currentPath->setLength(ply);
 
-	ChessBoard board = currentGame->getPosition().board();
+	ChessBoard board = currentPath->getPosition();
 	bdeTheory = theoryBase->find(board);
 	bdeRep = repBase->find(board);
 	boardwindow->setPosition(board);
 	movewindow->update(bdeTheory, bdeRep);
 	openingwindow->update(bdeTheory, bdeRep);
 	commentwindow->update(bdeTheory.comment, bdeRep.comment);
-	pathwindow->update(currentGame);
+	pathwindow->update(currentPath);
 }

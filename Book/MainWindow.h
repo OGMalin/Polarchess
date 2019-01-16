@@ -15,7 +15,7 @@ class OpeningWindow;
 class CommentWindow;
 class PathWindow;
 class EngineWindow;
-class QChessGame;
+class Path;
 
 
 class MainWindow : public QMainWindow
@@ -31,7 +31,7 @@ public slots:
 	void pathSelected(int);
 
 public:
-	QChessGame* currentGame;
+	Path* currentPath;
 	MainWindow(QWidget *parent = Q_NULLPTR);
 	virtual ~MainWindow();
 

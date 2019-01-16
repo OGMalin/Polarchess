@@ -1,5 +1,5 @@
 #include "PathWindow.h"
-#include "../Common/QChessGame.h"
+#include "Path.h"
 #include <QStringList>
 
 PathWindow::PathWindow(QWidget *parent)
@@ -16,14 +16,13 @@ PathWindow::~PathWindow()
 {
 }
 
-void PathWindow::update(QChessGame* game)
+void PathWindow::update(Path* path)
 {
 	char sz[16];
 	QStringList ml;
 	QString p = ".";
 	clear();
-	currentGame = game;
-	game->getMovelist(ml);
+	path->getMoveList(ml);
 	addItem("O"); // Start position
 	for (int i = 0; i < ml.size(); i++)
 	{

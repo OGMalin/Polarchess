@@ -2,7 +2,7 @@
 
 #include <QListWidget>
 
-class QChessGame;
+class Path;
 
 class PathWindow : public QListWidget
 {
@@ -11,12 +11,12 @@ class PathWindow : public QListWidget
 public:
 	PathWindow(QWidget *parent = 0);
 	~PathWindow();
-	void update(QChessGame* game);
+	void update(Path* path);
+
 signals:
 	void pathSelected(int);
+
 public slots:
 	void moveClicked(QListWidgetItem*);
-private:
-	QChessGame* currentGame;
 };
 

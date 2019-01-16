@@ -75,13 +75,13 @@
     <ClCompile Include="..\Common\PolyglotBook.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\Common\QChessGame.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
     <ClCompile Include="PathWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="EngineWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Path.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -106,9 +106,6 @@
     </QtMoc>
     <QtMoc Include="Database.h">
       <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="..\Common\QChessGame.h">
-      <Filter>Common</Filter>
     </QtMoc>
     <QtMoc Include="EngineWindow.h">
       <Filter>Header Files</Filter>
@@ -141,6 +138,9 @@
     </ClInclude>
     <ClInclude Include="..\Common\PolyglotBook.h">
       <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Path.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
