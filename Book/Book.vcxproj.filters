@@ -84,6 +84,9 @@
     <ClCompile Include="Path.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Common\Engine.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -112,6 +115,9 @@
     </QtMoc>
     <QtMoc Include="PathWindow.h">
       <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\Common\Engine.h">
+      <Filter>Common</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

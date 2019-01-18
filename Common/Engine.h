@@ -1,9 +1,11 @@
 #pragma once
 
-#include "../Common/QChessGame.h"
+#include "../Common/ChessBoard.h"
+#include "../Common/MoveList.h"
 #include <QObject>
 #include <QString>
 #include <QProcess>
+
 
 enum SEARCHTYPE
 {
@@ -47,6 +49,6 @@ public:
 	bool load(QString& setup);
 	void unload();
 	void write(QString& cmd);
-	void search(QChessGame* game, SEARCHTYPE searchtype, int wtime, int winc, int btime, int binc, int movestogo);
+	void search(ChessBoard& board, MoveList& moves, SEARCHTYPE searchtype, int wtime, int winc, int btime, int binc, int movestogo);
 	const QString lastError();
 };

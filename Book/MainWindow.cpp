@@ -64,6 +64,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(boardwindow, SIGNAL(moveEntered(ChessMove&)), this, SLOT(moveEntered(ChessMove&)));
 	connect(pathwindow, SIGNAL(pathSelected(int)), this, SLOT(pathSelected(int)));
 
+//	boardwindow->setVisible(false);
 //	enginewindow->setVisible(false);
 //	openingwindow->setVisible(false);
 //	movewindow->setVisible(false);

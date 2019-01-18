@@ -12,7 +12,6 @@ typedef unsigned __int64 HASHKEY;
 const int MAX_PLY = 100;
 const int MATE = 32767;    // Mate value
 
-
 // Shortcuts for squares in a 88 board
 enum {
 	a1 = 0x00, b1, c1, d1, e1, f1, g1, h1,

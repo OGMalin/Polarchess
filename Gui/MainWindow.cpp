@@ -327,7 +327,10 @@ void MainWindow::newGame()
 		{
 			mtg = 40 - currentGame->moveCount(WHITE);
 		}
-		playEngine->search(currentGame, NORMAL_SEARCH, gameSetting.startTime * 1000, gameSetting.startTimeInc * 1000, gameSetting.startTime * 1000, gameSetting.startTimeInc * 1000, mtg);
+		ChessBoard b = currentGame->getStartPosition().board();
+		MoveList ml = currentGame->movelist();
+
+		playEngine->search(b, ml,NORMAL_SEARCH, gameSetting.startTime * 1000, gameSetting.startTimeInc * 1000, gameSetting.startTime * 1000, gameSetting.startTimeInc * 1000, mtg);
 		boardwindow->flip(true);
 	}
 	playEngine->load(setup);
@@ -426,7 +429,9 @@ void MainWindow::moveEntered(ChessMove& move)
 		if (mtg < 0)
 			mtg = 0;
 	}
-	playEngine->search(currentGame, NORMAL_SEARCH, clockwindow->gettime(WHITE), gameSetting.startTimeInc * 1000, clockwindow->gettime(BLACK), gameSetting.startTimeInc * 1000, mtg);
+	ChessBoard b = currentGame->getStartPosition().board();
+	MoveList ml = currentGame->movelist();
+	playEngine->search(b, ml, NORMAL_SEARCH, clockwindow->gettime(WHITE), gameSetting.startTimeInc * 1000, clockwindow->gettime(BLACK), gameSetting.startTimeInc * 1000, mtg);
 }
 
 void MainWindow::endGame()

@@ -6,17 +6,18 @@
 #include <QStringList>
 #include "../Common/ChessBoard.h"
 #include "../Common/ChessMove.h"
+#include "../Common/MoveList.h"
 
 extern const char* STARTFEN;
 
 class QChessMove
 {
-private:
+public:
 	ChessMove _move;
 	QString _comment;
 	int _second;
 	int _next;
-public:
+
 	QChessMove() { _next = -1; _move.clear(); _second = -1; };
 	ChessMove  move() const{ return _move; };
 	QString comment() const { return _comment; };
@@ -33,13 +34,12 @@ public:
 
 class QChessPosition
 {
-private:
+public:
 	ChessBoard _board;
 	QString _comment;
 	QChessMoveList _moves;
 	int _enginescore;
 	QString _enginepv;
-public:
 	ChessBoard board() const { return _board; };
 	QString comment() const { return _comment; };
 	int enginescore() { return _enginescore; };
@@ -85,6 +85,7 @@ public:
 	const QChessPosition getPosition();
 	const QChessPosition getStartPosition();
 	void getMovelist(QStringList& list, int type=FIDE);
+	MoveList movelist();
 	bool doMove(const QChessMove& move);
 	bool doMove(const ChessMove& move);
 	typeColor toMove();

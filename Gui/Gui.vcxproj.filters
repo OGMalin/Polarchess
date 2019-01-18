@@ -146,9 +146,6 @@
     <ClInclude Include="..\Common\ChessBoard.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\Common\defs.h">
-      <Filter>Common</Filter>
-    </ClInclude>
     <ClInclude Include="..\Common\Utility.h">
       <Filter>Common</Filter>
     </ClInclude>

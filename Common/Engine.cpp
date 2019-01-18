@@ -1,9 +1,9 @@
 #include <QProcess>
 #include "Engine.h"
-
-#include <string>
-
 #include "../Common/Utility.h"
+#include <string>
+#include <QSettings>
+#include <QDebug>
 
 using namespace std;
 
@@ -20,8 +20,17 @@ Engine::~Engine()
 
 void Engine::setEngine(QString& name, QString& dir)
 {
+	unload();
 	engineName = name;
 	workingDir = dir;
+	QString path = dir + "/" + name;
+	QSettings settings(path, QSettings::IniFormat);
+	settings.beginGroup("Engine");
+	settings.setValue("path", "komodo.exe");
+	settings.endGroup();
+	settings.beginGroup("Option");
+	settings.setValue("hash", 256);
+	settings.endGroup();
 }
 
 bool Engine::load(QString& setup)
@@ -141,17 +150,26 @@ void Engine::write(QString& cmd)
 	process->write("\n");
 }
 
-void Engine::search(QChessGame* game, SEARCHTYPE searchtype, int wtime, int winc, int btime, int binc, int movestogo)
+void Engine::search(ChessBoard& board, MoveList& moves, SEARCHTYPE searchtype, int wtime, int winc, int btime, int binc, int movestogo)
 {
 	QString cmd;
 	QStringList list;
-	game->getMovelist(list,UCI);
-	string s=game->getStartPosition().board().getFen();
+	ChessBoard b;
+	int i;
+	b = board;
+	for (i = 0; i < moves.size; i++)
+	{
+		list.append(b.makeMoveText(moves.at(i),UCI).c_str());
+		if (!b.doMove(moves.at(i), true))
+			break;
+	}
+	string s=board.getFen();
 	cmd = "position fen ";
-	if (s == STARTFEN)
+
+	if (board.startposition())
 		cmd += "startfen";
 	else
-		cmd += s.c_str();
+		cmd += board.getFen(true).c_str();
 	if (list.size())
 	{
 		cmd += " moves";
