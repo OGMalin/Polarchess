@@ -911,3 +911,10 @@ char ChessBoard::getCharFromPiece(typePiece p)
 	};
 };
 
+bool ChessBoard::startposition()
+{
+	string s=getFen(true);
+	if (s == string("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1"))
+		return true;
+	return false;
+}

@@ -126,6 +126,21 @@ void QChessGame::getMovelist(QStringList& list, int type)
 	}
 }
 
+MoveList QChessGame::movelist()
+{
+	MoveList ml;
+	QChessPosition pos;
+	QChessMove m;
+	QList<int>::iterator lit = line.begin();
+	while (lit != line.end())
+	{
+		if (!game[*lit]._moves.size())
+			break;
+		ml.push_back(game[*lit]._moves[0].move());
+		++lit;
+	}
+	return ml;
+}
 typeColor QChessGame::toMove()
 {
 	return getPosition().board().toMove;
