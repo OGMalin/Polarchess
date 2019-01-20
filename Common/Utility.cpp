@@ -197,3 +197,20 @@ unsigned __int64 rand64()
 	i64 = (high << 32) | low;
 	return i64;
 }
+
+bool isNumber(const string& s, int type)
+{
+	string::size_type e;
+	if (!s.length())
+		return false;
+	switch (type)
+	{
+	case 8:  e = s.find_first_not_of("01234567"); break;
+	case 10: e = s.find_first_not_of("0123456789"); break;
+	case 16: e = s.find_first_not_of("0123456789abcdefABCDEF"); break;
+	default: e = s.find_first_not_of("0123456789.+- "); break;
+	}
+	if (e == string::npos)
+		return true;
+	return false;
+}

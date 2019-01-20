@@ -3,6 +3,7 @@
 #include "Database.h"
 #include "../Common/ChessMove.h"
 #include <QMainWindow>
+#include <QString>
 
 class QMenu;
 class QToolBar;
@@ -36,6 +37,7 @@ public:
 	virtual ~MainWindow();
 
 private:
+	QString dataPath;
 	QMenu* fileMenu;
 	QMenu* fileOpenMenu;
 	QMenu* fileNewMenu;

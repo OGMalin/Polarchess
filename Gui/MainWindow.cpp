@@ -44,6 +44,7 @@ MainWindow::MainWindow()
 	clockwindow = new ClockWindow;
 	enginewindow = new EngineWindow;
 
+	enginewindow->update(currentGame->getStartPosition());
 	hSplitter->addWidget(boardwindow);
 	hSplitter->addWidget(vSplitter);
 	vSplitter->addWidget(clockwindow);
@@ -333,7 +334,7 @@ void MainWindow::newGame()
 		playEngine->search(b, ml,NORMAL_SEARCH, gameSetting.startTime * 1000, gameSetting.startTimeInc * 1000, gameSetting.startTime * 1000, gameSetting.startTimeInc * 1000, mtg);
 		boardwindow->flip(true);
 	}
-	playEngine->load(setup);
+	playEngine->loadSetup(setup);
 	
 }
 

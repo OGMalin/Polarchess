@@ -24,16 +24,48 @@ void Engine::setEngine(QString& name, QString& dir)
 	engineName = name;
 	workingDir = dir;
 	QString path = dir + "/" + name;
-	QSettings settings(path, QSettings::IniFormat);
-	settings.beginGroup("Engine");
-	settings.setValue("path", "komodo.exe");
-	settings.endGroup();
-	settings.beginGroup("Option");
-	settings.setValue("hash", 256);
-	settings.endGroup();
 }
 
-bool Engine::load(QString& setup)
+bool Engine::load(QString& enginefile)
+{
+	if (process)
+		return false;
+	QSettings settings(enginefile, QSettings::IniFormat);
+	settings.beginGroup("Engine");
+	QString enginepath = settings.value("path").toString();
+	if (enginepath.isEmpty())
+		return false;
+	settings.endGroup();
+	settings.beginGroup("Option");
+	QStringList keys = settings.allKeys();
+
+	options.clear();
+	QString val;
+	for (int i = 0; i < keys.size(); i++)
+	{
+		val = settings.value(keys[i]).toString();
+		if (!val.isEmpty())
+			options.push_back(keys[i] + " value " + val);
+	}
+	settings.endGroup();
+
+	process = new QProcess(this);
+	if (!process)
+		return false;
+
+	connect(process, SIGNAL(errorOccurred(QProcess::ProcessError)), SLOT(slotErrorOccurred(QProcess::ProcessError)));
+	connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), SLOT(slotFinished(int, QProcess::ExitStatus)));
+	connect(process, SIGNAL(readyReadStandardOutput()), SLOT(slotReadyStandardOutput()));
+	connect(process, SIGNAL(started()), SLOT(slotStarted()));
+
+	process->setReadChannel(QProcess::StandardOutput);
+
+	emit engineMessage("Starting engine");
+	process->start(enginepath);
+	return true;
+}
+
+bool Engine::loadSetup(QString& setup)
 {
 	readyok = false;
 	if (process)
@@ -68,6 +100,8 @@ void Engine::unload()
 {
 	if (!process)
 		return;
+	disconnect();
+
 	process->write("quit\n");
 	if (process)
 		process->waitForFinished(1000);
@@ -107,8 +141,18 @@ void Engine::slotReadyStandardOutput()
 
 			if (cmd == "uciok")
 			{
-				if (!setup.isEmpty())
+				if (!options.isEmpty())
+				{
+					for (int i = 0; i < options.size(); i++)
+					{
+						write(QString("setoption name " + options[i]));
+					}
+				}
+				else if (!setup.isEmpty())
+				{
 					process->write(setup.toLatin1());
+					process->write("isready\n");
+				}
 				process->write("isready\n");
 			}
 			else if (cmd == "readyok")
@@ -124,6 +168,139 @@ void Engine::slotReadyStandardOutput()
 			else if (cmd == "bestmove")
 			{
 				emit engineMove(QString(getWord(input, 2).c_str()), QString(getWord(input, 4).c_str()));
+			}
+			else if(cmd == "info")
+			{
+				EngineInfo ei;
+				int index = 2;
+				string info=getWord(input,index);
+				++index;
+				while (info.length())
+				{
+					if (info == "depth")
+					{
+						ei.depth=stoi(getWord(input, index));
+					}
+					else if (info == "seldepth")
+					{
+						ei.seldepth = stoi(getWord(input, index));
+					}
+					else if (info == "time")
+					{
+						ei.time = stoi(getWord(input, index));
+					}
+					else if (info == "nodes")
+					{
+						ei.nodes = stoi(getWord(input, index));
+					}
+					else if (info == "pv")
+					{
+						ChessBoard b = currentBoard;
+						ChessMove m = b.getMoveFromText(getWord(input, index));
+						while (!m.empty())
+						{
+							ei.pv.push_back(m);
+							b.doMove(m, false);
+							++index;
+							m = b.getMoveFromText(getWord(input, index));
+						}
+						--index;
+					}
+					else if (info == "multipv")
+					{
+						ei.multipv = stoi(getWord(input, index));
+					}
+					else if (info == "score")
+					{
+						info = getWord(input, index);
+						++index;
+						if (info=="cp")
+							ei.cp = stoi(getWord(input, index));
+						else if (info=="mate")
+							ei.mate = stoi(getWord(input, index));
+					}
+					else if (info == "currmove")
+					{
+						ei.currmove = currentBoard.getMoveFromText(getWord(input, index));
+					}
+					else if (info == "currmovenumber")
+					{
+						ei.currmovenumber = stoi(getWord(input, index));
+					}
+					else if (info == "hashfull")
+					{
+						ei.hashfull = stoi(getWord(input, index));
+					}
+					else if (info == "nps")
+					{
+						ei.nps = stoi(getWord(input, index));
+					}
+					else if (info == "tbhits")
+					{
+						ei.tbhits = stoi(getWord(input, index));
+					}
+					else if (info == "sbhits")
+					{
+						ei.sbhits = stoi(getWord(input, index));
+					}
+					else if (info == "cpuload")
+					{
+						ei.cpuload = stoi(getWord(input, index));
+					}
+					else if (info == "string")
+					{
+						ei.string=getWord(input,index).c_str();
+						++index;
+						string s = getWord(input, index);
+						while (s.length())
+						{
+							ei.string += " ";
+							ei.string += s.c_str();
+							++index;
+							s = getWord(input, index);
+						}
+						// string is the rest of the line so break out of the while loop.
+						break;
+					}
+					else if (info == "refutation")
+					{
+						ChessBoard b = currentBoard;
+						ChessMove m = b.getMoveFromText(getWord(input, index));
+						while (!m.empty())
+						{
+							ei.refutation.push_back(m);
+							b.doMove(m, false);
+							++index;
+							m = b.getMoveFromText(getWord(input, index));
+						}
+						--index;
+					}
+					else if (info == "currline")
+					{
+						string s = getWord(input, index).c_str();
+						if (isNumber(s))
+						{
+							ei.cpunr= stoi(s);
+							++index;
+						}
+						ChessBoard b = currentBoard;
+						ChessMove m = b.getMoveFromText(s);
+						while (!m.empty())
+						{
+							ei.refutation.push_back(m);
+							b.doMove(m, false);
+							++index;
+							m = b.getMoveFromText(getWord(input, index));
+						}
+						--index;
+
+					}
+
+					++index;
+					info = getWord(input, index);
+					++index;
+				}
+				emit engineInfo(ei);
 			}
 		}
 	}
@@ -146,21 +323,25 @@ void Engine::slotReadyRead()
 
 void Engine::write(QString& cmd)
 {
+	if (!process)
+		return;
 	process->write(cmd.toLatin1());
 	process->write("\n");
 }
 
 void Engine::search(ChessBoard& board, MoveList& moves, SEARCHTYPE searchtype, int wtime, int winc, int btime, int binc, int movestogo)
 {
+	if (!process)
+		return;
 	QString cmd;
 	QStringList list;
 	ChessBoard b;
 	int i;
-	b = board;
+	currentBoard = board;
 	for (i = 0; i < moves.size; i++)
 	{
-		list.append(b.makeMoveText(moves.at(i),UCI).c_str());
-		if (!b.doMove(moves.at(i), true))
+		list.append(currentBoard.makeMoveText(moves.at(i),UCI).c_str());
+		if (!currentBoard.doMove(moves.at(i), true))
 			break;
 	}
 	string s=board.getFen();
@@ -190,10 +371,17 @@ void Engine::search(ChessBoard& board, MoveList& moves, SEARCHTYPE searchtype, i
 	cmd="go";
 	if (searchtype == PONDER_SEARCH)
 		cmd += " ponder";
-	cmd += " wtime " + QString().setNum(wtime);
-	cmd += " btime " + QString().setNum(btime);
-	cmd += " winc " + QString().setNum(winc);
-	cmd += " binc " + QString().setNum(binc);
+	if (searchtype == INFINITE_SEARCH)
+	{
+		cmd += " infinite";
+	}
+	else
+	{
+		cmd += " wtime " + QString().setNum(wtime);
+		cmd += " btime " + QString().setNum(btime);
+		cmd += " winc " + QString().setNum(winc);
+		cmd += " binc " + QString().setNum(binc);
+	}
 	if (movestogo)
 		cmd += "movestogo " + QString().setNum(movestogo);
 	cmd += "\n";
@@ -201,4 +389,16 @@ void Engine::search(ChessBoard& board, MoveList& moves, SEARCHTYPE searchtype, i
 		process->write(cmd.toLatin1());
 	else
 		waitCommand += cmd;
+}
+
+void Engine::stop()
+{
+	write(QString("stop"));
+}
+
+void Engine::setMultiPV(int n)
+{
+	QString qs = "setoption name multipv value ";
+	qs += QString().setNum(n);
+	write(qs);
 }

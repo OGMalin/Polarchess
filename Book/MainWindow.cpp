@@ -28,6 +28,8 @@ MainWindow::MainWindow(QWidget *parent)
 	QSettings settings;
 	restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
 
+	dataPath = QStandardPaths::locate(QStandardPaths::DocumentsLocation, QCoreApplication::organizationName(), QStandardPaths::LocateDirectory);
+	dataPath += "/" + QCoreApplication::applicationName();
 	writeTheory = false;
 	writeRep = false;
 	createMenu();
@@ -154,8 +156,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::fileOpenTheory()
 {
 	QMessageBox msgbox;
-	QString path = QStandardPaths::locate(QStandardPaths::DocumentsLocation, "/Polarchess", QStandardPaths::LocateDirectory);
-	path = QFileDialog::getOpenFileName(this, "Open book", path, "Book files (*.book)");
+	QString path = QFileDialog::getOpenFileName(this, "Open book", dataPath, "Book files (*.book)");
 	if (!path.isEmpty())
 	{
 		if (!theoryBase->open(path))
@@ -188,8 +189,7 @@ void MainWindow::fileOpenTheory()
 void MainWindow::fileOpenRep()
 {
 	QMessageBox msgbox;
-	QString path = QStandardPaths::locate(QStandardPaths::DocumentsLocation, "/Polarchess", QStandardPaths::LocateDirectory);
-	path = QFileDialog::getOpenFileName(this, "Open book", path, "Book files (*.book)");
+	QString path = QFileDialog::getOpenFileName(this, "Open book", dataPath, "Book files (*.book)");
 	if (!path.isEmpty())
 	{
 		if (!repBase->open(path))
@@ -221,8 +221,7 @@ void MainWindow::fileOpenRep()
 
 void MainWindow::fileNewTheory()
 {
-	QString path = QStandardPaths::locate(QStandardPaths::DocumentsLocation, "/Polarchess", QStandardPaths::LocateDirectory);
-	path = QFileDialog::getSaveFileName(this, "Create book", path, "Book files (*.book)");
+	QString path = QFileDialog::getSaveFileName(this, "Open book", dataPath, "Book files (*.book)");
 	if (!path.isEmpty())
 	{
 		QFile file(path);
@@ -265,8 +264,7 @@ void MainWindow::fileNewTheory()
 
 void MainWindow::fileNewRep()
 {
-	QString path = QStandardPaths::locate(QStandardPaths::DocumentsLocation, "/Polarchess", QStandardPaths::LocateDirectory);
-	path = QFileDialog::getSaveFileName(this, "Create book", path, "Book files (*.book)");
+	QString path = QFileDialog::getSaveFileName(this, "Open book", dataPath, "Book files (*.book)");
 	if (!path.isEmpty())
 	{
 		QFile file(path);
