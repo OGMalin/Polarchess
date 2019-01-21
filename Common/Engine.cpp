@@ -100,9 +100,10 @@ void Engine::unload()
 {
 	if (!process)
 		return;
-	disconnect();
-
-	process->write("quit\n");
+	disconnect(process);
+	write("stop");
+	_sleep(500);
+	write("quit");
 	if (process)
 		process->waitForFinished(1000);
 	delete process;
@@ -134,6 +135,7 @@ void Engine::slotReadyStandardOutput()
 	while (process && process->canReadLine())
 	{
 		readlen = process->readLine(sz, 1024);
+		qDebug(sz);
 		if (readlen)
 		{
 			input = trim(sz);
@@ -150,16 +152,16 @@ void Engine::slotReadyStandardOutput()
 				}
 				else if (!setup.isEmpty())
 				{
-					process->write(setup.toLatin1());
-					process->write("isready\n");
+					write(setup);
+					write("isready");
 				}
-				process->write("isready\n");
+				write("isready");
 			}
 			else if (cmd == "readyok")
 			{
 				if (!waitCommand.isEmpty())
 				{
-					process->write(waitCommand.toLatin1());
+					write(waitCommand);
 					waitCommand.clear();
 				}
 				readyok = true;
@@ -309,7 +311,7 @@ void Engine::slotReadyStandardOutput()
 void Engine::slotStarted()
 {
 	emit engineMessage(tr("Engine started"));
-	process->write("uci\n");
+	write("uci");
 }
 
 void Engine::slotStateChanged(QProcess::ProcessState newState)
@@ -323,6 +325,7 @@ void Engine::slotReadyRead()
 
 void Engine::write(QString& cmd)
 {
+	qDebug(cmd.toLatin1());
 	if (!process)
 		return;
 	process->write(cmd.toLatin1());
@@ -362,10 +365,9 @@ void Engine::search(ChessBoard& board, MoveList& moves, SEARCHTYPE searchtype, i
 			++lit;
 		}
 	}
-	cmd += "\n";
 	// If engine playing white it is most probaly not ready yet.
 	if (readyok)
-		process->write(cmd.toLatin1());
+		write(cmd);
 	else
 		waitCommand += cmd;
 	cmd="go";
@@ -386,14 +388,14 @@ void Engine::search(ChessBoard& board, MoveList& moves, SEARCHTYPE searchtype, i
 		cmd += "movestogo " + QString().setNum(movestogo);
 	cmd += "\n";
 	if (readyok)
-		process->write(cmd.toLatin1());
+		write(cmd);
 	else
 		waitCommand += cmd;
 }
 
 void Engine::stop()
 {
-	write(QString("stop"));
+	write("stop");
 }
 
 void Engine::setMultiPV(int n)

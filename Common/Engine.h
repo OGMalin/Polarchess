@@ -98,6 +98,7 @@ public:
 	bool load(QString& enginefile);
 	void unload();
 	void write(QString& cmd);
+	void write(char* sz) { write(QString(sz)); }
 	void search(ChessBoard& board, MoveList& moves, SEARCHTYPE searchtype, int wtime = 0, int winc = 0, int btime = 0, int binc = 0, int movestogo = 0);
 	const QString lastError();
 	void stop();

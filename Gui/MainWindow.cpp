@@ -44,7 +44,6 @@ MainWindow::MainWindow()
 	clockwindow = new ClockWindow;
 	enginewindow = new EngineWindow;
 
-	enginewindow->update(currentGame->getStartPosition());
 	hSplitter->addWidget(boardwindow);
 	hSplitter->addWidget(vSplitter);
 	vSplitter->addWidget(clockwindow);

@@ -16,7 +16,8 @@ public:
 	QString iniPath;
 	EngineWindow(QWidget *parent = 0);
 	~EngineWindow();
-	void update(ChessBoard& board);
+	void setPosition(const ChessBoard& cb);
+
 public slots:
 	void analyzeClicked(bool);
 	void freezeClicked(bool);

@@ -67,9 +67,9 @@ EngineWindow::~EngineWindow()
 	delete engine;
 }
 
-void EngineWindow::update(ChessBoard& board)
+void EngineWindow::setPosition(const ChessBoard& cb)
 {
-	currentBoard = board;
+	currentBoard = cb;
 	if (analyzing)
 		if (!freezing)
 			engine->stop();
@@ -165,7 +165,7 @@ void EngineWindow::engineInfo(const EngineInfo& info)
 		else if (info.mate)
 			item = new QStandardItem(QString("M") + itoa(info.mate,sz,10));
 		else
-			item = new QStandardItem(itoa(info.mate, sz, 10));
+			item = new QStandardItem(itoa(info.cp, sz, 10));
 		item->setEditable(false);
 		item->setTextAlignment(Qt::AlignCenter);
 		model->setItem(line-1, 0, item);

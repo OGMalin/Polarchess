@@ -63,6 +63,8 @@ MainWindow::MainWindow(QWidget *parent)
 	repBase = new Database(QString("rep"));
 	currentPath = new Path();
 
+	enginewindow->setPosition(currentPath->getStartPosition());
+
 	connect(boardwindow, SIGNAL(moveEntered(ChessMove&)), this, SLOT(moveEntered(ChessMove&)));
 	connect(pathwindow, SIGNAL(pathSelected(int)), this, SLOT(pathSelected(int)));
 
@@ -416,6 +418,7 @@ void MainWindow::moveEntered(ChessMove& move)
 	bdeTheory = theoryBase->find(board);
 	bdeRep = repBase->find(board);
 	boardwindow->setPosition(board);
+	enginewindow->setPosition(board);
 	movewindow->update(bdeTheory, bdeRep);
 	openingwindow->update(bdeTheory, bdeRep);
 	commentwindow->update(bdeTheory.comment, bdeRep.comment);
@@ -433,6 +436,7 @@ void MainWindow::pathSelected(int ply)
 	bdeTheory = theoryBase->find(board);
 	bdeRep = repBase->find(board);
 	boardwindow->setPosition(board);
+	enginewindow->setPosition(board);
 	movewindow->update(bdeTheory, bdeRep);
 	openingwindow->update(bdeTheory, bdeRep);
 	commentwindow->update(bdeTheory.comment, bdeRep.comment);
