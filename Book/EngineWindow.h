@@ -16,7 +16,7 @@ public:
 	QString iniPath;
 	EngineWindow(QWidget *parent = 0);
 	~EngineWindow();
-	void setPosition(const ChessBoard& cb);
+	void setPosition(const ChessBoard& cb, int movenr=1);
 
 public slots:
 	void analyzeClicked(bool);
@@ -36,11 +36,16 @@ private:
 	QPushButton* incline;	// Increase multipv
 	QPushButton* decline;	// Decrease multipv
 	QLabel* lines;		// Show number of multipv
+	QLabel* nodes;
+	QLabel* nps;
+	QLabel* time;
 	QStandardItemModel* model;
 	bool analyzing;
 	bool freezing;
 	ChessBoard currentBoard;
 	ChessBoard freezeBoard;
 	MoveList movelist;
+	int movenr;
+	int freezemovenr;
 };
 

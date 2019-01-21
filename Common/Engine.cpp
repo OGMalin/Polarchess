@@ -216,10 +216,18 @@ void Engine::slotReadyStandardOutput()
 					{
 						info = getWord(input, index);
 						++index;
-						if (info=="cp")
+						if (info == "cp")
+						{
 							ei.cp = stoi(getWord(input, index));
-						else if (info=="mate")
+							if (currentBoard.toMove == BLACK)
+								ei.cp *= -1;
+						}
+						else if (info == "mate")
+						{
 							ei.mate = stoi(getWord(input, index));
+							if (currentBoard.toMove == BLACK)
+								ei.mate *= -1;
+						}
 					}
 					else if (info == "currmove")
 					{

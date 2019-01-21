@@ -12,6 +12,8 @@ EngineWindow::EngineWindow(QWidget *parent)
 {
 	char sz[16];
 	multipv = 1;
+	movenr = 1;
+	freezemovenr = 1;
 	analyzing = false;
 	freezing = false;
 	engine = new Engine;
@@ -32,16 +34,26 @@ EngineWindow::EngineWindow(QWidget *parent)
 	analyze->setCheckable(true);
 	freeze = new QPushButton("Freeze");
 	freeze->setCheckable(true);
+	nodes = new QLabel;
+	nodes->setAlignment(Qt::AlignCenter);
+	nps = new QLabel;
+	nps->setAlignment(Qt::AlignCenter);
+	time = new QLabel;
+	time->setAlignment(Qt::AlignCenter);
+
 	hbox->addWidget(decline);
 	hbox->addWidget(lines);
 	hbox->addWidget(incline);
 	hbox->addWidget(analyze);
 	hbox->addWidget(freeze);
+	hbox->addWidget(nodes);
+	hbox->addWidget(nps);
+	hbox->addWidget(time);
 	grid->addLayout(hbox, 0, 0);
 
-	model = new QStandardItemModel(multipv, 5);
+	model = new QStandardItemModel(multipv, 3);
 	QStringList header;
-	header << "Score" << "Depth" << "Time" << "Nodes" << "PV";
+	header << "Score" << "Depth" << "PV";
 	model->setHorizontalHeaderLabels(header);
 	QTableView* output = new QTableView;
 	output->setModel(model);
@@ -67,9 +79,10 @@ EngineWindow::~EngineWindow()
 	delete engine;
 }
 
-void EngineWindow::setPosition(const ChessBoard& cb)
+void EngineWindow::setPosition(const ChessBoard& cb, int mn)
 {
 	currentBoard = cb;
+	movenr = mn;
 	if (analyzing)
 		if (!freezing)
 			engine->stop();
@@ -103,10 +116,13 @@ void EngineWindow::freezeClicked(bool)
 	{
 		freezing = true;
 		freezeBoard = currentBoard;
+		freezemovenr = movenr;
 	}
 	else
 	{
 		freezing = false;
+		if (analyzing)
+			engine->stop();
 	}
 }
 
@@ -154,56 +170,71 @@ void EngineWindow::engineInfo(const EngineInfo& info)
 	int line = info.multipv;
 	if (line < 1)
 		line = 1;
+//	model->clear();
+	if (info.time)
+		time->setText(itoa(info.time / 1000, sz, 10) + QString("s"));
+	if (info.nodes)
+		nodes->setText(itoa(info.nodes, sz, 10) + QString(" nodes"));
+	if (info.nps)
+		nps->setText(itoa(info.nps, sz, 10) + QString(" nps"));
+
 	if (info.pv.size)
 	{
 		QStandardItem* item;
-
-		if (info.lowerbound)
-			item = new QStandardItem("--");
-		else if (info.upperbound)
-			item = new QStandardItem("++");
-		else if (info.mate)
-			item = new QStandardItem(QString("M") + itoa(info.mate,sz,10));
-		else
-			item = new QStandardItem(itoa(info.cp, sz, 10));
-		item->setEditable(false);
-		item->setTextAlignment(Qt::AlignCenter);
-		model->setItem(line-1, 0, item);
-
-		item = new QStandardItem(itoa(info.depth, sz, 10));
-		item->setEditable(false);
-		item->setTextAlignment(Qt::AlignCenter);
-		model->setItem(line - 1, 1, item);
-
-		item = new QStandardItem(itoa(info.time/1000, sz, 10));
-		item->setEditable(false);
-		item->setTextAlignment(Qt::AlignCenter);
-		model->setItem(line - 1, 2, item);
-
-		item = new QStandardItem(itoa(info.nodes, sz, 10));
-		item->setEditable(false);
-		item->setTextAlignment(Qt::AlignCenter);
-		model->setItem(line - 1, 3, item);
-
 		QString s;
 		ChessBoard b;
 		ChessMove m;
+		int mn;
 		if (freezing)
-			b = freezeBoard;
-		else
-			b = currentBoard;
-		for (int i = 0; i < info.pv.size; i++)
 		{
-			m = info.pv.list[i];
-
-			s += QString(b.makeMoveText(m,FIDE).c_str());
-			if (i<(info.pv.size-1))
-				s+=" ";
-			b.doMove(m,false);
+			b = freezeBoard;
+			mn = freezemovenr;
 		}
-		item = new QStandardItem(s);
-		item->setEditable(false);
-		item->setTextAlignment(Qt::AlignCenter);
-		model->setItem(line - 1, 4, item);
+		else
+		{
+			b = currentBoard;
+			mn = movenr;
+		}
+		if (b.isLegal(ChessMove(info.pv.list[0])))
+		{
+			if (info.lowerbound)
+				item = new QStandardItem("--");
+			else if (info.upperbound)
+				item = new QStandardItem("++");
+			else if (info.mate)
+				item = new QStandardItem(QString("M") + itoa(info.mate, sz, 10));
+			else
+				item = new QStandardItem(itoa(info.cp, sz, 10));
+			item->setEditable(false);
+			item->setTextAlignment(Qt::AlignCenter);
+			model->setItem(line - 1, 0, item);
+
+			item = new QStandardItem(itoa(info.depth, sz, 10));
+			item->setEditable(false);
+			item->setTextAlignment(Qt::AlignCenter);
+			model->setItem(line - 1, 1, item);
+
+			for (int i = 0; i < info.pv.size; i++)
+			{
+				m = info.pv.list[i];
+				if (b.toMove == WHITE)
+				{
+					s += itoa(mn + i / 2, sz, 10) + QString(".");
+				}
+				else if (i == 0)
+				{
+					s += itoa(mn, sz, 10) + QString("...");
+					++mn;
+				}
+				s += QString(b.makeMoveText(m, FIDE).c_str());
+				if (i < (info.pv.size - 1))
+					s += " ";
+				b.doMove(m, false);
+			}
+			item = new QStandardItem(s);
+			item->setEditable(false);
+			item->setTextAlignment(Qt::AlignLeft);
+			model->setItem(line - 1, 2, item);
+		}
 	}
 }

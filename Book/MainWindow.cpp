@@ -418,7 +418,7 @@ void MainWindow::moveEntered(ChessMove& move)
 	bdeTheory = theoryBase->find(board);
 	bdeRep = repBase->find(board);
 	boardwindow->setPosition(board);
-	enginewindow->setPosition(board);
+	enginewindow->setPosition(board,currentPath->size()/2+1);
 	movewindow->update(bdeTheory, bdeRep);
 	openingwindow->update(bdeTheory, bdeRep);
 	commentwindow->update(bdeTheory.comment, bdeRep.comment);
@@ -436,7 +436,7 @@ void MainWindow::pathSelected(int ply)
 	bdeTheory = theoryBase->find(board);
 	bdeRep = repBase->find(board);
 	boardwindow->setPosition(board);
-	enginewindow->setPosition(board);
+	enginewindow->setPosition(board, currentPath->size() / 2 + 1);
 	movewindow->update(bdeTheory, bdeRep);
 	openingwindow->update(bdeTheory, bdeRep);
 	commentwindow->update(bdeTheory.comment, bdeRep.comment);
