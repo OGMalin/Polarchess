@@ -67,6 +67,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	connect(boardwindow, SIGNAL(moveEntered(ChessMove&)), this, SLOT(moveEntered(ChessMove&)));
 	connect(pathwindow, SIGNAL(pathSelected(int)), this, SLOT(pathSelected(int)));
+	connect(commentwindow, SIGNAL(commentChanged(QString&)), this, SLOT(commentChanged(QString&)));
 
 //	boardwindow->setVisible(false);
 //	enginewindow->setVisible(false);
@@ -250,10 +251,9 @@ void MainWindow::fileNewTheory()
 		/*
 		movewindow->setVisible(true);
 		commentwindow->setVisible(true);
-
+		*/
 		closeTheoryAct->setDisabled(false);
 		writeTheoryAct->setDisabled(false);
-		*/
 
 		if (writeTheory)
 		{
@@ -293,10 +293,10 @@ void MainWindow::fileNewRep()
 		/*
 		movewindow->setVisible(true);
 		commentwindow->setVisible(true);
+		*/
 
 		closeRepAct->setDisabled(false);
 		writeRepAct->setDisabled(false);
-		*/
 
 		if (writeRep)
 		{
@@ -441,4 +441,18 @@ void MainWindow::pathSelected(int ply)
 	openingwindow->update(bdeTheory, bdeRep);
 	commentwindow->update(bdeTheory.comment, bdeRep.comment);
 	pathwindow->update(currentPath);
+}
+
+void MainWindow::commentChanged(QString& comment)
+{
+	if (writeTheory)
+	{
+		bdeTheory.comment = comment;
+		theoryBase->add(bdeTheory);
+	}
+	else if (writeRep)
+	{
+		bdeRep.comment = comment;
+		repBase->add(bdeTheory);
+	}
 }

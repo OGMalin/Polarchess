@@ -30,6 +30,7 @@ private:
 public slots:
 	void moveEntered(ChessMove&);
 	void pathSelected(int);
+	void commentChanged(QString&);
 
 public:
 	Path* currentPath;

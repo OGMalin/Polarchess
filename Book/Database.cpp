@@ -98,7 +98,7 @@ bool Database::add(BookDBEntry& bde)
 			"eco = :eco,"
 			"comment = :comment,"
 			"eval = :eval,"
-			"computer = : computer,"
+			"computer = :computer,"
 			"movelist = :movelist "
 			"WHERE fen = :fen;");
 	}
@@ -119,6 +119,12 @@ bool Database::add(BookDBEntry& bde)
 	bde.convertFromMoveList(bde.movelist, qs);
 	query.bindValue(":movelist", qs.toLatin1());
 	query.exec();
+	QSqlError error = query.lastError();
+	if (error.isValid())
+	{
+		qDebug() << "Database error: " << error.databaseText();
+		qDebug() << "Driver error: " << error.driverText();
+	}
 	bde.dirty = false;
 	return true;
 }
@@ -194,7 +200,8 @@ void BookDBEntry::convertToMoveList(QVector<BookDBMove>& movelist, const QString
 			bdm.repertoire = qmove[2].toInt();
 		if (qmove.size() > 3)
 			bdm.score = qmove[3].toInt();
-		movelist.append(bdm);
+		if (!bdm.move.empty())
+			movelist.append(bdm);
 	}
 }
 
@@ -206,17 +213,20 @@ void BookDBEntry::convertFromMoveList(const QVector<BookDBMove>& movelist, QStri
 	QVector<BookDBMove>::ConstIterator it = movelist.begin();
 	while (it != movelist.end())
 	{
-		if (!first)
-			data += ";";
-		else
-			first = false;
-		data += board.makeMoveText(it->move, sz, 16, FIDE);
-		data += "|";
-		data += it->comment;
-		data += "|";
-		data += itoa(it->repertoire, sz, 10);
-		data += "|";
-		data += itoa(it->score, sz, 10);
+		if (board.isLegal(ChessMove(it->move)))
+		{
+			if (!first)
+				data += ";";
+			else
+				first = false;
+			data += board.makeMoveText(it->move, sz, 16, FIDE);
+			data += "|";
+			data += it->comment;
+			data += "|";
+			data += itoa(it->repertoire, sz, 10);
+			data += "|";
+			data += itoa(it->score, sz, 10);
+		}
 		++it;
 	}
 }
