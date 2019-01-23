@@ -2,6 +2,7 @@
 
 #include <QWidget>
 #include <QPixmap>
+#include <QPoint>
 #include "ChessBoard.h"
 #include "ChessMove.h"
 
@@ -19,11 +20,14 @@ class BoardWindow :public QWidget
 	Q_OBJECT
 public:
 	BoardWindow(QWidget* parent = 0);
-	void flip();
 	void flip(bool inv);
 	void newGame();
 	void setPosition(const QString& fen);
 	void setPosition(const ChessBoard& cb);
+
+public slots:
+	void showContextMenu(const QPoint& pos);
+	void flip();
 
 signals:
 	void moveEntered(ChessMove&);

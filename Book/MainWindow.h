@@ -55,6 +55,8 @@ private:
 	QAction* exitAct;
 	QAction* writeTheoryAct;
 	QAction* writeRepAct;
+	QAction* whiteRepAct;
+	QAction* blackRepAct;
 	QSplitter* hSplitter;
 	QSplitter* v1Splitter;
 	QSplitter* v2Splitter;
@@ -70,6 +72,7 @@ private:
 	BookDBEntry bdeRep;
 	bool writeTheory;
 	bool writeRep;
+	bool whiteRep;
 	void createMenu();
 	void writeSettings();
 	void readSettings();
@@ -82,4 +85,6 @@ private:
 	void fileCloseRep();
 	void bookWriteTheory();
 	void bookWriteRep();
+	void whiteRepertoire();
+	void blackRepertoire();
 };

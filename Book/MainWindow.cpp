@@ -32,6 +32,8 @@ MainWindow::MainWindow(QWidget *parent)
 	dataPath += "/" + QCoreApplication::applicationName();
 	writeTheory = false;
 	writeRep = false;
+	whiteRep=true;
+
 	createMenu();
 	readSettings();
 
@@ -105,6 +107,8 @@ void MainWindow::createMenu()
 	writeRepAct = bookWriteMenu->addAction("Write to repertoire book", this, &MainWindow::bookWriteRep);
 	writeTheoryAct->setCheckable(true);
 	writeRepAct->setCheckable(true);
+	whiteRepAct= bookMenu->addAction("White repertoire", this, &MainWindow::whiteRepertoire);
+	blackRepAct = bookMenu->addAction("Black repertoire", this, &MainWindow::blackRepertoire);
 
 	// Setting up the toolbar
 	toolbar = addToolBar("Toolbar");
@@ -116,6 +120,12 @@ void MainWindow::createMenu()
 	closeRepAct->setDisabled(true);
 	writeTheoryAct->setDisabled(true);
 	writeRepAct->setDisabled(true);
+	whiteRepAct->setDisabled(true);
+	blackRepAct->setDisabled(true);
+
+	whiteRepAct->setCheckable(true);
+	blackRepAct->setCheckable(true);
+	whiteRepAct->setChecked(true);
 }
 
 void MainWindow::writeSettings()
@@ -212,6 +222,8 @@ void MainWindow::fileOpenRep()
 
 		closeRepAct->setDisabled(false);
 		writeRepAct->setDisabled(false);
+		whiteRepAct->setDisabled(false);
+		blackRepAct->setDisabled(false);
 
 		if (writeRep)
 		{
@@ -297,6 +309,8 @@ void MainWindow::fileNewRep()
 
 		closeRepAct->setDisabled(false);
 		writeRepAct->setDisabled(false);
+		whiteRepAct->setDisabled(false);
+		blackRepAct->setDisabled(false);
 
 		if (writeRep)
 		{
@@ -326,6 +340,8 @@ void MainWindow::fileCloseRep()
 	bdeRep.clear();
 	closeRepAct->setDisabled(true);
 	writeRepAct->setDisabled(true);
+	whiteRepAct->setDisabled(true);
+	blackRepAct->setDisabled(true);
 
 	if (writeRep)
 	{
@@ -370,7 +386,6 @@ void MainWindow::moveEntered(ChessMove& move)
 	ChessBoard board = currentPath->getPosition();
 	BookDBMove bm;
 
-	BookDBEntry bde;
 	// Do the move if it is legal
 	if (!currentPath->add(move))
 	{
@@ -379,39 +394,27 @@ void MainWindow::moveEntered(ChessMove& move)
 	}
 
 	// Save the move if it doesn't exist
-	PathEntry pe;
 	if (writeTheory)
 	{
-		for (int i = 0; i < currentPath->size(); i++)
+		if (!bdeTheory.moveExist(move))
 		{
-			pe = currentPath->getEntry(i);
-			bde = theoryBase->find(pe.board);
-			if (!bde.moveExist(move))
-			{
-				bm.move = move;
-				bm.score = 0;
-				bm.repertoire = 0;
-				bde.movelist.append(bm);
-				theoryBase->add(bde);
-			}
+			bm.move = move;
+			bm.score = 0;
+			bm.repertoire = 0;
+			bdeTheory.movelist.append(bm);
+			theoryBase->add(bdeTheory);
 		}
 	} else if (writeRep)
 	{
-		for (int i = 0; i < currentPath->size(); i++)
+		if (!bdeRep.moveExist(move))
 		{
-			pe = currentPath->getEntry(i);
-			bde = repBase->find(pe.board);
-			if (!bde.moveExist(move))
-			{
-				bm.move = move;
-				bm.score = 0;
-				bm.repertoire = 0;
-				bdeRep.movelist.append(bm);
-				repBase->add(bdeRep);
-			}
+			bm.move = move;
+			bm.score = 0;
+			bm.repertoire = 0;
+			bdeRep.movelist.append(bm);
+			repBase->add(bdeRep);
 		}
 	}
-
 
 	// Change to read from both db
 	board = currentPath->getPosition();
@@ -455,4 +458,16 @@ void MainWindow::commentChanged(QString& comment)
 		bdeRep.comment = comment;
 		repBase->add(bdeTheory);
 	}
+}
+
+void MainWindow::whiteRepertoire()
+{
+	whiteRep = true;
+	blackRepAct->setChecked(false);
+}
+
+void MainWindow::blackRepertoire()
+{
+	whiteRep = false;
+	whiteRepAct->setChecked(false);
 }

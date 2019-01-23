@@ -2,6 +2,7 @@
 #include <QPaintEvent>
 #include <QResizeEvent>
 #include <QPainter>
+#include <QMenu>
 #include "defs.h"
 
 BoardWindow::BoardWindow(QWidget* parent)
@@ -14,6 +15,8 @@ BoardWindow::BoardWindow(QWidget* parent)
 	setBoardTheme();
 	setMinimumSize(200, 200);
 	readImgPieces();
+	setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 }
 
 void BoardWindow::paintEvent(QPaintEvent* event)
@@ -323,4 +326,11 @@ void BoardWindow::setPosition(const ChessBoard& cb)
 	dragPiece = EMPTY;
 	currentBoard = cb;
 	update();
+}
+
+void BoardWindow::showContextMenu(const QPoint& pos)
+{
+	QMenu* contextMenu = new QMenu(this);
+	contextMenu->addAction(QString("Flip"), this, SLOT(flip()));
+	contextMenu->exec(mapToGlobal(pos));
 }
