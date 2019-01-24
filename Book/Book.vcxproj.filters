@@ -87,6 +87,18 @@
     <ClCompile Include="..\Common\Engine.cpp">
       <Filter>Common</Filter>
     </ClCompile>
+    <ClCompile Include="..\Common\Pgn.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\ChessGame.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\WinFile.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="ImportPgnDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -119,6 +131,9 @@
     <QtMoc Include="..\Common\Engine.h">
       <Filter>Common</Filter>
     </QtMoc>
+    <QtMoc Include="ImportPgnDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Common\defs.h">
@@ -147,6 +162,18 @@
     </ClInclude>
     <ClInclude Include="Path.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Pgn.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\ChessGame.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\WinFile.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\NagValues.h">
+      <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

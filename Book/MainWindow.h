@@ -57,6 +57,7 @@ private:
 	QAction* writeRepAct;
 	QAction* whiteRepAct;
 	QAction* blackRepAct;
+	QAction* importPgnAct;
 	QSplitter* hSplitter;
 	QSplitter* v1Splitter;
 	QSplitter* v2Splitter;
@@ -87,4 +88,5 @@ private:
 	void bookWriteRep();
 	void whiteRepertoire();
 	void blackRepertoire();
+	void fileImportPgn();
 };

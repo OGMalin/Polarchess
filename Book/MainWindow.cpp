@@ -5,6 +5,7 @@
 #include "PathWindow.h"
 #include "EngineWindow.h"
 #include "AboutDialog.h"
+#include "ImportPgnDialog.h"
 #include "../Common/BoardWindow.h"
 #include "Path.h"
 #include <QMenu>
@@ -98,6 +99,7 @@ void MainWindow::createMenu()
 	fileCloseMenu = fileMenu->addMenu("Close book");
 	closeTheoryAct = fileCloseMenu->addAction("Close theory book", this, &MainWindow::fileCloseTheory);
 	closeRepAct = fileCloseMenu->addAction("Close repertoire book", this, &MainWindow::fileCloseRep);
+	importPgnAct = fileMenu->addAction("Import pgnfiles", this, &MainWindow::fileImportPgn);
 	fileMenu->addSeparator();
 	exitAct = fileMenu->addAction("Exit", this, &QWidget::close);
 
@@ -107,6 +109,7 @@ void MainWindow::createMenu()
 	writeRepAct = bookWriteMenu->addAction("Write to repertoire book", this, &MainWindow::bookWriteRep);
 	writeTheoryAct->setCheckable(true);
 	writeRepAct->setCheckable(true);
+	bookMenu->addSeparator();
 	whiteRepAct= bookMenu->addAction("White repertoire", this, &MainWindow::whiteRepertoire);
 	blackRepAct = bookMenu->addAction("Black repertoire", this, &MainWindow::blackRepertoire);
 
@@ -122,6 +125,7 @@ void MainWindow::createMenu()
 	writeRepAct->setDisabled(true);
 	whiteRepAct->setDisabled(true);
 	blackRepAct->setDisabled(true);
+	importPgnAct->setDisabled(true);
 
 	whiteRepAct->setCheckable(true);
 	blackRepAct->setCheckable(true);
@@ -189,6 +193,7 @@ void MainWindow::fileOpenTheory()
 
 		closeTheoryAct->setDisabled(false);
 		writeTheoryAct->setDisabled(false);
+		importPgnAct->setDisabled(false);
 
 		if (writeTheory)
 		{
@@ -224,6 +229,7 @@ void MainWindow::fileOpenRep()
 		writeRepAct->setDisabled(false);
 		whiteRepAct->setDisabled(false);
 		blackRepAct->setDisabled(false);
+		importPgnAct->setDisabled(false);
 
 		if (writeRep)
 		{
@@ -266,6 +272,7 @@ void MainWindow::fileNewTheory()
 		*/
 		closeTheoryAct->setDisabled(false);
 		writeTheoryAct->setDisabled(false);
+		importPgnAct->setDisabled(false);
 
 		if (writeTheory)
 		{
@@ -311,6 +318,7 @@ void MainWindow::fileNewRep()
 		writeRepAct->setDisabled(false);
 		whiteRepAct->setDisabled(false);
 		blackRepAct->setDisabled(false);
+		importPgnAct->setDisabled(false);
 
 		if (writeRep)
 		{
@@ -323,6 +331,7 @@ void MainWindow::fileNewRep()
 
 void MainWindow::fileCloseTheory()
 {
+	theoryBase->close();
 	bdeTheory.clear();
 	closeTheoryAct->setDisabled(true);
 	writeTheoryAct->setDisabled(true);
@@ -333,10 +342,13 @@ void MainWindow::fileCloseTheory()
 		writeTheory = false;
 		writeTheoryAct->setChecked(false);
 	}
+	if (!repBase->isOpen())
+		importPgnAct->setDisabled(true);
 }
 
 void MainWindow::fileCloseRep()
 {
+	repBase->close();
 	bdeRep.clear();
 	closeRepAct->setDisabled(true);
 	writeRepAct->setDisabled(true);
@@ -349,6 +361,8 @@ void MainWindow::fileCloseRep()
 		writeRep = false;
 		writeRepAct->setChecked(false);
 	}
+	if (!theoryBase->isOpen())
+		importPgnAct->setDisabled(true);
 }
 
 void MainWindow::bookWriteTheory()
@@ -470,4 +484,16 @@ void MainWindow::blackRepertoire()
 {
 	whiteRep = false;
 	whiteRepAct->setChecked(false);
+}
+
+void MainWindow::fileImportPgn()
+{
+	int moves=999;
+	ImportPgnDialog dialog(this);
+	dialog.setItems(theoryBase->isOpen(), repBase->isOpen(), whiteRep, moves);
+	if (dialog.exec() == QDialog::Rejected)
+		return;
+	bool theory, rep, white;
+	QString path;
+	dialog.getItems(path, theory, rep, white, moves);
 }

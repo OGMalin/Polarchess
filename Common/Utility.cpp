@@ -44,6 +44,27 @@ const string trim(const string& s)
 	return string(s, b, e - b + 1);
 }
 
+const std::string getLine(const string& input, int n)
+{
+	char sep[] = "\r\n";
+	return getWord(input, n, sep);
+}
+
+const std::string getLine(const char* sz)
+{
+	int len = strlen(sz);
+	int end = 0;
+	while (end < len)
+	{
+		if (sz[end] == '\n')
+			break;
+		if (sz[end] == '\0')
+			break;
+		++end;
+	}
+	return string(sz, end);
+}
+
 char* trim(char* str)
 {
 	int p;
@@ -213,4 +234,30 @@ bool isNumber(const string& s, int type)
 	if (e == string::npos)
 		return true;
 	return false;
+}
+
+void breakLines(std::string& s, int linelength)
+{
+	int index, lastspace, letter;
+	index = 0;
+	letter = 0;
+	lastspace = 0;
+	char c;
+	while ((int)s.length() > index)
+	{
+		c = s.at(index);
+		if (c == ' ')
+			lastspace = index;
+		if (c == '\n')
+			letter = 0;
+		else
+			letter++;
+		if (letter > linelength)
+		{
+			s.replace(lastspace, 1, "\r\n");
+			letter = index - lastspace;
+			lastspace = 0;
+		}
+		index++;
+	}
 }
