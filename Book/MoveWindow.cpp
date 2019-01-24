@@ -24,9 +24,11 @@ MoveWindow::~MoveWindow()
 
 void MoveWindow::update(BookDBEntry& theory, BookDBEntry& rep)
 {
-	int i;
+	int i,j;
 	QString qs;
 	QStandardItem* item;
+	int rows;
+	model->setRowCount(0);
 	for (i = 0; i < theory.movelist.size();i++)
 	{
 		qs=QString(theory.board.makeMoveText(theory.movelist[i].move, FIDE).c_str());
@@ -36,5 +38,28 @@ void MoveWindow::update(BookDBEntry& theory, BookDBEntry& rep)
 		item->setTextAlignment(Qt::AlignLeft);
 		model->setItem(i,0,item);
 	}
-	model->setRowCount(i);
+	rows = i;
+	for (i = 0; i < rep.movelist.size(); i++)
+	{
+		qs = QString(rep.board.makeMoveText(rep.movelist[i].move, FIDE).c_str());
+		qs += rep.movelist[i].comment;
+		item = new QStandardItem(qs);
+		item->setEditable(false);
+		item->setTextAlignment(Qt::AlignLeft);
+		for (j = 0; j < theory.movelist.size(); j++)
+		{
+			if (rep.movelist[i].move == theory.movelist[j].move)
+				break;
+		}
+		if (j < theory.movelist.size())
+		{
+			model->setItem(j, 1, item);
+		}
+		else
+		{
+			model->setItem(rows, 1, item);
+			++rows;
+		}
+	}
+	model->setRowCount(rows);
 }
