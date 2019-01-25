@@ -1,5 +1,5 @@
 #include "Scoresheet.h"
-#include "QChessGame.h"
+#include "../Common/QChessGame.h"
 #include <QTableView>
 #include <QStandardItemModel>
 #include <QStringList>

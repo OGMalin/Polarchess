@@ -9,20 +9,20 @@
 
 struct ChessGameMove
 {
-  size_t posIndex;
+  int posIndex;
   ChessMove move;
   std::string comment;         
 };
 
 struct ChessGamePosition
 {
-  size_t fromIndex;
+  int fromIndex;
   ChessBoard board;
   std::string comment;
   std::vector<ChessGameMove> move;
   ChessGamePosition():fromIndex(-1){};
 
-  size_t moveExist(ChessMove& m)
+  int moveExist(ChessMove& m)
   {
     size_t i=0;
     while (i<move.size())
@@ -34,9 +34,9 @@ struct ChessGamePosition
     return -1;
   }
 
-  size_t moveExist(size_t n)
+  int moveExist(int n)
   {
-    size_t i=0;
+    int i=0;
     while (i<move.size())
     {
       if (move[i].posIndex==n)
@@ -151,7 +151,7 @@ public:
   const std::string getWhiteTimeControl();
   const std::string getBlackTimeControl();
   // Return number of halfmoves in mainline.
-  size_t  mainMoves();
+  int  mainMoves();
   std::string toString();
   // Return a variation as a pgn string.
   std::string getVariation(int n, bool comment);
@@ -168,7 +168,7 @@ public:
   bool getMove(std::string& m , unsigned int n);
   void getComment(std::string& comment);
   bool getPosition(ChessBoard& cb);
-  size_t  getPosition(){return activePosition;};
+  int  getPosition(){return activePosition;};
   void getCurrentLine(MoveList& ml);
   int  getCurrentPly();
   bool addMove(ChessMove& m);
@@ -180,16 +180,16 @@ public:
   void addMoveComment(std::string& s, bool replace=false);
   bool deleteMoves(ChessMove& m);
   // Change the order of a move.
-  void orderMove(ChessMove& m, size_t neworder);
-  bool goTo(size_t pos);
-  void CopyByMove(ChessGame& newgame,size_t pos, size_t exclude);
+  void orderMove(ChessMove& m, int neworder);
+  bool goTo(int pos);
+  void CopyByMove(ChessGame& newgame,int pos, int exclude);
 //private:
   bool deleteMove(int n);
-  bool deletePosition(size_t n);
-  size_t activePosition;
+  bool deletePosition(int n);
+  int activePosition;
   std::string piecechar;
   bool doMove(unsigned int n);
-  void iterateMoves(std::string& s, size_t pos, int mn, bool comment, bool variation);
-  size_t iterateVariation(size_t pos, int& current, int variation);
+  void iterateMoves(std::string& s, int pos, int mn, bool comment, bool variation);
+  int iterateVariation(int pos, int& current, int variation);
 };
 

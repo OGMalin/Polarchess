@@ -4,8 +4,8 @@
 #include "ClockWindow.h"
 #include "EngineWindow.h"
 #include "Database.h"
+#include "Scoresheet.h"
 #include "../Common/BoardWindow.h"
-#include "../Common/Scoresheet.h"
 #include "../Common/Engine.h"
 #include "../Common/QChessGame.h"
 #include <QIcon>

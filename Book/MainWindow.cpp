@@ -496,4 +496,9 @@ void MainWindow::fileImportPgn()
 	bool theory, rep, white;
 	QString path;
 	dialog.getItems(path, theory, rep, white, moves);
+
+	if (theory)
+		dialog.importPgnFile(this, theoryBase, path, false, false, moves);
+	else if (rep)
+		dialog.importPgnFile(this, repBase, path, white, !white, moves);
 }

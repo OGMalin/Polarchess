@@ -1,4 +1,5 @@
 #include "ImportPgnDialog.h"
+#include "Database.h"
 #include <QLineEdit>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -7,6 +8,10 @@
 #include <QRadioButton>
 #include <QLabel>
 #include <QButtonGroup>
+#include <QMessageBox>
+#include <QProgressDialog>
+#include "../Common/Pgn.h"
+#include "../Common/ChessGame.h"
 
 ImportPgnDialog::ImportPgnDialog(QWidget *parent)
 	: QDialog(parent)
@@ -113,4 +118,62 @@ void ImportPgnDialog::openFile()
 	if (!path.isEmpty())
 		filename->setText(path);
 
+}
+
+void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnfile, bool whiterep, bool blackrep, int moves)
+{
+	QProgressDialog progress("Importing Pgn file: " + pgnfile, "Cancel", 0, 0, this);
+	progress.setWindowModality(Qt::WindowModal);
+	Pgn pgn;
+	if (!pgn.open(pgnfile.toStdString(), true))
+	{
+		QMessageBox msgBox(parent);
+		msgBox.setText("Can't open pgn file: " + pgnfile);
+		return;
+	}
+	int games = pgn.size();
+	progress.setMaximum(games);
+	if (games < 1)
+	{
+		QMessageBox msgBox(parent);
+		msgBox.setText("No games in the pgn file: " + pgnfile);
+		pgn.close();
+		return;
+	}
+	ChessGame game;
+	BookDBEntry bde;
+	BookDBMove bdm;
+	int i, j, k;
+	for (i = 0; i < games; i++)
+	{
+		progress.setValue(i);
+		if (progress.wasCanceled())
+		{
+			pgn.close();
+			return;
+		}
+		if (pgn.read(game, i + 1, moves))
+		{
+			for (j = 0; j < game.position.size(); j++)
+			{
+				if (progress.wasCanceled())
+				{
+					pgn.close();
+					return;
+				}
+				bde=db->find(game.position[j].board);
+				bde.board=game.position[j].board;
+				for (k = 0; k < game.position[j].move.size(); k++)
+				{
+					bdm.clear();
+					bdm.move = game.position[j].move[k].move;
+					bdm.comment = game.position[j].move[k].comment.c_str();
+					bde.movelist.push_back(bdm);
+				}
+			}
+			db->add(bde);
+		}
+	}
+	progress.setValue(games);
+	pgn.close();
 }

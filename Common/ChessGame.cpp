@@ -65,7 +65,7 @@ bool ChessGame::toEnd(bool variation)
 {
   if (activePosition<0)
     return false;
-  size_t p;
+  int p;
   if (variation)
     p=activePosition;
   else
@@ -83,7 +83,7 @@ bool ChessGame::toEnd(bool variation)
 // Delete all moves in a variation.
 bool ChessGame::deleteMoves(ChessMove& m)
 {
-  size_t mindex,pos;
+  int mindex,pos;
   ChessBoard cb;
 
   if (activePosition<0)
@@ -111,9 +111,9 @@ bool ChessGame::deleteMoves(ChessMove& m)
   return true;
 }
 
-void ChessGame::orderMove(ChessMove& m, size_t neworder)
+void ChessGame::orderMove(ChessMove& m, int neworder)
 {
-  size_t n,current;
+  int n,current;
   ChessGameMove cgm;
   if ((activePosition<0) || m.empty())
     return;
@@ -161,7 +161,7 @@ void ChessGame::orderMove(ChessMove& m, size_t neworder)
 
 bool ChessGame::addMove(ChessMove& m)
 {
-  size_t i;
+  int i;
   ChessGamePosition cgp;
   ChessGameMove cgm;
 
@@ -258,7 +258,7 @@ void ChessGame::addBoardComment(std::string& s, bool replace)
 
 void ChessGame::addMoveComment(const char* sz, bool replace)
 {
-  size_t i,p;
+  int i,p;
   if (activePosition<1)
     return;
   if ((p=position[activePosition].fromIndex)<0)
@@ -273,7 +273,7 @@ void ChessGame::addMoveComment(const char* sz, bool replace)
 
 void ChessGame::addMoveComment(std::string& s, bool replace)
 {
-  size_t i,p;
+  int i,p;
   if (activePosition<1)
     return;
   if ((p=position[activePosition].fromIndex)<0)
@@ -294,7 +294,7 @@ bool ChessGame::getMove(ChessMove& m , std::string& comment, int n)
     return false;
   if ((n==-1) && (activePosition>0))
   {
-    size_t p=position[activePosition].fromIndex;
+    int p=position[activePosition].fromIndex;
     for (unsigned int i=0;i<position[p].move.size();i++)
     {
       if (position[p].move[i].posIndex==activePosition)
@@ -325,7 +325,7 @@ bool ChessGame::getMove(std::string& m, unsigned int n)
   if (!getMove(cm,comment,n))
     return false;
   m=position[activePosition].board.makeMoveText(cm,sz,16,FIDE);
-  size_t j=m.length();
+  int j=m.length();
   for (int i=0;i<j;i++)
   {
     switch (m.at(i))
@@ -399,7 +399,7 @@ void ChessGame::forward(unsigned int n)
   unsigned int i=0;
   if (activePosition<0)
     return;
-  size_t p;
+  int p;
   p=activePosition;
   while ((i<n) && (position[p].move.size()>0))
   {
@@ -412,9 +412,9 @@ void ChessGame::forward(unsigned int n)
     activePosition=p;
 }
 
-size_t ChessGame::mainMoves()
+int ChessGame::mainMoves()
 {
-  size_t i=0,p=0;
+  int i=0,p=0;
   if (activePosition<1)
     return 0;
   while (position[p].move.size()>0)
@@ -555,7 +555,7 @@ std::string ChessGame::toString()
   string moves;
   iterateMoves(moves,0,1,true,true);
   // Make linebreak in movetext
-  size_t it=0;
+  int it=0;
   while (1)
   {
     if (moves.substr(it).length()<75)
@@ -575,13 +575,13 @@ std::string ChessGame::toString()
   return s;
 };
 
-void ChessGame::iterateMoves(std::string& s, size_t pos, int mn, bool comment, bool variation)
+void ChessGame::iterateMoves(std::string& s, int pos, int mn, bool comment, bool variation)
 {
   int i;
   char buf[20];
   ChessBoard cb;
   ChessMove  cm;
-  size_t n=position[pos].move.size();
+  int n=position[pos].move.size();
   if (n>0)
   {
     cb.copy(position[pos].board);
@@ -670,10 +670,10 @@ void ChessGame::copy(const ChessGame& g)
 }
 
 
-size_t ChessGame::iterateVariation(size_t pos, int& current, int variation)
+int ChessGame::iterateVariation(int pos, int& current, int variation)
 {
-  size_t i,p;
-  size_t n=position[pos].move.size();
+  int i,p;
+  int n=position[pos].move.size();
   if (n==0)
   {
     if (current==variation)
@@ -701,7 +701,7 @@ void ChessGame::getCurrentLine(MoveList& ml)
   ml.clear();
   if (activePosition<0)
     return;
-  size_t p,last;
+  int p,last;
   last=activePosition;
   p=position[last].fromIndex;
   while (p>=0)
@@ -724,7 +724,7 @@ void ChessGame::getCurrentLine(MoveList& ml)
 int ChessGame::getCurrentPly()
 {
   int n=0;
-  size_t p=activePosition;
+  int p=activePosition;
   while (p>0)
   {
     p=position[p].fromIndex;
@@ -738,10 +738,10 @@ std::string ChessGame::getVariation(int n, bool comment)
   ChessBoard cb;
   ChessMove  cm;
   string s;
-  vector<size_t> ml;
+  vector<int> ml;
   char buf[20];
 	int v = 0;
-  size_t p,p1,i,moves,mn;
+  int p,p1,i,moves,mn;
   int it;
   p=iterateVariation(0,v,n);
   if (p<0)
@@ -832,10 +832,10 @@ int ChessGame::getVariation(int n, bool comment, ChessGame& variation)
   ChessBoard cb;
   ChessMove  cm;
   string s;
-  vector<size_t> ml;
+  vector<int> ml;
 	int v = 0;
-	size_t p, p1, i, moves;
-  size_t it;
+	int p, p1, i, moves;
+  int it;
   p=iterateVariation(0,v,n);
   if (p<0)
     return 0;
@@ -966,7 +966,7 @@ int ChessGame::isDraw()
     return 0;
 
   //repetitiondraw
-  size_t p;
+  int p;
   int rep;
   p=position[activePosition].fromIndex;
   rep=1;
@@ -1018,7 +1018,7 @@ int ChessGame::isDraw()
   return 0;
 }
 
-bool ChessGame::goTo(size_t pos)
+bool ChessGame::goTo(int pos)
 {
   vector<ChessGamePosition>::iterator it=position.begin();
   int i=0;
@@ -1037,7 +1037,7 @@ bool ChessGame::goTo(size_t pos)
 
 bool ChessGame::goTo(const ChessBoard& bb, bool strict)
 {
-  size_t oldpos=activePosition;
+  int oldpos=activePosition;
 
   // Find position in main line
   toEnd();
@@ -1056,7 +1056,7 @@ bool ChessGame::goTo(const ChessBoard& bb, bool strict)
   }
 
   // Search in all positions.
-  size_t size=position.size();
+  int size=position.size();
   activePosition=0;
   while (activePosition<size)
   {
@@ -1094,7 +1094,7 @@ bool ChessGame::deleteMove(int n)
   return false;
 }
 
-bool ChessGame::deletePosition(size_t n)
+bool ChessGame::deletePosition(int n)
 {
   if (!goTo(n))
     return false;
@@ -1113,7 +1113,7 @@ bool ChessGame::deletePosition(size_t n)
   return true;
 }
 
-void ChessGame::CopyByMove(ChessGame& newgame,size_t pos, size_t exclude)
+void ChessGame::CopyByMove(ChessGame& newgame,int pos, int exclude)
 {
   unsigned int mindex=0;
   string s;
