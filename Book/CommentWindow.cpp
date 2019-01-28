@@ -13,6 +13,7 @@ CommentWindow::CommentWindow(QWidget *parent)
 	QVBoxLayout* vbox = new QVBoxLayout;
 	comment = new QTextEdit;
 	comment->setDisabled(true);
+	vbox->setMargin(0);
 	vbox->addWidget(comment);
 	setLayout(vbox);
 	theoryColor.setRgb(0, 0, 128);

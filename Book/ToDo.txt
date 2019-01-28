@@ -1,1 +1,6 @@
 ToDo List
+
+Delete move in movewindow.
+Delete variation in movewindow.
+Add line to database (rep and theory) in pathwindow.
+Training. 

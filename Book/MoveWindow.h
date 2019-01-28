@@ -2,6 +2,7 @@
 
 #include "Database.h"
 #include <QWidget>
+#include <QBrush>
 
 class QTableView;
 class QStandardItemModel;
@@ -18,4 +19,6 @@ public:
 private:
 	QTableView * table;
 	QStandardItemModel* model;
+	QBrush repBrush;
+	QBrush normalBrush;
 };

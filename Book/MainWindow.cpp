@@ -110,13 +110,15 @@ void MainWindow::createMenu()
 	writeTheoryAct->setCheckable(true);
 	writeRepAct->setCheckable(true);
 	bookMenu->addSeparator();
-	whiteRepAct= bookMenu->addAction("White repertoire", this, &MainWindow::whiteRepertoire);
+	whiteRepAct = bookMenu->addAction("White repertoire", this, &MainWindow::whiteRepertoire);
 	blackRepAct = bookMenu->addAction("Black repertoire", this, &MainWindow::blackRepertoire);
 
 	// Setting up the toolbar
 	toolbar = addToolBar("Toolbar");
 	toolbar->addAction(writeTheoryAct);
 	toolbar->addAction(writeRepAct);
+	toolbar->addAction(whiteRepAct);
+	toolbar->addAction(blackRepAct);
 
 	// No database opened as default
 	closeTheoryAct->setDisabled(true);
@@ -399,6 +401,7 @@ void MainWindow::moveEntered(ChessMove& move)
 {
 	ChessBoard board = currentPath->getPosition();
 	BookDBMove bm;
+	int i;
 
 	// Do the move if it is legal
 	if (!currentPath->add(move))
@@ -412,9 +415,8 @@ void MainWindow::moveEntered(ChessMove& move)
 	{
 		if (!bdeTheory.moveExist(move))
 		{
+			bm.clear();
 			bm.move = move;
-			bm.score = 0;
-			bm.repertoire = 0;
 			bdeTheory.movelist.append(bm);
 			theoryBase->add(bdeTheory);
 		}
@@ -422,11 +424,29 @@ void MainWindow::moveEntered(ChessMove& move)
 	{
 		if (!bdeRep.moveExist(move))
 		{
+			bm.clear();
 			bm.move = move;
-			bm.score = 0;
-			bm.repertoire = 0;
+			if (whiteRep && (bdeRep.board.toMove == WHITE))
+				bm.whiterep = 1;
+			else if (!whiteRep && (bdeRep.board.toMove == BLACK))
+				bm.blackrep = 1;
 			bdeRep.movelist.append(bm);
 			repBase->add(bdeRep);
+		}
+		else
+		{
+			for (i = 0; i < bdeRep.movelist.size(); i++)
+			{
+				if (bdeRep.movelist[i].move == move)
+				{
+					if (whiteRep && (bdeRep.board.toMove == WHITE))
+						bdeRep.movelist[i].whiterep = 1;
+					else if (!whiteRep && (bdeRep.board.toMove == BLACK))
+						bdeRep.movelist[i].blackrep = 1;
+					repBase->add(bdeRep);
+					break;
+				}
+			}
 		}
 	}
 
@@ -493,12 +513,21 @@ void MainWindow::fileImportPgn()
 	dialog.setItems(theoryBase->isOpen(), repBase->isOpen(), whiteRep, moves);
 	if (dialog.exec() == QDialog::Rejected)
 		return;
-	bool theory, rep, white;
+	bool theory, rep, white, variation, comment;
 	QString path;
-	dialog.getItems(path, theory, rep, white, moves);
+	dialog.getItems(path, theory, rep, white, moves, comment, variation);
 
 	if (theory)
-		dialog.importPgnFile(this, theoryBase, path, false, false, moves);
+		dialog.importPgnFile(this, theoryBase, path, false, false, moves, comment, variation);
 	else if (rep)
-		dialog.importPgnFile(this, repBase, path, white, !white, moves);
+		dialog.importPgnFile(this, repBase, path, white, !white, moves, comment, variation);
+
+	// Change to read from both db
+	ChessBoard board = currentPath->getPosition();
+	bdeTheory = theoryBase->find(board);
+	bdeRep = repBase->find(board);
+	boardwindow->setPosition(board);
+	movewindow->update(bdeTheory, bdeRep);
+	openingwindow->update(bdeTheory, bdeRep);
+	commentwindow->update(bdeTheory.comment, bdeRep.comment);
 }

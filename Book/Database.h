@@ -13,10 +13,11 @@ struct BookDBMove
 {
 	ChessMove move;
 	QString comment;
-	int score;
-	int repertoire;
+	int score=0;
+	int whiterep=0;
+	int blackrep=0;
 	BookDBMove() { clear(); };
-	void clear() { move.clear(); comment.clear(); score = 0; repertoire = 0; };
+	void clear() { move.clear(); comment.clear(); score = 0; whiterep = 0; blackrep = 0; };
 };
 
 struct BookDBEntry
@@ -24,14 +25,16 @@ struct BookDBEntry
 	ChessBoard board;
 	QString opening;
 	QString eco;
-	int eval;
+	int eval=0;
 	QString computer;
 	QString comment;
+	int score=0;
 	QVector<BookDBMove> movelist;
 	bool dirty;
 	BookDBEntry() { clear();  dirty = false; };
 	void clear() { board.clear(); opening.clear(); eco.clear(); comment.clear(); movelist.clear(); computer.clear(); eval = 0; dirty = false; };
 	bool moveExist(ChessMove& move);
+
 	void convertToMoveList(QVector<BookDBMove>&, const QString&);
 	void convertFromMoveList(const QVector<BookDBMove>&, QString&);
 };

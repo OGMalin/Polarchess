@@ -6,6 +6,7 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include <QRadioButton>
+#include <QCheckBox>
 #include <QLabel>
 #include <QButtonGroup>
 #include <QMessageBox>
@@ -45,6 +46,8 @@ ImportPgnDialog::ImportPgnDialog(QWidget *parent)
 	vbox->addLayout(hbox);
 	theoryfile->setEnabled(false);
 	repfile->setEnabled(false);
+	connect(theoryfile, SIGNAL(clicked()), this, SLOT(typeChanged()));
+	connect(repfile, SIGNAL(clicked()), this, SLOT(typeChanged()));
 
 	hbox = new QHBoxLayout;
 	label = new QLabel("Repertoire:");
@@ -57,8 +60,18 @@ ImportPgnDialog::ImportPgnDialog(QWidget *parent)
 	hbox->addWidget(whiterep);
 	hbox->addWidget(blackrep);
 	vbox->addLayout(hbox);
+	whiterep->setChecked(true);
 	whiterep->setEnabled(false);
 	blackrep->setEnabled(false);
+
+	hbox = new QHBoxLayout;
+	comment = new QCheckBox("Include comment");
+	variation = new QCheckBox("Include varitions");
+	hbox->addWidget(comment);
+	hbox->addWidget(variation);
+	vbox->addLayout(hbox);
+	comment->setChecked(true);
+	variation->setChecked(true);
 
 	hbox = new QHBoxLayout;
 	label = new QLabel("Game length:");
@@ -93,22 +106,25 @@ void ImportPgnDialog::setItems(bool theory, bool rep, bool white, int moves)
 		blackrep->setEnabled(true);
 		if (!theory)
 			repfile->setChecked(true);
+		if (white)
+			whiterep->setChecked(true);
+		else
+			blackrep->setChecked(true);
 	}
+
 	char sz[16];
 	numberofmoves->setText(itoa(moves, sz, 10));
 }
 
-void ImportPgnDialog::getItems(QString& path, bool& theory, bool& rep, bool& white, int& moves)
+void ImportPgnDialog::getItems(QString& path, bool& theory, bool& rep, bool& white, int& moves, bool& com, bool& var)
 {
 	path=filename->text();
-	if (theoryfile->isChecked())
-		theory = true;
-	if (repfile->isChecked())
-		rep = true;
-	if (whiterep->isChecked())
-		white = true;
-	else
-		white = false;
+	theory = theoryfile->isChecked();
+	rep = repfile->isChecked();
+	white = whiterep->isChecked();
+	com = comment->isChecked();
+	var = variation->isChecked();
+
 	moves=numberofmoves->text().toInt();
 }
 
@@ -120,9 +136,24 @@ void ImportPgnDialog::openFile()
 
 }
 
-void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnfile, bool whiterep, bool blackrep, int moves)
+void ImportPgnDialog::typeChanged()
 {
-	QProgressDialog progress("Importing Pgn file: " + pgnfile, "Cancel", 0, 0, this);
+	if (theoryfile->isChecked())
+	{
+		blackrep->setEnabled(false);
+		whiterep->setEnabled(false);
+	}
+	else
+	{
+		blackrep->setEnabled(true);
+		whiterep->setEnabled(true);
+	}
+}
+
+void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnfile, bool whiterep, bool blackrep, int moves, bool comment, bool variation)
+{
+	QProgressDialog progress("Importing Pgn file: " + pgnfile, "Cancel", 0, 100, this);
+	progress.setMinimumDuration(0);
 	progress.setWindowModality(Qt::WindowModal);
 	Pgn pgn;
 	if (!pgn.open(pgnfile.toStdString(), true))
@@ -143,7 +174,7 @@ void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnf
 	ChessGame game;
 	BookDBEntry bde;
 	BookDBMove bdm;
-	int i, j, k;
+	int i, j, k, l;
 	for (i = 0; i < games; i++)
 	{
 		progress.setValue(i);
@@ -162,16 +193,49 @@ void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnf
 					return;
 				}
 				bde=db->find(game.position[j].board);
-				bde.board=game.position[j].board;
+				if (comment && !game.position[j].comment.empty())
+				{
+					if (!bde.comment.isEmpty())
+						bde.comment = "\n";
+					bde.comment += game.position[j].comment.c_str();
+				}
 				for (k = 0; k < game.position[j].move.size(); k++)
 				{
 					bdm.clear();
 					bdm.move = game.position[j].move[k].move;
-					bdm.comment = game.position[j].move[k].comment.c_str();
-					bde.movelist.push_back(bdm);
+					if (!bde.moveExist(bdm.move))
+					{
+						if (comment && !game.position[j].move[k].comment.empty())
+							bdm.comment = game.position[j].move[k].comment.c_str();
+						if (whiterep)
+							bdm.whiterep = 1;
+						else if (blackrep)
+							bdm.blackrep = 1;
+						bde.movelist.push_back(bdm);
+					}
+					else
+					{
+						for (l = 0; l < bde.movelist.size(); l++)
+						{
+							if (bdm.move == bde.movelist[l].move)
+							{
+								if (comment && !game.position[j].move[k].comment.empty())
+								{
+									if (bde.movelist[l].comment.isEmpty())
+										bde.movelist[l].comment = game.position[j].move[k].comment.c_str();
+								}
+								if (whiterep)
+									bde.movelist[l].whiterep = 1;
+								else if (blackrep)
+									bde.movelist[l].blackrep = 1;
+								break;
+							}
+						}
+					}
+
 				}
+				db->add(bde);
 			}
-			db->add(bde);
 		}
 	}
 	progress.setValue(games);

@@ -14,8 +14,12 @@ MoveWindow::MoveWindow(QWidget *parent)
 	model->setHorizontalHeaderLabels(header);
 	table = new QTableView;
 	table->setModel(model);
+	vbox->setMargin(0);
 	vbox->addWidget(table);
 	setLayout(vbox);
+//	setContentsMargins(0, 0, 0, 0);
+	normalBrush.setColor(Qt::black);
+	repBrush.setColor(Qt::green);
 }
 
 MoveWindow::~MoveWindow()
@@ -46,6 +50,13 @@ void MoveWindow::update(BookDBEntry& theory, BookDBEntry& rep)
 		item = new QStandardItem(qs);
 		item->setEditable(false);
 		item->setTextAlignment(Qt::AlignLeft);
+		if (rep.movelist[i].whiterep && (rep.board.toMove == WHITE))
+			item->setForeground(repBrush);
+		else if (rep.movelist[i].blackrep && (rep.board.toMove == BLACK))
+			item->setForeground(repBrush);
+		else
+			item->setForeground(normalBrush);
+
 		for (j = 0; j < theory.movelist.size(); j++)
 		{
 			if (rep.movelist[i].move == theory.movelist[j].move)
