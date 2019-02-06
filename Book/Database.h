@@ -14,10 +14,8 @@ struct BookDBMove
 	ChessMove move;
 	QString comment;
 	int score=0;
-	int whiterep=0;
-	int blackrep=0;
 	BookDBMove() { clear(); };
-	void clear() { move.clear(); comment.clear(); score = 0; whiterep = 0; blackrep = 0; };
+	void clear() { move.clear(); comment.clear(); score = 0; };
 };
 
 struct BookDBEntry
@@ -25,14 +23,15 @@ struct BookDBEntry
 	ChessBoard board;
 	QString opening;
 	QString eco;
-	int eval=0;
+	int eval;
+	int repertoire; // 1= White, 2=Black, 0=none
 	QString computer;
 	QString comment;
 	int score=0;
 	QVector<BookDBMove> movelist;
 	bool dirty;
 	BookDBEntry() { clear();  dirty = false; };
-	void clear() { board.clear(); opening.clear(); eco.clear(); comment.clear(); movelist.clear(); computer.clear(); eval = 0; dirty = false; };
+	void clear() { board.clear(); opening.clear(); eco.clear(); comment.clear(); movelist.clear(); computer.clear(); eval = 0; repertoire = 0; dirty = false; };
 	bool moveExist(ChessMove& move);
 
 	void convertToMoveList(QVector<BookDBMove>&, const QString&);
@@ -50,12 +49,12 @@ public:
 	bool open(const QString& path);
 	void close();
 	bool add(BookDBEntry& data);
-	BookDBEntry find(ChessBoard& board);
+	BookDBEntry find(ChessBoard& board, int rep);
 	bool isOpen() { return opened; };
 
 private:
 	bool opened;
 //	QSqlDatabase bookdb;
 	QString dbname;
-	bool exist(ChessBoard& board);
+	bool exist(ChessBoard& board, int rep);
 };

@@ -50,9 +50,9 @@ void MoveWindow::update(BookDBEntry& theory, BookDBEntry& rep)
 		item = new QStandardItem(qs);
 		item->setEditable(false);
 		item->setTextAlignment(Qt::AlignLeft);
-		if (rep.movelist[i].whiterep && (rep.board.toMove == WHITE))
+		if ((rep.repertoire==1) && (rep.board.toMove == WHITE))
 			item->setForeground(repBrush);
-		else if (rep.movelist[i].blackrep && (rep.board.toMove == BLACK))
+		else if ((rep.repertoire == 2) && (rep.board.toMove == BLACK))
 			item->setForeground(repBrush);
 		else
 			item->setForeground(normalBrush);

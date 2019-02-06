@@ -193,6 +193,10 @@ void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnf
 					return;
 				}
 				bde=db->find(game.position[j].board);
+				if (whiterep)
+					bde.repertoire = 1;
+				else if (blackrep)
+					bde.repertoire = 2;
 				if (comment && !game.position[j].comment.empty())
 				{
 					if (!bde.comment.isEmpty())
@@ -207,10 +211,6 @@ void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnf
 					{
 						if (comment && !game.position[j].move[k].comment.empty())
 							bdm.comment = game.position[j].move[k].comment.c_str();
-						if (whiterep)
-							bdm.whiterep = 1;
-						else if (blackrep)
-							bdm.blackrep = 1;
 						bde.movelist.push_back(bdm);
 					}
 					else
@@ -224,10 +224,6 @@ void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnf
 									if (bde.movelist[l].comment.isEmpty())
 										bde.movelist[l].comment = game.position[j].move[k].comment.c_str();
 								}
-								if (whiterep)
-									bde.movelist[l].whiterep = 1;
-								else if (blackrep)
-									bde.movelist[l].blackrep = 1;
 								break;
 							}
 						}

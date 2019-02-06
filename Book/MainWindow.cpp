@@ -426,10 +426,6 @@ void MainWindow::moveEntered(ChessMove& move)
 		{
 			bm.clear();
 			bm.move = move;
-			if (whiteRep && (bdeRep.board.toMove == WHITE))
-				bm.whiterep = 1;
-			else if (!whiteRep && (bdeRep.board.toMove == BLACK))
-				bm.blackrep = 1;
 			bdeRep.movelist.append(bm);
 			repBase->add(bdeRep);
 		}
@@ -439,10 +435,6 @@ void MainWindow::moveEntered(ChessMove& move)
 			{
 				if (bdeRep.movelist[i].move == move)
 				{
-					if (whiteRep && (bdeRep.board.toMove == WHITE))
-						bdeRep.movelist[i].whiterep = 1;
-					else if (!whiteRep && (bdeRep.board.toMove == BLACK))
-						bdeRep.movelist[i].blackrep = 1;
 					repBase->add(bdeRep);
 					break;
 				}
