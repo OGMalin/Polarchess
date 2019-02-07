@@ -175,6 +175,15 @@ void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnf
 	BookDBEntry bde;
 	BookDBMove bdm;
 	int i, j, k, l;
+
+	int repertoire;
+	if (whiterep)
+		repertoire = 1;
+	else if (blackrep)
+		repertoire = 2;
+	else
+		repertoire = 0;
+	
 	for (i = 0; i < games; i++)
 	{
 		progress.setValue(i);
@@ -192,11 +201,7 @@ void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnf
 					pgn.close();
 					return;
 				}
-				bde=db->find(game.position[j].board);
-				if (whiterep)
-					bde.repertoire = 1;
-				else if (blackrep)
-					bde.repertoire = 2;
+				bde = db->find(game.position[j].board, repertoire);
 				if (comment && !game.position[j].comment.empty())
 				{
 					if (!bde.comment.isEmpty())

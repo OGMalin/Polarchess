@@ -93,7 +93,7 @@ bool Database::add(BookDBEntry& bde)
 
 	QSqlQuery query(db);
 
-	if (exist(bde.board))
+	if (exist(bde.board,bde.repertoire))
 	{
 		query.prepare("UPDATE positions SET "
 			"opening = :opening,"
@@ -142,6 +142,7 @@ BookDBEntry Database::find(ChessBoard& board, int rep)
 	// Will return current board if it not exist in the db so it don't need to save
 	// positions with no other data (comment, moves etc.)
 	bde.board = board;
+	bde.repertoire = rep;
 	if (!opened)
 		return bde;
 	QSqlDatabase db = QSqlDatabase::database(dbname);

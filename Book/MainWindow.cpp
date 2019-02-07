@@ -184,7 +184,7 @@ void MainWindow::fileOpenTheory()
 			msgbox.exec();
 			return;
 		}
-		bdeTheory = theoryBase->find(currentPath->getPosition());
+		bdeTheory = theoryBase->find(currentPath->getPosition(),0);
 		movewindow->update(bdeTheory, bdeRep);
 		openingwindow->update(bdeTheory, bdeRep);
 		commentwindow->update(bdeTheory.comment, bdeRep.comment);
@@ -218,7 +218,7 @@ void MainWindow::fileOpenRep()
 			msgbox.exec();
 			return;
 		}
-		bdeRep = repBase->find(currentPath->getPosition());
+		bdeRep = repBase->find(currentPath->getPosition(),whiteRep?1:2);
 		movewindow->update(bdeTheory, bdeRep);
 		openingwindow->update(bdeTheory, bdeRep);
 		commentwindow->update(bdeTheory.comment, bdeRep.comment);
@@ -263,7 +263,7 @@ void MainWindow::fileNewTheory()
 		bdeTheory.eco = "A00";
 		theoryBase->add(bdeTheory);
 
-		bdeTheory= theoryBase->find(currentPath->getPosition());
+		bdeTheory = theoryBase->find(currentPath->getPosition(), 0);
 		
 		movewindow->update(bdeTheory, bdeRep);
 		openingwindow->update(bdeTheory, bdeRep);
@@ -303,10 +303,12 @@ void MainWindow::fileNewRep()
 		repBase->create(path);
 		bdeRep.clear();
 		bdeRep.board = currentPath->getStartPosition();
-		bdeRep.eco = "A00";
+		bdeRep.repertoire = 1;
+		repBase->add(bdeRep);
+		bdeRep.repertoire = 2;
 		repBase->add(bdeRep);
 
-		bdeRep = repBase->find(currentPath->getPosition());
+		bdeRep = repBase->find(currentPath->getPosition(), whiteRep ? 1 : 2);
 
 		movewindow->update(bdeTheory, bdeRep);
 		openingwindow->update(bdeTheory, bdeRep);
@@ -444,8 +446,8 @@ void MainWindow::moveEntered(ChessMove& move)
 
 	// Change to read from both db
 	board = currentPath->getPosition();
-	bdeTheory = theoryBase->find(board);
-	bdeRep = repBase->find(board);
+	bdeTheory = theoryBase->find(board, 0);
+	bdeRep = repBase->find(board, whiteRep ? 1 : 2);
 	boardwindow->setPosition(board);
 	enginewindow->setPosition(board,currentPath->size()/2+1);
 	movewindow->update(bdeTheory, bdeRep);
@@ -462,8 +464,8 @@ void MainWindow::pathSelected(int ply)
 		currentPath->setLength(ply);
 
 	ChessBoard board = currentPath->getPosition();
-	bdeTheory = theoryBase->find(board);
-	bdeRep = repBase->find(board);
+	bdeTheory = theoryBase->find(board, 0);
+	bdeRep = repBase->find(board, whiteRep ? 1 : 2);
 	boardwindow->setPosition(board);
 	enginewindow->setPosition(board, currentPath->size() / 2 + 1);
 	movewindow->update(bdeTheory, bdeRep);
@@ -490,12 +492,22 @@ void MainWindow::whiteRepertoire()
 {
 	whiteRep = true;
 	blackRepAct->setChecked(false);
+	ChessBoard board = currentPath->getPosition();
+	bdeRep = repBase->find(board, 1);
+	movewindow->update(bdeTheory, bdeRep);
+	openingwindow->update(bdeTheory, bdeRep);
+	commentwindow->update(bdeTheory.comment, bdeRep.comment);
 }
 
 void MainWindow::blackRepertoire()
 {
 	whiteRep = false;
 	whiteRepAct->setChecked(false);
+	ChessBoard board = currentPath->getPosition();
+	bdeRep = repBase->find(board, 2);
+	movewindow->update(bdeTheory, bdeRep);
+	openingwindow->update(bdeTheory, bdeRep);
+	commentwindow->update(bdeTheory.comment, bdeRep.comment);
 }
 
 void MainWindow::fileImportPgn()
@@ -516,8 +528,8 @@ void MainWindow::fileImportPgn()
 
 	// Change to read from both db
 	ChessBoard board = currentPath->getPosition();
-	bdeTheory = theoryBase->find(board);
-	bdeRep = repBase->find(board);
+	bdeTheory = theoryBase->find(board, 0);
+	bdeRep = repBase->find(board, whiteRep ? 1 : 2);
 	boardwindow->setPosition(board);
 	movewindow->update(bdeTheory, bdeRep);
 	openingwindow->update(bdeTheory, bdeRep);
