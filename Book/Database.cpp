@@ -245,3 +245,9 @@ void BookDBEntry::convertFromMoveList(const QVector<BookDBMove>& movelist, QStri
 	}
 }
 
+void Database::getRepLines(RepPaths& paths, ChessBoard board, int color, int count)
+{
+	paths.paths.clear();
+	paths.sum = 0;
+
+}

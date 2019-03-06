@@ -8,6 +8,19 @@
 #include <QDataStream>
 #include "../Common/ChessMove.h"
 #include "../Common/ChessBoard.h"
+#include "Path.h"
+
+struct RepPath
+{
+	Path path;
+	int count;
+};
+
+struct RepPaths
+{
+	QVector<RepPath> paths;
+	int sum;
+};
 
 struct BookDBMove
 {
@@ -51,6 +64,7 @@ public:
 	bool add(BookDBEntry& data);
 	BookDBEntry find(ChessBoard& board, int rep);
 	bool isOpen() { return opened; };
+	void getRepLines(RepPaths& paths, ChessBoard board, int color, int count);
 
 private:
 	bool opened;
