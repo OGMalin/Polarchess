@@ -249,5 +249,38 @@ void Database::getRepLines(RepPaths& paths, ChessBoard board, int color, int cou
 {
 	paths.paths.clear();
 	paths.sum = 0;
+	if (!opened)
+		return;
+	QSqlDatabase db = QSqlDatabase::database(dbname);
+	if (!db.open())
+		return;
+	QSqlQuery query(db);
+	// Read all positions
+	if ((color == 0) || (color == 1))
+	{
+		query.clear();
+		query.prepare("SELECT fen, score, movelist FROM positions WHERE repertoire = :rep;");
+		query.bindValue(":rep", 1);
+		if (query.exec())
+		{
+			while (query.next())
+			{
 
+			}
+		}
+/*
+		if (query.exec() && query.next())
+		{
+			bde.opening = query.value("opening").toString();
+			bde.eco = query.value("eco").toString();
+			bde.comment = query.value("comment").toString();
+			bde.eval = query.value("eval").toInt();
+			bde.computer = query.value("computer").toString();
+			bde.score = query.value("score").toInt();
+			bde.repertoire = query.value("repertoire").toInt();
+			bde.convertToMoveList(bde.movelist, query.value("movelist").toString());
+			bde.dirty = false;
+		}
+		*/
+	}
 }
