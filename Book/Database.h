@@ -1,5 +1,28 @@
 #pragma once
+/*
+	Database format
+	
+	fen			text
+		position as fenstring rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR W kqKQ -
 
+	comment		text
+		Text comment to the position
+
+	eval		text
+		Human evaluation
+
+	computer	text
+		Computer evaluation
+
+	score		text (Only in use on repertoire db)
+		Successfull guesses (-10000=Not tried, -9999= Tried once then starting from 0)
+
+	repertoire	text (Only in use on repertoire db)
+		0=White, 1=black
+
+	movelist	text
+		move1|comment|score;move2|comment|score
+*/
 #include <QObject>
 #include <QSqlDatabase>
 #include <QString>
@@ -34,8 +57,6 @@ struct BookDBMove
 struct BookDBEntry
 {
 	ChessBoard board;
-	QString opening;
-	QString eco;
 	int eval;
 	int repertoire; // 1= White, 2=Black, 0=none
 	QString computer;
@@ -44,7 +65,7 @@ struct BookDBEntry
 	QVector<BookDBMove> movelist;
 	bool dirty;
 	BookDBEntry() { clear();  dirty = false; };
-	void clear() { board.clear(); opening.clear(); eco.clear(); comment.clear(); movelist.clear(); computer.clear(); eval = 0; repertoire = 0; dirty = false; };
+	void clear() { board.clear(); comment.clear(); movelist.clear(); computer.clear(); eval = 0; repertoire = 0; dirty = false; };
 	bool moveExist(ChessMove& move);
 
 	void convertToMoveList(QVector<BookDBMove>&, const QString&);

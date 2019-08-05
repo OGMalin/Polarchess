@@ -260,7 +260,6 @@ void MainWindow::fileNewTheory()
 		theoryBase->create(path);
 		bdeTheory.clear();
 		bdeTheory.board = currentPath->getStartPosition();
-		bdeTheory.eco = "A00";
 		theoryBase->add(bdeTheory);
 
 		bdeTheory = theoryBase->find(currentPath->getPosition(), 0);

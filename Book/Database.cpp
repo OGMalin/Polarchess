@@ -62,8 +62,6 @@ bool Database::create(const QString& path)
 	query.exec();
 	query.exec("CREATE TABLE positions ( "
 		"fen	TEXT,"
-		"opening	TEXT,"
-		"eco	TEXT,"
 		"comment	TEXT,"
 		"eval	TEXT,"
 		"computer	TEXT,"
@@ -96,8 +94,6 @@ bool Database::add(BookDBEntry& bde)
 	if (exist(bde.board,bde.repertoire))
 	{
 		query.prepare("UPDATE positions SET "
-			"opening = :opening,"
-			"eco = :eco,"
 			"comment = :comment,"
 			"eval = :eval,"
 			"computer = :computer,"
@@ -109,13 +105,11 @@ bool Database::add(BookDBEntry& bde)
 	else
 	{
 		query.prepare("INSERT INTO positions ( "
-			"fen, opening, eco, comment, eval, computer, score, repertoire, movelist"
+			"fen, comment, eval, computer, score, repertoire, movelist"
 			") VALUES ( "
-			":fen, :opening, :eco, :comment, :eval, :computer, :score, :repertoire, :movelist );");
+			":fen, :comment, :eval, :computer, :score, :repertoire, :movelist );");
 	}
 	query.bindValue(":fen", bde.board.getFen(true).c_str());
-	query.bindValue(":opening", bde.opening.toLatin1());
-	query.bindValue(":eco", bde.eco.toLatin1());
 	query.bindValue(":comment", bde.comment.toLatin1());
 	query.bindValue(":eval", itoa(bde.eval, sz, 10));
 	query.bindValue(":computer", bde.computer.toLatin1());
@@ -153,8 +147,6 @@ BookDBEntry Database::find(ChessBoard& board, int rep)
 	query.bindValue(":fen", board.getFen(true).c_str());
 	if (query.exec() && query.next())
 	{
-		bde.opening = query.value("opening").toString();
-		bde.eco = query.value("eco").toString();
 		bde.comment = query.value("comment").toString();
 		bde.eval = query.value("eval").toInt();
 		bde.computer = query.value("computer").toString();
