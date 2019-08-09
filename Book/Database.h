@@ -20,6 +20,9 @@
 	repertoire	text (Only in use on repertoire db)
 		0=White, 1=black
 
+	bookmark	text
+		Mark position (training)
+
 	movelist	text
 		move1|comment|score;move2|comment|score
 */
@@ -61,6 +64,7 @@ struct BookDBEntry
 	int repertoire; // 1= White, 2=Black, 0=none
 	QString computer;
 	QString comment;
+	QString bookmark;
 	int score=0;
 	QVector<BookDBMove> movelist;
 	bool dirty;
