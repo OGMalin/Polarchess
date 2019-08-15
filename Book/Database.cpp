@@ -67,7 +67,6 @@ bool Database::create(const QString& path)
 		"computer	TEXT,"
 		"score	TEXT,"
 		"repertoire	TEXT,"
-		"bookmark	TEXT,"
 		"movelist	TEXT,"
 		"PRIMARY KEY(fen)"
 		"); ");
@@ -100,16 +99,15 @@ bool Database::add(BookDBEntry& bde)
 			"computer = :computer,"
 			"score = :score,"
 			"repertoire = :repertoire,"
-			"bookmark = :bookmark,"
 			"movelist = :movelist "
 			"WHERE fen = :fen;");
 	}
 	else
 	{
 		query.prepare("INSERT INTO positions ( "
-			"fen, comment, eval, computer, score, repertoire, bookmark, movelist"
+			"fen, comment, eval, computer, score, repertoire, movelist"
 			") VALUES ( "
-			":fen, :comment, :eval, :computer, :score, :repertoire, :bookmark, :movelist );");
+			":fen, :comment, :eval, :computer, :score, :repertoire, :movelist );");
 	}
 	query.bindValue(":fen", bde.board.getFen(true).c_str());
 	query.bindValue(":comment", bde.comment.toLatin1());
@@ -117,7 +115,6 @@ bool Database::add(BookDBEntry& bde)
 	query.bindValue(":computer", bde.computer.toLatin1());
 	query.bindValue(":score", itoa(bde.score, sz, 10));
 	query.bindValue(":repertoire", itoa(bde.repertoire, sz, 10));
-	query.bindValue(":bookmark", bde.bookmark.toLatin1());
 	QString qs;
 	bde.convertFromMoveList(bde.movelist, qs);
 	query.bindValue(":movelist", qs.toLatin1());
@@ -155,7 +152,6 @@ BookDBEntry Database::find(ChessBoard& board, int rep)
 		bde.computer = query.value("computer").toString();
 		bde.score = query.value("score").toInt();
 		bde.repertoire = query.value("repertoire").toInt();
-		bde.bookmark = query.value("bookmark").toString();
 		bde.convertToMoveList(bde.movelist, query.value("movelist").toString());
 		bde.dirty = false;
 	}
