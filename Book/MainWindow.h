@@ -66,6 +66,7 @@ private:
 	BookDBEntry bde[3];
 	int write;
 	void createMenu();
+	void updateMenu();
 	void writeSettings();
 	void readSettings();
 	void flipBoard();

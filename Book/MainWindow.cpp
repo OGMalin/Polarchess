@@ -127,6 +127,50 @@ void MainWindow::createMenu()
 
 }
 
+void MainWindow::updateMenu()
+{
+	switch (write)
+	{
+		case 0:
+			writeAct[0]->setChecked(true);
+			writeAct[1]->setChecked(false);
+			writeAct[2]->setChecked(false);
+			break;
+		case 1:
+			writeAct[0]->setChecked(false);
+			writeAct[1]->setChecked(true);
+			writeAct[2]->setChecked(false);
+			break;
+		case 2:
+			writeAct[0]->setChecked(false);
+			writeAct[1]->setChecked(false);
+			writeAct[2]->setChecked(true);
+			break;
+		default:
+			writeAct[0]->setChecked(false);
+			writeAct[1]->setChecked(false);
+			writeAct[2]->setChecked(false);
+			break;
+	}
+	commentwindow->write = write;
+	int open = 0;
+	for (int i = 0; i < 3; i++)
+	{
+		if (Base[i]->isOpen())
+		{
+			closeAct[i]->setDisabled(false);
+			++open;
+		}else
+		{
+			closeAct[i]->setDisabled(true);
+		}
+	}
+	if (open==0)
+		importPgnAct->setDisabled(true);
+	else
+		importPgnAct->setDisabled(false);
+}
+
 void MainWindow::writeSettings()
 {/*
 	QSettings settings;
@@ -187,20 +231,11 @@ void MainWindow::fileOpen(int type)
 		commentwindow->setVisible(true);
 		*/
 
-		switch (type)
-		{
-
-		}
-		closeAct[type]->setDisabled(false);
-		writeAct[type]->setDisabled(false);
-		importPgnAct->setDisabled(false);
-
 		if (write == type)
 		{
 			write = -1;
-			commentwindow->write = -1;
-			writeAct[type]->setChecked(false);
 		}
+		updateMenu();
 	}
 }
 
@@ -233,16 +268,10 @@ void MainWindow::fileNew(int type)
 		movewindow->setVisible(true);
 		commentwindow->setVisible(true);
 		*/
-		closeAct[type]->setDisabled(false);
-		writeAct[type]->setDisabled(false);
-		importPgnAct->setDisabled(false);
 
 		if (write == type)
-		{
 			write = -1;
-			commentwindow->write = -1;
-			writeAct[type]->setChecked(false);
-		}
+		updateMenu();
 	}
 }
 
@@ -250,41 +279,21 @@ void MainWindow::fileClose(int type)
 {
 	Base[type]->close();
 	bde[type].clear();
-	closeAct[type]->setDisabled(true);
-	writeAct[type]->setDisabled(true);
 
 	if (write == type)
-	{
 		write = -1;
-		commentwindow->write = -1;
-		writeAct[type]->setChecked(false);
-	}
-	bool b = false;
-	for (int i = 0; i < 3; i++)
-	{
-		if (Base[type]->isOpen())
-		{
-			b = true;
-			break;
-		}
-	}
-	importPgnAct->setDisabled(b);
+
+	updateMenu();
 }
 
 
 void MainWindow::bookWrite(int type)
 {
 	if (write == type)
-	{
 		write = -1;
-		writeAct[type]->setChecked(false);
-	}
 	else
-	{
 		write = type;
-		writeAct[type]->setChecked(true);
-	}
-	commentwindow->write=write;
+	updateMenu();
 }
 
 void MainWindow::flipBoard()
