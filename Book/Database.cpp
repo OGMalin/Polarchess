@@ -66,7 +66,6 @@ bool Database::create(const QString& path)
 		"eval	TEXT,"
 		"computer	TEXT,"
 		"score	TEXT,"
-		"repertoire	TEXT,"
 		"movelist	TEXT,"
 		"PRIMARY KEY(fen)"
 		"); ");
@@ -91,30 +90,28 @@ bool Database::add(BookDBEntry& bde)
 
 	QSqlQuery query(db);
 
-	if (exist(bde.board,bde.repertoire))
+	if (exist(bde.board))
 	{
 		query.prepare("UPDATE positions SET "
 			"comment = :comment,"
 			"eval = :eval,"
 			"computer = :computer,"
 			"score = :score,"
-			"repertoire = :repertoire,"
 			"movelist = :movelist "
 			"WHERE fen = :fen;");
 	}
 	else
 	{
 		query.prepare("INSERT INTO positions ( "
-			"fen, comment, eval, computer, score, repertoire, movelist"
+			"fen, comment, eval, computer, score, movelist"
 			") VALUES ( "
-			":fen, :comment, :eval, :computer, :score, :repertoire, :movelist );");
+			":fen, :comment, :eval, :computer, :score, :movelist );");
 	}
 	query.bindValue(":fen", bde.board.getFen(true).c_str());
 	query.bindValue(":comment", bde.comment.toLatin1());
 	query.bindValue(":eval", itoa(bde.eval, sz, 10));
 	query.bindValue(":computer", bde.computer.toLatin1());
 	query.bindValue(":score", itoa(bde.score, sz, 10));
-	query.bindValue(":repertoire", itoa(bde.repertoire, sz, 10));
 	QString qs;
 	bde.convertFromMoveList(bde.movelist, qs);
 	query.bindValue(":movelist", qs.toLatin1());
@@ -129,14 +126,13 @@ bool Database::add(BookDBEntry& bde)
 	return true;
 }
 
-BookDBEntry Database::find(ChessBoard& board, int rep)
+BookDBEntry Database::find(ChessBoard& board)
 {
 	BookDBEntry bde;
 
 	// Will return current board if it not exist in the db so it don't need to save
 	// positions with no other data (comment, moves etc.)
 	bde.board = board;
-	bde.repertoire = rep;
 	if (!opened)
 		return bde;
 	QSqlDatabase db = QSqlDatabase::database(dbname);
@@ -151,28 +147,17 @@ BookDBEntry Database::find(ChessBoard& board, int rep)
 		bde.eval = query.value("eval").toInt();
 		bde.computer = query.value("computer").toString();
 		bde.score = query.value("score").toInt();
-		bde.repertoire = query.value("repertoire").toInt();
 		bde.convertToMoveList(bde.movelist, query.value("movelist").toString());
 		bde.dirty = false;
 	}
 	return bde;
 }
 
-bool Database::exist(ChessBoard& board, int rep)
+bool Database::exist(ChessBoard& board)
 {
 	QSqlDatabase db = QSqlDatabase::database(dbname);
 	QSqlQuery query(db);
-	if (rep)
-	{
-		char sz[16];
-		query.prepare("SELECT fen FROM positionS WHERE fen = :fen AND repertoire = :repertoire;");
-		query.bindValue(":repertoire", itoa(rep, sz, 10));
-
-	}
-	else
-	{
-		query.prepare("SELECT fen FROM positionS WHERE fen = :fen;");
-	}
+	query.prepare("SELECT fen FROM positionS WHERE fen = :fen;");
 	query.bindValue(":fen", board.getFen(true).c_str());
 	if (query.exec() && query.next())
 		return true;
@@ -237,8 +222,22 @@ void BookDBEntry::convertFromMoveList(const QVector<BookDBMove>& movelist, QStri
 	}
 }
 
+void BookDBEntry::updateMove(BookDBMove& bm)
+{
+	for (int i = 0; i < movelist.size(); i++)
+	{
+		if (bm.move == movelist[i].move)
+		{
+			movelist[i] = bm;
+			return;
+		}
+	}
+	movelist.append(bm);
+}
+
 void Database::getRepLines(RepPaths& paths, ChessBoard board, int color, int count)
 {
+/*
 	paths.paths.clear();
 	paths.sum = 0;
 	if (!opened)
@@ -260,7 +259,6 @@ void Database::getRepLines(RepPaths& paths, ChessBoard board, int color, int cou
 
 			}
 		}
-/*
 		if (query.exec() && query.next())
 		{
 			bde.opening = query.value("opening").toString();
@@ -273,6 +271,7 @@ void Database::getRepLines(RepPaths& paths, ChessBoard board, int color, int cou
 			bde.convertToMoveList(bde.movelist, query.value("movelist").toString());
 			bde.dirty = false;
 		}
-		*/
+		
 	}
+*/
 }

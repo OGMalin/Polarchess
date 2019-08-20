@@ -12,12 +12,11 @@ class CommentWindow : public QWidget
 	Q_OBJECT
 
 public:
+	int write;
 	CommentWindow(QWidget *parent=0);
 	~CommentWindow();
-	void update(QString theory, QString rep);
-	void setWriteTheory(bool b);
-	void setWriteRep(bool b);
-	void disableWrite();
+	void update(QString theory, QString white, QString black);
+	void disableWrite() { write = -1; };
 
 signals:
 	void commentChanged(QString&);
@@ -27,8 +26,7 @@ private:
 	QColor theoryColor;
 	QColor repColor;
 	QFont font;
-	bool writeTheory, writeRep;
-	QString cTheory, cRep;
+	QString cTheory, cWhite, cBlack;
 protected:
 	virtual void mouseDoubleClickEvent(QMouseEvent* event);
 };

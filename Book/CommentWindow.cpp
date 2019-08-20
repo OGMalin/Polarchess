@@ -6,10 +6,10 @@
 CommentWindow::CommentWindow(QWidget *parent)
 	: QWidget(parent)
 {
-	writeTheory = false;
-	writeRep = false;
+	write = -1;
 	cTheory.clear();
-	cRep.clear();
+	cWhite.clear();
+	cBlack.clear();
 	QVBoxLayout* vbox = new QVBoxLayout;
 	comment = new QTextEdit;
 	comment->setDisabled(true);
@@ -25,16 +25,22 @@ CommentWindow::~CommentWindow()
 {
 }
 
-void CommentWindow::update(QString theory, QString rep)
+void CommentWindow::update(QString theory, QString white, QString black)
 {
 	cTheory = theory;
-	cRep = rep;
+	cWhite = white;
+	cBlack = black;
 	comment->clear();
 	comment->setFont(font);
-	if (!cRep.isEmpty())
+	if (!cWhite.isEmpty())
 	{
 		comment->setTextColor(repColor);
-		comment->append(cRep);
+		comment->append(cWhite);
+	}
+	if (!cWhite.isEmpty())
+	{
+		comment->setTextColor(repColor);
+		comment->append(cBlack);
 	}
 	if (!cTheory.isEmpty())
 	{
@@ -43,46 +49,34 @@ void CommentWindow::update(QString theory, QString rep)
 	}
 }
 
-void CommentWindow::setWriteTheory(bool b)
-{
-	writeTheory = b;
-	writeRep = false;
-}
-
-void CommentWindow::setWriteRep(bool b)
-{
-	writeTheory = false;
-	writeRep = b;
-}
-
-void CommentWindow::disableWrite()
-{
-	writeTheory = false;
-	writeRep = false;
-}
-
 void CommentWindow::mouseDoubleClickEvent(QMouseEvent* event)
 {
-	bool res;
+	bool res = false;
+	QString newText;
 
-	if (writeTheory)
+	switch (write)
 	{
-		QString newText = QInputDialog::getMultiLineText(this, "PolarBook", "Theory comment", cTheory, &res);
-		if (res)
-		{
-			cTheory = newText;
-			update(cTheory, cRep);
-			emit commentChanged(cTheory);
-		}
+		case 0:
+			newText = QInputDialog::getMultiLineText(this, "PolarBook", "Theory comment", cTheory, &res);
+			if (res)
+				cTheory = newText;
+			break;
+		case 1:
+			newText = QInputDialog::getMultiLineText(this, "PolarBook", "White repertoire comment", cWhite, &res);
+			if (res)
+				cWhite = newText;
+			break;
+		case 2:
+			newText = QInputDialog::getMultiLineText(this, "PolarBook", "Black repertoire comment", cBlack, &res);
+			if (res)
+				cBlack = newText;
+			break;
+		default:
+			return;
 	}
-	else if (writeRep)
+	if (res)
 	{
-		QString newText = QInputDialog::getMultiLineText(this, "PolarBook", "Repertoire comment", cRep, &res);
-		if (res)
-		{
-			cRep = newText;
-			update(cTheory, cRep);
-			emit commentChanged(cRep);
-		}
+		update(cTheory, cWhite, cBlack);
+		emit commentChanged(newText);
 	}
 }

@@ -3,6 +3,7 @@
 #include <QStandardItemModel>
 #include <QVBoxLayout>
 #include <QStringList>
+#include <QVector>
 
 MoveWindow::MoveWindow(QWidget *parent)
 	: QWidget(parent)
@@ -26,7 +27,7 @@ MoveWindow::~MoveWindow()
 {
 }
 
-void MoveWindow::update(BookDBEntry& theory, BookDBEntry& rep)
+void MoveWindow::update(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black)
 {
 	int i,j;
 	QString qs;
@@ -43,23 +44,49 @@ void MoveWindow::update(BookDBEntry& theory, BookDBEntry& rep)
 		model->setItem(i,0,item);
 	}
 	rows = i;
-	for (i = 0; i < rep.movelist.size(); i++)
+	BookDBEntry bde = white;
+	QVector<BookDBMove> bms = black.movelist;
+	BookDBMove bm;
+	for (i = 0; i < bde.movelist.size(); i++)
 	{
-		qs = QString(rep.board.makeMoveText(rep.movelist[i].move, FIDE).c_str());
-		qs += rep.movelist[i].comment;
+		if (bde.board.toMove == WHITE)
+			bde.movelist[i].score = 1;
+		else
+			bde.movelist[i].score = 0;
+	}
+	for (i = 0; i < bms.size(); i++)
+	{
+		if (bde.moveExist(bms[i].move))
+		{
+			if (bde.board.toMove == BLACK)
+			{
+				bms[i].score = 2;
+				bde.updateMove(bms[i]);
+			}
+		}else
+		{
+			if (bde.board.toMove == BLACK)
+				bms[i].score = 2;
+			else
+				bms[i].score = 0;
+			bde.movelist.append(bms[i]);
+		}
+	}
+	for (i = 0; i < bde.movelist.size(); i++)
+	{
+		qs = QString(bde.board.makeMoveText(bde.movelist[i].move, FIDE).c_str());
+		qs += bde.movelist[i].comment;
 		item = new QStandardItem(qs);
 		item->setEditable(false);
 		item->setTextAlignment(Qt::AlignLeft);
-		if ((rep.repertoire==1) && (rep.board.toMove == WHITE))
-			item->setForeground(repBrush);
-		else if ((rep.repertoire == 2) && (rep.board.toMove == BLACK))
+		if (bde.movelist[i].score>0)
 			item->setForeground(repBrush);
 		else
 			item->setForeground(normalBrush);
 
 		for (j = 0; j < theory.movelist.size(); j++)
 		{
-			if (rep.movelist[i].move == theory.movelist[j].move)
+			if (bde.movelist[i].move == theory.movelist[j].move)
 				break;
 		}
 		if (j < theory.movelist.size())

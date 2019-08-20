@@ -31,9 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	dataPath = QStandardPaths::locate(QStandardPaths::DocumentsLocation, QCoreApplication::organizationName(), QStandardPaths::LocateDirectory);
 	dataPath += "/" + QCoreApplication::applicationName();
-	writeTheory = false;
-	writeRep = false;
-	whiteRep=true;
+	write = -1;
 
 	createMenu();
 	readSettings();
@@ -62,8 +60,9 @@ MainWindow::MainWindow(QWidget *parent)
 
 	setCentralWidget(hSplitter);
 
-	theoryBase = new Database(QString("theory"));
-	repBase = new Database(QString("rep"));
+	Base[THEORY] = new Database(QString("theory"));
+	Base[REPWHITE] = new Database(QString("white"));
+	Base[REPBLACK] = new Database(QString("black"));
 	currentPath = new Path();
 
 	enginewindow->setPosition(currentPath->getStartPosition());
@@ -91,47 +90,41 @@ void MainWindow::createMenu()
 	// File menu
 	fileMenu = menuBar()->addMenu("File");
 	fileOpenMenu = fileMenu->addMenu("Open book");
-	openTheoryAct = fileOpenMenu->addAction("Open theory book", this, &MainWindow::fileOpenTheory);
-	openRepAct = fileOpenMenu->addAction("Open repertoire book", this, &MainWindow::fileOpenRep);
+	openAct[THEORY] = fileOpenMenu->addAction("Open theory book", this, &MainWindow::fileOpenTheory);
+	openAct[REPWHITE] = fileOpenMenu->addAction("Open White repertoire book", this, &MainWindow::fileOpenWhite);
+	openAct[REPBLACK] = fileOpenMenu->addAction("Open Black repertoire book", this, &MainWindow::fileOpenBlack);
 	fileNewMenu = fileMenu->addMenu("New book");
-	newTheoryAct = fileNewMenu->addAction("New theory book", this, &MainWindow::fileNewTheory);
-	newRepAct = fileNewMenu->addAction("New repertoire book", this, &MainWindow::fileNewRep);
+	newAct[THEORY] = fileNewMenu->addAction("New theory book", this, &MainWindow::fileNewTheory);
+	newAct[REPWHITE] = fileNewMenu->addAction("New White repertoire book", this, &MainWindow::fileNewWhite);
+	newAct[REPBLACK] = fileNewMenu->addAction("New Black repertoire book", this, &MainWindow::fileNewBlack);
 	fileCloseMenu = fileMenu->addMenu("Close book");
-	closeTheoryAct = fileCloseMenu->addAction("Close theory book", this, &MainWindow::fileCloseTheory);
-	closeRepAct = fileCloseMenu->addAction("Close repertoire book", this, &MainWindow::fileCloseRep);
+	closeAct[THEORY] = fileCloseMenu->addAction("Close theory book", this, &MainWindow::fileCloseTheory);
+	closeAct[REPWHITE] = fileCloseMenu->addAction("Close White repertoire book", this, &MainWindow::fileCloseWhite);
+	closeAct[REPBLACK] = fileCloseMenu->addAction("Close Black repertoire book", this, &MainWindow::fileCloseBlack);
 	importPgnAct = fileMenu->addAction("Import pgnfiles", this, &MainWindow::fileImportPgn);
 	fileMenu->addSeparator();
 	exitAct = fileMenu->addAction("Exit", this, &QWidget::close);
 
 	bookMenu = menuBar()->addMenu("Book");
 	bookWriteMenu = bookMenu->addMenu("Write enable");
-	writeTheoryAct = bookWriteMenu->addAction("Write to theory book", this, &MainWindow::bookWriteTheory);
-	writeRepAct = bookWriteMenu->addAction("Write to repertoire book", this, &MainWindow::bookWriteRep);
-	writeTheoryAct->setCheckable(true);
-	writeRepAct->setCheckable(true);
+	writeAct[THEORY] = bookWriteMenu->addAction("Write to theory book", this, &MainWindow::bookWriteTheory);
+	writeAct[REPWHITE] = bookWriteMenu->addAction("Write to White repertoire book", this, &MainWindow::bookWriteWhite);
+	writeAct[REPBLACK] = bookWriteMenu->addAction("Write to Black repertoire book", this, &MainWindow::bookWriteBlack);
 	bookMenu->addSeparator();
-	whiteRepAct = bookMenu->addAction("White repertoire", this, &MainWindow::whiteRepertoire);
-	blackRepAct = bookMenu->addAction("Black repertoire", this, &MainWindow::blackRepertoire);
 
 	// Setting up the toolbar
 	toolbar = addToolBar("Toolbar");
-	toolbar->addAction(writeTheoryAct);
-	toolbar->addAction(writeRepAct);
-	toolbar->addAction(whiteRepAct);
-	toolbar->addAction(blackRepAct);
+	for (int i = 0; i < 3; i++)
+	{
+		toolbar->addAction(writeAct[i]);
+		writeAct[i]->setCheckable(true);
+		closeAct[i]->setDisabled(true);
+		writeAct[i]->setDisabled(true);
+	}
 
 	// No database opened as default
-	closeTheoryAct->setDisabled(true);
-	closeRepAct->setDisabled(true);
-	writeTheoryAct->setDisabled(true);
-	writeRepAct->setDisabled(true);
-	whiteRepAct->setDisabled(true);
-	blackRepAct->setDisabled(true);
 	importPgnAct->setDisabled(true);
 
-	whiteRepAct->setCheckable(true);
-	blackRepAct->setCheckable(true);
-	whiteRepAct->setChecked(true);
 }
 
 void MainWindow::writeSettings()
@@ -172,77 +165,46 @@ void MainWindow::closeEvent(QCloseEvent* event)
 //	event->accept();
 }
 
-void MainWindow::fileOpenTheory()
+void MainWindow::fileOpen(int type)
 {
 	QMessageBox msgbox;
 	QString path = QFileDialog::getOpenFileName(this, "Open book", dataPath, "Book files (*.book)");
 	if (!path.isEmpty())
 	{
-		if (!theoryBase->open(path))
+		if (!Base[type]->open(path))
 		{
 			msgbox.setText("Can't open book");
 			msgbox.exec();
 			return;
 		}
-		bdeTheory = theoryBase->find(currentPath->getPosition(),0);
-		movewindow->update(bdeTheory, bdeRep);
-		openingwindow->update(bdeTheory, bdeRep);
-		commentwindow->update(bdeTheory.comment, bdeRep.comment);
+		bde[type] = Base[type]->find(currentPath->getPosition());
+
+		movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
+//		openingwindow->update(bdeTheory, bdeRep);
+		commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
 /*
 		movewindow->setVisible(true);
 		commentwindow->setVisible(true);
 		*/
 
-		closeTheoryAct->setDisabled(false);
-		writeTheoryAct->setDisabled(false);
+		switch (type)
+		{
+
+		}
+		closeAct[type]->setDisabled(false);
+		writeAct[type]->setDisabled(false);
 		importPgnAct->setDisabled(false);
 
-		if (writeTheory)
+		if (write == type)
 		{
-			commentwindow->setWriteTheory(false);
-			writeTheory = false;
-			writeTheoryAct->setChecked(false);
+			write = -1;
+			commentwindow->write = -1;
+			writeAct[type]->setChecked(false);
 		}
 	}
 }
 
-void MainWindow::fileOpenRep()
-{
-	QMessageBox msgbox;
-	QString path = QFileDialog::getOpenFileName(this, "Open book", dataPath, "Book files (*.book)");
-	if (!path.isEmpty())
-	{
-		if (!repBase->open(path))
-		{
-			msgbox.setText("Can't open book");
-			msgbox.exec();
-			return;
-		}
-		bdeRep = repBase->find(currentPath->getPosition(),whiteRep?1:2);
-		movewindow->update(bdeTheory, bdeRep);
-		openingwindow->update(bdeTheory, bdeRep);
-		commentwindow->update(bdeTheory.comment, bdeRep.comment);
-		/*
-		movewindow->setVisible(true);
-		commentwindow->setVisible(true);
-		*/
-
-		closeRepAct->setDisabled(false);
-		writeRepAct->setDisabled(false);
-		whiteRepAct->setDisabled(false);
-		blackRepAct->setDisabled(false);
-		importPgnAct->setDisabled(false);
-
-		if (writeRep)
-		{
-			commentwindow->setWriteRep(false);
-			writeRep = false;
-			writeRepAct->setChecked(false);
-		}
-	}
-}
-
-void MainWindow::fileNewTheory()
+void MainWindow::fileNew(int type)
 {
 	QString path = QFileDialog::getSaveFileName(this, "Open book", dataPath, "Book files (*.book)");
 	if (!path.isEmpty())
@@ -257,133 +219,72 @@ void MainWindow::fileNewTheory()
 				return;
 			file.remove();
 		}
-		theoryBase->create(path);
-		bdeTheory.clear();
-		bdeTheory.board = currentPath->getStartPosition();
-		theoryBase->add(bdeTheory);
+		Base[type]->create(path);
+		bde[type].clear();
+		bde[type].board = currentPath->getStartPosition();
+		Base[type]->add(bde[type]);
 
-		bdeTheory = theoryBase->find(currentPath->getPosition(), 0);
+		bde[type] = Base[type]->find(currentPath->getPosition());
 		
-		movewindow->update(bdeTheory, bdeRep);
-		openingwindow->update(bdeTheory, bdeRep);
-		commentwindow->update(bdeTheory.comment, bdeRep.comment);
+		movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
+//		openingwindow->update(bdeTheory, bdeRep);
+		commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
 		/*
 		movewindow->setVisible(true);
 		commentwindow->setVisible(true);
 		*/
-		closeTheoryAct->setDisabled(false);
-		writeTheoryAct->setDisabled(false);
+		closeAct[type]->setDisabled(false);
+		writeAct[type]->setDisabled(false);
 		importPgnAct->setDisabled(false);
 
-		if (writeTheory)
+		if (write == type)
 		{
-			commentwindow->setWriteTheory(false);
-			writeTheory = false;
-			writeTheoryAct->setChecked(false);
+			write = -1;
+			commentwindow->write = -1;
+			writeAct[type]->setChecked(false);
 		}
 	}
 }
 
-void MainWindow::fileNewRep()
+void MainWindow::fileClose(int type)
 {
-	QString path = QFileDialog::getSaveFileName(this, "Open book", dataPath, "Book files (*.book)");
-	if (!path.isEmpty())
+	Base[type]->close();
+	bde[type].clear();
+	closeAct[type]->setDisabled(true);
+	writeAct[type]->setDisabled(true);
+
+	if (write == type)
 	{
-		QFile file(path);
-		if (file.exists())
+		write = -1;
+		commentwindow->write = -1;
+		writeAct[type]->setChecked(false);
+	}
+	bool b = false;
+	for (int i = 0; i < 3; i++)
+	{
+		if (Base[type]->isOpen())
 		{
-			QMessageBox msgbox;
-			msgbox.setText("The book allready exist. Do you want to delete it?");
-			msgbox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-			if (msgbox.exec() != QMessageBox::Ok)
-				return;
-			file.remove();
-		}
-		repBase->create(path);
-		bdeRep.clear();
-		bdeRep.board = currentPath->getStartPosition();
-		bdeRep.repertoire = 1;
-		repBase->add(bdeRep);
-		bdeRep.repertoire = 2;
-		repBase->add(bdeRep);
-
-		bdeRep = repBase->find(currentPath->getPosition(), whiteRep ? 1 : 2);
-
-		movewindow->update(bdeTheory, bdeRep);
-		openingwindow->update(bdeTheory, bdeRep);
-		commentwindow->update(bdeTheory.comment, bdeRep.comment);
-		/*
-		movewindow->setVisible(true);
-		commentwindow->setVisible(true);
-		*/
-
-		closeRepAct->setDisabled(false);
-		writeRepAct->setDisabled(false);
-		whiteRepAct->setDisabled(false);
-		blackRepAct->setDisabled(false);
-		importPgnAct->setDisabled(false);
-
-		if (writeRep)
-		{
-			commentwindow->setWriteRep(false);
-			writeRep = false;
-			writeRepAct->setChecked(false);
+			b = true;
+			break;
 		}
 	}
+	importPgnAct->setDisabled(b);
 }
 
-void MainWindow::fileCloseTheory()
-{
-	theoryBase->close();
-	bdeTheory.clear();
-	closeTheoryAct->setDisabled(true);
-	writeTheoryAct->setDisabled(true);
 
-	if (writeTheory)
+void MainWindow::bookWrite(int type)
+{
+	if (write == type)
 	{
-		commentwindow->setWriteTheory(false);
-		writeTheory = false;
-		writeTheoryAct->setChecked(false);
+		write = -1;
+		writeAct[type]->setChecked(false);
 	}
-	if (!repBase->isOpen())
-		importPgnAct->setDisabled(true);
-}
-
-void MainWindow::fileCloseRep()
-{
-	repBase->close();
-	bdeRep.clear();
-	closeRepAct->setDisabled(true);
-	writeRepAct->setDisabled(true);
-	whiteRepAct->setDisabled(true);
-	blackRepAct->setDisabled(true);
-
-	if (writeRep)
+	else
 	{
-		commentwindow->setWriteRep(false);
-		writeRep = false;
-		writeRepAct->setChecked(false);
+		write = type;
+		writeAct[type]->setChecked(true);
 	}
-	if (!theoryBase->isOpen())
-		importPgnAct->setDisabled(true);
-}
-
-void MainWindow::bookWriteTheory()
-{
-	writeTheory = writeTheory ? false : true;
-	writeTheoryAct->setChecked(writeTheory);
-	writeRep = false;
-	writeRepAct->setChecked(false);
-	commentwindow->setWriteTheory(writeTheory);
-}
-
-void MainWindow::bookWriteRep()
-{
-	writeRep = writeRep ? false : true;
-	writeRepAct->setChecked(writeRep);
-	writeTheory = false;
-	writeTheoryAct->setChecked(false);
-	commentwindow->setWriteRep(writeRep);
+	commentwindow->write=write;
 }
 
 void MainWindow::flipBoard()
@@ -411,47 +312,30 @@ void MainWindow::moveEntered(ChessMove& move)
 		return;
 	}
 
-	// Save the move if it doesn't exist
-	if (writeTheory)
+	if (write >= 0)
 	{
-		if (!bdeTheory.moveExist(move))
+		// Save the move if it doesn't exist
+		if (!bde[write].moveExist(move))
 		{
 			bm.clear();
 			bm.move = move;
-			bdeTheory.movelist.append(bm);
-			theoryBase->add(bdeTheory);
-		}
-	} else if (writeRep)
-	{
-		if (!bdeRep.moveExist(move))
-		{
-			bm.clear();
-			bm.move = move;
-			bdeRep.movelist.append(bm);
-			repBase->add(bdeRep);
-		}
-		else
-		{
-			for (i = 0; i < bdeRep.movelist.size(); i++)
-			{
-				if (bdeRep.movelist[i].move == move)
-				{
-					repBase->add(bdeRep);
-					break;
-				}
-			}
+			bde[write].movelist.append(bm);
+			Base[write]->add(bde[write]);
 		}
 	}
 
 	// Change to read from both db
 	board = currentPath->getPosition();
-	bdeTheory = theoryBase->find(board, 0);
-	bdeRep = repBase->find(board, whiteRep ? 1 : 2);
+
+	for (int i = 0; i < 3; i++)
+	{
+		bde[i] = Base[i]->find(board);
+	}
 	boardwindow->setPosition(board);
 	enginewindow->setPosition(board,currentPath->size()/2+1);
-	movewindow->update(bdeTheory, bdeRep);
-	openingwindow->update(bdeTheory, bdeRep);
-	commentwindow->update(bdeTheory.comment, bdeRep.comment);
+	movewindow->update(bde[THEORY], bde[REPWHITE],bde[REPBLACK]);
+//	openingwindow->update(bdeTheory, bdeRep);
+	commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
 	pathwindow->update(currentPath);
 }
 
@@ -463,74 +347,45 @@ void MainWindow::pathSelected(int ply)
 		currentPath->setLength(ply);
 
 	ChessBoard board = currentPath->getPosition();
-	bdeTheory = theoryBase->find(board, 0);
-	bdeRep = repBase->find(board, whiteRep ? 1 : 2);
+
+	for (int i = 0; i < 3; i++)
+		bde[i] = Base[i]->find(board);
 	boardwindow->setPosition(board);
 	enginewindow->setPosition(board, currentPath->size() / 2 + 1);
-	movewindow->update(bdeTheory, bdeRep);
-	openingwindow->update(bdeTheory, bdeRep);
-	commentwindow->update(bdeTheory.comment, bdeRep.comment);
+	movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
+//	openingwindow->update(bdeTheory, bdeRep);
+	commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
 	pathwindow->update(currentPath);
 }
 
 void MainWindow::commentChanged(QString& comment)
 {
-	if (writeTheory)
+	if (write >= 0)
 	{
-		bdeTheory.comment = comment;
-		theoryBase->add(bdeTheory);
+		bde[write].comment = comment;
+		Base[write]->add(bde[write]);
 	}
-	else if (writeRep)
-	{
-		bdeRep.comment = comment;
-		repBase->add(bdeTheory);
-	}
-}
-
-void MainWindow::whiteRepertoire()
-{
-	whiteRep = true;
-	blackRepAct->setChecked(false);
-	ChessBoard board = currentPath->getPosition();
-	bdeRep = repBase->find(board, 1);
-	movewindow->update(bdeTheory, bdeRep);
-	openingwindow->update(bdeTheory, bdeRep);
-	commentwindow->update(bdeTheory.comment, bdeRep.comment);
-}
-
-void MainWindow::blackRepertoire()
-{
-	whiteRep = false;
-	whiteRepAct->setChecked(false);
-	ChessBoard board = currentPath->getPosition();
-	bdeRep = repBase->find(board, 2);
-	movewindow->update(bdeTheory, bdeRep);
-	openingwindow->update(bdeTheory, bdeRep);
-	commentwindow->update(bdeTheory.comment, bdeRep.comment);
 }
 
 void MainWindow::fileImportPgn()
 {
 	int moves=999;
 	ImportPgnDialog dialog(this);
-	dialog.setItems(theoryBase->isOpen(), repBase->isOpen(), whiteRep, moves);
+	dialog.setItems(Base[THEORY]->isOpen(), Base[REPWHITE]->isOpen(), Base[REPBLACK]->isOpen(), moves);
 	if (dialog.exec() == QDialog::Rejected)
 		return;
-	bool theory, rep, white, variation, comment;
+	bool theory, white, black, variation, comment;
 	QString path;
-	dialog.getItems(path, theory, rep, white, moves, comment, variation);
+	dialog.getItems(path, theory, white, black, moves, comment, variation);
 
-	if (theory)
-		dialog.importPgnFile(this, theoryBase, path, false, false, moves, comment, variation);
-	else if (rep)
-		dialog.importPgnFile(this, repBase, path, white, !white, moves, comment, variation);
+	dialog.importPgnFile(this, Base[THEORY], path, moves, comment, variation);
 
 	// Change to read from both db
 	ChessBoard board = currentPath->getPosition();
-	bdeTheory = theoryBase->find(board, 0);
-	bdeRep = repBase->find(board, whiteRep ? 1 : 2);
+	for (int i = 0; i < 3; i++)
+		bde[i] = Base[i]->find(board);
 	boardwindow->setPosition(board);
-	movewindow->update(bdeTheory, bdeRep);
-	openingwindow->update(bdeTheory, bdeRep);
-	commentwindow->update(bdeTheory.comment, bdeRep.comment);
+	movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
+	//	openingwindow->update(bdeTheory, bdeRep);
+	commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
 }

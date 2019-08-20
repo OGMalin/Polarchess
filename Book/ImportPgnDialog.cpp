@@ -150,7 +150,7 @@ void ImportPgnDialog::typeChanged()
 	}
 }
 
-void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnfile, bool whiterep, bool blackrep, int moves, bool comment, bool variation)
+void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnfile, int moves, bool comment, bool variation)
 {
 	QProgressDialog progress("Importing Pgn file: " + pgnfile, "Cancel", 0, 100, this);
 	progress.setMinimumDuration(0);
@@ -176,14 +176,6 @@ void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnf
 	BookDBMove bdm;
 	int i, j, k, l;
 
-	int repertoire;
-	if (whiterep)
-		repertoire = 1;
-	else if (blackrep)
-		repertoire = 2;
-	else
-		repertoire = 0;
-	
 	for (i = 0; i < games; i++)
 	{
 		progress.setValue(i);
@@ -201,7 +193,7 @@ void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnf
 					pgn.close();
 					return;
 				}
-				bde = db->find(game.position[j].board, repertoire);
+				bde = db->find(game.position[j].board);
 				if (comment && !game.position[j].comment.empty())
 				{
 					if (!bde.comment.isEmpty())

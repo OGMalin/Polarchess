@@ -17,9 +17,6 @@
 	score		text (Only in use on repertoire db)
 		Successfull guesses (-10000=Not tried, -9999= Tried once then starting from 0)
 
-	repertoire	text (Only in use on repertoire db)
-		0=White, 1=black
-
 	movelist	text
 		move1|comment|score;move2|comment|score
 */
@@ -58,15 +55,15 @@ struct BookDBEntry
 {
 	ChessBoard board;
 	int eval;
-	int repertoire; // 1= White, 2=Black, 0=none
 	QString computer;
 	QString comment;
 	int score=0;
 	QVector<BookDBMove> movelist;
 	bool dirty;
 	BookDBEntry() { clear();  dirty = false; };
-	void clear() { board.clear(); comment.clear(); movelist.clear(); computer.clear(); eval = 0; repertoire = 0; dirty = false; };
+	void clear() { board.clear(); comment.clear(); movelist.clear(); computer.clear(); eval = 0; dirty = false; };
 	bool moveExist(ChessMove& move);
+	void updateMove(BookDBMove&bm);
 
 	void convertToMoveList(QVector<BookDBMove>&, const QString&);
 	void convertFromMoveList(const QVector<BookDBMove>&, QString&);
@@ -83,7 +80,7 @@ public:
 	bool open(const QString& path);
 	void close();
 	bool add(BookDBEntry& data);
-	BookDBEntry find(ChessBoard& board, int rep);
+	BookDBEntry find(ChessBoard& board);
 	bool isOpen() { return opened; };
 	void getRepLines(RepPaths& paths, ChessBoard board, int color, int count);
 
@@ -91,5 +88,5 @@ private:
 	bool opened;
 //	QSqlDatabase bookdb;
 	QString dbname;
-	bool exist(ChessBoard& board, int rep);
+	bool exist(ChessBoard& board);
 };
