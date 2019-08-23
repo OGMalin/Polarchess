@@ -36,15 +36,28 @@ bool Database::open(const QString& path)
 	db.setDatabaseName(path);
 
 	if (!db.open())
+	{
 		opened = false;
-	else
+	}else
+	{
 		opened = true;
+		QSqlQuery query(db);
+		query.prepare("SELECT * FROM info;");
+		if (query.exec() && query.next())
+		{
+			bdi.db = query.value("db").toString();
+			bdi.version = query.value("version").toString();
+			bdi.type = query.value("type").toInt();
+		}
+	}
+
 	return opened;
 }
 
-bool Database::create(const QString& path)
+bool Database::create(const QString& path, int dbtype)
 {
 	QSqlDatabase db = QSqlDatabase::database(dbname);
+	char sz[16];
 
 	db.setDatabaseName(path);
 	
@@ -55,10 +68,11 @@ bool Database::create(const QString& path)
 		return false;
 	}
 	QSqlQuery query(db);
-	query.exec("CREATE TABLE info ( type TEXT, version TEXT);");
-	query.prepare("INSERT INTO info (type, version) VALUES ( :type, :version);");
-	query.bindValue(":type", DBTYPE);
+	query.exec("CREATE TABLE info ( db TEXT, version TEXT, type TEXT);");
+	query.prepare("INSERT INTO info (db, version, type) VALUES ( :db, :version, :type);");
+	query.bindValue(":db", DBTYPE);
 	query.bindValue(":version", DBVERSION);
+	query.bindValue(":type", itoa(dbtype, sz, 10));
 	query.exec();
 	query.exec("CREATE TABLE positions ( "
 		"fen	TEXT,"
@@ -69,6 +83,9 @@ bool Database::create(const QString& path)
 		"movelist	TEXT,"
 		"PRIMARY KEY(fen)"
 		"); ");
+	bdi.db = DBTYPE;
+	bdi.version = DBVERSION;
+	bdi.type = dbtype;
 	opened = true;
 	return true;
 }
@@ -162,6 +179,17 @@ bool Database::exist(ChessBoard& board)
 	if (query.exec() && query.next())
 		return true;
 	return false;
+}
+
+BookDBInfo Database::bookInfo()
+{
+	if (!opened)
+	{
+		bdi.version.clear();
+		bdi.db.clear();
+		bdi.type = 0;
+	}
+	return bdi;
 }
 
 bool BookDBEntry::moveExist(ChessMove& move)

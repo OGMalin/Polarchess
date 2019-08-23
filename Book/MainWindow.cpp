@@ -254,7 +254,7 @@ void MainWindow::fileNew(int type)
 				return;
 			file.remove();
 		}
-		Base[type]->create(path);
+		Base[type]->create(path, type);
 		bde[type].clear();
 		bde[type].board = currentPath->getStartPosition();
 		Base[type]->add(bde[type]);
