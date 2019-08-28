@@ -159,10 +159,12 @@ void MainWindow::updateMenu()
 		if (Base[i]->isOpen())
 		{
 			closeAct[i]->setDisabled(false);
+			writeAct[i]->setDisabled(false);
 			++open;
 		}else
 		{
 			closeAct[i]->setDisabled(true);
+			writeAct[i]->setDisabled(true);
 		}
 	}
 	if (open==0)
