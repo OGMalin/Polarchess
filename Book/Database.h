@@ -69,20 +69,30 @@ struct BookDBEntry
 	void convertFromMoveList(const QVector<BookDBMove>&, QString&);
 };
 
+struct BookDBInfo
+{
+	QString db;
+	QString version;
+	int type;
+};
+
 class Database : public QObject
 {
 	Q_OBJECT
 
 public:
+	BookDBInfo bdi;
 	Database(QString& name, QObject *parent=0);
 	~Database();
-	bool create(const QString& path);
+	// dbtype: 0=general, 1=White repertoire, 2=Black repertoire
+	bool create(const QString& path, int dbtype);
 	bool open(const QString& path);
 	void close();
 	bool add(BookDBEntry& data);
 	BookDBEntry find(ChessBoard& board);
 	bool isOpen() { return opened; };
 	void getRepLines(RepPaths& paths, ChessBoard board, int color, int count);
+	BookDBInfo bookInfo();
 
 private:
 	bool opened;

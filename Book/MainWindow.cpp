@@ -159,10 +159,12 @@ void MainWindow::updateMenu()
 		if (Base[i]->isOpen())
 		{
 			closeAct[i]->setDisabled(false);
+			writeAct[i]->setDisabled(false);
 			++open;
 		}else
 		{
 			closeAct[i]->setDisabled(true);
+			writeAct[i]->setDisabled(true);
 		}
 	}
 	if (open==0)
@@ -254,7 +256,7 @@ void MainWindow::fileNew(int type)
 				return;
 			file.remove();
 		}
-		Base[type]->create(path);
+		Base[type]->create(path, type);
 		bde[type].clear();
 		bde[type].board = currentPath->getStartPosition();
 		Base[type]->add(bde[type]);
