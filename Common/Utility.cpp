@@ -52,7 +52,7 @@ const std::string getLine(const string& input, int n)
 
 const std::string getLine(const char* sz)
 {
-	int len = strlen(sz);
+	int len = (int)strlen(sz);
 	int end = 0;
 	while (end < len)
 	{
