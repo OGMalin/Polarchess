@@ -1,5 +1,4 @@
 //#define _DEBUG_SEARCH
-//#define _DEBUG_STRENGTH
 
 #include <process.h>
 #include <string>
@@ -131,8 +130,6 @@ void EngineSearchThreadLoop(void* lpv)
 					eng.eval.queenValue = ev.value;
 				else if (ev.type == EVAL_bishoppair)
 					eng.eval.bishopValue = ev.value;
-				else if (ev.type == EVAL_strength)
-					eng.strength = ev.value;
 				else if (ev.type == EVAL_mobility)
 					eng.eval.mobilityScore = ev.value;
 				break;
@@ -151,7 +148,6 @@ void EngineSearchThreadLoop(void* lpv)
 
 Engine::Engine()
 {
-	strength = FULL_STRENGTH; // Strength defaults to 100%
 	debug = false;
 	contempt = 0;
 	multiPV = 1;
@@ -199,7 +195,7 @@ void Engine::startSearch()
 	}
 	else if ((ml[0].size == 1) && (searchtype == NORMAL_SEARCH))
 	{ // Only one legal move
-		bestMove.push_back(BestMove(ml[0].list[0],0));
+		bestMove = ml[0].list[0];
 		sendBestMove();
 		return;
 	}
@@ -293,11 +289,11 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 	if (depth == 1)
 	{
 		orderRootMoves();
-		bestMove.push_back(BestMove(ml[0].list[0], watch.read(WatchPrecision::Microsecond)));
+		bestMove = ml[0].list[0];
 	}
 	else
 	{
-		mit = ml[0].find(bestMove.back().move);
+		mit = ml[0].find(bestMove);
 		if (mit < ml[0].size)
 			ml[0].list[mit].score = 0x7fffffff;
 		ml[0].sort();
@@ -345,7 +341,7 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 				sendPV(pv[0], depth,score);
 			alpha = score;
 
-			bestMove.push_back(BestMove(ml[0].list[mit], watch.read(WatchPrecision::Microsecond)));
+			bestMove = ml[0].list[mit];
 		}
 		if (inCheck)
 			--extention;
@@ -569,8 +565,6 @@ bool Engine::abortCheck()
 				eval.queenValue = ev.value;
 			else if (ev.type == EVAL_bishoppair)
 				eval.bishopValue = ev.value;
-			else if (ev.type == EVAL_strength)
-				strength = ev.value;
 			else if (ev.type == EVAL_mobility)
 				eval.mobilityScore = ev.value;
 			break;
@@ -585,48 +579,7 @@ bool Engine::abortCheck()
 
 void Engine::sendBestMove()
 {
-	string s;
-#ifdef _DEBUG_STRENGTH
-
-	list<BestMove>::iterator _mit = bestMove.begin();
-	ChessMove _m = bestMove.front().move;
-	cout << "BestMove list"  << endl;
-	while (_mit != bestMove.end())
-	{
-		s = theBoard.makeMoveText(_mit->move, UCI);
-		cout << s << " (" << _mit->score << ")" << endl;
-		++_mit;
-	}
-
-#endif
-
-	if (searchtype != NORMAL_SEARCH)
-	{
-		s = theBoard.makeMoveText(bestMove.back().move, UCI);
-
-		assert(s.length());
-
-		ei->sendInQue(ENG_string, "bestmove " + theBoard.makeMoveText(bestMove.back().move,UCI));
-		return;
-	}
-	// Full strength
-	if (strength == FULL_STRENGTH)
-	{
-		ei->sendInQue(ENG_string, "bestmove " + theBoard.makeMoveText(bestMove.back().move,UCI));
-		return;
-	}
-	ULONGLONG ull = (watch.read(WatchPrecision::Microsecond)*strength)/ FULL_STRENGTH;
-	list<BestMove>::iterator mit=bestMove.begin();
-	ChessMove m=bestMove.front().move;
-	while (mit!=bestMove.end())
-	{
-		if (mit->score > ull)
-			break;
-		m = mit->move;
-		++mit;
-	}
-
-	ei->sendInQue(ENG_string, "bestmove " + theBoard.makeMoveText(m,UCI));
+	ei->sendInQue(ENG_string, "bestmove " + theBoard.makeMoveText(bestMove,UCI));
 }
 
 void Engine::sendPV(const MoveList& pvline, int depth, int score, int type)

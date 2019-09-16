@@ -9,6 +9,7 @@
 class FrontEnd
 {
 	DWORD movegenTest(int depth, bool init = true, int ply = 0);
+	LONGLONG freqMz;
 public:
 	std::list<std::string> personalities;
 	DWORD maxElo;
@@ -40,7 +41,7 @@ public:
 	void findMaxElo();
 	void uciReadFile(const std::string& s);
 	void uciEval(const std::string& s);
-	DWORD calculateStrength(int elo);
+	DWORD calculateStrength(int elo, int tm);
 	void readIniFiles();
 	const std::string getProgramPath();
 };

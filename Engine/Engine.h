@@ -8,8 +8,6 @@
 #include "../Common/MoveGenerator.h"
 #include "../Common/defs.h"
 
-const int FULL_STRENGTH = 1000000;
-
 enum SEARCHTYPE
 {
 	NORMAL_SEARCH=1,
@@ -26,20 +24,11 @@ enum
 	upperbound
 };
 
-struct BestMove
-{
-	ChessMove move;
-	ULONGLONG score;
-	BestMove() {};
-	BestMove(ChessMove& m, ULONGLONG s) { move = m, score = s; };
-};
-
 class Engine
 {
 	friend void EngineSearchThreadLoop(void* eng);
 public:
-	DWORD strength; // strength 100% = 1 000 000;
-	std::list<BestMove> bestMove;
+	ChessMove bestMove;
 	Evaluation eval;
 	StopWatch watch;
 	MoveGenerator mgen;
