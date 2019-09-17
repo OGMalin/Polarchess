@@ -11,7 +11,7 @@
 
 using namespace std;
 
-const char* ENGINENAME = "PolarChess 2.0 B4";
+const char* ENGINENAME = "PolarChess 2.0 B5";
 
 // To calculate rating
 // Testmachine speed in MHz
@@ -55,6 +55,7 @@ int FrontEnd::run()
 #endif
 
 	findMaxElo();
+	currentElo = maxElo;
 	readIniFiles();
 
 	engine.sendOutQue(ENG_clearhistory);
@@ -171,16 +172,19 @@ void FrontEnd::uciUci()
 	uci.write("option name Ponder type check default false");
 	sprintf_s(sz, 256, "option name Contempt type spin default %i min -500 max 500", contempt);
 	uci.write(sz);
-	s = "option name Personality type combo default ";
-	if (find(personalities.begin(), personalities.end(), "Normal") != personalities.end())
-		s += "Normal";
-	else
-		s += "<empty>";
-	for (it = personalities.begin(); it != personalities.end(); it++)
-		s += " var " + *it;
-	uci.write(s);
+	if (personalities.size())
+	{
+		s = "option name Personality type combo default ";
+		if (find(personalities.begin(), personalities.end(), "Normal") != personalities.end())
+			s += "Normal";
+		else
+			s += "<empty>";
+		for (it = personalities.begin(); it != personalities.end(); it++)
+			s += " var " + *it;
+		uci.write(s);
+	}
 //	uci.write("option name MultiPV type spin default 1 min 1 max 100");
-	uci.write(sz);
+//	uci.write(sz);
 	uci.write("option name UCI_AnalyseMode type check default false");
 	s = "option name UCI_LimitStrength type check default ";
 	if (limitStrength)
@@ -572,7 +576,7 @@ void FrontEnd::uciGo(const std::string& input)
 	winc = (currentBoard.toMove == WHITE) ? winc : binc;
 	eg.maxTime = (wtime + (movestogo*winc)) / movestogo;
 	if (eg.maxTime > (DWORD)(wtime / 2))
-		eg.maxTime = wtime;
+		eg.maxTime = wtime/2;
 
 	eg.fixedTime = movetime;
 	eg.nodes=nodes;

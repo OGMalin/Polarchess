@@ -308,10 +308,10 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 	// Add the root position to the drawtable
 	hashDrawTable.add(hashKey, 0);
 
-	bool sendinfo;
+	bool sendinfo=true;
 	for (mit = 0; mit < ml[0].size; mit++)
 	{
-		sendinfo = (watch.read(WatchPrecision::Millisecond) > 999) ? true : false;
+//		sendinfo = (watch.read(WatchPrecision::Millisecond) > 999) ? true : false;
 		// Send UCI info
 		if (debug || sendinfo)
 		{
