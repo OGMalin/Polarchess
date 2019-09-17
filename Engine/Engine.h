@@ -51,6 +51,7 @@ public:
 	int contempt;
 	ChessBoard theBoard;
 	ChessBoard tempBoard;
+	// Keep track of materiale on board to deside if nullmove is dangerous
 	int material[13];
 	Engine();
 	void startSearch();

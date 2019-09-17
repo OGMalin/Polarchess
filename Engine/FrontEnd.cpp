@@ -881,7 +881,7 @@ DWORD FrontEnd::calculateStrength(int elo, int tm)
 		return 0;
 	double f1 = diff / halfSpeed;
 	double f2 = 1 / (pow(2,f1));
-	dnodes = testNodes * (freqMz / testFrequence);
+	dnodes = testNodes * (double)(freqMz / testFrequence);
 	nodes = (DWORD)(f2*dnodes*tm/1000);
 #ifdef _DEBUG
 	char sz[256];

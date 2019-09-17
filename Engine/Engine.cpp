@@ -22,8 +22,10 @@ Engine eng;
 char sz[256];
 ChessMove emptyMove;
 
+// White/black materiale are only used to deside if nullmove should be used.
 #define whitemateriale (material[whiteknight]+material[whitebishop]+material[whiterook]+material[whitequeen])
 #define blackmateriale (material[blackknight]+material[blackbishop]+material[blackrook]+material[blackqueen])
+
 // Heinz adaptive null-move reduction, p.35 in SSCC
 // 2 if (depth<=6) or ((depth<=8)&(max_pieces_per_side<3))
 // 3 if (depth>8) or ((depth>6)&(max_pieces_per_side>=3))
@@ -306,9 +308,10 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 	// Add the root position to the drawtable
 	hashDrawTable.add(hashKey, 0);
 
-	bool sendinfo = (watch.read(WatchPrecision::Millisecond) > 999) ? true : false;
+	bool sendinfo;
 	for (mit = 0; mit < ml[0].size; mit++)
 	{
+		sendinfo = (watch.read(WatchPrecision::Millisecond) > 999) ? true : false;
 		// Send UCI info
 		if (debug || sendinfo)
 		{
@@ -317,7 +320,7 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 		}
 		newkey = theBoard.newHashkey(ml[0].list[mit], hashKey);
 		mgen.doMove(theBoard, ml[0].list[mit]);
-		++material[ml[0].list[mit].capturedpiece];
+		--material[ml[0].list[mit].capturedpiece];
 
 		assert(theBoard.hashkey() == newkey);
 
@@ -328,7 +331,7 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 		if (score == -BREAKING)
 			return BREAKING;
 		mgen.undoMove(theBoard, ml[0].list[mit]);
-		--material[ml[0].list[mit].capturedpiece];
+		++material[ml[0].list[mit].capturedpiece];
 		ml[0].list[mit].score = nodes - oldNodes;
 		if (score >= beta)
 			return beta;
@@ -376,7 +379,7 @@ int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey
 	hashDrawTable.add(hashKey, ply);
 
 	// Null move
-	if (!followPV, !inCheck && doNullmove && whitemateriale && blackmateriale)
+	if (!followPV && !inCheck && doNullmove && whitemateriale && blackmateriale)
 	{
 
 		newkey = theBoard.newHashkey(nullmove[ply],hashKey);
@@ -397,7 +400,7 @@ int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey
 	{
 		newkey = theBoard.newHashkey(ml[ply].list[mit], hashKey);
 		mgen.doMove(theBoard, ml[ply].list[mit]);
-		++material[ml[ply].list[mit].capturedpiece];
+		--material[ml[ply].list[mit].capturedpiece];
 
 		assert(theBoard.hashkey() == newkey);
 
@@ -410,7 +413,7 @@ int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey
 		if (score == -BREAKING)
 			return BREAKING;
 		mgen.undoMove(theBoard, ml[ply].list[mit]);
-		--material[ml[ply].list[mit].capturedpiece];
+		++material[ml[ply].list[mit].capturedpiece];
 		if (score >= beta)
 			return beta;
 		if (score > alpha)
