@@ -59,9 +59,11 @@ public:
 	bool isDraw(ChessBoard& cb);
 	bool cantWin(ChessBoard& cb);
 	bool cantLose(ChessBoard& cb);
+	bool evalSpecialEndgame(ChessBoard& cb);
 	void evalStatic(ChessBoard& cb);
 	void evalStaticEndgame(ChessBoard& cb);
 	void evalPawnstructure(ChessBoard& cb);
 	void evalBishopPair(ChessBoard& cb);
 	void evalMobility(ChessBoard& cb);
+
 };

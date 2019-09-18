@@ -3,6 +3,8 @@
 #include "StaticEndgame.h"
 #include "../Common/MoveGenerator.h"
 
+const int ENDGAME = 3000;
+
 Evaluation::Evaluation()
 {
 	rootcolor = WHITE;
@@ -32,6 +34,7 @@ void Evaluation::setup(ChessBoard& cb)
 		fPawnEndGame[i] = NULL;
 	}
 	scanBoard(cb);
+
 	if (bishopPair && ((bishoplist[WHITE].size > 1) || (bishoplist[BLACK].size > 1)))
 		addEval(&Evaluation::evalBishopPair, true, true);
 	if (mobilityScore)
@@ -102,24 +105,27 @@ int Evaluation::evaluate(ChessBoard& cb, int alpha, int beta)
 
 	scanBoard(cb);
 
-
-	if (gamestage < 3000)
-		isEndgame = true;
-	else
-		isEndgame = false;
-
 	evalPawnstructure(cb);
 
 	if (isEndgame)
 	{
 		if (isDraw(cb))
 			return drawscore[cb.toMove];
+		
+		if (evalSpecialEndgame(cb))
+		{
+			score = (cb.toMove == WHITE) ? (position[WHITE] - position[BLACK]) : (position[BLACK] - position[WHITE]);
+			if (score==0)
+				return drawscore[cb.toMove];
+			return score;
+		}
 		evalStaticEndgame(cb);
 
 		// try a alphabeta cut
 		score = (cb.toMove == WHITE) ? (position[WHITE] - position[BLACK]) : (position[BLACK] - position[WHITE]);
 		if ((score < (alpha - 300)) || (score > (beta + 300)))
 			return score;
+
 
 		i = 0;
 		while (efunc = fEndGame[i++])
@@ -128,10 +134,17 @@ int Evaluation::evaluate(ChessBoard& cb, int alpha, int beta)
 		score = (cb.toMove == WHITE) ? (position[WHITE] - position[BLACK]) : (position[BLACK] - position[WHITE]);
 
 		// Correct the score if there isn't any winchances to force 3 fold rep.
+
 		if (cantWin(cb))
-			score = drawscore[cb.toMove] - 1;
+		{
+			if (position[cb.toMove] > position[OTHERPLAYER(cb.toMove)])
+				score = drawscore[cb.toMove] - 1;
+		}
 		else if (cantLose(cb))
-			score = drawscore[cb.toMove] + 1;
+		{
+			if (position[cb.toMove] < position[OTHERPLAYER(cb.toMove)])
+				score = drawscore[cb.toMove] + 1;
+		}
 	}
 	else
 	{
@@ -240,6 +253,11 @@ void Evaluation::scanBoard(ChessBoard& cb)
 	}
 	for (j = i; j < 32; j++)
 		pieces[j][0] = 0;
+
+	if (gamestage < ENDGAME)
+		isEndgame = true;
+	else
+		isEndgame = false;
 }
 
 void Evaluation::evalStatic(ChessBoard& cb)
@@ -464,4 +482,9 @@ void Evaluation::evalMobility(ChessBoard& cb)
 	testGen.undoNullMove(cb, testMove);
 	position[WHITE] += mobility[WHITE]*mobilityScore;
 	position[BLACK] += mobility[BLACK]*mobilityScore;
+}
+
+bool Evaluation::evalSpecialEndgame(ChessBoard& cb)
+{
+	return false;
 }
