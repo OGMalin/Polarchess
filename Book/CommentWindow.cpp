@@ -2,6 +2,8 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QInputDialog>
+#include <QMenu>
+#include <QFontDialog>
 
 CommentWindow::CommentWindow(QWidget *parent)
 	: QWidget(parent)
@@ -18,7 +20,12 @@ CommentWindow::CommentWindow(QWidget *parent)
 	setLayout(vbox);
 	theoryColor.setRgb(0, 0, 128);
 	repColor.setRgb(0, 128, 0);
+
+	setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+
 	font.setPointSize(12);
+	this->setFont(font);
 }
 
 CommentWindow::~CommentWindow()
@@ -31,7 +38,6 @@ void CommentWindow::update(QString theory, QString white, QString black)
 	cWhite = white;
 	cBlack = black;
 	comment->clear();
-	comment->setFont(font);
 	if (!cWhite.isEmpty())
 	{
 		comment->setTextColor(repColor);
@@ -78,5 +84,23 @@ void CommentWindow::mouseDoubleClickEvent(QMouseEvent* event)
 	{
 		update(cTheory, cWhite, cBlack);
 		emit commentChanged(newText);
+	}
+}
+
+void CommentWindow::showContextMenu(const QPoint& pos)
+{
+	QMenu* contextMenu = new QMenu(this);
+	contextMenu->addAction(QString("Font"), this, SLOT(selectFont()));
+	contextMenu->exec(mapToGlobal(pos));
+}
+
+void CommentWindow::selectFont()
+{
+	bool ok;
+	QFont f = QFontDialog::getFont(&ok, font, this);
+	if (ok)
+	{
+		font = f;
+		this->setFont(font);
 	}
 }

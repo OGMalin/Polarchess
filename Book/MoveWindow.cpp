@@ -4,6 +4,8 @@
 #include <QVBoxLayout>
 #include <QStringList>
 #include <QVector>
+#include <QMenu>
+#include <QFontDialog>
 
 MoveWindow::MoveWindow(QWidget *parent)
 	: QWidget(parent)
@@ -21,6 +23,12 @@ MoveWindow::MoveWindow(QWidget *parent)
 //	setContentsMargins(0, 0, 0, 0);
 	normalBrush.setColor(Qt::black);
 	repBrush.setColor(Qt::green);
+
+	setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+
+	font.setPointSize(12);
+	this->setFont(font);
 }
 
 MoveWindow::~MoveWindow()
@@ -40,7 +48,7 @@ void MoveWindow::update(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& bl
 		qs += theory.movelist[i].comment;
 		item = new QStandardItem(qs);
 		item->setEditable(false);
-		item->setTextAlignment(Qt::AlignLeft);
+		item->setTextAlignment(Qt::AlignCenter);
 		model->setItem(i,0,item);
 	}
 	rows = i;
@@ -78,7 +86,7 @@ void MoveWindow::update(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& bl
 		qs += bde.movelist[i].comment;
 		item = new QStandardItem(qs);
 		item->setEditable(false);
-		item->setTextAlignment(Qt::AlignLeft);
+		item->setTextAlignment(Qt::AlignCenter);
 		if (bde.movelist[i].score>0)
 			item->setForeground(repBrush);
 		else
@@ -100,4 +108,22 @@ void MoveWindow::update(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& bl
 		}
 	}
 	model->setRowCount(rows);
+}
+
+void MoveWindow::showContextMenu(const QPoint& pos)
+{
+	QMenu* contextMenu = new QMenu(this);
+	contextMenu->addAction(QString("Font"), this, SLOT(selectFont()));
+	contextMenu->exec(mapToGlobal(pos));
+}
+
+void MoveWindow::selectFont()
+{
+	bool ok;
+	QFont f = QFontDialog::getFont(&ok, font, this);
+	if (ok)
+	{
+		font = f;
+		this->setFont(font);
+	}
 }

@@ -6,6 +6,8 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QTableView>
+#include <QMenu>
+#include <QFontDialog>
 
 EngineWindow::EngineWindow(QWidget *parent)
 	: QWidget(parent)
@@ -65,6 +67,8 @@ EngineWindow::EngineWindow(QWidget *parent)
 	if (multipv == 1)
 		decline->setEnabled(false);
 
+	setContextMenuPolicy(Qt::CustomContextMenu);
+
 	connect(decline, SIGNAL(clicked(bool)), this, SLOT(declineClicked(bool)));
 	connect(incline, SIGNAL(clicked(bool)), this, SLOT(inclineClicked(bool)));
 	connect(freeze, SIGNAL(clicked(bool)), this, SLOT(freezeClicked(bool)));
@@ -72,6 +76,10 @@ EngineWindow::EngineWindow(QWidget *parent)
 	connect(engine, SIGNAL(engineReady()), this, SLOT(engineReady()));
 	connect(engine, SIGNAL(engineMove(const QString&, const QString&)), this, SLOT(engineStoped(const QString&, const QString&)));
 	connect(engine, SIGNAL(engineInfo(const EngineInfo&)), this, SLOT(engineInfo(const EngineInfo&)));
+	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+
+	font.setPointSize(12);
+	this->setFont(font);
 }
 
 EngineWindow::~EngineWindow()
@@ -236,5 +244,23 @@ void EngineWindow::engineInfo(const EngineInfo& info)
 			item->setTextAlignment(Qt::AlignLeft);
 			model->setItem(line - 1, 2, item);
 		}
+	}
+}
+
+void EngineWindow::showContextMenu(const QPoint& pos)
+{
+	QMenu* contextMenu = new QMenu(this);
+	contextMenu->addAction(QString("Font"), this, SLOT(selectFont()));
+	contextMenu->exec(mapToGlobal(pos));
+}
+
+void EngineWindow::selectFont()
+{
+	bool ok;
+	QFont f = QFontDialog::getFont(&ok, font, this);
+	if (ok)
+	{
+		font = f;
+		this->setFont(font);
 	}
 }

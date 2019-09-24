@@ -5,6 +5,7 @@
 #include "../Common/ChessBoard.h"
 #include "../Common/MoveList.h"
 #include <QStandardItemModel>
+#include <QFont>
 
 class QPushButton;
 class QLabel;
@@ -26,6 +27,8 @@ public slots:
 	void engineReady();
 	void engineStoped(const QString& move, const QString& ponder);
 	void engineInfo(const EngineInfo&);
+	void showContextMenu(const QPoint& pos);
+	void selectFont();
 
 private:
 	int multipv;
@@ -47,5 +50,6 @@ private:
 	MoveList movelist;
 	int movenr;
 	int freezemovenr;
+	QFont font;
 };
 

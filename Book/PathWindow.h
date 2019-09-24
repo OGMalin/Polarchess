@@ -1,6 +1,9 @@
 #pragma once
 
+#include <QWidget>
 #include <QListWidget>
+#include <QPoint>
+#include <QFont>
 
 class Path;
 
@@ -18,5 +21,10 @@ signals:
 
 public slots:
 	void moveClicked(QListWidgetItem*);
+	void showContextMenu(const QPoint& pos);
+	void selectFont();
+
+private:
+	QFont font;
 };
 

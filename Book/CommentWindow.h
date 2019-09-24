@@ -21,6 +21,10 @@ public:
 signals:
 	void commentChanged(QString&);
 
+public slots:
+	void showContextMenu(const QPoint& pos);
+	void selectFont();
+
 private:
 	QTextEdit* comment;
 	QColor theoryColor;

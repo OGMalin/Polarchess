@@ -1,6 +1,8 @@
 #include "PathWindow.h"
 #include "Path.h"
 #include <QStringList>
+#include <QMenu>
+#include <QFontDialog>
 
 PathWindow::PathWindow(QWidget *parent)
 	: QListWidget(parent)
@@ -9,7 +11,13 @@ PathWindow::PathWindow(QWidget *parent)
 	setViewMode(QListWidget::IconMode);
 	setResizeMode(QListWidget::Adjust);
 	setMovement(QListWidget::Static);
+
+	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(moveClicked(QListWidgetItem*)));
+	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+
+	font.setPointSize(12);
+	this->setFont(font);
 }
 
 PathWindow::~PathWindow()
@@ -36,4 +44,22 @@ void PathWindow::update(Path* path)
 void PathWindow::moveClicked(QListWidgetItem* item)
 {
 	emit pathSelected(currentRow());
+}
+
+void PathWindow::showContextMenu(const QPoint& pos)
+{
+	QMenu* contextMenu = new QMenu(this);
+	contextMenu->addAction(QString("Font"), this, SLOT(selectFont()));
+	contextMenu->exec(mapToGlobal(pos));
+}
+
+void PathWindow::selectFont()
+{
+	bool ok;
+	QFont f = QFontDialog::getFont(&ok, font, this);
+	if (ok)
+	{
+		font = f;
+		this->setFont(font);
+	}
 }
