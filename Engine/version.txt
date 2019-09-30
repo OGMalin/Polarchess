@@ -9,3 +9,5 @@
 
            2.0 B4 - Added evaluation of insufficient material.
                   - Added can't Win and can't lose.
+
+18/9-2019  2.0 B5 - Fixed bug in can't win, can't lose. Fixed timemanagement.
