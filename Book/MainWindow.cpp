@@ -27,7 +27,6 @@ MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
 	QSettings settings;
-	restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
 
 	dataPath = QStandardPaths::locate(QStandardPaths::DocumentsLocation, QCoreApplication::organizationName(), QStandardPaths::LocateDirectory);
 	dataPath += "/" + QCoreApplication::applicationName();
@@ -77,7 +76,11 @@ MainWindow::MainWindow(QWidget *parent)
 //	movewindow->setVisible(false);
 //	commentwindow->setVisible(false);
 
+	restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
 	restoreState(settings.value("mainWindowState").toByteArray());
+	v1Splitter->restoreState(settings.value("v1State").toByteArray());
+	v2Splitter->restoreState(settings.value("v2State").toByteArray());
+	hSplitter->restoreState(settings.value("hState").toByteArray());
 }
 
 MainWindow::~MainWindow()
@@ -207,7 +210,10 @@ void MainWindow::closeEvent(QCloseEvent* event)
 	QSettings settings;
 	settings.setValue("mainWindowGeometry", saveGeometry());
 	settings.setValue("mainWindowState", saveState());
-//	writeSettings();
+	settings.setValue("v1State", v1Splitter->saveState());
+	settings.setValue("v2State", v2Splitter->saveState());
+	settings.setValue("hState", hSplitter->saveState());
+	//	writeSettings();
 //	event->accept();
 }
 
