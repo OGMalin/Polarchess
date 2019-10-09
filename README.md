@@ -7,7 +7,7 @@ The old PolarChess project is renamed to Polarengine.
 
 <dl>
   <dt>Book</dt>
-  <dd>Book builder for PolarChess</dd>
+  <dd>Openingdatabase</dd>
 </dl>
 <dl>
   <dt>Common</dt>
