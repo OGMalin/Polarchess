@@ -30,7 +30,8 @@ private:
 
 public slots:
 	void moveEntered(ChessMove&);
-	void moveSelected(ChessMove&);
+	void moveSelected(int rep, int movenr);
+	void moveDelete(int rep, int movenr);
 	void pathSelected(int);
 	void commentChanged(QString&);
 

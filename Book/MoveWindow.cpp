@@ -11,12 +11,13 @@ MoveWindow::MoveWindow(QWidget *parent)
 	: QWidget(parent)
 {
 	QVBoxLayout* vbox = new QVBoxLayout;
-	model = new QStandardItemModel(0, 2);
+	model = new QStandardItemModel(0, 3);
 	QStringList header;
-	header << "Theory" << "Repertoire";
+	header << "Theory" << "White" << "Black";
 	model->setHorizontalHeaderLabels(header);
 	table = new QTableView;
 	table->setModel(model);
+	table->setSelectionMode(QAbstractItemView::SingleSelection);
 	vbox->setMargin(0);
 	vbox->addWidget(table);
 	setLayout(vbox);
@@ -26,7 +27,7 @@ MoveWindow::MoveWindow(QWidget *parent)
 
 	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
-
+	connect(table, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(moveClicked(const QModelIndex&)));
 	font.setPointSize(12);
 	this->setFont(font);
 }
@@ -52,67 +53,43 @@ void MoveWindow::update(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& bl
 		model->setItem(i,0,item);
 	}
 	rows = i;
-	BookDBEntry bde = white;
-	QVector<BookDBMove> bms = black.movelist;
-	BookDBMove bm;
-	for (i = 0; i < bde.movelist.size(); i++)
+	for (i = 0; i < white.movelist.size(); i++)
 	{
-		if (bde.board.toMove == WHITE)
-			bde.movelist[i].score = 1;
-		else
-			bde.movelist[i].score = 0;
-	}
-	for (i = 0; i < bms.size(); i++)
-	{
-		if (bde.moveExist(bms[i].move))
-		{
-			if (bde.board.toMove == BLACK)
-			{
-				bms[i].score = 2;
-				bde.updateMove(bms[i]);
-			}
-		}else
-		{
-			if (bde.board.toMove == BLACK)
-				bms[i].score = 2;
-			else
-				bms[i].score = 0;
-			bde.movelist.append(bms[i]);
-		}
-	}
-	for (i = 0; i < bde.movelist.size(); i++)
-	{
-		qs = QString(bde.board.makeMoveText(bde.movelist[i].move, FIDE).c_str());
-		qs += bde.movelist[i].comment;
+		qs = QString(white.board.makeMoveText(white.movelist[i].move, FIDE).c_str());
+		qs += white.movelist[i].comment;
 		item = new QStandardItem(qs);
 		item->setEditable(false);
 		item->setTextAlignment(Qt::AlignCenter);
-		if (bde.movelist[i].score>0)
+		if (white.board.toMove==WHITE)
 			item->setForeground(repBrush);
 		else
 			item->setForeground(normalBrush);
-
-		for (j = 0; j < theory.movelist.size(); j++)
-		{
-			if (bde.movelist[i].move == theory.movelist[j].move)
-				break;
-		}
-		if (j < theory.movelist.size())
-		{
-			model->setItem(j, 1, item);
-		}
-		else
-		{
-			model->setItem(rows, 1, item);
-			++rows;
-		}
+		model->setItem(i, 1, item);
 	}
+	rows = __max(rows,i);
+	for (i = 0; i < black.movelist.size(); i++)
+	{
+		qs = QString(black.board.makeMoveText(black.movelist[i].move, FIDE).c_str());
+		qs += black.movelist[i].comment;
+		item = new QStandardItem(qs);
+		item->setEditable(false);
+		item->setTextAlignment(Qt::AlignCenter);
+		if (black.board.toMove == BLACK)
+			item->setForeground(repBrush);
+		else
+			item->setForeground(normalBrush);
+		model->setItem(i, 2, item);
+	}
+	rows = __max(rows, i);
+
 	model->setRowCount(rows);
 }
 
 void MoveWindow::showContextMenu(const QPoint& pos)
 {
 	QMenu* contextMenu = new QMenu(this);
+	QModelIndex qmi = table->indexAt(pos);
+	contextMenu->addAction(QString("Delete move"), this, SLOT(deleteMove()));
 	contextMenu->addAction(QString("Font"), this, SLOT(selectFont()));
 	contextMenu->exec(mapToGlobal(pos));
 }
@@ -125,5 +102,21 @@ void MoveWindow::selectFont()
 	{
 		font = f;
 		this->setFont(font);
+	}
+}
+
+void MoveWindow::moveClicked(const QModelIndex& index)
+{
+	emit moveSelected(index.column(), index.row());
+}
+
+void MoveWindow::deleteMove()
+{
+	QItemSelectionModel* sel = table->selectionModel();
+	if (sel->hasSelection())
+	{
+		QModelIndex qmi = sel->currentIndex();
+		if (qmi.isValid())
+			emit moveDelete(qmi.column(), qmi.row());
 	}
 }

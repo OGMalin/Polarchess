@@ -18,11 +18,14 @@ public:
 	void update(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black);
 
 signals:
-	void moveSelected(ChessMove& m);
+	void moveSelected(int rep, int movenr);
+	void moveDelete(int rep, int movenr);
 
 public slots:
 	void showContextMenu(const QPoint& pos);
 	void selectFont();
+	void deleteMove();
+	void moveClicked(const QModelIndex& index);
 
 private:
 	QTableView * table;

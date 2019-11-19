@@ -67,7 +67,8 @@ MainWindow::MainWindow(QWidget *parent)
 	enginewindow->setPosition(currentPath->getStartPosition());
 
 	connect(boardwindow, SIGNAL(moveEntered(ChessMove&)), this, SLOT(moveEntered(ChessMove&)));
-	connect(movewindow, SIGNAL(moveSelected(ChessMove&)), this, SLOT(moveSelected(ChessMove&)));
+	connect(movewindow, SIGNAL(moveSelected(int, int)), this, SLOT(moveSelected(int, int)));
+	connect(movewindow, SIGNAL(moveDelete(int, int)), this, SLOT(moveDelete(int, int)));
 	connect(pathwindow, SIGNAL(pathSelected(int)), this, SLOT(pathSelected(int)));
 	connect(commentwindow, SIGNAL(commentChanged(QString&)), this, SLOT(commentChanged(QString&)));
 
@@ -293,6 +294,8 @@ void MainWindow::fileClose(int type)
 		write = -1;
 
 	updateMenu();
+	movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
+	commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
 }
 
 
@@ -317,9 +320,44 @@ void MainWindow::aboutDialog()
 	dialog.exec();
 }
 
-void MainWindow::moveSelected(ChessMove& move)
+void MainWindow::moveSelected(int rep, int movenr)
 {
+	if ((rep < 0) || (rep > 2))
+		return;
+	if (bde[rep].movelist.size() <= movenr)
+		return;
+	ChessBoard board = currentPath->getPosition();
+	int i;
 
+	// Do the move if it is legal
+	if (!currentPath->add(bde[rep].movelist[movenr].move))
+		return;
+
+	// Change to read from both db
+	board = currentPath->getPosition();
+
+	for (int i = 0; i < 3; i++)
+	{
+		bde[i] = Base[i]->find(board);
+	}
+	boardwindow->setPosition(board);
+	enginewindow->setPosition(board, currentPath->size() / 2 + 1);
+	movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
+	//	openingwindow->update(bdeTheory, bdeRep);
+	commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
+	pathwindow->update(currentPath);
+}
+
+void MainWindow::moveDelete(int rep, int movenr)
+{
+	if ((rep < 0) || (rep > 2))
+		return;
+	if (bde[rep].movelist.size() <= movenr)
+		return;
+	bde[rep].movelist.removeAt(movenr);
+	Base[rep]->add(bde[rep]);
+	movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
+	commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
 }
 
 void MainWindow::moveEntered(ChessMove& move)

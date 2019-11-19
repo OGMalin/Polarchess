@@ -43,7 +43,7 @@ void CommentWindow::update(QString theory, QString white, QString black)
 		comment->setTextColor(repColor);
 		comment->append(cWhite);
 	}
-	if (!cWhite.isEmpty())
+	if (!cBlack.isEmpty())
 	{
 		comment->setTextColor(repColor);
 		comment->append(cBlack);
