@@ -125,13 +125,13 @@ bool Database::add(BookDBEntry& bde)
 			":fen, :comment, :eval, :computer, :score, :movelist );");
 	}
 	query.bindValue(":fen", bde.board.getFen(true).c_str());
-	query.bindValue(":comment", bde.comment.toLatin1());
+	query.bindValue(":comment", bde.comment);
 	query.bindValue(":eval", itoa(bde.eval, sz, 10));
-	query.bindValue(":computer", bde.computer.toLatin1());
+	query.bindValue(":computer", bde.computer);
 	query.bindValue(":score", itoa(bde.score, sz, 10));
 	QString qs;
 	bde.convertFromMoveList(bde.movelist, qs);
-	query.bindValue(":movelist", qs.toLatin1());
+	query.bindValue(":movelist", qs);
 	query.exec();
 	QSqlError error = query.lastError();
 	if (error.isValid())
