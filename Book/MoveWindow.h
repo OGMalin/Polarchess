@@ -17,6 +17,9 @@ public:
 	~MoveWindow();
 	void update(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black);
 
+signals:
+	void moveSelected(ChessMove& m);
+
 public slots:
 	void showContextMenu(const QPoint& pos);
 	void selectFont();

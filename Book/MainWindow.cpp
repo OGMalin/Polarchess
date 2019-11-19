@@ -67,6 +67,7 @@ MainWindow::MainWindow(QWidget *parent)
 	enginewindow->setPosition(currentPath->getStartPosition());
 
 	connect(boardwindow, SIGNAL(moveEntered(ChessMove&)), this, SLOT(moveEntered(ChessMove&)));
+	connect(movewindow, SIGNAL(moveSelected(ChessMove&)), this, SLOT(moveSelected(ChessMove&)));
 	connect(pathwindow, SIGNAL(pathSelected(int)), this, SLOT(pathSelected(int)));
 	connect(commentwindow, SIGNAL(commentChanged(QString&)), this, SLOT(commentChanged(QString&)));
 
@@ -314,6 +315,11 @@ void MainWindow::aboutDialog()
 {
 	AboutDialog dialog(this);
 	dialog.exec();
+}
+
+void MainWindow::moveSelected(ChessMove& move)
+{
+
 }
 
 void MainWindow::moveEntered(ChessMove& move)
