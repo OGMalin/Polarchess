@@ -8,6 +8,7 @@
 #include <QTableView>
 #include <QMenu>
 #include <QFontDialog>
+#include <QDir>
 
 EngineWindow::EngineWindow(QWidget *parent)
 	: QWidget(parent)
@@ -20,7 +21,7 @@ EngineWindow::EngineWindow(QWidget *parent)
 	freezing = false;
 	engine = new Engine;
 	currentBoard.startposition();
-	engineName = "Engine.eng"; 
+	engineName.clear(); 
 	iniPath = QStandardPaths::locate(QStandardPaths::DocumentsLocation, QCoreApplication::organizationName(), QStandardPaths::LocateDirectory);
 	iniPath += "/" + QCoreApplication::applicationName() + "/Engines";
 
@@ -42,7 +43,7 @@ EngineWindow::EngineWindow(QWidget *parent)
 	nps->setAlignment(Qt::AlignCenter);
 	time = new QLabel;
 	time->setAlignment(Qt::AlignCenter);
-
+	selengine = new QComboBox;
 	hbox->addWidget(decline);
 	hbox->addWidget(lines);
 	hbox->addWidget(incline);
@@ -51,6 +52,7 @@ EngineWindow::EngineWindow(QWidget *parent)
 	hbox->addWidget(nodes);
 	hbox->addWidget(nps);
 	hbox->addWidget(time);
+	hbox->addWidget(selengine);
 	grid->addLayout(hbox, 0, 0);
 
 	model = new QStandardItemModel(multipv, 3);
@@ -67,12 +69,22 @@ EngineWindow::EngineWindow(QWidget *parent)
 	if (multipv == 1)
 		decline->setEnabled(false);
 
+	// Read engine list
+	QFileInfoList qfil = QDir(iniPath, "*.eng").entryInfoList(QDir::NoFilter, QDir::Name | QDir::IgnoreCase);
+	for (int i = 0; i < qfil.size(); i++)
+	{
+		if (i == 0)
+			engineName = qfil[i].completeBaseName(); // Defaults to first engine.
+		selengine->addItem(qfil[i].completeBaseName());
+	}
+
 	setContextMenuPolicy(Qt::CustomContextMenu);
 
 	connect(decline, SIGNAL(clicked(bool)), this, SLOT(declineClicked(bool)));
 	connect(incline, SIGNAL(clicked(bool)), this, SLOT(inclineClicked(bool)));
 	connect(freeze, SIGNAL(clicked(bool)), this, SLOT(freezeClicked(bool)));
 	connect(analyze, SIGNAL(clicked(bool)), this, SLOT(analyzeClicked(bool)));
+	connect(selengine, SIGNAL(activated(const QString&)), this, SLOT(selectEngine(const QString&)));
 	connect(engine, SIGNAL(engineReady()), this, SLOT(engineReady()));
 	connect(engine, SIGNAL(engineMove(const QString&, const QString&)), this, SLOT(engineStoped(const QString&, const QString&)));
 	connect(engine, SIGNAL(engineInfo(const EngineInfo&)), this, SLOT(engineInfo(const EngineInfo&)));
@@ -102,7 +114,13 @@ void EngineWindow::analyzeClicked(bool)
 	{
 		if (analyzing)
 			return;
-		QString enginePath = iniPath + "/" + engineName;
+		if (engineName.isEmpty())
+		{
+
+			analyze->setChecked(false);
+			return;
+		}
+		QString enginePath = iniPath + "/" + engineName + ".eng";
 		if (engine->load(enginePath))
 		{
 			analyzing = true;
@@ -263,4 +281,11 @@ void EngineWindow::selectFont()
 		font = f;
 		this->setFont(font);
 	}
+}
+
+void EngineWindow::selectEngine(const QString& eng)
+{
+	if (analyzing)
+		analyze->animateClick();
+	engineName = eng;
 }

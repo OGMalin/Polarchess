@@ -6,6 +6,7 @@
 #include "../Common/MoveList.h"
 #include <QStandardItemModel>
 #include <QFont>
+#include <QComboBox>
 
 class QPushButton;
 class QLabel;
@@ -29,6 +30,7 @@ public slots:
 	void engineInfo(const EngineInfo&);
 	void showContextMenu(const QPoint& pos);
 	void selectFont();
+	void selectEngine(const QString& eng);
 
 private:
 	int multipv;
@@ -42,6 +44,7 @@ private:
 	QLabel* nodes;
 	QLabel* nps;
 	QLabel* time;
+	QComboBox* selengine;
 	QStandardItemModel* model;
 	bool analyzing;
 	bool freezing;
