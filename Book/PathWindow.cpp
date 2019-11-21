@@ -51,7 +51,7 @@ void PathWindow::showContextMenu(const QPoint& pos)
 	QMenu* contextMenu = new QMenu(this);
 	contextMenu->addAction(QString("Add line to theory"), this, SLOT(addPathT()));
 	contextMenu->addAction(QString("Add line to White repertoire"), this, SLOT(addPathW()));
-	contextMenu->addAction(QString("Add line to Black repertoire"), this, SLOT(addPathT()));
+	contextMenu->addAction(QString("Add line to Black repertoire"), this, SLOT(addPathB()));
 	contextMenu->addAction(QString("Font"), this, SLOT(selectFont()));
 	contextMenu->exec(mapToGlobal(pos));
 }
