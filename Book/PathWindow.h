@@ -18,11 +18,16 @@ public:
 
 signals:
 	void pathSelected(int);
+	void pathToDB(int);
 
 public slots:
 	void moveClicked(QListWidgetItem*);
 	void showContextMenu(const QPoint& pos);
 	void selectFont();
+	void addPath(int);
+	void addPathT() { addPath(0); };
+	void addPathW() { addPath(1); };
+	void addPathB() { addPath(2); };
 
 private:
 	QFont font;

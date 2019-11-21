@@ -69,6 +69,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(boardwindow, SIGNAL(moveEntered(ChessMove&)), this, SLOT(moveEntered(ChessMove&)));
 	connect(movewindow, SIGNAL(moveSelected(int, int)), this, SLOT(moveSelected(int, int)));
 	connect(movewindow, SIGNAL(moveDelete(int, int)), this, SLOT(moveDelete(int, int)));
+	connect(pathwindow, SIGNAL(pathToDB(int)), this, SLOT(pathToDB(int)));
 	connect(pathwindow, SIGNAL(pathSelected(int)), this, SLOT(pathSelected(int)));
 	connect(commentwindow, SIGNAL(commentChanged(QString&)), this, SLOT(commentChanged(QString&)));
 
@@ -417,6 +418,29 @@ void MainWindow::pathSelected(int ply)
 //	openingwindow->update(bdeTheory, bdeRep);
 	commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
 	pathwindow->update(currentPath);
+}
+
+void MainWindow::pathToDB(int rep)
+{
+	if (Base[rep]->isOpen())
+	{
+		BookDBEntry bd;
+		PathEntry pe;
+		BookDBMove bm;
+		for (int i = 0; i < currentPath->size(); i++)
+		{
+			pe = currentPath->getEntry(i);
+			bd = Base[rep]->find(pe.board);
+			if (!bd.moveExist(pe.move))
+			{
+				bm.clear();
+				bm.move = pe.move;
+				bd.movelist.append(bm);
+				Base[rep]->add(bd);
+			}
+
+		}
+	}
 }
 
 void MainWindow::commentChanged(QString& comment)

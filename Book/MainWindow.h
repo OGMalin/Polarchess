@@ -33,6 +33,7 @@ public slots:
 	void moveSelected(int rep, int movenr);
 	void moveDelete(int rep, int movenr);
 	void pathSelected(int);
+	void pathToDB(int);
 	void commentChanged(QString&);
 
 public:
