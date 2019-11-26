@@ -126,6 +126,7 @@
     <ClCompile Include="..\Common\WinFile.cpp" />
     <ClCompile Include="AboutDialog.cpp" />
     <ClCompile Include="CommentWindow.cpp" />
+    <ClCompile Include="CreateStatisticsDialog.cpp" />
     <ClCompile Include="Database.cpp" />
     <ClCompile Include="EngineWindow.cpp" />
     <ClCompile Include="ImportPgnDialog.cpp" />
@@ -135,6 +136,7 @@
     <ClCompile Include="OpeningWindow.cpp" />
     <ClCompile Include="Path.cpp" />
     <ClCompile Include="PathWindow.cpp" />
+    <ClCompile Include="Statistics.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h" />
@@ -179,6 +181,11 @@
     <ClInclude Include="..\Common\ChessGame.h" />
     <ClInclude Include="..\Common\ChessMove.h" />
     <ClInclude Include="..\Common\defs.h" />
+    <QtMoc Include="CreateStatisticsDialog.h">
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
+    </QtMoc>
+    <ClInclude Include="Statistics.h" />
     <QtMoc Include="..\Common\Engine.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
       <Define Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;QT_SQL_LIB</Define>

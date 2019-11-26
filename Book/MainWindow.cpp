@@ -108,6 +108,7 @@ void MainWindow::createMenu()
 	closeAct[REPWHITE] = fileCloseMenu->addAction("Close White repertoire book", this, &MainWindow::fileCloseWhite);
 	closeAct[REPBLACK] = fileCloseMenu->addAction("Close Black repertoire book", this, &MainWindow::fileCloseBlack);
 	importPgnAct = fileMenu->addAction("Import pgnfiles", this, &MainWindow::fileImportPgn);
+	createStatAct = fileMenu->addAction("Import Statistics", this, &MainWindow::fileCreateStatistics);
 	fileMenu->addSeparator();
 	exitAct = fileMenu->addAction("Exit", this, &QWidget::close);
 
@@ -473,4 +474,9 @@ void MainWindow::fileImportPgn()
 	movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
 	//	openingwindow->update(bdeTheory, bdeRep);
 	commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
+}
+
+void MainWindow::fileCreateStatistics()
+{
+	movewindow->createStatistics();
 }

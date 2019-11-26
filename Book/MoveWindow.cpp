@@ -1,4 +1,5 @@
 #include "MoveWindow.h"
+#include "CreateStatisticsDialog.h"
 #include <QTableView>
 #include <QStandardItemModel>
 #include <QVBoxLayout>
@@ -6,10 +7,16 @@
 #include <QVector>
 #include <QMenu>
 #include <QFontDialog>
+#include <QApplication>
+#include <QStandardPaths>
 
 MoveWindow::MoveWindow(QWidget *parent)
 	: QWidget(parent)
 {
+	QString spath = QStandardPaths::locate(QStandardPaths::DocumentsLocation, QCoreApplication::organizationName(), QStandardPaths::LocateDirectory);
+	spath += "/" + QCoreApplication::applicationName();
+	statistics = new Statistics();
+	statistics->open(spath + "/statistics.bin");
 	QVBoxLayout* vbox = new QVBoxLayout;
 	model = new QStandardItemModel(0, 3);
 	QStringList header;
@@ -119,4 +126,12 @@ void MoveWindow::deleteMove()
 		if (qmi.isValid())
 			emit moveDelete(qmi.column(), qmi.row());
 	}
+}
+
+void MoveWindow::createStatistics()
+{
+	CreateStatisticsDialog dialog(this);
+	if (dialog.exec() == QDialog::Rejected)
+		return;
+
 }

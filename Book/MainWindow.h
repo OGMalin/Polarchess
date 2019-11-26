@@ -56,6 +56,7 @@ private:
 	QAction* writeAct[3];
 	QAction* exitAct;
 	QAction* importPgnAct;
+	QAction* createStatAct;
 	QSplitter* hSplitter;
 	QSplitter* v1Splitter;
 	QSplitter* v2Splitter;
@@ -90,4 +91,5 @@ private:
 	void bookWriteBlack() { bookWrite(REPBLACK); };
 	void bookWrite(int);
 	void fileImportPgn();
+	void fileCreateStatistics();
 };
