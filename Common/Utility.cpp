@@ -261,3 +261,27 @@ void breakLines(std::string& s, int linelength)
 		index++;
 	}
 }
+
+const string trunc(const string& s)
+{
+	if (s.length() == 0)
+		return s;
+	string line;
+	string tmp;
+	int len;
+	int i;
+	i = 1;
+	tmp = getWord(s, i);
+	len = (int)tmp.length();
+	while (len > 0)
+	{
+		line += tmp;
+		i++;
+		tmp = getWord(s, i);
+		len = (int)tmp.length();
+		if (len)
+			line += ' ';
+	}
+	return line;
+}
+

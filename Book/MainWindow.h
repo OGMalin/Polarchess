@@ -49,6 +49,7 @@ private:
 	QMenu* fileOpenMenu;
 	QMenu* fileNewMenu;
 	QMenu* fileCloseMenu;
+	QMenu* fileImportMenu;
 	QMenu* bookMenu;
 	QMenu* bookWriteMenu;
 	QToolBar* toolbar;
@@ -58,6 +59,7 @@ private:
 	QAction* writeAct[3];
 	QAction* exitAct;
 	QAction* importPgnAct;
+	QAction* importBookAct;
 	QAction* createStatAct;
 	QSplitter* hSplitter;
 	QSplitter* v1Splitter;
@@ -94,5 +96,6 @@ private:
 	void bookWriteBlack() { bookWrite(REPBLACK); };
 	void bookWrite(int);
 	void fileImportPgn();
+	void fileImportBook();
 	void fileCreateStatistics();
 };

@@ -22,6 +22,7 @@
 #include <QStandardPaths>
 #include <QMessageBox>
 #include <QSplitter>
+#include <QPushButton>
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
@@ -59,9 +60,9 @@ MainWindow::MainWindow(QWidget *parent)
 
 	setCentralWidget(hSplitter);
 
-	Base[THEORY] = new Database(QString("theory"));
-	Base[REPWHITE] = new Database(QString("white"));
-	Base[REPBLACK] = new Database(QString("black"));
+	Base[THEORY] = new Database("theory");
+	Base[REPWHITE] = new Database("white");
+	Base[REPBLACK] = new Database("black");
 	currentPath = new Path();
 	training = new Training();
 	training->SetDatabase(WHITE, Base[REPWHITE]);
@@ -112,8 +113,10 @@ void MainWindow::createMenu()
 	closeAct[THEORY] = fileCloseMenu->addAction("Close theory book", this, &MainWindow::fileCloseTheory);
 	closeAct[REPWHITE] = fileCloseMenu->addAction("Close White repertoire book", this, &MainWindow::fileCloseWhite);
 	closeAct[REPBLACK] = fileCloseMenu->addAction("Close Black repertoire book", this, &MainWindow::fileCloseBlack);
-	importPgnAct = fileMenu->addAction("Import pgnfiles", this, &MainWindow::fileImportPgn);
-	createStatAct = fileMenu->addAction("Import Statistics", this, &MainWindow::fileCreateStatistics);
+	fileImportMenu = fileMenu->addMenu("Import");
+	importPgnAct = fileImportMenu->addAction("Import pgnfiles", this, &MainWindow::fileImportPgn);
+	importBookAct = fileImportMenu->addAction("Import book", this, &MainWindow::fileImportBook);
+	createStatAct = fileImportMenu->addAction("Import Statistics", this, &MainWindow::fileCreateStatistics);
 	fileMenu->addSeparator();
 	exitAct = fileMenu->addAction("Exit", this, &QWidget::close);
 
@@ -491,6 +494,48 @@ void MainWindow::fileImportPgn()
 	movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
 	//	openingwindow->update(bdeTheory, bdeRep);
 	commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
+}
+
+void MainWindow::fileImportBook()
+{
+	Database iBase("ImportBase");
+	QMessageBox msgbox;
+	QString path = QFileDialog::getOpenFileName(this, "Open book to import", dataPath, "Book files (*.book)");
+	if (!path.isEmpty())
+	{
+		if (!iBase.open(path))
+		{
+			msgbox.setText("Can't open book to import");
+			msgbox.exec();
+			return;
+		}
+		msgbox.setText("Select book to import to");
+		QPushButton *theoryButton = msgbox.addButton("Theory", QMessageBox::ActionRole);
+		QPushButton *whiteButton = msgbox.addButton("White repertoire", QMessageBox::ActionRole);
+		QPushButton *blackButton = msgbox.addButton("Black repertoire", QMessageBox::ActionRole);
+		QPushButton *abortButton = msgbox.addButton(QMessageBox::Abort);
+		if (!Base[THEORY]->isOpen())
+			theoryButton->setDisabled(true);
+		if (!Base[REPWHITE]->isOpen())
+			whiteButton->setDisabled(true);
+		if (!Base[REPBLACK]->isOpen())
+			blackButton->setDisabled(true);
+		msgbox.exec();
+		if (msgbox.clickedButton() == theoryButton)
+			Base[THEORY]->importBase(&iBase);
+		else if (msgbox.clickedButton() == whiteButton)
+			Base[REPWHITE]->importBase(&iBase);
+		else if (msgbox.clickedButton() == blackButton)
+			Base[REPBLACK]->importBase(&iBase);
+		else
+			return;
+
+		ChessBoard board = currentPath->getPosition();
+		for (int i = 0; i < 3; i++)
+			bde[i] = Base[i]->find(board);
+		movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
+		commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
+	}
 }
 
 void MainWindow::fileCreateStatistics()

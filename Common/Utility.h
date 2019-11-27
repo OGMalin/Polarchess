@@ -21,6 +21,9 @@ extern char* trim(char* s);
 extern const std::string lowercase(const std::string& s);
 extern char* lowercase(char* s);
 
+// Removes whitespace in front and after a string and set
+// all whitespace inbetween to a single space
+extern const std::string trunc(const std::string& s);
 
 extern bool booleanString(const std::string& s);
 extern bool existIn(char c, const char* str);

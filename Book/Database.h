@@ -65,10 +65,12 @@ struct BookDBEntry
 	BookDBEntry() { clear();  dirty = false; };
 	void clear() { board.clear(); comment.clear(); movelist.clear(); computer.clear(); eval = movescore = endscore = 0; dirty = false; };
 	bool moveExist(ChessMove& move);
-	void updateMove(BookDBMove&bm);
+	void updateMove(BookDBMove&bm, bool mergemove=false);
 
 	void convertToMoveList(QVector<BookDBMove>&, const QString&);
 	void convertFromMoveList(const QVector<BookDBMove>&, QString&);
+
+	void merge(BookDBEntry& bde);
 };
 
 struct BookDBInfo
@@ -84,7 +86,7 @@ class Database : public QObject
 
 public:
 	BookDBInfo bdi;
-	Database(QString& name, QObject *parent=0);
+	Database(QString name, QObject *parent=0);
 	~Database();
 	// dbtype: 0=general, 1=White repertoire, 2=Black repertoire
 	bool create(const QString& path, int dbtype);
@@ -96,6 +98,7 @@ public:
 	void getRepLines(RepPaths& paths, ChessBoard board, int color, int count);
 	BookDBInfo bookInfo();
 	void getTrainingPosition(QVector<BookDBEntry>);
+	void importBase(Database* iBase);
 
 private:
 	bool opened;
