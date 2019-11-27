@@ -96,6 +96,13 @@ void MoveWindow::showContextMenu(const QPoint& pos)
 {
 	QMenu* contextMenu = new QMenu(this);
 	QModelIndex qmi = table->indexAt(pos);
+	contextMenu->addAction(QString("No comment"), this, SLOT(addComment0()));
+	contextMenu->addAction(QString("!"), this, SLOT(addComment1()));
+	contextMenu->addAction(QString("?"), this, SLOT(addComment2()));
+	contextMenu->addAction(QString("!!"), this, SLOT(addComment3()));
+	contextMenu->addAction(QString("??"), this, SLOT(addComment4()));
+	contextMenu->addAction(QString("!?"), this, SLOT(addComment5()));
+	contextMenu->addAction(QString("?!"), this, SLOT(addComment6()));
 	contextMenu->addAction(QString("Delete move"), this, SLOT(deleteMove()));
 	contextMenu->addAction(QString("Font"), this, SLOT(selectFont()));
 	contextMenu->exec(mapToGlobal(pos));
@@ -128,10 +135,20 @@ void MoveWindow::deleteMove()
 	}
 }
 
+void MoveWindow::addComment(QString& comment)
+{
+	QItemSelectionModel* sel = table->selectionModel();
+	if (sel->hasSelection())
+	{
+		QModelIndex qmi = sel->currentIndex();
+		if (qmi.isValid())
+			emit addMoveComment(qmi.column(), qmi.row(), comment);
+	}
+}
+
 void MoveWindow::createStatistics()
 {
 	CreateStatisticsDialog dialog(this);
 	if (dialog.exec() == QDialog::Rejected)
 		return;
-
 }

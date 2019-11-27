@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Database.h"
+#include "Training.h"
 #include "../Common/ChessMove.h"
 #include <QMainWindow>
 #include <QString>
@@ -35,6 +36,7 @@ public slots:
 	void pathSelected(int);
 	void pathToDB(int);
 	void commentChanged(QString&);
+	void addMoveComment(int rep, int movenr, QString& comment);
 
 public:
 	Path* currentPath;
@@ -68,6 +70,7 @@ private:
 	EngineWindow* enginewindow;
 	Database* Base[3];
 	BookDBEntry bde[3];
+	Training* training;
 	int write;
 	void createMenu();
 	void updateMenu();

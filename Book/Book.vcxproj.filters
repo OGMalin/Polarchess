@@ -105,6 +105,9 @@
     <ClCompile Include="CreateStatisticsDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Training.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -185,6 +188,9 @@
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="Statistics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Training.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

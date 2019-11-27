@@ -15,6 +15,7 @@ public:
 	PathWindow(QWidget *parent = 0);
 	~PathWindow();
 	void update(Path* path);
+	void addPath(int);
 
 signals:
 	void pathSelected(int);
@@ -24,7 +25,6 @@ public slots:
 	void moveClicked(QListWidgetItem*);
 	void showContextMenu(const QPoint& pos);
 	void selectFont();
-	void addPath(int);
 	void addPathT() { addPath(0); };
 	void addPathW() { addPath(1); };
 	void addPathB() { addPath(2); };

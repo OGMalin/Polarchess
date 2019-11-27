@@ -63,12 +63,16 @@ MainWindow::MainWindow(QWidget *parent)
 	Base[REPWHITE] = new Database(QString("white"));
 	Base[REPBLACK] = new Database(QString("black"));
 	currentPath = new Path();
+	training = new Training();
+	training->SetDatabase(WHITE, Base[REPWHITE]);
+	training->SetDatabase(BLACK, Base[REPBLACK]);
 
 	enginewindow->setPosition(currentPath->getStartPosition());
 
 	connect(boardwindow, SIGNAL(moveEntered(ChessMove&)), this, SLOT(moveEntered(ChessMove&)));
 	connect(movewindow, SIGNAL(moveSelected(int, int)), this, SLOT(moveSelected(int, int)));
 	connect(movewindow, SIGNAL(moveDelete(int, int)), this, SLOT(moveDelete(int, int)));
+	connect(movewindow, SIGNAL(addMoveComment(int, int, QString&)), this, SLOT(addMoveComment(int, int, QString&)));
 	connect(pathwindow, SIGNAL(pathToDB(int)), this, SLOT(pathToDB(int)));
 	connect(pathwindow, SIGNAL(pathSelected(int)), this, SLOT(pathSelected(int)));
 	connect(commentwindow, SIGNAL(commentChanged(QString&)), this, SLOT(commentChanged(QString&)));
@@ -89,6 +93,7 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
 	delete currentPath;
+	delete training;
 }
 
 void MainWindow::createMenu()
@@ -357,6 +362,18 @@ void MainWindow::moveDelete(int rep, int movenr)
 	if (bde[rep].movelist.size() <= movenr)
 		return;
 	bde[rep].movelist.removeAt(movenr);
+	Base[rep]->add(bde[rep]);
+	movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
+	commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
+}
+
+void MainWindow::addMoveComment(int rep, int movenr, QString& comment)
+{
+	if ((rep < 0) || (rep > 2))
+		return;
+	if (bde[rep].movelist.size() <= movenr)
+		return;
+	bde[rep].movelist[movenr].comment = comment;
 	Base[rep]->add(bde[rep]);
 	movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
 	commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);

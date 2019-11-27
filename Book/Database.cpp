@@ -79,7 +79,8 @@ bool Database::create(const QString& path, int dbtype)
 		"comment	TEXT,"
 		"eval	TEXT,"
 		"computer	TEXT,"
-		"score	TEXT,"
+		"movescore	TEXT,"
+		"endscore	TEXT,"
 		"movelist	TEXT,"
 		"PRIMARY KEY(fen)"
 		"); ");
@@ -113,22 +114,24 @@ bool Database::add(BookDBEntry& bde)
 			"comment = :comment,"
 			"eval = :eval,"
 			"computer = :computer,"
-			"score = :score,"
+			"movescore = :movescore,"
+			"endscore = :endscore,"
 			"movelist = :movelist "
 			"WHERE fen = :fen;");
 	}
 	else
 	{
 		query.prepare("INSERT INTO positions ( "
-			"fen, comment, eval, computer, score, movelist"
+			"fen, comment, eval, computer, movescore, endscore, movelist"
 			") VALUES ( "
-			":fen, :comment, :eval, :computer, :score, :movelist );");
+			":fen, :comment, :eval, :computer, :movescore, :endscore, :movelist );");
 	}
 	query.bindValue(":fen", bde.board.getFen(true).c_str());
 	query.bindValue(":comment", bde.comment);
 	query.bindValue(":eval", itoa(bde.eval, sz, 10));
 	query.bindValue(":computer", bde.computer);
-	query.bindValue(":score", itoa(bde.score, sz, 10));
+	query.bindValue(":movescore", itoa(bde.movescore, sz, 10));
+	query.bindValue(":endscore", itoa(bde.endscore, sz, 10));
 	QString qs;
 	bde.convertFromMoveList(bde.movelist, qs);
 	query.bindValue(":movelist", qs);
@@ -163,7 +166,8 @@ BookDBEntry Database::find(ChessBoard& board)
 		bde.comment = query.value("comment").toString();
 		bde.eval = query.value("eval").toInt();
 		bde.computer = query.value("computer").toString();
-		bde.score = query.value("score").toInt();
+		bde.movescore = query.value("movescore").toInt();
+		bde.endscore = query.value("endscore").toInt();
 		bde.convertToMoveList(bde.movelist, query.value("movelist").toString());
 		bde.dirty = false;
 	}
@@ -263,6 +267,29 @@ void BookDBEntry::updateMove(BookDBMove& bm)
 	movelist.append(bm);
 }
 
+void Database::getTrainingPosition(QVector<BookDBEntry> pos)
+{
+	int i;
+	pos.clear();
+	BookDBEntry bde;
+
+	if (!opened)
+		return;
+	QSqlDatabase db = QSqlDatabase::database(dbname);
+	if (!db.open())
+		return;
+	QSqlQuery query(db);
+	query.prepare("SELECT fen,movescore,endscore,movelist FROM positions;");
+	while (query.exec() && query.next())
+	{
+		bde.board.setFen(query.value("fen").toString().toStdString().c_str());
+		bde.movescore = query.value("movescore").toInt();
+		bde.endscore = query.value("endscore").toInt();
+		bde.convertToMoveList(bde.movelist, query.value("movelist").toString());
+		pos.push_back(bde);
+	}
+}
+
 void Database::getRepLines(RepPaths& paths, ChessBoard board, int color, int count)
 {
 /*
@@ -302,4 +329,5 @@ void Database::getRepLines(RepPaths& paths, ChessBoard board, int color, int cou
 		
 	}
 */
+	// Read all positions from Database.
 }
