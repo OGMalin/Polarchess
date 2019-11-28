@@ -127,6 +127,11 @@ void MainWindow::createMenu()
 	writeAct[REPBLACK] = bookWriteMenu->addAction("Write to Black repertoire book", this, &MainWindow::bookWriteBlack);
 	bookMenu->addSeparator();
 
+	trainingMenu = menuBar()->addMenu("Training");
+	clearTrainingAct = trainingMenu->addAction("Clear trainingdata", this, &MainWindow::trainingClearData);
+	createTrainingFullAct = trainingMenu->addAction("Create training from startposition", this, &MainWindow::trainingCreateFull);
+	createTrainingPosAct = trainingMenu->addAction("Create training from current position", this, &MainWindow::trainingCreateFromPos);
+
 	// Setting up the toolbar
 	toolbar = addToolBar("Toolbar");
 	for (int i = 0; i < 3; i++)
@@ -541,4 +546,23 @@ void MainWindow::fileImportBook()
 void MainWindow::fileCreateStatistics()
 {
 	movewindow->createStatistics();
+}
+
+void MainWindow::trainingClearData()
+{
+	Base[REPWHITE]->clearAllTrainingData();
+	Base[REPBLACK]->clearAllTrainingData();
+}
+
+void MainWindow::trainingCreateFull()
+{
+	ChessBoard cb;
+	cb.startposition();
+	training->create(cb);
+}
+
+void MainWindow::trainingCreateFromPos()
+{
+	ChessBoard cb = currentPath->getPosition();
+	training->create(cb);
 }

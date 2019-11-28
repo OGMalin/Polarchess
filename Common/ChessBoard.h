@@ -57,6 +57,8 @@ public:
 	const std::string makeMoveText(const ChessMove& m, int type);
 	bool startposition();
 
-	// Used when sorting
+	// Used when sorting and searching
 	friend bool operator<(const ChessBoard& b1, const ChessBoard& b2);
+	friend bool operator==(const ChessBoard& b1, const ChessBoard& b2);
+	friend bool operator!=(const ChessBoard& b1, const ChessBoard& b2);
 };

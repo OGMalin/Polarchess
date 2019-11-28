@@ -16,21 +16,47 @@ void Training::SetDatabase(int color, Database* base)
 	Base[color] = base;
 }
 
-bool posLess(const BookDBEntry& b1, const BookDBEntry& b2)
-{
-	return b1.board < b2.board;
-}
-
-void Training::create(ChessBoard* cb, int color)
+void Training::create(ChessBoard& cb, int color)
 {
 	// Read White base
 	Database*base;
 	QVector<BookDBEntry> pos;
+	ChessBoard b;
+	TrainingPath path;
+	int index;
+	list.clear();
 
-	if (Base[0] && ((color == -1) || (color == 0)))
+	if (Base[WHITE] && ((color == -1) || (color == WHITE)))
 	{
-		base = Base[0];
+		base = Base[WHITE];
 		base->getTrainingPosition(pos);
-		std::sort(pos.begin(), pos.end() , posLess);
+		if (pos.size() > 0)
+		{
+			std::sort(pos.begin(), pos.end());
+			b.startposition();
+			walkThrough(b, path, 0, pos);
+		}
+	}
+}
+
+void Training::walkThrough(ChessBoard& cb, TrainingPath& path, int ply, QVector<BookDBEntry>& pos)
+{
+	int  curmove = 0;
+	BookDBEntry bde;
+	QVector<BookDBEntry>::iterator bid;
+
+	bde.board = cb;
+	bid = std::lower_bound(pos.begin(), pos.end(), bde);
+	if (bid->board != cb)
+		return;
+	while (1)
+	{
+		if (ply == 0)
+		{
+			path.start = cb;
+		}
+		if (bid->movelist.size() < curmove)
+			return;
+		++curmove;
 	}
 }

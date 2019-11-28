@@ -200,7 +200,7 @@ BookDBInfo Database::bookInfo()
 	return bdi;
 }
 
-void Database::getTrainingPosition(QVector<BookDBEntry> pos)
+void Database::getTrainingPosition(QVector<BookDBEntry>& pos)
 {
 	int i;
 	pos.clear();
@@ -221,6 +221,29 @@ void Database::getTrainingPosition(QVector<BookDBEntry> pos)
 		bde.endscore = query.value("endscore").toInt();
 		bde.convertToMoveList(bde.movelist, query.value("movelist").toString());
 		pos.push_back(bde);
+	}
+}
+
+void Database::clearAllTrainingData()
+{
+	QSqlDatabase db = QSqlDatabase::database(dbname);
+
+	if (!opened)
+		return;
+	if (!db.open())
+		return;
+
+	QSqlQuery query(db);
+
+	query.prepare("UPDATE positions SET "
+		"movescore = '0',"
+		"endscore = '0';");
+	query.exec();
+	QSqlError error = query.lastError();
+	if (error.isValid())
+	{
+		qDebug() << "Database error: " << error.databaseText();
+		qDebug() << "Driver error: " << error.driverText();
 	}
 }
 
@@ -448,3 +471,4 @@ void BookDBEntry::merge(BookDBEntry& bde)
 	for (int i = 0; i < bde.movelist.size(); i++)
 		updateMove(bde.movelist[i], true);
 }
+

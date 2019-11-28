@@ -184,7 +184,7 @@ unsigned int _rand32()
 	const unsigned int q = 44488;  // prime/a
 	const unsigned int r = 3399;   // prime%a
 
-								   //  static unsigned int seed=time(NULL);
+	//  static unsigned int seed=time(NULL);
 	static unsigned int seed = 1;
 	unsigned int x;
 	x = a * (seed%q) - r * (seed / q);

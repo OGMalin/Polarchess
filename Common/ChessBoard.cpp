@@ -926,12 +926,52 @@ bool operator<(const ChessBoard& b1, const ChessBoard& b2)
 	{
 		if (b1.board[sq] < b2.board[sq])
 			return true;
+		if (b1.board[sq] != b2.board[sq])
+			return false;
 	}
 	if (b1.castle < b2.castle)
 		return true;
+	if (b1.castle != b2.castle)
+		return false;
 	if (b1.enPassant < b2.enPassant)
 		return true;
+	if (b1.enPassant != b2.enPassant)
+		return false;
 	if (b1.toMove < b2.toMove)
+		return true;
+	return false;
+};
+
+bool operator==(const ChessBoard& b1, const ChessBoard& b2)
+{
+	typeSquare sq;
+	for (sq = 0; sq < 0x88; sq++)
+	{
+		if (b1.board[sq] != b2.board[sq])
+			return false;
+	}
+	if (b1.castle != b2.castle)
+		return false;
+	if (b1.enPassant != b2.enPassant)
+		return false;
+	if (b1.toMove != b2.toMove)
+		return false;
+	return true;
+};
+
+bool operator!=(const ChessBoard& b1, const ChessBoard& b2)
+{
+	typeSquare sq;
+	for (sq = 0; sq < 0x88; sq++)
+	{
+		if (b1.board[sq] != b2.board[sq])
+			return true;
+	}
+	if (b1.castle != b2.castle)
+		return true;
+	if (b1.enPassant != b2.enPassant)
+		return true;
+	if (b1.toMove != b2.toMove)
 		return true;
 	return false;
 };

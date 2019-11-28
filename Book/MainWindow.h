@@ -52,6 +52,7 @@ private:
 	QMenu* fileImportMenu;
 	QMenu* bookMenu;
 	QMenu* bookWriteMenu;
+	QMenu* trainingMenu;
 	QToolBar* toolbar;
 	QAction* openAct[3];
 	QAction* newAct[3];
@@ -61,6 +62,9 @@ private:
 	QAction* importPgnAct;
 	QAction* importBookAct;
 	QAction* createStatAct;
+	QAction* clearTrainingAct;
+	QAction* createTrainingFullAct;
+	QAction* createTrainingPosAct;
 	QSplitter* hSplitter;
 	QSplitter* v1Splitter;
 	QSplitter* v2Splitter;
@@ -91,11 +95,15 @@ private:
 	void fileCloseWhite() { fileClose(REPWHITE); };
 	void fileCloseBlack() { fileClose(REPBLACK); };
 	void fileClose(int);
+	void fileImportPgn();
+	void fileImportBook();
+	void fileCreateStatistics();
 	void bookWriteTheory() { bookWrite(THEORY); };
 	void bookWriteWhite() { bookWrite(REPWHITE); };
 	void bookWriteBlack() { bookWrite(REPBLACK); };
 	void bookWrite(int);
-	void fileImportPgn();
-	void fileImportBook();
-	void fileCreateStatistics();
+	void trainingClearData();
+	void trainingCreateFull();
+	void trainingCreateFromPos();
+
 };

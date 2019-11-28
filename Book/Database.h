@@ -71,6 +71,9 @@ struct BookDBEntry
 	void convertFromMoveList(const QVector<BookDBMove>&, QString&);
 
 	void merge(BookDBEntry& bde);
+
+	friend bool operator<(const BookDBEntry& b1, const BookDBEntry& b2) { return b1.board < b2.board; };
+	friend bool operator==(const BookDBEntry& b1, const BookDBEntry& b2) { return b1.board == b2.board; };
 };
 
 struct BookDBInfo
@@ -97,7 +100,8 @@ public:
 	bool isOpen() { return opened; };
 	void getRepLines(RepPaths& paths, ChessBoard board, int color, int count);
 	BookDBInfo bookInfo();
-	void getTrainingPosition(QVector<BookDBEntry>);
+	void getTrainingPosition(QVector<BookDBEntry>&);
+	void clearAllTrainingData();
 	void importBase(Database* iBase);
 
 private:
