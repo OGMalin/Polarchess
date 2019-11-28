@@ -31,6 +31,14 @@
 #include "../Common/ChessBoard.h"
 #include "Path.h"
 
+struct TrainingLine
+{
+	QString start;
+	QString moves;
+	int endscore;
+	int movescore;
+};
+
 struct RepPath
 {
 	Path path;

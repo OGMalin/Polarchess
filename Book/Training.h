@@ -21,6 +21,7 @@ struct TrainingPath
 	int movescore;
 	int color;
 	void clear() { moves.clear(); start.clear(); movescore = endscore = 0; color = 0; };
+	friend bool operator<(const TrainingPath& t1, const TrainingPath& t2);
 };
 
 class Training
