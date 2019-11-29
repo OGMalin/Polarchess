@@ -911,12 +911,17 @@ char ChessBoard::getCharFromPiece(typePiece p)
 	};
 };
 
-bool ChessBoard::startposition()
+bool ChessBoard::isStartposition()
 {
 	string s=getFen(true);
 	if (s == string("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1"))
 		return true;
 	return false;
+}
+
+void ChessBoard::setStartposition()
+{
+	setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1");
 }
 
 bool operator<(const ChessBoard& b1, const ChessBoard& b2)

@@ -50,6 +50,12 @@ bool Database::open(const QString& path)
 			bdi.version = query.value("version").toString();
 			bdi.type = query.value("type").toInt();
 		}
+		QSqlError error = query.lastError();
+		if (error.isValid())
+		{
+			qDebug() << "Database error: " << error.databaseText();
+			qDebug() << "Driver error: " << error.driverText();
+		}
 	}
 
 	return opened;
@@ -70,21 +76,60 @@ bool Database::create(const QString& path, int dbtype)
 	}
 	QSqlQuery query(db);
 	query.exec("CREATE TABLE info ( db TEXT, version TEXT, type TEXT);");
+	QSqlError error = query.lastError();
+	if (error.isValid())
+	{
+		qDebug() << "Database error: " << error.databaseText();
+		qDebug() << "Driver error: " << error.driverText();
+	}
+
 	query.prepare("INSERT INTO info (db, version, type) VALUES ( :db, :version, :type);");
 	query.bindValue(":db", DBTYPE);
 	query.bindValue(":version", DBVERSION);
 	query.bindValue(":type", itoa(dbtype, sz, 10));
 	query.exec();
+	error = query.lastError();
+	if (error.isValid())
+	{
+		qDebug() << "Database error: " << error.databaseText();
+		qDebug() << "Driver error: " << error.driverText();
+	}
+
 	query.exec("CREATE TABLE positions ( "
 		"fen	TEXT,"
 		"comment	TEXT,"
 		"eval	TEXT,"
 		"computer	TEXT,"
-		"movescore	TEXT,"
 		"endscore	TEXT,"
 		"movelist	TEXT,"
 		"PRIMARY KEY(fen)"
 		"); ");
+	error = query.lastError();
+	if (error.isValid())
+	{
+		qDebug() << "Database error: " << error.databaseText();
+		qDebug() << "Driver error: " << error.driverText();
+	}
+
+	query.exec("CREATE TABLE training ( "
+		"start	TEXT,"
+		"endscore	TEXT,"
+		"moves	TEXT"
+		"); ");
+	error = query.lastError();
+	if (error.isValid())
+	{
+		qDebug() << "Database error: " << error.databaseText();
+		qDebug() << "Driver error: " << error.driverText();
+	}
+	query.exec("CREATE INDEX endscore ON training (endscore);");
+	error = query.lastError();
+	if (error.isValid())
+	{
+		qDebug() << "Database error: " << error.databaseText();
+		qDebug() << "Driver error: " << error.driverText();
+	}
+
 	bdi.db = DBTYPE;
 	bdi.version = DBVERSION;
 	bdi.type = dbtype;
@@ -118,7 +163,6 @@ bool Database::add(BookDBEntry& bde)
 			"comment = :comment,"
 			"eval = :eval,"
 			"computer = :computer,"
-			"movescore = :movescore,"
 			"endscore = :endscore,"
 			"movelist = :movelist "
 			"WHERE fen = :fen;");
@@ -126,15 +170,14 @@ bool Database::add(BookDBEntry& bde)
 	else
 	{
 		query.prepare("INSERT INTO positions ( "
-			"fen, comment, eval, computer, movescore, endscore, movelist"
+			"fen, comment, eval, computer, endscore, movelist"
 			") VALUES ( "
-			":fen, :comment, :eval, :computer, :movescore, :endscore, :movelist );");
+			":fen, :comment, :eval, :computer, :endscore, :movelist );");
 	}
 	query.bindValue(":fen", bde.board.getFen(true).c_str());
 	query.bindValue(":comment", bde.comment);
 	query.bindValue(":eval", itoa(bde.eval, sz, 10));
 	query.bindValue(":computer", bde.computer);
-	query.bindValue(":movescore", itoa(bde.movescore, sz, 10));
 	query.bindValue(":endscore", itoa(bde.endscore, sz, 10));
 	QString qs;
 	bde.convertFromMoveList(bde.movelist, qs);
@@ -170,10 +213,15 @@ BookDBEntry Database::find(ChessBoard& board)
 		bde.comment = query.value("comment").toString();
 		bde.eval = query.value("eval").toInt();
 		bde.computer = query.value("computer").toString();
-		bde.movescore = query.value("movescore").toInt();
 		bde.endscore = query.value("endscore").toInt();
 		bde.convertToMoveList(bde.movelist, query.value("movelist").toString());
 		bde.dirty = false;
+	}
+	QSqlError error = query.lastError();
+	if (error.isValid())
+	{
+		qDebug() << "Database error: " << error.databaseText();
+		qDebug() << "Driver error: " << error.driverText();
 	}
 	return bde;
 }
@@ -186,6 +234,12 @@ bool Database::exist(ChessBoard& board)
 	query.bindValue(":fen", board.getFen(true).c_str());
 	if (query.exec() && query.next())
 		return true;
+	QSqlError error = query.lastError();
+	if (error.isValid())
+	{
+		qDebug() << "Database error: " << error.databaseText();
+		qDebug() << "Driver error: " << error.driverText();
+	}
 	return false;
 }
 
@@ -212,12 +266,17 @@ void Database::getTrainingPosition(QVector<BookDBEntry>& pos)
 	if (!db.open())
 		return;
 	QSqlQuery query(db);
-	query.prepare("SELECT fen,movescore,endscore,movelist FROM positions;");
+	query.prepare("SELECT fen,endscore,movelist FROM positions;");
 	query.exec();
+	QSqlError error = query.lastError();
+	if (error.isValid())
+	{
+		qDebug() << "Database error: " << error.databaseText();
+		qDebug() << "Driver error: " << error.driverText();
+	}
 	while (query.next())
 	{
 		bde.board.setFen(query.value("fen").toString().toStdString().c_str());
-		bde.movescore = query.value("movescore").toInt();
 		bde.endscore = query.value("endscore").toInt();
 		bde.convertToMoveList(bde.movelist, query.value("movelist").toString());
 		pos.push_back(bde);
@@ -236,7 +295,6 @@ void Database::clearAllTrainingData()
 	QSqlQuery query(db);
 
 	query.prepare("UPDATE positions SET "
-		"movescore = '0',"
 		"endscore = '0';");
 	query.exec();
 	QSqlError error = query.lastError();
@@ -304,6 +362,12 @@ void Database::importBase(Database* iBase)
 	QSqlQuery query2(db2);
 	query2.prepare("SELECT * FROM positions;");
 	query2.exec();
+	QSqlError error = query2.lastError();
+	if (error.isValid())
+	{
+		qDebug() << "Database error: " << error.databaseText();
+		qDebug() << "Driver error: " << error.driverText();
+	}
 	while (query2.next())
 	{
 
@@ -311,7 +375,6 @@ void Database::importBase(Database* iBase)
 		bde2.comment = query2.value("comment").toString();
 		bde2.eval = query2.value("eval").toInt();
 		bde2.computer = query2.value("computer").toString();
-		bde2.movescore = query2.value("movescore").toInt();
 		bde2.endscore = query2.value("endscore").toInt();
 		bde2.convertToMoveList(bde2.movelist, query2.value("movelist").toString());
 		bde1.clear();
@@ -323,14 +386,12 @@ void Database::importBase(Database* iBase)
 			bde1.comment = query1.value("comment").toString();
 			bde1.eval = query1.value("eval").toInt();
 			bde1.computer = query1.value("computer").toString();
-			bde1.movescore = query1.value("movescore").toInt();
 			bde1.endscore = query1.value("endscore").toInt();
 			bde1.convertToMoveList(bde1.movelist, query1.value("movelist").toString());
 			query1.prepare("UPDATE positions SET "
 				"comment = :comment,"
 				"eval = :eval,"
 				"computer = :computer,"
-				"movescore = :movescore,"
 				"endscore = :endscore,"
 				"movelist = :movelist "
 				"WHERE fen = :fen;");
@@ -338,22 +399,50 @@ void Database::importBase(Database* iBase)
 		else
 		{
 			query1.prepare("INSERT INTO positions ( "
-				"fen, comment, eval, computer, movescore, endscore, movelist"
+				"fen, comment, eval, computer, endscore, movelist"
 				") VALUES ( "
-				":fen, :comment, :eval, :computer, :movescore, :endscore, :movelist );");
+				":fen, :comment, :eval, :computer, :endscore, :movelist );");
 		}
 		bde1.merge(bde2);
 		query1.bindValue(":fen", bde1.board.getFen(true).c_str());
 		query1.bindValue(":comment", bde1.comment);
 		query1.bindValue(":eval", itoa(bde1.eval, sz, 10));
 		query1.bindValue(":computer", bde1.computer);
-		query1.bindValue(":movescore", itoa(bde1.movescore, sz, 10));
 		query1.bindValue(":endscore", itoa(bde1.endscore, sz, 10));
 		QString qs;
 		bde1.convertFromMoveList(bde1.movelist, qs);
 		query1.bindValue(":movelist", qs);
 		query1.exec();
 		QSqlError error = query1.lastError();
+		if (error.isValid())
+		{
+			qDebug() << "Database error: " << error.databaseText();
+			qDebug() << "Driver error: " << error.driverText();
+		}
+	}
+}
+
+void Database::addTrainingLine(QVector<TrainingLine>& tlines)
+{
+	char sz[16];
+	if (!opened)
+		return;
+	QSqlDatabase db = QSqlDatabase::database(dbname);
+	if (!db.open())
+		return;
+	QSqlQuery query(db);
+	query.exec("DELETE FROM training;");
+	for (int i = 0; i < tlines.size();i++)
+	{
+		query.prepare("INSERT INTO training ( "
+			"start, endscore, moves"
+			") VALUES ( "
+			":start, :endscore, :moves );");
+		query.bindValue(":start", itoa(tlines[i].start, sz, 10));
+		query.bindValue(":endscore", itoa(tlines[i].endscore, sz, 10));
+		query.bindValue(":moves", tlines[i].moves);
+		query.exec();
+		QSqlError error = query.lastError();
 		if (error.isValid())
 		{
 			qDebug() << "Database error: " << error.databaseText();
@@ -464,8 +553,6 @@ void BookDBEntry::merge(BookDBEntry& bde)
 			comment += bde.comment;
 		}
 	}
-	if (!movescore)
-		movescore = bde.movescore;
 	if (!endscore)
 		endscore = bde.endscore;
 	for (int i = 0; i < bde.movelist.size(); i++)

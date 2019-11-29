@@ -55,7 +55,8 @@ public:
 	//  UCI  - UCI standard
 	char* makeMoveText(const ChessMove& cm, char* buf, int bufsize, int type);
 	const std::string makeMoveText(const ChessMove& m, int type);
-	bool startposition();
+	bool isStartposition();
+	void setStartposition();
 
 	// Used when sorting and searching
 	friend bool operator<(const ChessBoard& b1, const ChessBoard& b2);

@@ -11,6 +11,7 @@ ToDo List
 =Create move statistics from a big db (Move count, win/draw/loss, highest rated player). (Own database)
 ?Number of variation in rep. base.
 =Opening names (ECO code). (Own database)
+*Show path with grayed for th next moves.
 
 
 

@@ -14,7 +14,6 @@
 	computer	text
 		Computer evaluation
 
-	movescore		text (Only in use on repertoire db)
 	endscore		text (Only in use on repertoire db)
 		Successfull guesses (-10000=Not tried, -9999= Tried once then starting from 0)
 
@@ -33,10 +32,9 @@
 
 struct TrainingLine
 {
-	QString start;
+	int start;
 	QString moves;
 	int endscore;
-	int movescore;
 };
 
 struct RepPath
@@ -66,12 +64,11 @@ struct BookDBEntry
 	int eval;
 	QString computer;
 	QString comment;
-	int movescore;
 	int endscore;
 	QVector<BookDBMove> movelist;
 	bool dirty;
 	BookDBEntry() { clear();  dirty = false; };
-	void clear() { board.clear(); comment.clear(); movelist.clear(); computer.clear(); eval = movescore = endscore = 0; dirty = false; };
+	void clear() { board.clear(); comment.clear(); movelist.clear(); computer.clear(); eval = endscore = 0; dirty = false; };
 	bool moveExist(ChessMove& move);
 	void updateMove(BookDBMove&bm, bool mergemove=false);
 
@@ -111,7 +108,7 @@ public:
 	void getTrainingPosition(QVector<BookDBEntry>&);
 	void clearAllTrainingData();
 	void importBase(Database* iBase);
-
+	void addTrainingLine(QVector<TrainingLine>& tlines);
 private:
 	bool opened;
 //	QSqlDatabase bookdb;

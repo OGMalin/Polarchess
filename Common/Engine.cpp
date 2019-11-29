@@ -358,7 +358,7 @@ void Engine::search(ChessBoard& board, MoveList& moves, SEARCHTYPE searchtype, i
 	string s=board.getFen();
 	cmd = "position fen ";
 
-	if (board.startposition())
+	if (board.isStartposition())
 		cmd += "startfen";
 	else
 		cmd += board.getFen(true).c_str();

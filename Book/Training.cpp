@@ -22,6 +22,8 @@ void Training::create(ChessBoard& cb, int color)
 	QVector<BookDBEntry> pos;
 	ChessBoard b;
 	TrainingPath path;
+	TrainingLine tline;
+	QVector<TrainingLine> tlines;
 	int i, j, rep;
 	bool exist;
 
@@ -36,19 +38,19 @@ void Training::create(ChessBoard& cb, int color)
 			if (pos.size() > 0)
 			{
 				std::sort(pos.begin(), pos.end());
-				b.startposition();
+				b.setStartposition();
 				walkThrough(b, path, 0, pos);
 			}
 		}
 
 		// Remove lines if starting from a position
-		b.startposition();
+		b.setStartposition();
 		if (cb != b)
 		{
 			for (i = 0; i < list.size(); i++)
 			{
 				exist = false;
-				b = list[i].start;
+				b.setStartposition();
 				for (j = 0; j < list[i].moves.size(); j++)
 				{
 					if (b == cb)
@@ -76,21 +78,33 @@ void Training::create(ChessBoard& cb, int color)
 		// Update score
 		for (i = 0; i < list.size(); i++)
 		{
-			list[i].movescore = 0;
-			list[i].endscore = 0;
-			for (j = 0; j < list[i].moves.size(); j++)
-			{
-				list[i].movescore += list[i].moves[j].movescore;
-			}
 			if (list[i].moves.size() > 0)
 				list[i].endscore = list[i].moves[list[i].moves.size() - 1].endscore;
+			list[i].endscore = 0;
 		}
 
-		// Sort list based on endscore and movescore;
+		// Sort list based on endscore;
 		std::sort(list.begin(), list.end());
 
 		// Save the list to db;
-//		Base[rep]
+		for (i = 0; i < list.size(); i++)
+		{
+			tline.start = 0;
+			tline.endscore = list[i].endscore;
+			tline.moves.clear();
+			b.setStartposition();
+			for (j = 0; j < list[i].moves.size(); j++)
+			{
+				if (b == cb)
+					tline.start = j;
+				if (j > 0)
+					tline.moves += " ";
+				tline.moves += b.makeMoveText(list[i].moves[j].move, FIDE).c_str();
+				b.doMove(list[i].moves[j].move, false);
+			}
+			tlines.push_back(tline);
+		}
+		Base[rep]->addTrainingLine(tlines);
 	}
 }
 
@@ -100,45 +114,32 @@ void Training::walkThrough(ChessBoard& cb, TrainingPath& path, int ply, QVector<
 	BookDBEntry bde;
 	QVector<BookDBEntry>::iterator bid;
 	TrainingPathEntry tpe;
+
+	// Get position 
 	bde.board = cb;
 	bid = std::lower_bound(pos.begin(), pos.end(), bde);
-	if (bid->board != cb)
+
+	// The position don't exist or no moves or repeating move
+	if ((bid->board != cb) || (bid->movelist.size() == 0) || (bid->dirty))
+	{
+		list.push_back(path);
 		return;
-	if (bid->movelist.size() < curmove)
-		return;
+	}
 	
-	// Stop when repeating moves
-	if (bid->dirty)
-		return;
 	bid->dirty = true;
 
 	while (1)
 	{
-		if (ply == 0)
-		{
-			path.start = cb;
-		}
 		tpe.move = bid->movelist[curmove].move;
 		tpe.endscore = bid->endscore;
-		tpe.movescore = bid->movescore;
 		path.moves.push_back(tpe);
 		cb.doMove(tpe.move, false);
 		walkThrough(cb, path, ply + 1, pos);
-		cb = bde.board;
+		path.moves.pop_back();
 		++curmove;
-		if (bid->movelist.size() < curmove)
-			return;
-		list.push_back(path);
+		if (curmove >= bid->movelist.size())
+			break;
+		cb = bde.board;
 	}
 }
 
-bool operator<(const TrainingPath& t1, const TrainingPath& t2)
-{
-	if (t1.endscore < t2.endscore)
-		return true;
-	if (t1.endscore != t2.endscore)
-		return false;
-	if (t1.movescore < t2.movescore)
-		return true;
-	return false;
-};

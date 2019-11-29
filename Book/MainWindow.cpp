@@ -557,7 +557,7 @@ void MainWindow::trainingClearData()
 void MainWindow::trainingCreateFull()
 {
 	ChessBoard cb;
-	cb.startposition();
+	cb.setStartposition();
 	training->create(cb);
 }
 

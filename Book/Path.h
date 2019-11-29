@@ -11,6 +11,7 @@ struct PathEntry
 {
 	ChessBoard board;
 	ChessMove move;
+	bool active;
 };
 
 class Path

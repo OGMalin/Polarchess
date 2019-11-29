@@ -20,7 +20,7 @@ EngineWindow::EngineWindow(QWidget *parent)
 	analyzing = false;
 	freezing = false;
 	engine = new Engine;
-	currentBoard.startposition();
+	currentBoard.setStartposition();
 	engineName.clear(); 
 	iniPath = QStandardPaths::locate(QStandardPaths::DocumentsLocation, QCoreApplication::organizationName(), QStandardPaths::LocateDirectory);
 	iniPath += "/" + QCoreApplication::applicationName() + "/Engines";
