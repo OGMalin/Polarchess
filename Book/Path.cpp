@@ -72,7 +72,7 @@ bool Path::add(ChessMove& move)
 
 	p.move = move;
 	moves.push_back(p);
-
+	current = moves.size() - 1;
 	return true;
 }
 

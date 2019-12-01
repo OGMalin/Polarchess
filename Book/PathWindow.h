@@ -4,6 +4,7 @@
 #include <QListWidget>
 #include <QPoint>
 #include <QFont>
+#include <QBrush>
 
 class Path;
 
@@ -31,5 +32,7 @@ public slots:
 
 private:
 	QFont font;
+	QBrush normalBrush;
+	QBrush grayedBrush;
 };
 

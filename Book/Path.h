@@ -11,7 +11,6 @@ struct PathEntry
 {
 	ChessBoard board;
 	ChessMove move;
-	bool active;
 };
 
 class Path
@@ -30,4 +29,5 @@ public:
 	void setLength(int ply);
 	PathEntry getEntry(int n);
 	void getMoveList(QStringList& ml);
+	int current; // Pont to active position
 };
