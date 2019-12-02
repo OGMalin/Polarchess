@@ -15,6 +15,7 @@ Path::~Path()
 void Path::clear()
 {
 	moves.clear();
+	current = 0;
 }
 
 ChessBoard Path::getStartPosition()
@@ -32,47 +33,51 @@ ChessBoard Path::getPosition()
 {
 	ChessBoard b;
 	int size = moves.size();
-	if (size == 0)
-	{
-		b.setFen(STARTFEN);
-	}
-	else
-	{
-		b = moves[size - 1].board;
-		b.doMove(moves[size - 1].move,false);
-	}
-	return b;
+	if (current >= size)
+		current = size - 1;
+	if (current == 0)
+		return getStartPosition();
+	return moves[current].board;
 }
 
 typeColor Path::toMove()
 {
 	if (moves.empty())
 		return WHITE;
-
-	return moves.back().board.toMove;
+	if (current >= moves.size())
+		current = moves.size() - 1;
+	return moves[current].board.toMove;
 }
 
 bool Path::add(ChessMove& move)
 {
 	int size = moves.size();
-
+	if (current >= size)
+		current = size - 1;
 	PathEntry p;
 	if (size == 0)
-	{
 		p.board.setFen(STARTFEN);
-	}
 	else
+		p = moves[current];
+
+	if (move == p.move)
 	{
-		p.board = moves[size - 1].board;
-		p.board.doMove(moves[size - 1].move,false);
+		current++;
+		return true;
 	}
 
 	if (!p.board.isLegal(move))
 		return false;
 
 	p.move = move;
+	moves[current] = p;
+
+
+	p.board.doMove(p.move, false);
+
+	moves.remove(current + 1, size - current - 1);
 	moves.push_back(p);
-	current = moves.size() - 1;
+	++current;
 	return true;
 }
 
@@ -127,4 +132,12 @@ void Path::getMoveList(QStringList& ml)
 		s=moves[i].board.makeMoveText(moves[i].move,sz,16,FIDE);
 		ml.append(s);
 	}
+}
+
+void Path::setCurrent(int i)
+{
+	if (i >= moves.size())
+		current = moves.size() - 1;
+	else
+		current = i;
 }
