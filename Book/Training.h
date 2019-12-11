@@ -33,4 +33,5 @@ public:
 	~Training();
 	void SetDatabase(int color, Database* base);
 	void create(ChessBoard& cb, int color=-1);
+	bool get(TrainingLine& line);
 };

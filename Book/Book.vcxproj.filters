@@ -209,6 +209,9 @@
     <Image Include="images\pieces.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="icon\home48.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ToDo.txt" />

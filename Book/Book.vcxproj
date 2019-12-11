@@ -235,6 +235,7 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="icon\home48.png" />
     <Image Include="images\pieces.png" />
   </ItemGroup>
   <ItemGroup>

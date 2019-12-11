@@ -35,14 +35,13 @@ void PathWindow::update(Path* path)
 	clear();
 	path->getMoveList(ml);
 	addItem("O"); // Start position
-	
 	for (int i = 0; i < ml.size(); i++)
 	{
 		if (!(i % 2))
 			addItem(itoa(i / 2 + 1, sz, 10) + p + ml[i]);
 		else
 			addItem(ml[i]);
-		if (i > path->current)
+		if (i >= path->current())
 			item(count() - 1)->setForeground(grayedBrush);
 		else
 			item(count() - 1)->setForeground(normalBrush);

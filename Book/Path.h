@@ -5,7 +5,7 @@
 #include "../Common/ChessMove.h"
 #include "../Common/ChessBoard.h"
 
-extern const char* STARTFEN;
+//extern const char* STARTFEN;
 
 struct PathEntry
 {
@@ -16,22 +16,43 @@ struct PathEntry
 class Path
 {
 private:
+	// The path
 	QVector<PathEntry> moves;
+
+	// Pont to active position
+	int _current;
+
+	// Return
+	int size();
+
+	// Clear the path and set the startposition to standard startposition.
+	void clear();
+
+	// Who is to move at current position
+	typeColor toMove();
+
 public:
 	Path();
 	virtual ~Path();
-	// Return the startposition.
-	ChessBoard getStartPosition();
+
+	// Add a move from current position to the path. If it exist as 'shadow' move the rest of the path are kept.
+	bool add(ChessMove& move);
+
+	// Set current index;
+	void current(int n);
+
+	// Get current index;
+	int current();
+
 	// Return current position
 	ChessBoard getPosition();
-	void setCurrent(int i);
-	void clear();
-	typeColor toMove();
-	bool add(ChessMove& move);
-	int size();
-	void setLength(int ply);
+
+	// Get entry at index n.
 	PathEntry getEntry(int n);
-	// Get full movelist
+
+	// Return the startposition.
+	ChessBoard getStartPosition();
+
+	// Get full movelist.
 	void getMoveList(QStringList& ml);
-	int current; // Pont to active position
 };

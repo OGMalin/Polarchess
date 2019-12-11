@@ -451,6 +451,33 @@ void Database::addTrainingLine(QVector<TrainingLine>& tlines)
 	}
 }
 
+bool Database::getTrainingLine(TrainingLine& line)
+{
+	line.moves.clear();
+	if (!opened)
+		return false;
+	QSqlDatabase db = QSqlDatabase::database(dbname);
+	if (!db.open())
+		return false;
+	QSqlQuery query(db);
+	query.prepare("SELECT * FROM training ORDERBY endscore;");
+	if (query.exec() && query.next())
+	{
+		line.start = query.value("start").toInt();
+		line.endscore = query.value("endscore").toInt();
+		line.moves = query.value("moves").toString();
+	}
+	QSqlError error = query.lastError();
+	if (error.isValid())
+	{
+		qDebug() << "Database error: " << error.databaseText();
+		qDebug() << "Driver error: " << error.driverText();
+	}
+	if (line.moves.isEmpty())
+		return false;
+	return true;
+}
+
 bool BookDBEntry::moveExist(ChessMove& move)
 {
 	QVector<BookDBMove>::iterator it = movelist.begin();

@@ -143,3 +143,32 @@ void Training::walkThrough(ChessBoard& cb, TrainingPath& path, int ply, QVector<
 	}
 }
 
+bool Training::get(TrainingLine& line)
+{
+	TrainingLine tline[2];
+	int rep;
+	for (rep = 0; rep < 2; rep++)
+		Base[rep]->getTrainingLine(tline[rep]);
+	if (tline[0].moves.isEmpty() && tline[1].moves.isEmpty())
+		return false;
+	if (tline[0].moves.isEmpty())
+	{
+		line = tline[1];
+		return true;
+	}
+	if (tline[1].moves.isEmpty())
+	{
+		line = tline[0];
+		return true;
+	}
+
+	if (tline[0].endscore <= tline[1].endscore)
+	{
+		line = tline[0];
+		return true;
+	}
+	line = tline[1];
+	return true;
+
+}
+

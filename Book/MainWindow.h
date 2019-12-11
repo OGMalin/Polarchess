@@ -65,6 +65,7 @@ private:
 	QAction* clearTrainingAct;
 	QAction* createTrainingFullAct;
 	QAction* createTrainingPosAct;
+	QAction* startTrainingAct;
 	QSplitter* hSplitter;
 	QSplitter* v1Splitter;
 	QSplitter* v2Splitter;
@@ -105,5 +106,5 @@ private:
 	void trainingClearData();
 	void trainingCreateFull();
 	void trainingCreateFromPos();
-
+	void trainingStart();
 };

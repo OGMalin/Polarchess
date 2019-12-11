@@ -131,6 +131,7 @@ void MainWindow::createMenu()
 	clearTrainingAct = trainingMenu->addAction("Clear trainingdata", this, &MainWindow::trainingClearData);
 	createTrainingFullAct = trainingMenu->addAction("Create training from startposition", this, &MainWindow::trainingCreateFull);
 	createTrainingPosAct = trainingMenu->addAction("Create training from current position", this, &MainWindow::trainingCreateFromPos);
+	startTrainingAct = trainingMenu->addAction("Start training", this, &MainWindow::trainingStart);
 
 	// Setting up the toolbar
 	toolbar = addToolBar("Toolbar");
@@ -356,7 +357,7 @@ void MainWindow::moveSelected(int rep, int movenr)
 		bde[i] = Base[i]->find(board);
 	}
 	boardwindow->setPosition(board);
-	enginewindow->setPosition(board, currentPath->size() / 2 + 1);
+	enginewindow->setPosition(board, currentPath->current() / 2 + 1);
 	movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
 	//	openingwindow->update(bdeTheory, bdeRep);
 	commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
@@ -420,7 +421,7 @@ void MainWindow::moveEntered(ChessMove& move)
 		bde[i] = Base[i]->find(board);
 	}
 	boardwindow->setPosition(board);
-	enginewindow->setPosition(board,currentPath->size()/2+1);
+	enginewindow->setPosition(board,currentPath->current()/2+1);
 	movewindow->update(bde[THEORY], bde[REPWHITE],bde[REPBLACK]);
 //	openingwindow->update(bdeTheory, bdeRep);
 	commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
@@ -429,17 +430,16 @@ void MainWindow::moveEntered(ChessMove& move)
 
 void MainWindow::pathSelected(int ply)
 {
-	if (ply < 1)
-		currentPath->clear();
-	else
-		currentPath->setLength(ply);
+
+	currentPath->current(ply);
 
 	ChessBoard board = currentPath->getPosition();
 
 	for (int i = 0; i < 3; i++)
 		bde[i] = Base[i]->find(board);
+
 	boardwindow->setPosition(board);
-	enginewindow->setPosition(board, currentPath->size() / 2 + 1);
+	enginewindow->setPosition(board, currentPath->current() / 2 + 1);
 	movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
 //	openingwindow->update(bdeTheory, bdeRep);
 	commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
@@ -453,7 +453,7 @@ void MainWindow::pathToDB(int rep)
 		BookDBEntry bd;
 		PathEntry pe;
 		BookDBMove bm;
-		for (int i = 0; i < currentPath->size(); i++)
+		for (int i = 0; i < currentPath->current(); i++)
 		{
 			pe = currentPath->getEntry(i);
 			bd = Base[rep]->find(pe.board);
@@ -562,6 +562,12 @@ void MainWindow::trainingCreateFull()
 }
 
 void MainWindow::trainingCreateFromPos()
+{
+	ChessBoard cb = currentPath->getPosition();
+	training->create(cb);
+}
+
+void MainWindow::trainingStart()
 {
 	ChessBoard cb = currentPath->getPosition();
 	training->create(cb);

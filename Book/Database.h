@@ -109,6 +109,7 @@ public:
 	void clearAllTrainingData();
 	void importBase(Database* iBase);
 	void addTrainingLine(QVector<TrainingLine>& tlines);
+	bool getTrainingLine(TrainingLine& line);
 private:
 	bool opened;
 //	QSqlDatabase bookdb;

@@ -1,6 +1,6 @@
 #include "Path.h"
 #include <QString>
-const char* STARTFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1";
+//const char* STARTFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1";
 
 Path::Path()
 {
@@ -14,70 +14,63 @@ Path::~Path()
 
 void Path::clear()
 {
+	PathEntry pe;
 	moves.clear();
-	current = 0;
+	_current = 0;
+	pe.board.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1");
+	pe.move.clear();
+	moves.push_back(pe);
 }
 
 ChessBoard Path::getStartPosition()
 {
-	if (moves.empty())
-	{
-		ChessBoard b;
-		b.setFen(STARTFEN);
-		return b;
-	}
 	return moves[0].board;
 }
 
 ChessBoard Path::getPosition()
 {
-	ChessBoard b;
-	int size = moves.size();
-	if (current >= size)
-		current = size - 1;
-	if (current == 0)
-		return getStartPosition();
-	return moves[current].board;
+	return moves[_current].board;
 }
 
 typeColor Path::toMove()
 {
 	if (moves.empty())
 		return WHITE;
-	if (current >= moves.size())
-		current = moves.size() - 1;
-	return moves[current].board.toMove;
+	if (_current >= moves.size())
+		_current = moves.size() - 1;
+	return moves[_current].board.toMove;
 }
 
 bool Path::add(ChessMove& move)
 {
-	int size = moves.size();
-	if (current >= size)
-		current = size - 1;
 	PathEntry p;
-	if (size == 0)
-		p.board.setFen(STARTFEN);
-	else
-		p = moves[current];
+
+	if (move.empty())
+		return false;
+
+	p = moves[_current];
 
 	if (move == p.move)
 	{
-		current++;
+		_current++;
 		return true;
 	}
 
 	if (!p.board.isLegal(move))
 		return false;
 
-	p.move = move;
-	moves[current] = p;
+	moves[_current].move = p.move=move;
 
 
-	p.board.doMove(p.move, false);
+	p.board.doMove(move, false);
+	p.move.clear();
 
-	moves.remove(current + 1, size - current - 1);
+	++_current;
+
+	if (moves.size()>_current)
+		moves.remove(_current,(moves.size()-_current));
 	moves.push_back(p);
-	++current;
+
 	return true;
 }
 
@@ -89,37 +82,12 @@ int Path::size()
 PathEntry Path::getEntry(int n)
 {
 	PathEntry p;
-	int size = moves.size();
-	if (size == 0)
-	{
-		p.board.setFen(STARTFEN);
-		return p;
-	}
 
 	if (n < moves.size())
 	{
 		return moves[n];
 	}
-	p.board=getPosition();
 	return p;
-}
-
-void Path::setLength(int ply)
-{
-	int size = moves.size();
-
-	if (ply > size)
-		return;
-
-	if (ply <= 0)
-	{
-		clear();
-		return;
-	}
-
-	moves.remove(ply,size-ply);
-
-
 }
 
 void Path::getMoveList(QStringList& ml)
@@ -129,15 +97,21 @@ void Path::getMoveList(QStringList& ml)
 	ml.clear();
 	for (int i = 0; i < moves.size(); i++)
 	{
+		if (moves[i].move.empty())
+			break;
 		s=moves[i].board.makeMoveText(moves[i].move,sz,16,FIDE);
 		ml.append(s);
 	}
 }
 
-void Path::setCurrent(int i)
+void Path::current(int n)
 {
-	if (i >= moves.size())
-		current = moves.size() - 1;
-	else
-		current = i;
+	if (n >= moves.size())
+		n = moves.size() - 1;
+	_current = n;
+}
+
+int Path::current()
+{
+	return _current;
 }
