@@ -23,6 +23,7 @@
 #include <QMessageBox>
 #include <QSplitter>
 #include <QPushButton>
+#include <QStatusBar>
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
@@ -34,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
 	write = -1;
 
 	createMenu();
+	createStatusbar();
 	readSettings();
 
 	statusBar();
@@ -194,6 +196,12 @@ void MainWindow::updateMenu()
 		importPgnAct->setDisabled(false);
 }
 
+void MainWindow::createStatusbar()
+{
+	statusWatch = new StatusWatch();
+	statusBar()->addPermanentWidget(statusWatch);
+}
+
 void MainWindow::writeSettings()
 {/*
 	QSettings settings;
@@ -238,6 +246,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::fileOpen(int type)
 {
 	QMessageBox msgbox;
+	statusBar()->showMessage(QString("Open book"), 5000);
 	QString path = QFileDialog::getOpenFileName(this, "Open book", dataPath, "Book files (*.book)");
 	if (!path.isEmpty())
 	{
@@ -571,4 +580,5 @@ void MainWindow::trainingStart()
 {
 	ChessBoard cb = currentPath->getPosition();
 	training->create(cb);
+	training->get(trainingLine);
 }

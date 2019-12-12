@@ -305,48 +305,6 @@ void Database::clearAllTrainingData()
 	}
 }
 
-void Database::getRepLines(RepPaths& paths, ChessBoard board, int color, int count)
-{
-/*
-	paths.paths.clear();
-	paths.sum = 0;
-	if (!opened)
-		return;
-	QSqlDatabase db = QSqlDatabase::database(dbname);
-	if (!db.open())
-		return;
-	QSqlQuery query(db);
-	// Read all positions
-	if ((color == 0) || (color == 1))
-	{
-		query.clear();
-		query.prepare("SELECT fen, score, movelist FROM positions WHERE repertoire = :rep;");
-		query.bindValue(":rep", 1);
-		if (query.exec())
-		{
-			while (query.next())
-			{
-
-			}
-		}
-		if (query.exec() && query.next())
-		{
-			bde.opening = query.value("opening").toString();
-			bde.eco = query.value("eco").toString();
-			bde.comment = query.value("comment").toString();
-			bde.eval = query.value("eval").toInt();
-			bde.computer = query.value("computer").toString();
-			bde.score = query.value("score").toInt();
-			bde.repertoire = query.value("repertoire").toInt();
-			bde.convertToMoveList(bde.movelist, query.value("movelist").toString());
-			bde.dirty = false;
-		}
-		
-	}
-*/
-	// Read all positions from Database.
-}
-
 void Database::importBase(Database* iBase)
 {
 	BookDBEntry bde1, bde2;
@@ -460,7 +418,7 @@ bool Database::getTrainingLine(TrainingLine& line)
 	if (!db.open())
 		return false;
 	QSqlQuery query(db);
-	query.prepare("SELECT * FROM training ORDERBY endscore;");
+	query.prepare("SELECT * FROM training ORDER BY endscore;");
 	if (query.exec() && query.next())
 	{
 		line.start = query.value("start").toInt();
@@ -474,6 +432,36 @@ bool Database::getTrainingLine(TrainingLine& line)
 		qDebug() << "Driver error: " << error.driverText();
 	}
 	if (line.moves.isEmpty())
+		return false;
+	return true;
+}
+
+bool Database::getTrainingLines(QVector<TrainingLine>& lines)
+{
+	TrainingLine tl;
+	lines.clear();
+	if (!opened)
+		return false;
+	QSqlDatabase db = QSqlDatabase::database(dbname);
+	if (!db.open())
+		return false;
+	QSqlQuery query(db);
+	query.prepare("SELECT * FROM training ORDERBY endscore;");
+	query.exec();
+	while (query.next())
+	{
+		tl.start = query.value("start").toInt();
+		tl.endscore = query.value("endscore").toInt();
+		tl.moves = query.value("moves").toString();
+		lines.push_back(tl);
+	}
+	QSqlError error = query.lastError();
+	if (error.isValid())
+	{
+		qDebug() << "Database error: " << error.databaseText();
+		qDebug() << "Driver error: " << error.driverText();
+	}
+	if (lines.isEmpty())
 		return false;
 	return true;
 }

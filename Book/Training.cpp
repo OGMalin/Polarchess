@@ -80,7 +80,8 @@ void Training::create(ChessBoard& cb, int color)
 		{
 			if (list[i].moves.size() > 0)
 				list[i].endscore = list[i].moves[list[i].moves.size() - 1].endscore;
-			list[i].endscore = 0;
+			else
+				list[i].endscore = 0;
 		}
 
 		// Sort list based on endscore;
@@ -102,7 +103,8 @@ void Training::create(ChessBoard& cb, int color)
 				tline.moves += b.makeMoveText(list[i].moves[j].move, FIDE).c_str();
 				b.doMove(list[i].moves[j].move, false);
 			}
-			tlines.push_back(tline);
+			if (!tline.moves.isEmpty())
+				tlines.push_back(tline);
 		}
 		Base[rep]->addTrainingLine(tlines);
 	}
@@ -143,32 +145,61 @@ void Training::walkThrough(ChessBoard& cb, TrainingPath& path, int ply, QVector<
 	}
 }
 
-bool Training::get(TrainingLine& line)
+bool Training::get(TrainingPath& line)
 {
 	TrainingLine tline[2];
 	int rep;
+	line.clear();
 	for (rep = 0; rep < 2; rep++)
 		Base[rep]->getTrainingLine(tline[rep]);
-	if (tline[0].moves.isEmpty() && tline[1].moves.isEmpty())
+	if (tline[WHITE].moves.isEmpty() && tline[BLACK].moves.isEmpty())
 		return false;
-	if (tline[0].moves.isEmpty())
-	{
-		line = tline[1];
-		return true;
-	}
-	if (tline[1].moves.isEmpty())
-	{
-		line = tline[0];
-		return true;
-	}
-
-	if (tline[0].endscore <= tline[1].endscore)
-	{
-		line = tline[0];
-		return true;
-	}
-	line = tline[1];
+	line.color = BLACK;
+	if (tline[WHITE].moves.isEmpty())
+		line.color = BLACK;
+	if (tline[BLACK].moves.isEmpty())
+		line.color = WHITE;
+	if (!tline[WHITE].moves.isEmpty() && !tline[BLACK].moves.isEmpty())
+		line.color = (tline[WHITE].endscore <= tline[BLACK].endscore) ? WHITE : BLACK;
+	line.endscore = tline[line.color].endscore;
+	line.start = tline[line.color].start;
+	convertMoves(tline[line.color].moves, line);
 	return true;
 
 }
 
+void Training::getAll(QVector<TrainingPath>& allTP)
+{
+	int rep, i;
+	QVector<TrainingLine> lines;
+	TrainingPath tp;
+	allTP.clear();
+	for (rep = 0; rep < 2; rep++)
+	{
+		Base[rep]->getTrainingLines(lines);
+		for (i = 0; i < lines.size(); i++)
+		{
+			tp.endscore = lines[i].endscore;
+			tp.start = lines[i].start;
+			convertMoves(lines[i].moves, tp);
+			allTP.push_back(tp);
+		}
+	}
+}
+
+void Training::convertMoves(const QString& smoves, TrainingPath& tp)
+{
+	ChessBoard cb;
+	ChessMove move;
+	TrainingPathEntry tpe;
+	QStringList slist = smoves.split(" ");
+	cb.setStartposition();
+	tp.moves.clear();
+	for (int i = 0; i < slist.size(); i++)
+	{
+		tp.endposition = cb;
+		tpe.move=cb.getMoveFromText(slist[i].toStdString());
+		tp.moves.push_back(tpe);
+		cb.doMove(move, false);
+	}
+}

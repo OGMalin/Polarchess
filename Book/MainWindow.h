@@ -2,6 +2,7 @@
 
 #include "Database.h"
 #include "Training.h"
+#include "StatusWatch.h"
 #include "../Common/ChessMove.h"
 #include <QMainWindow>
 #include <QString>
@@ -78,8 +79,11 @@ private:
 	Database* Base[3];
 	BookDBEntry bde[3];
 	Training* training;
+	TrainingPath trainingLine;
+	StatusWatch* statusWatch;
 	int write;
 	void createMenu();
+	void createStatusbar();
 	void updateMenu();
 	void writeSettings();
 	void readSettings();

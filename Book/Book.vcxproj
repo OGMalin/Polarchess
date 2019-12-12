@@ -138,6 +138,7 @@
     <ClCompile Include="Path.cpp" />
     <ClCompile Include="PathWindow.cpp" />
     <ClCompile Include="Statistics.cpp" />
+    <ClCompile Include="StatusWatch.cpp" />
     <ClCompile Include="Training.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -184,6 +185,10 @@
     <ClInclude Include="..\Common\ChessMove.h" />
     <ClInclude Include="..\Common\defs.h" />
     <ClInclude Include="..\Common\Epd.h" />
+    <QtMoc Include="StatusWatch.h">
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
+    </QtMoc>
     <ClInclude Include="Training.h" />
     <QtMoc Include="CreateStatisticsDialog.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>

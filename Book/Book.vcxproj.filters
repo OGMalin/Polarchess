@@ -111,6 +111,9 @@
     <ClCompile Include="..\Common\Epd.cpp">
       <Filter>Common</Filter>
     </ClCompile>
+    <ClCompile Include="StatusWatch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -147,6 +150,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="CreateStatisticsDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="StatusWatch.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

@@ -110,6 +110,7 @@ public:
 	void importBase(Database* iBase);
 	void addTrainingLine(QVector<TrainingLine>& tlines);
 	bool getTrainingLine(TrainingLine& line);
+	bool getTrainingLines(QVector<TrainingLine>& lines);
 private:
 	bool opened;
 //	QSqlDatabase bookdb;
