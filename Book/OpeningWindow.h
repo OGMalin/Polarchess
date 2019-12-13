@@ -11,7 +11,7 @@ class OpeningWindow : public QWidget
 public:
 	OpeningWindow(QWidget *parent=0);
 	~OpeningWindow();
-	void update(BookDBEntry& theory, BookDBEntry& rep);
+	void refresh(BookDBEntry& theory, BookDBEntry& rep);
 
 private:
 	QLineEdit* openingline;

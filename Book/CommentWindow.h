@@ -15,7 +15,7 @@ public:
 	int write;
 	CommentWindow(QWidget *parent=0);
 	~CommentWindow();
-	void update(QString theory, QString white, QString black);
+	void refresh(QString theory, QString white, QString black);
 	void disableWrite() { write = -1; };
 
 signals:

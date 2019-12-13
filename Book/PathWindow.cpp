@@ -27,7 +27,7 @@ PathWindow::~PathWindow()
 {
 }
 
-void PathWindow::update(Path* path)
+void PathWindow::refresh(Path* path)
 {
 	char sz[16];
 	QStringList ml;

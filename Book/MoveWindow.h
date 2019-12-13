@@ -16,7 +16,7 @@ class MoveWindow : public QWidget
 public:
 	MoveWindow(QWidget *parent=0);
 	~MoveWindow();
-	void update(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black);
+	void refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black);
 	void createStatistics();
 	void addComment(QString& comment);
 

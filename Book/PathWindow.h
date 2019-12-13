@@ -15,7 +15,7 @@ class PathWindow : public QListWidget
 public:
 	PathWindow(QWidget *parent = 0);
 	~PathWindow();
-	void update(Path* path);
+	void refresh(Path* path);
 	void addPath(int);
 
 signals:

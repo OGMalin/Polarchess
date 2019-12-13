@@ -32,7 +32,7 @@ CommentWindow::~CommentWindow()
 {
 }
 
-void CommentWindow::update(QString theory, QString white, QString black)
+void CommentWindow::refresh(QString theory, QString white, QString black)
 {
 	cTheory = theory;
 	cWhite = white;
@@ -82,7 +82,7 @@ void CommentWindow::mouseDoubleClickEvent(QMouseEvent* event)
 	}
 	if (res)
 	{
-		update(cTheory, cWhite, cBlack);
+		refresh(cTheory, cWhite, cBlack);
 		emit commentChanged(newText);
 	}
 }

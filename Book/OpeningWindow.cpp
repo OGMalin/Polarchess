@@ -15,7 +15,7 @@ OpeningWindow::~OpeningWindow()
 {
 }
 
-void OpeningWindow::update(BookDBEntry& theory, BookDBEntry& rep)
+void OpeningWindow::refresh(BookDBEntry& theory, BookDBEntry& rep)
 {
 	QString qs;
 	openingline->setText(qs);

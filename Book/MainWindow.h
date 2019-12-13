@@ -21,7 +21,6 @@ class PathWindow;
 class EngineWindow;
 class Path;
 
-
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -67,6 +66,7 @@ private:
 	QAction* createTrainingFullAct;
 	QAction* createTrainingPosAct;
 	QAction* startTrainingAct;
+	QAction* stopTrainingAct;
 	QSplitter* hSplitter;
 	QSplitter* v1Splitter;
 	QSplitter* v2Splitter;
@@ -81,9 +81,11 @@ private:
 	Training* training;
 	TrainingPath trainingLine;
 	StatusWatch* statusWatch;
+	bool inTraining;
 	int write;
 	void createMenu();
 	void createStatusbar();
+	void updateWindow();
 	void updateMenu();
 	void writeSettings();
 	void readSettings();
@@ -111,4 +113,5 @@ private:
 	void trainingCreateFull();
 	void trainingCreateFromPos();
 	void trainingStart();
+	void trainingStop();
 };

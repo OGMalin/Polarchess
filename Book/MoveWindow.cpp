@@ -43,7 +43,7 @@ MoveWindow::~MoveWindow()
 {
 }
 
-void MoveWindow::update(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black)
+void MoveWindow::refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black)
 {
 	int i,j;
 	QString qs;

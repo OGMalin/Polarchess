@@ -25,9 +25,6 @@ private:
 	// Return
 	int size();
 
-	// Clear the path and set the startposition to standard startposition.
-	void clear();
-
 	// Who is to move at current position
 	typeColor toMove();
 
@@ -37,6 +34,9 @@ public:
 
 	// Add a move from current position to the path. If it exist as 'shadow' move the rest of the path are kept.
 	bool add(ChessMove& move);
+
+	// Clear the path and set the startposition to standard startposition.
+	void clear();
 
 	// Set current index;
 	void current(int n);

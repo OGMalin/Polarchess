@@ -33,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
 	dataPath = QStandardPaths::locate(QStandardPaths::DocumentsLocation, QCoreApplication::organizationName(), QStandardPaths::LocateDirectory);
 	dataPath += "/" + QCoreApplication::applicationName();
 	write = -1;
+	inTraining = false;
 
 	createMenu();
 	createStatusbar();
@@ -79,12 +80,6 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(pathwindow, SIGNAL(pathToDB(int)), this, SLOT(pathToDB(int)));
 	connect(pathwindow, SIGNAL(pathSelected(int)), this, SLOT(pathSelected(int)));
 	connect(commentwindow, SIGNAL(commentChanged(QString&)), this, SLOT(commentChanged(QString&)));
-
-//	boardwindow->setVisible(false);
-//	enginewindow->setVisible(false);
-//	openingwindow->setVisible(false);
-//	movewindow->setVisible(false);
-//	commentwindow->setVisible(false);
 
 	restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
 	restoreState(settings.value("mainWindowState").toByteArray());
@@ -134,6 +129,7 @@ void MainWindow::createMenu()
 	createTrainingFullAct = trainingMenu->addAction("Create training from startposition", this, &MainWindow::trainingCreateFull);
 	createTrainingPosAct = trainingMenu->addAction("Create training from current position", this, &MainWindow::trainingCreateFromPos);
 	startTrainingAct = trainingMenu->addAction("Start training", this, &MainWindow::trainingStart);
+	stopTrainingAct = trainingMenu->addAction("Stop training", this, &MainWindow::trainingStop);
 
 	// Setting up the toolbar
 	toolbar = addToolBar("Toolbar");
@@ -194,6 +190,29 @@ void MainWindow::updateMenu()
 		importPgnAct->setDisabled(true);
 	else
 		importPgnAct->setDisabled(false);
+}
+
+void MainWindow::updateWindow()
+{
+	movewindow->refresh(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
+	commentwindow->refresh(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
+	pathwindow->refresh(currentPath);
+
+#ifndef _DEBUG
+	if(inTraining)
+	{
+		movewindow->setVisible(false);
+		commentwindow->setVisible(false);
+		enginewindow->setVisible(false);
+	}
+	else
+	{
+		movewindow->setVisible(true);
+		commentwindow->setVisible(true);
+		enginewindow->setVisible(true);
+	}
+#endif // !_DEBUG
+
 }
 
 void MainWindow::createStatusbar()
@@ -258,13 +277,7 @@ void MainWindow::fileOpen(int type)
 		}
 		bde[type] = Base[type]->find(currentPath->getPosition());
 
-		movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
-//		openingwindow->update(bdeTheory, bdeRep);
-		commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
-/*
-		movewindow->setVisible(true);
-		commentwindow->setVisible(true);
-		*/
+		updateWindow();
 
 		if (write == type)
 		{
@@ -296,13 +309,7 @@ void MainWindow::fileNew(int type)
 
 		bde[type] = Base[type]->find(currentPath->getPosition());
 		
-		movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
-//		openingwindow->update(bdeTheory, bdeRep);
-		commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
-		/*
-		movewindow->setVisible(true);
-		commentwindow->setVisible(true);
-		*/
+		updateWindow();
 
 		if (write == type)
 			write = -1;
@@ -319,8 +326,7 @@ void MainWindow::fileClose(int type)
 		write = -1;
 
 	updateMenu();
-	movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
-	commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
+	updateWindow();
 }
 
 
@@ -347,6 +353,8 @@ void MainWindow::aboutDialog()
 
 void MainWindow::moveSelected(int rep, int movenr)
 {
+	if (inTraining)
+		return;
 	if ((rep < 0) || (rep > 2))
 		return;
 	if (bde[rep].movelist.size() <= movenr)
@@ -365,24 +373,24 @@ void MainWindow::moveSelected(int rep, int movenr)
 	{
 		bde[i] = Base[i]->find(board);
 	}
+
 	boardwindow->setPosition(board);
 	enginewindow->setPosition(board, currentPath->current() / 2 + 1);
-	movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
-	//	openingwindow->update(bdeTheory, bdeRep);
-	commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
-	pathwindow->update(currentPath);
+
+	updateWindow();
 }
 
 void MainWindow::moveDelete(int rep, int movenr)
 {
+	if (inTraining)
+		return;
 	if ((rep < 0) || (rep > 2))
 		return;
 	if (bde[rep].movelist.size() <= movenr)
 		return;
 	bde[rep].movelist.removeAt(movenr);
 	Base[rep]->add(bde[rep]);
-	movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
-	commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
+	updateWindow();
 }
 
 void MainWindow::addMoveComment(int rep, int movenr, QString& comment)
@@ -393,8 +401,7 @@ void MainWindow::addMoveComment(int rep, int movenr, QString& comment)
 		return;
 	bde[rep].movelist[movenr].comment = comment;
 	Base[rep]->add(bde[rep]);
-	movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
-	commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
+	updateWindow();
 }
 
 void MainWindow::moveEntered(ChessMove& move)
@@ -403,12 +410,23 @@ void MainWindow::moveEntered(ChessMove& move)
 	BookDBMove bm;
 	int i;
 
+	if (!board.isLegal(move))
+	{
+		boardwindow->setPosition(board);
+		return;
+	}
+		
+	if (inTraining)
+	{
+	}
+
 	// Do the move if it is legal
 	if (!currentPath->add(move))
 	{
 		boardwindow->setPosition(board);
 		return;
 	}
+
 
 	if (write >= 0)
 	{
@@ -431,10 +449,8 @@ void MainWindow::moveEntered(ChessMove& move)
 	}
 	boardwindow->setPosition(board);
 	enginewindow->setPosition(board,currentPath->current()/2+1);
-	movewindow->update(bde[THEORY], bde[REPWHITE],bde[REPBLACK]);
-//	openingwindow->update(bdeTheory, bdeRep);
-	commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
-	pathwindow->update(currentPath);
+
+	updateWindow();
 }
 
 void MainWindow::pathSelected(int ply)
@@ -449,10 +465,7 @@ void MainWindow::pathSelected(int ply)
 
 	boardwindow->setPosition(board);
 	enginewindow->setPosition(board, currentPath->current() / 2 + 1);
-	movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
-//	openingwindow->update(bdeTheory, bdeRep);
-	commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
-	pathwindow->update(currentPath);
+	updateWindow();
 }
 
 void MainWindow::pathToDB(int rep)
@@ -505,9 +518,8 @@ void MainWindow::fileImportPgn()
 	for (int i = 0; i < 3; i++)
 		bde[i] = Base[i]->find(board);
 	boardwindow->setPosition(board);
-	movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
-	//	openingwindow->update(bdeTheory, bdeRep);
-	commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
+
+	updateWindow();
 }
 
 void MainWindow::fileImportBook()
@@ -547,8 +559,7 @@ void MainWindow::fileImportBook()
 		ChessBoard board = currentPath->getPosition();
 		for (int i = 0; i < 3; i++)
 			bde[i] = Base[i]->find(board);
-		movewindow->update(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
-		commentwindow->update(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
+		updateWindow();
 	}
 }
 
@@ -578,7 +589,26 @@ void MainWindow::trainingCreateFromPos()
 
 void MainWindow::trainingStart()
 {
-	ChessBoard cb = currentPath->getPosition();
-	training->create(cb);
 	training->get(trainingLine);
+	if (trainingLine.moves.size() == 0)
+		return;
+	boardwindow->flip(trainingLine.color == BLACK);
+	ChessBoard cb;
+	cb.setStartposition();
+	currentPath->clear();
+
+	for (int i = 0; i < trainingLine.start; i++)
+	{
+		currentPath->add(trainingLine.moves[i].move);
+		cb.doMove(trainingLine.moves[i].move,false);
+	}
+	inTraining = true;
+	write = -1;
+	updateWindow();
+}
+
+void MainWindow::trainingStop()
+{
+	inTraining = false;
+	updateWindow();
 }

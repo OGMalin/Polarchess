@@ -35,6 +35,10 @@ public:
 	~Training();
 	void SetDatabase(int color, Database* base);
 	void create(ChessBoard& cb, int color=-1);
+
+	// Get the most needed trainingline (With most error).
 	bool get(TrainingPath& line);
+
+	// Get all traininglines.
 	void getAll(QVector<TrainingPath>& allTP);
 };
