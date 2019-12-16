@@ -28,8 +28,6 @@
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
-	QSettings settings;
-
 	dataPath = QStandardPaths::locate(QStandardPaths::DocumentsLocation, QCoreApplication::organizationName(), QStandardPaths::LocateDirectory);
 	dataPath += "/" + QCoreApplication::applicationName();
 	write = -1;
@@ -37,7 +35,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 	createMenu();
 	createStatusbar();
-	readSettings();
 
 	statusBar();
 
@@ -81,11 +78,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(pathwindow, SIGNAL(pathSelected(int)), this, SLOT(pathSelected(int)));
 	connect(commentwindow, SIGNAL(commentChanged(QString&)), this, SLOT(commentChanged(QString&)));
 
-	restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
-	restoreState(settings.value("mainWindowState").toByteArray());
-	v1Splitter->restoreState(settings.value("v1State").toByteArray());
-	v2Splitter->restoreState(settings.value("v2State").toByteArray());
-	hSplitter->restoreState(settings.value("hState").toByteArray());
+	readSettings();
 }
 
 MainWindow::~MainWindow()
@@ -222,14 +215,24 @@ void MainWindow::createStatusbar()
 }
 
 void MainWindow::writeSettings()
-{/*
+{
 	QSettings settings;
-	settings.setValue("maingeometry", saveGeometry());
-	*/
+	settings.setValue("mainWindowGeometry", saveGeometry());
+	settings.setValue("mainWindowState", saveState());
+	settings.setValue("v1State", v1Splitter->saveState());
+	settings.setValue("v2State", v2Splitter->saveState());
+	settings.setValue("hState", hSplitter->saveState());
 }
 
 void MainWindow::readSettings()
 {
+	QSettings settings;
+	restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
+	restoreState(settings.value("mainWindowState").toByteArray());
+	v1Splitter->restoreState(settings.value("v1State").toByteArray());
+	v2Splitter->restoreState(settings.value("v2State").toByteArray());
+	hSplitter->restoreState(settings.value("hState").toByteArray());
+
 	/*
 	QSettings settings;
 	QByteArray maingeometry = settings.value("maingeometry", QByteArray()).toByteArray();
@@ -252,20 +255,13 @@ void MainWindow::readSettings()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-	QSettings settings;
-	settings.setValue("mainWindowGeometry", saveGeometry());
-	settings.setValue("mainWindowState", saveState());
-	settings.setValue("v1State", v1Splitter->saveState());
-	settings.setValue("v2State", v2Splitter->saveState());
-	settings.setValue("hState", hSplitter->saveState());
-	//	writeSettings();
+	writeSettings();
 //	event->accept();
 }
 
 void MainWindow::fileOpen(int type)
 {
 	QMessageBox msgbox;
-	statusBar()->showMessage(QString("Open book"), 5000);
 	QString path = QFileDialog::getOpenFileName(this, "Open book", dataPath, "Book files (*.book)");
 	if (!path.isEmpty())
 	{
@@ -353,8 +349,6 @@ void MainWindow::aboutDialog()
 
 void MainWindow::moveSelected(int rep, int movenr)
 {
-	if (inTraining)
-		return;
 	if ((rep < 0) || (rep > 2))
 		return;
 	if (bde[rep].movelist.size() <= movenr)
@@ -382,8 +376,6 @@ void MainWindow::moveSelected(int rep, int movenr)
 
 void MainWindow::moveDelete(int rep, int movenr)
 {
-	if (inTraining)
-		return;
 	if ((rep < 0) || (rep > 2))
 		return;
 	if (bde[rep].movelist.size() <= movenr)
@@ -418,6 +410,37 @@ void MainWindow::moveEntered(ChessMove& move)
 		
 	if (inTraining)
 	{
+		if (trainingLine.isCorrect(move))
+		{
+			statusBar()->showMessage(QString("correct move"), 5000);
+			currentPath->add(move);
+			ChessMove nextMove;
+			if (trainingLine.nextMove(nextMove))
+			{
+				currentPath->add(nextMove);
+				board = currentPath->getPosition();
+
+				for (int i = 0; i < 3; i++)
+				{
+					bde[i] = Base[i]->find(board);
+				}
+				boardwindow->setPosition(board);
+				enginewindow->setPosition(board, currentPath->current() / 2 + 1);
+
+				updateWindow();
+			}
+			else
+			{
+				statusBar()->showMessage(QString("Next line"), 5000);
+				trainingStart();
+			}
+		}
+		else
+		{
+			statusBar()->showMessage(QString("Wrong move"), 5000);
+			return;
+		}
+
 	}
 
 	// Do the move if it is legal
@@ -455,6 +478,8 @@ void MainWindow::moveEntered(ChessMove& move)
 
 void MainWindow::pathSelected(int ply)
 {
+	if (inTraining)
+		return;
 
 	currentPath->current(ply);
 
@@ -470,6 +495,8 @@ void MainWindow::pathSelected(int ply)
 
 void MainWindow::pathToDB(int rep)
 {
+	if (inTraining)
+		return;
 	if (Base[rep]->isOpen())
 	{
 		BookDBEntry bd;
@@ -604,6 +631,7 @@ void MainWindow::trainingStart()
 	}
 	inTraining = true;
 	write = -1;
+	boardwindow->setPosition(cb);
 	updateWindow();
 }
 

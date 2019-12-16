@@ -18,9 +18,12 @@ struct TrainingPath
 	int endscore;
 	int color;
 	int start;
+	int current;
 	ChessBoard endposition;
-	void clear() { moves.clear(); endscore = 0; color = 0; };
+	void clear() { moves.clear(); endscore = 0; color = 0; current = 0; endposition.clear(); };
 	friend bool operator<(const TrainingPath& t1, const TrainingPath& t2) { return t1.endscore < t2.endscore; };
+	bool isCorrect(ChessMove& move);
+	bool nextMove(ChessMove& move);
 };
 
 class Training

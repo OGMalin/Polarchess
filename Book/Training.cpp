@@ -1,6 +1,24 @@
 #include "Training.h"
 #include <algorithm>
 
+bool TrainingPath::isCorrect(ChessMove& move)
+{
+	if (moves[current].move == move)
+		return true;
+	return false;
+}
+
+bool TrainingPath::nextMove(ChessMove& move)
+{
+	if (current > (moves.size() + 2))
+	{
+		move = moves[current + 1].move;
+		current+=2;
+		return true;
+	}
+	return false;
+}
+
 Training::Training()
 {
 	Base[0] = Base[1] = NULL;
