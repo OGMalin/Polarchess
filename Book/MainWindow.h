@@ -45,6 +45,9 @@ public:
 
 private:
 	QString dataPath;
+	QString dataTheory;
+	QString dataWhite;
+	QString dataBlack;
 	QMenu* fileMenu;
 	QMenu* fileOpenMenu;
 	QMenu* fileNewMenu;

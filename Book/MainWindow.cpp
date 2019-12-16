@@ -222,6 +222,9 @@ void MainWindow::writeSettings()
 	settings.setValue("v1State", v1Splitter->saveState());
 	settings.setValue("v2State", v2Splitter->saveState());
 	settings.setValue("hState", hSplitter->saveState());
+	settings.setValue("dataTheory", dataTheory);
+	settings.setValue("dataWhite", dataWhite);
+	settings.setValue("dataBlack", dataBlack);
 }
 
 void MainWindow::readSettings()
@@ -232,6 +235,10 @@ void MainWindow::readSettings()
 	v1Splitter->restoreState(settings.value("v1State").toByteArray());
 	v2Splitter->restoreState(settings.value("v2State").toByteArray());
 	hSplitter->restoreState(settings.value("hState").toByteArray());
+	dataPath = settings.value("dataPath",dataPath).toString();
+	dataTheory = settings.value("dataTheory", dataPath + "/Theory.book").toString();
+	dataWhite = settings.value("dataWhite", dataPath + "/White.book").toString();
+	dataBlack = settings.value("dataBlack", dataPath + "/Black.book").toString();
 
 	/*
 	QSettings settings;
