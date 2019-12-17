@@ -1,4 +1,5 @@
 #include "Database.h"
+#include "../Common/WinFile.h"
 #include <QCoreApplication>
 #include <QSqlQuery>
 #include <QStandardPaths>
@@ -33,6 +34,8 @@ Database::~Database()
 
 bool Database::open(const QString& path)
 {
+	if (!WinFile::exist(path.toStdString()))
+		return false;
 	QSqlDatabase db = QSqlDatabase::database(dbname);
 	db.setDatabaseName(path);
 
@@ -55,6 +58,7 @@ bool Database::open(const QString& path)
 		{
 			qDebug() << "Database error: " << error.databaseText();
 			qDebug() << "Driver error: " << error.driverText();
+			opened = false;
 		}
 	}
 
@@ -418,9 +422,10 @@ bool Database::getTrainingLine(TrainingLine& line)
 	if (!db.open())
 		return false;
 	QSqlQuery query(db);
-	query.prepare("SELECT * FROM training ORDER BY endscore;");
+	query.prepare("SELECT rowid, * FROM training ORDER BY endscore;");
 	if (query.exec() && query.next())
 	{
+		line.rowid = query.value("rowid").toInt();
 		line.start = query.value("start").toInt();
 		line.endscore = query.value("endscore").toInt();
 		line.moves = query.value("moves").toString();
@@ -464,6 +469,25 @@ bool Database::getTrainingLines(QVector<TrainingLine>& lines)
 	if (lines.isEmpty())
 		return false;
 	return true;
+}
+
+void Database::updateTrainingScore(ChessBoard& cb, int rowid, int score)
+{
+	char sz[16];
+	if (!opened)
+		return;
+	QSqlDatabase db = QSqlDatabase::database(dbname);
+	if (!db.open())
+		return;
+	QSqlQuery query(db);
+	query.prepare("UPDATE positions SET endscore = :endscore WHERE fen = :fen;");
+	query.bindValue(":fen", cb.getFen(true).c_str());
+	query.bindValue(":endscore", itoa(score, sz, 10));
+	query.exec();
+	query.prepare("UPDATE training SET endscore = :endscore WHERE rowid = :rowid;");
+	query.bindValue(":endscore", itoa(score, sz, 10));
+	query.bindValue(":rowid", itoa(rowid, sz, 10));
+	query.exec();
 }
 
 bool BookDBEntry::moveExist(ChessMove& move)

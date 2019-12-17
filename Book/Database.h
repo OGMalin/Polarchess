@@ -32,6 +32,7 @@
 
 struct TrainingLine
 {
+	int rowid;
 	int start;
 	QString moves;
 	int endscore;
@@ -103,7 +104,6 @@ public:
 	bool add(BookDBEntry& data);
 	BookDBEntry find(ChessBoard& board);
 	bool isOpen() { return opened; };
-	void getRepLines(RepPaths& paths, ChessBoard board, int color, int count);
 	BookDBInfo bookInfo();
 	void getTrainingPosition(QVector<BookDBEntry>&);
 	void clearAllTrainingData();
@@ -111,6 +111,7 @@ public:
 	void addTrainingLine(QVector<TrainingLine>& tlines);
 	bool getTrainingLine(TrainingLine& line);
 	bool getTrainingLines(QVector<TrainingLine>& lines);
+	void updateTrainingScore(ChessBoard& cb, int rowid, int score);
 private:
 	bool opened;
 //	QSqlDatabase bookdb;

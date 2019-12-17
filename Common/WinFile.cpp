@@ -213,7 +213,7 @@ bool WinFile::writeLine(const std::string& line)
   return write(s.c_str(),s.length(),dwFilepointer);
 }
 
-bool WinFile::exist(const std::string& filename)
+const bool WinFile::exist(const std::string& filename)
 {
   HANDLE hFind;
   WIN32_FIND_DATAA wfd;

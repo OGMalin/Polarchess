@@ -10,13 +10,12 @@ bool TrainingPath::isCorrect(ChessMove& move)
 
 bool TrainingPath::nextMove(ChessMove& move)
 {
-	if (current > (moves.size() + 2))
-	{
-		move = moves[current + 1].move;
-		current+=2;
-		return true;
-	}
-	return false;
+	if ((current+2) >= moves.size())
+		return false;
+
+	move = moves[current + 1].move;
+	current+=2;
+	return true;
 }
 
 Training::Training()
@@ -106,6 +105,7 @@ void Training::create(ChessBoard& cb, int color)
 		std::sort(list.begin(), list.end());
 
 		// Save the list to db;
+		tlines.clear();
 		for (i = 0; i < list.size(); i++)
 		{
 			tline.start = 0;
@@ -181,6 +181,7 @@ bool Training::get(TrainingPath& line)
 		line.color = (tline[WHITE].endscore <= tline[BLACK].endscore) ? WHITE : BLACK;
 	line.endscore = tline[line.color].endscore;
 	line.start = tline[line.color].start;
+	line.rowid = tline[line.color].rowid;
 	convertMoves(tline[line.color].moves, line);
 	return true;
 
@@ -203,6 +204,11 @@ void Training::getAll(QVector<TrainingPath>& allTP)
 			allTP.push_back(tp);
 		}
 	}
+}
+
+void Training::updateScore(int color, ChessBoard& cb, int rowid, int score)
+{
+	Base[color]->updateTrainingScore(cb, rowid, score);
 }
 
 void Training::convertMoves(const QString& smoves, TrainingPath& tp)

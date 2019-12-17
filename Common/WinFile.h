@@ -25,7 +25,7 @@ public:
   void close();
   void flush();
   void deleteFile();
-  void useMemoryFile();
+//  void useMemoryFile();
   DWORD size();
   DWORD read(void* buffer, DWORD length, DWORD filepointer);
   DWORD read(void* buffer, DWORD length){return read(buffer,length,dwFilepointer);};
@@ -38,7 +38,7 @@ public:
   bool writeLine(const std::string& line);
   void putBack(std::string& line);
   bool isMemoryFile(){return (MemoryFile?true:false);};
-  bool exist(const std::string& filename);
+  static const bool exist(const std::string& filename);
   const std::string toString();
 };
 

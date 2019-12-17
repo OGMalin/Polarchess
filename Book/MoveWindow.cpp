@@ -16,7 +16,7 @@ MoveWindow::MoveWindow(QWidget *parent)
 	QString spath = QStandardPaths::locate(QStandardPaths::DocumentsLocation, QCoreApplication::organizationName(), QStandardPaths::LocateDirectory);
 	spath += "/" + QCoreApplication::applicationName();
 	statistics = new Statistics();
-	statistics->open(spath + "/statistics.bin");
+//	statistics->open(spath + "/Statistics.bin");
 	QVBoxLayout* vbox = new QVBoxLayout;
 	model = new QStandardItemModel(0, 3);
 	QStringList header;

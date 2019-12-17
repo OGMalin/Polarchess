@@ -83,6 +83,7 @@ private:
 	BookDBEntry bde[3];
 	Training* training;
 	TrainingPath trainingLine;
+	TrainingStat trainingStat;
 	StatusWatch* statusWatch;
 	bool inTraining;
 	int write;

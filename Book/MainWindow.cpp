@@ -68,8 +68,6 @@ MainWindow::MainWindow(QWidget *parent)
 	training->SetDatabase(WHITE, Base[REPWHITE]);
 	training->SetDatabase(BLACK, Base[REPBLACK]);
 
-	enginewindow->setPosition(currentPath->getStartPosition());
-
 	connect(boardwindow, SIGNAL(moveEntered(ChessMove&)), this, SLOT(moveEntered(ChessMove&)));
 	connect(movewindow, SIGNAL(moveSelected(int, int)), this, SLOT(moveSelected(int, int)));
 	connect(movewindow, SIGNAL(moveDelete(int, int)), this, SLOT(moveDelete(int, int)));
@@ -79,6 +77,31 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(commentwindow, SIGNAL(commentChanged(QString&)), this, SLOT(commentChanged(QString&)));
 
 	readSettings();
+
+	// Open default databases
+	if (!dataTheory.isEmpty())
+		if (!Base[THEORY]->open(dataTheory))
+			Base[THEORY]->create(dataTheory,THEORY);
+	if (!dataWhite.isEmpty())
+		if (!Base[REPWHITE]->open(dataWhite))
+			Base[REPWHITE]->create(dataWhite, REPWHITE);
+	if (!dataBlack.isEmpty())
+		if (!Base[REPBLACK]->open(dataBlack))
+			Base[REPBLACK]->create(dataBlack, REPBLACK);
+
+	ChessBoard board = currentPath->getPosition();
+
+	for (int i = 0; i < 3; i++)
+	{
+		bde[i] = Base[i]->find(board);
+	}
+
+	enginewindow->setPosition(board);
+	boardwindow->setPosition(board);
+	enginewindow->setPosition(board, currentPath->current() / 2 + 1);
+
+	updateMenu();
+	updateWindow();
 }
 
 MainWindow::~MainWindow()
@@ -421,6 +444,7 @@ void MainWindow::moveEntered(ChessMove& move)
 		{
 			statusBar()->showMessage(QString("correct move"), 5000);
 			currentPath->add(move);
+			boardwindow->setPosition(currentPath->getPosition());
 			ChessMove nextMove;
 			if (trainingLine.nextMove(nextMove))
 			{
@@ -435,15 +459,23 @@ void MainWindow::moveEntered(ChessMove& move)
 				enginewindow->setPosition(board, currentPath->current() / 2 + 1);
 
 				updateWindow();
+				return;
 			}
 			else
 			{
+				currentPath->current(currentPath->current() - 1);
+				if (!trainingStat.moveerror)
+				{
+					training->updateScore(trainingLine.color, currentPath->getPosition(), trainingLine.rowid, trainingLine.endscore + 1);
+				}
 				statusBar()->showMessage(QString("Next line"), 5000);
 				trainingStart();
+				return;
 			}
 		}
 		else
 		{
+			++trainingStat.moveerror;
 			statusBar()->showMessage(QString("Wrong move"), 5000);
 			return;
 		}
@@ -536,6 +568,7 @@ void MainWindow::commentChanged(QString& comment)
 
 void MainWindow::fileImportPgn()
 {
+	int rep;
 	int moves=999;
 	ImportPgnDialog dialog(this);
 	dialog.setItems(Base[THEORY]->isOpen(), Base[REPWHITE]->isOpen(), Base[REPBLACK]->isOpen(), moves);
@@ -545,7 +578,16 @@ void MainWindow::fileImportPgn()
 	QString path;
 	dialog.getItems(path, theory, white, black, moves, comment, variation);
 
-	dialog.importPgnFile(this, Base[THEORY], path, moves, comment, variation);
+	if (theory)
+		rep = THEORY;
+	else if (white)
+		rep = WHITE;
+	else if (black)
+		rep = BLACK;
+	else
+		return;
+
+	dialog.importPgnFile(this, Base[rep], path, moves, comment, variation);
 
 	// Change to read from both db
 	ChessBoard board = currentPath->getPosition();
@@ -623,6 +665,7 @@ void MainWindow::trainingCreateFromPos()
 
 void MainWindow::trainingStart()
 {
+	trainingStat.clear();
 	training->get(trainingLine);
 	if (trainingLine.moves.size() == 0)
 		return;
@@ -635,6 +678,7 @@ void MainWindow::trainingStart()
 	{
 		currentPath->add(trainingLine.moves[i].move);
 		cb.doMove(trainingLine.moves[i].move,false);
+		++trainingLine.current;
 	}
 	inTraining = true;
 	write = -1;
