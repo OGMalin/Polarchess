@@ -154,7 +154,7 @@ void Training::walkThrough(ChessBoard& cb, TrainingPath& path, int ply, QVector<
 		tpe.endscore = bid->endscore;
 		path.moves.push_back(tpe);
 		cb.doMove(tpe.move, false);
-		walkThrough(cb, path, ply + 1, pos);
+		walkThrough(cb, path, ply + 1, pos, color);
 		path.moves.pop_back();
 		// Only first move for repertoire
 		if (bde.board.toMove == color)

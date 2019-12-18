@@ -14,18 +14,16 @@ class ImportPgnDialog : public QDialog
 
 public:
 	ImportPgnDialog(QWidget *parent);
-	void setItems(bool theory, bool white, bool black, int moves);
-	void getItems(QString& path, bool& theory, bool& white, bool& black, int& moves, bool& com, bool& var);
+	void setItems(bool theorybase, bool white, bool black, int moves, bool var);
+	void getItems(QString& path, bool& theorybase, bool& white, bool& black, int& moves, bool& com, bool& var);
 	void importPgnFile(QWidget* parent, Database* db, QString& pgnfile, int moves, bool comment, bool variation);
 
 public slots:
 	void openFile();
-	void typeChanged();
 
 private:
 	QLineEdit* filename;
-	QRadioButton* theoryfile;
-	QRadioButton* repfile;
+	QRadioButton* theory;
 	QRadioButton* whiterep;
 	QRadioButton* blackrep; 
 	QCheckBox* comment;

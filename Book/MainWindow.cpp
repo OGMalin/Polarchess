@@ -571,7 +571,7 @@ void MainWindow::fileImportPgn()
 	int rep;
 	int moves=999;
 	ImportPgnDialog dialog(this);
-	dialog.setItems(Base[THEORY]->isOpen(), Base[REPWHITE]->isOpen(), Base[REPBLACK]->isOpen(), moves);
+	dialog.setItems(Base[THEORY]->isOpen(), Base[REPWHITE]->isOpen(), Base[REPBLACK]->isOpen(), moves, true);
 	if (dialog.exec() == QDialog::Rejected)
 		return;
 	bool theory, white, black, variation, comment;

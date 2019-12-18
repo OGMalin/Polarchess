@@ -34,33 +34,20 @@ ImportPgnDialog::ImportPgnDialog(QWidget *parent)
 	vbox->addLayout(hbox);
 
 	hbox = new QHBoxLayout;
-	label = new QLabel("Filetype:");
-	theoryfile= new QRadioButton("Theory");
-	repfile = new QRadioButton("Repertoire");
-	group = new QButtonGroup;
-	group->addButton(theoryfile);
-	group->addButton(repfile);
-	hbox->addWidget(label);
-	hbox->addWidget(theoryfile);
-	hbox->addWidget(repfile);
-	vbox->addLayout(hbox);
-	theoryfile->setEnabled(false);
-	repfile->setEnabled(false);
-	connect(theoryfile, SIGNAL(clicked()), this, SLOT(typeChanged()));
-	connect(repfile, SIGNAL(clicked()), this, SLOT(typeChanged()));
-
-	hbox = new QHBoxLayout;
-	label = new QLabel("Repertoire:");
+	label = new QLabel("Book type:");
+	theory= new QRadioButton("Theory");
 	whiterep = new QRadioButton("White");
 	blackrep = new QRadioButton("Black");
 	group = new QButtonGroup;
+	group->addButton(theory);
 	group->addButton(whiterep);
 	group->addButton(blackrep);
 	hbox->addWidget(label);
+	hbox->addWidget(theory);
 	hbox->addWidget(whiterep);
 	hbox->addWidget(blackrep);
 	vbox->addLayout(hbox);
-	whiterep->setChecked(true);
+	theory->setEnabled(false);
 	whiterep->setEnabled(false);
 	blackrep->setEnabled(false);
 
@@ -92,36 +79,34 @@ ImportPgnDialog::ImportPgnDialog(QWidget *parent)
 	setLayout(vbox);
 }
 
-void ImportPgnDialog::setItems(bool theory, bool rep, bool white, int moves)
+void ImportPgnDialog::setItems(bool theorybase, bool white, bool black, int moves, bool var)
 {
-	if (theory)
-	{
-		theoryfile->setEnabled(true);
-		theoryfile->setChecked(true);
-	}
-	if (rep)
-	{
-		repfile->setEnabled(true);
+	if (theorybase)
+		theory->setEnabled(true);
+	if (white)
 		whiterep->setEnabled(true);
+	if (black)
 		blackrep->setEnabled(true);
-		if (!theory)
-			repfile->setChecked(true);
-		if (white)
-			whiterep->setChecked(true);
-		else
-			blackrep->setChecked(true);
-	}
 
+	if (theorybase)
+		theory->setChecked(true);
+	else if (white)
+		whiterep->setChecked(true);
+	else if (black)
+		blackrep->setChecked(true);
+
+	if (var)
+		variation->setChecked(true);
 	char sz[16];
 	numberofmoves->setText(itoa(moves, sz, 10));
 }
 
-void ImportPgnDialog::getItems(QString& path, bool& theory, bool& rep, bool& white, int& moves, bool& com, bool& var)
+void ImportPgnDialog::getItems(QString& path, bool& theorybase, bool& white, bool& black, int& moves, bool& com, bool& var)
 {
 	path=filename->text();
-	theory = theoryfile->isChecked();
-	rep = repfile->isChecked();
+	theorybase = theory->isChecked();
 	white = whiterep->isChecked();
+	black = blackrep->isChecked();
 	com = comment->isChecked();
 	var = variation->isChecked();
 
@@ -134,20 +119,6 @@ void ImportPgnDialog::openFile()
 	if (!path.isEmpty())
 		filename->setText(path);
 
-}
-
-void ImportPgnDialog::typeChanged()
-{
-	if (theoryfile->isChecked())
-	{
-		blackrep->setEnabled(false);
-		whiterep->setEnabled(false);
-	}
-	else
-	{
-		blackrep->setEnabled(true);
-		whiterep->setEnabled(true);
-	}
 }
 
 void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnfile, int moves, bool comment, bool variation)
