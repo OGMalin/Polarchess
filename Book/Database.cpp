@@ -298,8 +298,7 @@ void Database::clearAllTrainingData()
 
 	QSqlQuery query(db);
 
-	query.prepare("UPDATE positions SET "
-		"endscore = '0';");
+	query.prepare("UPDATE positions SET endscore = '0';");
 	query.exec();
 	QSqlError error = query.lastError();
 	if (error.isValid())

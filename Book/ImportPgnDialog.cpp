@@ -198,7 +198,7 @@ void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnf
 				{
 					if (!bde.comment.isEmpty())
 						bde.comment = "\n";
-					bde.comment += game.position[j].comment.c_str();
+					bde.comment += QString::fromLatin1(game.position[j].comment.c_str());
 				}
 				for (k = 0; k < game.position[j].move.size(); k++)
 				{
@@ -207,7 +207,7 @@ void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnf
 					if (!bde.moveExist(bdm.move))
 					{
 						if (comment && !game.position[j].move[k].comment.empty())
-							bdm.comment = game.position[j].move[k].comment.c_str();
+							bdm.comment = QString::fromLatin1(game.position[j].move[k].comment.c_str());
 						bde.movelist.push_back(bdm);
 					}
 					else
@@ -219,7 +219,7 @@ void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnf
 								if (comment && !game.position[j].move[k].comment.empty())
 								{
 									if (bde.movelist[l].comment.isEmpty())
-										bde.movelist[l].comment = game.position[j].move[k].comment.c_str();
+										bde.movelist[l].comment = QString::fromLatin1(game.position[j].move[k].comment.c_str());
 								}
 								break;
 							}

@@ -581,9 +581,9 @@ void MainWindow::fileImportPgn()
 	if (theory)
 		rep = THEORY;
 	else if (white)
-		rep = WHITE;
+		rep = REPWHITE;
 	else if (black)
-		rep = BLACK;
+		rep = REPBLACK;
 	else
 		return;
 
@@ -665,6 +665,7 @@ void MainWindow::trainingCreateFromPos()
 
 void MainWindow::trainingStart()
 {
+	int i;
 	trainingStat.clear();
 	training->get(trainingLine);
 	if (trainingLine.moves.size() == 0)
@@ -674,10 +675,18 @@ void MainWindow::trainingStart()
 	cb.setStartposition();
 	currentPath->clear();
 
-	for (int i = 0; i < trainingLine.start; i++)
+	// Go to strtposition of this training line
+	for (i = 0; i < trainingLine.start; i++)
 	{
 		currentPath->add(trainingLine.moves[i].move);
 		cb.doMove(trainingLine.moves[i].move,false);
+		++trainingLine.current;
+	}
+	// If wrong color to move go one move forward
+	if (currentPath->getPosition().toMove != trainingLine.color)
+	{
+		currentPath->add(trainingLine.moves[i].move);
+		cb.doMove(trainingLine.moves[i].move, false);
 		++trainingLine.current;
 	}
 	inTraining = true;

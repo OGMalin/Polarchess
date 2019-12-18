@@ -176,8 +176,6 @@ bool Training::get(TrainingPath& line)
 	if (tline[WHITE].moves.isEmpty() && tline[BLACK].moves.isEmpty())
 		return false;
 	line.color = BLACK;
-	if (tline[WHITE].moves.isEmpty())
-		line.color = BLACK;
 	if (tline[BLACK].moves.isEmpty())
 		line.color = WHITE;
 	if (!tline[WHITE].moves.isEmpty() && !tline[BLACK].moves.isEmpty())
