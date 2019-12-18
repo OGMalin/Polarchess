@@ -56,7 +56,7 @@ void Training::create(ChessBoard& cb, int color)
 			{
 				std::sort(pos.begin(), pos.end());
 				b.setStartposition();
-				walkThrough(b, path, 0, pos);
+				walkThrough(b, path, 0, pos, rep);
 			}
 		}
 
@@ -128,7 +128,7 @@ void Training::create(ChessBoard& cb, int color)
 	}
 }
 
-void Training::walkThrough(ChessBoard& cb, TrainingPath& path, int ply, QVector<BookDBEntry>& pos)
+void Training::walkThrough(ChessBoard& cb, TrainingPath& path, int ply, QVector<BookDBEntry>& pos, int color)
 {
 	int  curmove = 0;
 	BookDBEntry bde;
@@ -156,6 +156,9 @@ void Training::walkThrough(ChessBoard& cb, TrainingPath& path, int ply, QVector<
 		cb.doMove(tpe.move, false);
 		walkThrough(cb, path, ply + 1, pos);
 		path.moves.pop_back();
+		// Only first move for repertoire
+		if (bde.board.toMove == color)
+			break;
 		++curmove;
 		if (curmove >= bid->movelist.size())
 			break;

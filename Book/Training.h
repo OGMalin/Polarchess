@@ -38,7 +38,7 @@ class Training
 private:
 	Database* Base[2];
 	QVector<TrainingPath> list;
-	void walkThrough(ChessBoard& cur, TrainingPath& path, int ply, QVector<BookDBEntry>& pos);
+	void walkThrough(ChessBoard& cur, TrainingPath& path, int ply, QVector<BookDBEntry>& pos, int color);
 	void convertMoves(const QString& smoves, TrainingPath& tp);
 public:
 	Training();
