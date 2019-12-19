@@ -170,6 +170,7 @@ void Engine::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
 void Engine::slotReadyStandardOutput()
 {
 	char sz[1024];
+	QString response;
 	string input, cmd, value;
 	__int64 readlen;
 	while (process && process->canReadLine())
@@ -191,7 +192,7 @@ void Engine::slotReadyStandardOutput()
 					}
 					else
 					{
-						xboard->readLine(input);
+						xboard->readLine(input, response);
 					}
 				}
 			}
@@ -385,7 +386,7 @@ void Engine::slotStarted()
 		write("xboard");
 		write("protover 2");
 		startup = true;
-		QTimer::singleShot(2000, this, SLOT(read());
+		QTimer::singleShot(2000, this, SLOT(read()));
 	}
 }
 

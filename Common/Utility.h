@@ -37,3 +37,5 @@ extern unsigned __int64 rand64();
 extern bool isNumber(const std::string& s, int type = 0);
 
 extern void breakLines(std::string& s, int linelength);
+
+extern const std::string getQuotedString(std::string& s);

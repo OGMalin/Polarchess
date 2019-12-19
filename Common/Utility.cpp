@@ -285,3 +285,20 @@ const string trunc(const string& s)
 	return line;
 }
 
+const string getQuotedString(std::string& s)
+{
+	string line;
+	char quote;
+	int end;
+	if (s.length() < 3)
+		return line;
+	quote = s.at(0);
+	if ((quote == '\"') || (quote == '\''))
+	{
+		end=s.find_first_of(quote, 1);
+		if (end == string::npos)
+			return line;
+		line = s.substr(1, end);
+	}
+	return line;
+}

@@ -2,6 +2,7 @@
 
 #include <QString>
 #include <QStringList>
+#include <string>
 
 struct XBoardFeature
 {
@@ -37,5 +38,5 @@ private:
 public:
 	XBoardEngine();
 	void clear();
-	int readLine(QString& line);
+	int readLine(std::string& line, QString& response);
 };
