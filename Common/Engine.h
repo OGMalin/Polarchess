@@ -3,6 +3,8 @@
 #include "../Common/ChessBoard.h"
 #include "../Common/MoveList.h"
 #include "../Common/ChessMove.h"
+#include "../Common/UciEngine.h"
+#include "../Common/XBoardEngine.h"
 #include <QObject>
 #include <QString>
 #include <QProcess>
@@ -18,6 +20,7 @@ enum SEARCHTYPE
 	TIME_SEARCH,
 	INFINITE_SEARCH
 };
+
 struct EngineInfo
 {
 	int depth;
@@ -69,6 +72,8 @@ class Engine :public QObject
 private:
 	QString engineName;
 	QString workingDir;
+	UciEngine* uci;
+	XBoardEngine* xboard;
 	QProcess* process;
 	QString lasterror;
 	QString setup;
@@ -76,13 +81,15 @@ private:
 	QString waitCommand;
 	QStringList options;
 	ChessBoard currentBoard;
-private slots:
+	bool startup;
+public slots:
 	// From QProcess
 	void slotErrorOccurred(QProcess::ProcessError error);
 	void slotFinished(int exitCode, QProcess::ExitStatus exitStatus);
 	void slotReadyStandardOutput();
 	void slotStarted();
 	void slotStateChanged(QProcess::ProcessState newState);
+	void ready();
 	// From IO Device
 	void slotReadyRead();
 signals:
