@@ -12,7 +12,7 @@ ToDo List
 ?Number of variation in rep. base.
 =Opening names (ECO code). (Own database)
 =Save computereval to a database
-
+*Winboard/XBoard support
 
 ? Maybe
 * Needed
