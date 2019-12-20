@@ -295,10 +295,10 @@ const string getQuotedString(std::string& s)
 	quote = s.at(0);
 	if ((quote == '\"') || (quote == '\''))
 	{
-		end=s.find_first_of(quote, 1);
+		end=(int)s.find_first_of(quote, 1);
 		if (end == string::npos)
 			return line;
-		line = s.substr(1, end);
+		line = s.substr(1, end-1);
 	}
 	return line;
 }

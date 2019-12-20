@@ -14,7 +14,10 @@ enum ENGINERESPONSE
 	SEND_ENGINE,
 	SEND_GUI_MESSAGE,
 	SEND_GUI_MOVE,
-	SEND_GUI_INFO
+	SEND_GUI_INFO,
+	FINNISH_STARTUP,
+	WAIT_FOREVER,
+	READYOK
 };
 
 Engine::Engine()
@@ -24,6 +27,7 @@ Engine::Engine()
 	uci = NULL;
 	xboard = NULL;
 	startup = false;
+	waitforever = false;
 }
 
 Engine::~Engine()
@@ -170,8 +174,9 @@ void Engine::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
 void Engine::slotReadyStandardOutput()
 {
 	char sz[1024];
-	QString response;
+	QString responsestring;
 	string input, cmd, value;
+	int res;
 	__int64 readlen;
 	while (process && process->canReadLine())
 	{
@@ -184,16 +189,29 @@ void Engine::slotReadyStandardOutput()
 
 			if (xboard)
 			{
-				if (cmd == "feature")
+				switch (xboard->readLine(input, responsestring))
 				{
-					if (getWord(input, 2) == "done=1")
-					{
-						startup = false;
-					}
-					else
-					{
-						xboard->readLine(input, response);
-					}
+				case FINNISH_STARTUP:
+					if (!responsestring.isEmpty())
+						write(responsestring);
+					startup = false;
+					res=xboard->isReady(responsestring);
+					if (res == READYOK)
+						sendOptions();
+					else if (res == SEND_ENGINE)
+						write(responsestring);
+					break;
+				case READYOK:
+					waitforever = false;
+					sendOptions();
+					emit engineReady();
+					break;
+				case SEND_ENGINE:
+					write(responsestring);
+					break;
+				case WAIT_FOREVER:
+					waitforever = true;
+					break;
 				}
 			}
 			else if (uci)
@@ -369,6 +387,15 @@ void Engine::slotReadyStandardOutput()
 					}
 					emit engineInfo(ei);
 				}
+				else
+				{
+					switch (uci->readLine(input, responsestring))
+					{
+					case FINNISH_STARTUP:
+						startup = false;
+						break;
+					}
+				}
 			}
 		}
 	}
@@ -487,4 +514,19 @@ void Engine::setMultiPV(int n)
 	QString qs = "setoption name multipv value ";
 	qs += QString().setNum(n);
 	write(qs);
+}
+
+void Engine::sendOptions()
+{
+	int i;
+	if (xboard)
+	{
+		for (i = 0; i < options.size(); i++)
+			write(options[i]);
+	}
+	else if (uci)
+	{
+		for (i = 0; i < options.size(); i++)
+			write(QString("setoption name " + options[i]));
+	}
 }

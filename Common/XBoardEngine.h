@@ -35,8 +35,10 @@ class XBoardEngine
 {
 private:
 	XBoardFeature feature;
+	int readFeature(std::string& line, QString& responsestring);
 public:
 	XBoardEngine();
 	void clear();
-	int readLine(std::string& line, QString& response);
+	int readLine(std::string& line, QString& responsestring);
+	int isReady(QString& rs);
 };

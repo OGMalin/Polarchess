@@ -78,6 +78,7 @@ private:
 	QString lasterror;
 	QString setup;
 	bool readyok;
+	bool waitforever;
 	QString waitCommand;
 	QStringList options;
 	ChessBoard currentBoard;
@@ -110,4 +111,5 @@ public:
 	const QString lastError();
 	void stop();
 	void setMultiPV(int n);
+	void sendOptions();
 };
