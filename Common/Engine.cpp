@@ -1,4 +1,3 @@
-#include <QProcess>
 #include "Engine.h"
 #include "../Common/Utility.h"
 #include <string>
@@ -8,21 +7,8 @@
 
 using namespace std;
 
-enum ENGINERESPONSE
-{
-	DO_NOTHING = 0,
-	SEND_ENGINE,
-	SEND_GUI_MESSAGE,
-	SEND_GUI_MOVE,
-	SEND_GUI_INFO,
-	FINNISH_STARTUP,
-	WAIT_FOREVER,
-	READYOK
-};
-
 Engine::Engine()
 {
-	process = NULL;
 	readyok = false;
 	uci = NULL;
 	xboard = NULL;
@@ -45,8 +31,6 @@ void Engine::setEngine(QString& name, QString& dir)
 
 bool Engine::load(QString& enginefile)
 {
-	if (process)
-		return false;
 	QSettings settings(enginefile, QSettings::IniFormat);
 	settings.beginGroup("Engine");
 	QString enginepath = settings.value("path").toString();
@@ -65,35 +49,14 @@ bool Engine::load(QString& enginefile)
 	settings.beginGroup("Option");
 	QStringList keys = settings.allKeys();
 
-	options.clear();
 	QString val;
 	for (int i = 0; i < keys.size(); i++)
-	{
-		val = settings.value(keys[i]).toString();
-		if (!val.isEmpty())
-		{
-			if (uci)
-				options.push_back(keys[i] + " value " + val);
-			else if (xboard)
-				options.push_back(keys[i] + " " + val);
-		}
-	}
+		uci ? uci->init(keys[i], settings.value(keys[i]).toString()):xboard->init(keys[i], settings.value(keys[i]).toString());
 	settings.endGroup();
 
-	process = new QProcess(this);
-	if (!process)
-		return false;
-
-	connect(process, SIGNAL(errorOccurred(QProcess::ProcessError)), SLOT(slotErrorOccurred(QProcess::ProcessError)));
-	connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), SLOT(slotFinished(int, QProcess::ExitStatus)));
-	connect(process, SIGNAL(readyReadStandardOutput()), SLOT(slotReadyStandardOutput()));
-	connect(process, SIGNAL(started()), SLOT(slotStarted()));
-
-	process->setReadChannel(QProcess::StandardOutput);
-
-	emit engineMessage("Starting engine");
-	process->start(enginepath);
-	return true;
+	if (uci)
+		return uci->load(enginepath);
+	return xboard->load(enginepath);
 }
 
 bool Engine::loadSetup(QString& setup)
@@ -429,15 +392,6 @@ void Engine::slotStateChanged(QProcess::ProcessState newState)
 
 void Engine::slotReadyRead()
 {
-}
-
-void Engine::write(QString& cmd)
-{
-	qDebug(cmd.toLatin1());
-	if (!process)
-		return;
-	process->write(cmd.toLatin1());
-	process->write("\n");
 }
 
 void Engine::search(ChessBoard& board, MoveList& moves, SEARCHTYPE searchtype, int wtime, int winc, int btime, int binc, int movestogo)

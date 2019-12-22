@@ -2,11 +2,15 @@
 
 #include <QString>
 #include <string>
+#include "../Common/BaseEngine.h"
 
-class UciEngine
+class UciEngine:public BaseEngine
 {
+protected:
+	QMap<QString, QString> initOptions;
+	virtual void fromEngine(std::string& input);
+public slots:
+	virtual void started();
 public:
 	UciEngine();
-	void clear();
-	int readLine(std::string& line, QString& responsestring);
 };

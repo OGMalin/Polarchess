@@ -1,224 +1,206 @@
 #include "../Common/XBoardEngine.h"
 #include "../Common/Utility.h"
+#include <QTimer>
 
 using namespace std;
 
-enum ENGINERESPONSE
-{
-	DO_NOTHING = 0,
-	SEND_ENGINE,
-	SEND_GUI_MESSAGE,
-	SEND_GUI_MOVE,
-	SEND_GUI_INFO,
-	FINNISH_STARTUP,
-	WAIT_FOREVER,
-	READYOK
-};
-
 XBoardEngine::XBoardEngine()
+	:BaseEngine()
 {
-	clear();
-}
-
-void XBoardEngine::clear()
-{
-	feature.ping = false; 
-	feature.setboard = false;
-	feature.playother = false;
-	feature.san = false;
-	feature.usermove = false;
-	feature.time = true;
-	feature.draw = true;
 	feature.sigint = true;
 	feature.sigterm = true;
-	feature.reuse = true;
-	feature.analyze = true;
-	feature.myname.clear();
-	feature.variants.clear();
-	feature.colors = true;
-	feature.ics = false;
-	feature.name = false;
-	feature.pause = false;
-	feature.nps = false;
-	feature.debug = false;
+	feature.ping = false;
+	feature.setboard = false;
 	feature.memory = false;
 	feature.smp = false;
-	feature.egt.clear();
-	feature.option.clear();
+	feature.reuse = true;
+	feature.usermove = false;
+	feature.debug = false;
+	feature.draw = true;
+	feature.pause = false;
+	feature.nps = true;
+	feature.analyze = true;
+	feature.exclude = false;
+	feature.setscore = false;
+	feature.highlight = false;
+	feature.playother = false;
+	feature.ics = false;
+	feature.name = false;
+	feature.colors = true;
+	feature.time = true;
+	feature.san = false;
 }
 
-int XBoardEngine::readLine(std::string& line, QString& responsestring)
+void XBoardEngine::fromEngine(std::string& input)
 {
-	responsestring.clear();
 	string cmd;
-	int response = DO_NOTHING;
+	string line;
 	int index = 0;
-	line = trim(line);
+	line = trim(input);
 	cmd = getWord(line, 1);
 	if (cmd == "feature")
 	{
 		index = cmd.size();
-		if (index>=line.size())
-			return response;
+		if (index>= line.size())
+			return;
 		line = trim(line.substr(index+1));
-		response = readFeature(line, responsestring);
+		readFeature(line);
 	}
-	else if (cmd == "pong")
-	{
-		response = READYOK;
-	}
-	return response;
 }
 
-int XBoardEngine::isReady(QString& rs)
-{
-	if (feature.ping)
-	{
-		rs = "ping 1";
-		return SEND_ENGINE;
-	}
-	return READYOK;
-
-}
-
-int XBoardEngine::readFeature(std::string& line, QString& responsestring)
+void XBoardEngine::readFeature(std::string& line)
 {
 	int index;
 	int i;
 	string cmd;
 	string sub;
 	string value;
-	int response = DO_NOTHING;
 
 	while ((cmd = getWord(line, 1, "=")).size() > 0)
 	{
 		if (cmd == "ping")
 		{
 			feature.ping = booleanString(line.substr(5, 1));
-			responsestring += "accepted ping\n";
+			write("accepted ping");
 			index = 7;
 		}
 		else if (cmd == "setboard")
 		{
 			feature.setboard = booleanString(line.substr(9, 1));
-			responsestring += "accepted setboard\n";
+			write("accepted setboard");
 			index = 11;
 		}
 		else if (cmd == "playother")
 		{
 			feature.playother = booleanString(line.substr(10, 1));
-			responsestring += "accepted playother\n";
+			write("accepted playother");
 			index = 12;
 		}
 		else if (cmd == "san")
 		{
 			feature.san = booleanString(line.substr(4, 1));
-			responsestring += "accepted san\n";
+			write("accepted san");
 			index = 6;
 		}
 		else if (cmd == "usermove")
 		{
 			feature.usermove = booleanString(line.substr(9, 1));
-			responsestring += "accepted usermove\n";
+			write("accepted usermove");
 			index = 11;
 		}
-		else if (cmd == "time")
+		else if (cmd == "times")
 		{
-			feature.time = booleanString(line.substr(5, 1));
-			responsestring += "accepted time\n";
-			index = 7;
+			feature.time = booleanString(line.substr(6, 1));
+			write("accepted times");
+			index = 8;
 		}
 		else if (cmd == "draw")
 		{
 			feature.draw = booleanString(line.substr(5, 1));
-			responsestring += "accepted draw\n";
+			write("accepted draw");
 			index = 7;
 		}
 		else if (cmd == "sigint")
 		{
 			feature.sigint = booleanString(line.substr(7, 1));
-			responsestring += "accepted sigint\n";
+			write("accepted sigint");
 			index = 9;
 		}
 		else if (cmd == "sigterm")
 		{
 			feature.sigterm = booleanString(line.substr(8, 1));
-			responsestring += "accepted sigterm\n";
+			write("accepted sigterm");
 			index = 10;
 		}
 		else if (cmd == "reuse")
 		{
 			feature.reuse = booleanString(line.substr(6, 1));
-			responsestring += "accepted reuse\n";
+			write("accepted reuse");
 			index = 8;
 		}
 		else if (cmd == "analyze")
 		{
 			feature.analyze = booleanString(line.substr(8, 1));
-			responsestring += "accepted analyze\n";
+			write("accepted analyze");
 			index = 10;
 		}
 		else if (cmd == "colors")
 		{
 			feature.colors = booleanString(line.substr(7, 1));
-			responsestring += "accepted colors\n";
+			write("accepted colors");
 			index = 9;
 		}
 		else if (cmd == "ics")
 		{
 			feature.ics = booleanString(line.substr(4, 1));
-			responsestring += "accepted ics\n";
+			write("accepted ics");
 			index = 6;
 		}
 		else if (cmd == "name")
 		{
 			feature.name = booleanString(line.substr(5, 1));
-			responsestring += "accepted name\n";
+			write("accepted name");
 			index = 7;
 		}
 		else if (cmd == "pause")
 		{
 			feature.pause = booleanString(line.substr(6, 1));
-			responsestring += "accepted pause\n";
+			write("accepted pause");
 			index = 8;
 		}
 		else if (cmd == "nps")
 		{
 			feature.nps = booleanString(line.substr(4, 1));
-			responsestring += "accepted nps\n";
+			write("accepted nps");
 			index = 6;
 		}
 		else if (cmd == "debug")
 		{
 			feature.debug = booleanString(line.substr(6, 1));
-			responsestring += "accepted debug\n";
+			write("accepted debug");
 			index = 8;
 		}
 		else if (cmd == "memory")
 		{
 			feature.memory = booleanString(line.substr(7, 1));
-			responsestring += "accepted memory\n";
+			write("accepted memory");
 			index = 9;
 		}
 		else if (cmd == "smp")
 		{
 			feature.smp = booleanString(line.substr(4, 1));
-			responsestring += "accepted smp\n";
+			write("accepted smp");
 			index = 6;
 		}
 		else if (cmd == "done")
 		{
 			if (booleanString(line.substr(5, 1)))
-				response = FINNISH_STARTUP;
-			else
-				response=WAIT_FOREVER;
-			responsestring += "accepted done\n";
+				finnishInit();
+			write("accepted done");
 			index = 7;
+		}
+		else if (cmd == "exclude")
+		{
+		feature.exclude = booleanString(line.substr(8, 1));
+		write("accepted exclude");
+		index = 10;
+		}
+		else if (cmd == "setscore")
+		{
+		feature.setscore = booleanString(line.substr(9, 1));
+		write("accepted setscore");
+		index = 11;
+		}
+		else if (cmd == "highlight")
+		{
+		feature.highlight = booleanString(line.substr(10, 1));
+		write("accepted highlight");
+		index = 12;
 		}
 		else if (cmd == "myname")
 		{
 			feature.myname = getQuotedString(line.substr(7)).c_str();
-			responsestring += "accepted myname\n";
+			write("accepted myname");
 			index = 7 + 3 + feature.myname.length();
 		}
 		else if (cmd == "variants")
@@ -230,7 +212,7 @@ int XBoardEngine::readFeature(std::string& line, QString& responsestring)
 				feature.variants.push_back(sub.c_str());
 				++i;
 			}
-			responsestring += "accepted variants\n";
+			write("accepted variants");
 			index = 9 + 3 + value.length();
 		}
 		else if (cmd == "egt")
@@ -242,7 +224,7 @@ int XBoardEngine::readFeature(std::string& line, QString& responsestring)
 				feature.egt.push_back(sub.c_str());
 				++i;
 			}
-			responsestring += "accepted egt\n";
+			write("accepted egt");
 			index = 4 + 3 + value.length();
 		}
 		else if (cmd == "option")
@@ -254,24 +236,50 @@ int XBoardEngine::readFeature(std::string& line, QString& responsestring)
 				feature.option.push_back(sub.c_str());
 				++i;
 			}
-			responsestring += "accepted option\n";
+			write("accepted option");
 			index = 7 + 3 + value.length();
 		}
 		else
 		{
-			responsestring += "rejected ";
-			responsestring += cmd.c_str();
-			responsestring += "\n";
+			write(string("rejected " + cmd).c_str());
 			index += cmd.size() + 1;
 		}
 
 		if (index >= line.size())
-			return response;
+			return;
 		line = line.substr(index);
 	}
-	if (!responsestring.isEmpty())
-		if (response == DO_NOTHING)
-			response = SEND_ENGINE;
+}
 
-	return response;
+void XBoardEngine::started()
+{
+	// XBoard engines should possible send options command before set in xboard mode, but ping/pong could possible not work then because
+	// it is a xboard feature.
+	QString qs;
+	QMap<QString, QString>::iterator it=initOptions.begin();
+	while (it!=initOptions.end())
+	{
+		qs = it.key();
+		if (!it.value().isEmpty())
+		{
+			qs += " ";
+			qs += it.value();
+		}
+		write(qs);
+		++it;
+	}
+	write("xboard");
+	write("protover 2");
+
+	// Wait 5 sek if the engine don't have done 1
+	QTimer::singleShot(2000, this, SLOT(finnishInit()));
+}
+
+void XBoardEngine::finnishInit()
+{
+	static bool sendt = false;
+	if (sendt)
+		return;
+	sendt = true;
+	emit finnishStartup();
 }

@@ -3,6 +3,7 @@
 #include <QString>
 #include <QStringList>
 #include <string>
+#include "../Common/BaseEngine.h"
 
 struct XBoardFeature
 {
@@ -29,16 +30,20 @@ struct XBoardFeature
 	bool smp;
 	QStringList egt;
 	QStringList option;
+	bool exclude;
+	bool setscore;
+	bool highlight;
 };
 
-class XBoardEngine
+class XBoardEngine:public BaseEngine
 {
-private:
+protected:
 	XBoardFeature feature;
-	int readFeature(std::string& line, QString& responsestring);
+	virtual void fromEngine(std::string& input);
+	void readFeature(std::string& line);
+public slots:
+	virtual void started();
+	void finnishInit();
 public:
 	XBoardEngine();
-	void clear();
-	int readLine(std::string& line, QString& responsestring);
-	int isReady(QString& rs);
 };
