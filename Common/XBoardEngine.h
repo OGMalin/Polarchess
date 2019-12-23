@@ -4,7 +4,6 @@
 #include <QStringList>
 #include <string>
 #include "../Common/BaseEngine.h"
-
 struct XBoardFeature
 {
 	bool ping;
@@ -37,6 +36,9 @@ struct XBoardFeature
 
 class XBoardEngine:public BaseEngine
 {
+private:
+	ChessBoard currentBoard;
+	MoveList currentMovelist;
 protected:
 	XBoardFeature feature;
 	virtual void fromEngine(std::string& input);
@@ -46,4 +48,7 @@ public slots:
 	void finnishInit();
 public:
 	XBoardEngine();
+	virtual ~XBoardEngine();
+	void analyze(ChessBoard& board, MoveList& moves);
+	void stop();
 };

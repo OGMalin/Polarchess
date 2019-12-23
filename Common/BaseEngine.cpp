@@ -1,6 +1,7 @@
 #include "../Common/BaseEngine.h"
 #include "../Common/Utility.h"
 #include <QDebug>
+#include <windows.h>
 
 using namespace std;
 
@@ -8,10 +9,23 @@ BaseEngine::BaseEngine(QObject*parent)
 	:QObject(parent)
 {
 	process = NULL;
+	searchtype = NO_SEARCH;
+}
+
+BaseEngine::~BaseEngine()
+{
+	if (process)
+	{
+		process->waitForFinished(1000);
+		delete process;
+		process = NULL;
+	}
 }
 
 bool BaseEngine::load(QString& path)
 {
+	if (path.isEmpty())
+		return false;
 	process = new QProcess(this);
 	if (!process)
 		return false;
@@ -23,6 +37,15 @@ bool BaseEngine::load(QString& path)
 
 	process->setReadChannel(QProcess::StandardOutput);
 
+	QString fp;
+	int i = path.lastIndexOf("\\");
+	int j = path.lastIndexOf("/");
+	i = max(i, j);
+	if (i > 0)
+	{
+		fp = path.left(i);
+		process->setWorkingDirectory(fp);
+	}
 	process->start(path);
 	return true;
 }

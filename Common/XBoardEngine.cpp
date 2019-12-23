@@ -48,6 +48,22 @@ void XBoardEngine::fromEngine(std::string& input)
 	}
 }
 
+XBoardEngine::~XBoardEngine()
+{
+	if (process)
+	{
+		if (searchtype != NO_SEARCH)
+		{
+			if (searchtype == INFINITE_SEARCH)
+				write("exit");
+			else
+				write("?");
+			_sleep(500);
+		}
+		write("quit");
+	}
+}
+
 void XBoardEngine::readFeature(std::string& line)
 {
 	int index;
@@ -272,7 +288,7 @@ void XBoardEngine::started()
 	write("protover 2");
 
 	// Wait 5 sek if the engine don't have done 1
-	QTimer::singleShot(2000, this, SLOT(finnishInit()));
+	QTimer::singleShot(5000, this, SLOT(finnishInit()));
 }
 
 void XBoardEngine::finnishInit()
@@ -282,4 +298,110 @@ void XBoardEngine::finnishInit()
 		return;
 	sendt = true;
 	emit finnishStartup();
+}
+
+void XBoardEngine::analyze(ChessBoard& board, MoveList& moves)
+{
+	QString qs;
+	int file, row, piece, i, j;
+	char filechar[] = "abcdefgh";
+	char rowchar[] = "12345678";
+	char piecechar[] = "PNBRQK";
+	int color;
+	if (!feature.analyze)
+		return;
+
+	stop();
+
+	ChessBoard cb = board;
+
+	if (!cb.isStartposition())
+	{
+		write("new");
+		write("force");
+		if (feature.setboard)
+		{
+			qs = "setboard ";
+			qs += cb.getFen().c_str();
+			write(qs);
+		}else
+		{
+			// XBoard edit command
+			if (cb.toMove == BLACK)
+				write("a2a3");
+			write("edit");
+			write("#");
+			color = cb.toMove;
+			for (file = 0; file < 8; file++)
+			{
+				for (row = 0; row < 8; row++)
+				{
+					piece = PIECE(cb.pieceAt(file, row));
+					if (piece != EMPTY)
+					{
+						qs = piecechar[piece - 1];
+						qs += filechar[file];
+						qs += rowchar[row];
+						if (PIECECOLOR(cb.pieceAt(file, row)) != color)
+						{
+							write("c");
+							color = PIECECOLOR(cb.pieceAt(file, row));
+						}
+						write(qs);
+					}
+				}
+			}
+			write(".");
+		}
+		for (i = 0; i < moves.size; i++)
+		{
+			write(cb.makeMoveText(moves.list[i], feature.san ? SAN : COOR).c_str());
+			cb.doMove(moves.list[i], false);
+		}
+		currentMovelist.clear();
+	}
+	else
+	{
+		for (i = 0; i < currentMovelist.size; i++)
+		{
+			if ((moves.list[i]!= currentMovelist.list[i]) || (moves.size >= i))
+			{
+				for (j = 0; j < currentMovelist.size - i; j++)
+					write("undo");
+				for (j = i; j < moves.size; j++)
+				{
+					write(cb.makeMoveText(moves.list[i], feature.san ? SAN : COOR).c_str());
+					cb.doMove(moves.list[i], false);
+				}
+				break;
+			}
+			else
+			{
+				cb.doMove(moves.list[i], false);
+			}
+		}
+		currentMovelist = moves;
+	}
+	currentBoard = cb;
+	write("post");
+	write("analyze");
+	searchtype = INFINITE_SEARCH;
+}
+
+void XBoardEngine::stop()
+{
+	// Stop current search
+	switch (searchtype)
+	{
+	case NORMAL_SEARCH:
+	case NODES_SEARCH:
+	case MATE_SEARCH:
+	case DEPTH_SEARCH:
+	case TIME_SEARCH:
+		write("?");
+		break;
+	case INFINITE_SEARCH:
+		write("exit");
+		break;
+	}
 }

@@ -42,6 +42,7 @@ public:
 	bool isRowChar(char c);
 	bool isFileChar(char c);
 	bool isPieceChar(char c);
+	typePiece pieceAt(int file, int row);
 	typePiece getPieceFromChar(char c);
 	char getCharFromPiece(typePiece p);
 	HASHKEY hashkey();

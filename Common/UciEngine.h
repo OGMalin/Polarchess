@@ -6,11 +6,15 @@
 
 class UciEngine:public BaseEngine
 {
+private:
+	ChessBoard currentBoard;
 protected:
-	QMap<QString, QString> initOptions;
 	virtual void fromEngine(std::string& input);
 public slots:
 	virtual void started();
 public:
 	UciEngine();
+	virtual ~UciEngine();
+	void analyze(ChessBoard& board, MoveList& moves);
+	void stop();
 };

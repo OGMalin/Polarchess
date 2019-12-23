@@ -924,6 +924,11 @@ void ChessBoard::setStartposition()
 	setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1");
 }
 
+typePiece ChessBoard::pieceAt(int file, int row)
+{
+	return board[SQUARE(file, row)];
+}
+
 bool operator<(const ChessBoard& b1, const ChessBoard& b2)
 {
 	typeSquare sq;

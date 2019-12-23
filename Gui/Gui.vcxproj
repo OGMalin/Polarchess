@@ -117,6 +117,7 @@
     </QtRcc>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Common\BaseEngine.cpp" />
     <ClCompile Include="..\Common\BoardWindow.cpp" />
     <ClCompile Include="..\Common\ChessBoard.cpp" />
     <ClCompile Include="..\Common\ChessGame.cpp" />
@@ -147,6 +148,10 @@
     <QtRcc Include="Gui.qrc" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="..\Common\BaseEngine.h">
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
+    </QtMoc>
     <ClInclude Include="..\Common\UciEngine.h" />
     <ClInclude Include="..\Common\XBoardEngine.h" />
     <ClInclude Include="EnginePlayer.h">
