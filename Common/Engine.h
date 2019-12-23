@@ -15,6 +15,7 @@ class Engine :public QObject
 	Q_OBJECT
 
 private:
+	QString engFile;
 	QString engineName;
 	QString workingDir;
 	UciEngine* uci;
@@ -27,10 +28,12 @@ private:
 	ChessBoard currentBoard;
 	bool startup;
 public slots:
-//	void ready() {};
+	void finnishStartup();
+	void stoped();
 signals:
 	void engineMessage(const QString& msg);
 	void engineReady();
+	void engineStoped();
 	void engineMove(const QString& move, const QString& ponder);
 	void engineInfo(const EngineInfo&);
 public:

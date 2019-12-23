@@ -4,9 +4,12 @@
 
 using namespace std;
 
+static bool bfinnishInit;
+
 XBoardEngine::XBoardEngine()
 	:BaseEngine()
 {
+	bfinnishInit = false;
 	feature.sigint = true;
 	feature.sigterm = true;
 	feature.ping = false;
@@ -104,11 +107,11 @@ void XBoardEngine::readFeature(std::string& line)
 			write("accepted usermove");
 			index = 11;
 		}
-		else if (cmd == "times")
+		else if (cmd == "time")
 		{
-			feature.time = booleanString(line.substr(6, 1));
-			write("accepted times");
-			index = 8;
+			feature.time = booleanString(line.substr(5, 1));
+			write("accepted time");
+			index = 7;
 		}
 		else if (cmd == "draw")
 		{
@@ -269,6 +272,7 @@ void XBoardEngine::readFeature(std::string& line)
 
 void XBoardEngine::started()
 {
+	bfinnishInit = false;
 	// XBoard engines should possible send options command before set in xboard mode, but ping/pong could possible not work then because
 	// it is a xboard feature.
 	QString qs;
@@ -293,10 +297,9 @@ void XBoardEngine::started()
 
 void XBoardEngine::finnishInit()
 {
-	static bool sendt = false;
-	if (sendt)
+	if (bfinnishInit)
 		return;
-	sendt = true;
+	bfinnishInit = true;
 	emit finnishStartup();
 }
 
@@ -311,13 +314,25 @@ void XBoardEngine::analyze(ChessBoard& board, MoveList& moves)
 	if (!feature.analyze)
 		return;
 
-	stop();
+	// Stop current search
+	switch (searchtype)
+	{
+	case NORMAL_SEARCH:
+	case NODES_SEARCH:
+	case MATE_SEARCH:
+	case DEPTH_SEARCH:
+	case TIME_SEARCH:
+		write("?");
+		break;
+	case INFINITE_SEARCH:
+		write("exit");
+		break;
+	}
 
 	ChessBoard cb = board;
 
 	if (!cb.isStartposition())
 	{
-		write("new");
 		write("force");
 		if (feature.setboard)
 		{
@@ -402,6 +417,7 @@ void XBoardEngine::stop()
 		break;
 	case INFINITE_SEARCH:
 		write("exit");
+		emit engineStoped();
 		break;
 	}
 }

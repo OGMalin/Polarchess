@@ -26,7 +26,7 @@ public slots:
 	void inclineClicked(bool);
 	void declineClicked(bool);
 	void engineReady();
-	void engineStoped(const QString& move, const QString& ponder);
+	void engineStoped();
 	void engineInfo(const EngineInfo&);
 	void showContextMenu(const QPoint& pos);
 	void selectFont();

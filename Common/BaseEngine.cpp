@@ -63,7 +63,7 @@ void BaseEngine::finished(int exitCode, QProcess::ExitStatus exitStatus)
 
 }
 
-void BaseEngine::readReadyStandardOutput()
+void BaseEngine::readyReadStandardOutput()
 {
 	char sz[1024];
 	string input;

@@ -40,13 +40,13 @@ private:
 	ChessBoard currentBoard;
 	MoveList currentMovelist;
 protected:
-	XBoardFeature feature;
 	virtual void fromEngine(std::string& input);
 	void readFeature(std::string& line);
 public slots:
 	virtual void started();
-	void finnishInit();
+	virtual void finnishInit();
 public:
+	XBoardFeature feature;
 	XBoardEngine();
 	virtual ~XBoardEngine();
 	void analyze(ChessBoard& board, MoveList& moves);

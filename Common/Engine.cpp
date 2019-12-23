@@ -28,6 +28,7 @@ void Engine::setEngine(QString& name, QString& dir)
 
 bool Engine::load(QString& enginefile)
 {
+	engFile = enginefile;
 	QSettings settings(enginefile, QSettings::IniFormat);
 	settings.beginGroup("Engine");
 	QString enginepath = settings.value("path").toString();
@@ -52,10 +53,26 @@ bool Engine::load(QString& enginefile)
 	settings.endGroup();
 
 	if (uci)
+	{
+		connect(uci, SIGNAL(finnishStartup()), SLOT(finnishStartup()));
+		connect(uci, SIGNAL(engineMove(const QString&, const QString&)), SLOT(stoped()));
 		return uci->load(enginepath);
+	}
+	
+	connect(xboard, SIGNAL(finnishStartup()), SLOT(finnishStartup()));
+	connect(xboard, SIGNAL(engineStoped()), SLOT(stoped()));
 	return xboard->load(enginepath);
 }
 
+void Engine::finnishStartup()
+{
+	emit engineReady();
+}
+
+void Engine::stoped()
+{
+	emit engineStoped();
+}
 bool Engine::loadSetup(QString& setup)
 {
 /*	readyok = false;
@@ -101,9 +118,16 @@ void Engine::unload()
 void Engine::analyze(ChessBoard& board, MoveList& moves)
 {
 	if (xboard)
-		xboard->analyze(board, moves);
+	{
+		if (xboard->feature.reuse)
+		{
+			xboard->analyze(board, moves);
+		}
+	}
 	else if (uci)
+	{
 		uci->analyze(board, moves);
+	}
 }
 
 void Engine::search(ChessBoard& board, MoveList& moves, SEARCHTYPE searchtype, int wtime, int winc, int btime, int binc, int movestogo)

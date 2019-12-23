@@ -78,12 +78,15 @@ public slots:
 	// From QProcess
 	virtual void errorOccurred(QProcess::ProcessError error);
 	virtual void finished(int exitCode, QProcess::ExitStatus exitStatus);
-	virtual void readReadyStandardOutput();
+	virtual void readyReadStandardOutput();
 	virtual void started();
+	virtual void finnishInit() {};
 signals:
 	void finnishStartup();
 	void engineMessage(const QString& msg);
 	void engineInfo(EngineInfo&);
+	void engineMove(const QString& move, const QString& ponder);
+	void engineStoped();
 public:
 	BaseEngine(QObject*parent = 0);
 	virtual ~BaseEngine();

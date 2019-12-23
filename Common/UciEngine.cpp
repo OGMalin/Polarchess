@@ -52,7 +52,7 @@ void UciEngine::fromEngine(std::string& input)
 	}
 	else if (cmd == "bestmove")
 	{
-//		emit engineMove(QString(getWord(input, 2).c_str()), QString(getWord(input, 4).c_str()));
+		emit engineMove(QString(getWord(input, 2).c_str()), QString(getWord(input, 4).c_str()));
 	}
 	else if (cmd == "info")
 	{
@@ -241,4 +241,9 @@ void UciEngine::stop()
 	// Stop current search
 	if (searchtype != NO_SEARCH)
 		write("stop");
+}
+
+void UciEngine::finnishInit()
+{
+
 }

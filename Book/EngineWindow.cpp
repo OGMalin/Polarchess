@@ -87,6 +87,7 @@ EngineWindow::EngineWindow(QWidget *parent)
 	connect(selengine, SIGNAL(activated(const QString&)), this, SLOT(selectEngine(const QString&)));
 	connect(engine, SIGNAL(engineReady()), this, SLOT(engineReady()));
 	connect(engine, SIGNAL(engineMove(const QString&, const QString&)), this, SLOT(engineStoped(const QString&, const QString&)));
+	connect(engine, SIGNAL(engineStoped()), this, SLOT(engineStoped()));
 	connect(engine, SIGNAL(engineInfo(const EngineInfo&)), this, SLOT(engineInfo(const EngineInfo&)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 
@@ -181,13 +182,13 @@ void EngineWindow::engineReady()
 {
 	engine->setMultiPV(multipv);
 	if (analyzing)
-		engine->search(currentBoard, movelist, INFINITE_SEARCH);
+		engine->analyze(currentBoard, movelist);
 }
 
-void EngineWindow::engineStoped(const QString& move, const QString& ponder)
+void EngineWindow::engineStoped()
 {
 	if (analyzing)
-		engine->search(currentBoard, movelist, INFINITE_SEARCH);
+		engine->analyze(currentBoard, movelist);
 }
 
 void EngineWindow::engineInfo(const EngineInfo& info)
