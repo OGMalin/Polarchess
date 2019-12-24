@@ -18,7 +18,7 @@ UciEngine::~UciEngine()
 	}
 }
 
-void UciEngine::started()
+void UciEngine::slotStarted()
 {
 	write("uci");
 }
@@ -243,7 +243,7 @@ void UciEngine::stop()
 		write("stop");
 }
 
-void UciEngine::finnishInit()
+void UciEngine::slotFinnishInit()
 {
 
 }

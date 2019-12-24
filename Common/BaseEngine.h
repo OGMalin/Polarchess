@@ -76,15 +76,15 @@ protected:
 	virtual void fromEngine(std::string& input) {};
 public slots:
 	// From QProcess
-	virtual void errorOccurred(QProcess::ProcessError error);
-	virtual void finished(int exitCode, QProcess::ExitStatus exitStatus);
-	virtual void readyReadStandardOutput();
-	virtual void started();
-	virtual void finnishInit() {};
+	virtual void slotErrorOccurred(QProcess::ProcessError error);
+	virtual void slotFinished(int exitCode, QProcess::ExitStatus exitStatus);
+	virtual void slotReadyReadStandardOutput();
+	virtual void slotStarted();
+	virtual void slotFinnishInit() {};
 signals:
 	void finnishStartup();
 	void engineMessage(const QString& msg);
-	void engineInfo(EngineInfo&);
+	void engineInfo(const EngineInfo&);
 	void engineMove(const QString& move, const QString& ponder);
 	void engineStoped();
 public:

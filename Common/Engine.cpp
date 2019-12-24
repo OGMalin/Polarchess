@@ -54,25 +54,33 @@ bool Engine::load(QString& enginefile)
 
 	if (uci)
 	{
-		connect(uci, SIGNAL(finnishStartup()), SLOT(finnishStartup()));
-		connect(uci, SIGNAL(engineMove(const QString&, const QString&)), SLOT(stoped()));
+		connect(uci, SIGNAL(finnishStartup()), SLOT(slotFinnishStartup()));
+		connect(uci, SIGNAL(engineMove(const QString&, const QString&)), SLOT(slotStoped()));
+		connect(uci, SIGNAL(engineInfo(const EngineInfo&)), SLOT(slotEngineInfo(const EngineInfo&)));
 		return uci->load(enginepath);
 	}
 	
-	connect(xboard, SIGNAL(finnishStartup()), SLOT(finnishStartup()));
-	connect(xboard, SIGNAL(engineStoped()), SLOT(stoped()));
+	connect(xboard, SIGNAL(finnishStartup()), SLOT(slotFinnishStartup()));
+	connect(xboard, SIGNAL(engineStoped()), SLOT(slotStoped()));
+	connect(xboard, SIGNAL(engineInfo(const EngineInfo&)), SLOT(slotEngineInfo(const EngineInfo&)));
 	return xboard->load(enginepath);
 }
 
-void Engine::finnishStartup()
+void Engine::slotFinnishStartup()
 {
 	emit engineReady();
 }
 
-void Engine::stoped()
+void Engine::slotStoped()
 {
 	emit engineStoped();
 }
+
+void Engine::slotEngineInfo(const EngineInfo& ei)
+{
+	emit engineInfo(ei);
+}
+
 bool Engine::loadSetup(QString& setup)
 {
 /*	readyok = false;

@@ -28,8 +28,9 @@ private:
 	ChessBoard currentBoard;
 	bool startup;
 public slots:
-	void finnishStartup();
-	void stoped();
+	void slotFinnishStartup();
+	void slotStoped();
+	void slotEngineInfo(const EngineInfo&);
 signals:
 	void engineMessage(const QString& msg);
 	void engineReady();

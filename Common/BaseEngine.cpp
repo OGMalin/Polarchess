@@ -30,10 +30,10 @@ bool BaseEngine::load(QString& path)
 	if (!process)
 		return false;
 
-	connect(process, SIGNAL(errorOccurred(QProcess::ProcessError)), SLOT(errorOccurred(QProcess::ProcessError)));
-	connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), SLOT(finished(int, QProcess::ExitStatus)));
-	connect(process, SIGNAL(readyReadStandardOutput()), SLOT(readyReadStandardOutput()));
-	connect(process, SIGNAL(started()), SLOT(started()));
+	connect(process, SIGNAL(errorOccurred(QProcess::ProcessError)), SLOT(slotErrorOccurred(QProcess::ProcessError)));
+	connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), SLOT(slotFinished(int, QProcess::ExitStatus)));
+	connect(process, SIGNAL(readyReadStandardOutput()), SLOT(slotReadyReadStandardOutput()));
+	connect(process, SIGNAL(started()), SLOT(slotStarted()));
 
 	process->setReadChannel(QProcess::StandardOutput);
 
@@ -50,7 +50,7 @@ bool BaseEngine::load(QString& path)
 	return true;
 }
 
-void BaseEngine::errorOccurred(QProcess::ProcessError error)
+void BaseEngine::slotErrorOccurred(QProcess::ProcessError error)
 {
 	char sz[16];
 	QString err = tr("Error message: ");
@@ -58,12 +58,12 @@ void BaseEngine::errorOccurred(QProcess::ProcessError error)
 	emit engineMessage(err);
 }
 
-void BaseEngine::finished(int exitCode, QProcess::ExitStatus exitStatus)
+void BaseEngine::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
 
 }
 
-void BaseEngine::readyReadStandardOutput()
+void BaseEngine::slotReadyReadStandardOutput()
 {
 	char sz[1024];
 	string input;
@@ -81,7 +81,7 @@ void BaseEngine::readyReadStandardOutput()
 	}
 }
 
-void BaseEngine::started()
+void BaseEngine::slotStarted()
 {
 
 }

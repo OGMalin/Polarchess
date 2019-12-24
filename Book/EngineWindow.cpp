@@ -80,16 +80,16 @@ EngineWindow::EngineWindow(QWidget *parent)
 
 	setContextMenuPolicy(Qt::CustomContextMenu);
 
-	connect(decline, SIGNAL(clicked(bool)), this, SLOT(declineClicked(bool)));
-	connect(incline, SIGNAL(clicked(bool)), this, SLOT(inclineClicked(bool)));
-	connect(freeze, SIGNAL(clicked(bool)), this, SLOT(freezeClicked(bool)));
-	connect(analyze, SIGNAL(clicked(bool)), this, SLOT(analyzeClicked(bool)));
-	connect(selengine, SIGNAL(activated(const QString&)), this, SLOT(selectEngine(const QString&)));
-	connect(engine, SIGNAL(engineReady()), this, SLOT(engineReady()));
-	connect(engine, SIGNAL(engineMove(const QString&, const QString&)), this, SLOT(engineStoped(const QString&, const QString&)));
-	connect(engine, SIGNAL(engineStoped()), this, SLOT(engineStoped()));
-	connect(engine, SIGNAL(engineInfo(const EngineInfo&)), this, SLOT(engineInfo(const EngineInfo&)));
-	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+	connect(decline, SIGNAL(clicked(bool)), this, SLOT(slotDeclineClicked(bool)));
+	connect(incline, SIGNAL(clicked(bool)), this, SLOT(slotInclineClicked(bool)));
+	connect(freeze, SIGNAL(clicked(bool)), this, SLOT(slotFreezeClicked(bool)));
+	connect(analyze, SIGNAL(clicked(bool)), this, SLOT(slotAnalyzeClicked(bool)));
+	connect(selengine, SIGNAL(activated(const QString&)), this, SLOT(slotSelectEngine(const QString&)));
+	connect(engine, SIGNAL(engineReady()), this, SLOT(slotEngineReady()));
+	connect(engine, SIGNAL(engineMove(const QString&, const QString&)), this, SLOT(slotEngineStoped()));
+	connect(engine, SIGNAL(engineStoped()), this, SLOT(slotSngineStoped()));
+	connect(engine, SIGNAL(engineInfo(const EngineInfo&)), this, SLOT(slotEngineInfo(const EngineInfo&)));
+	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(slotShowContextMenu(const QPoint&)));
 
 	font.setPointSize(12);
 	this->setFont(font);
@@ -109,7 +109,7 @@ void EngineWindow::setPosition(const ChessBoard& cb, int mn)
 			engine->stop();
 }
 
-void EngineWindow::analyzeClicked(bool)
+void EngineWindow::slotAnalyzeClicked(bool)
 {
 	if (analyze->isChecked())
 	{
@@ -137,7 +137,7 @@ void EngineWindow::analyzeClicked(bool)
 	}
 }
 
-void EngineWindow::freezeClicked(bool)
+void EngineWindow::slotFreezeClicked(bool)
 {
 	if (freeze->isChecked())
 	{
@@ -153,7 +153,7 @@ void EngineWindow::freezeClicked(bool)
 	}
 }
 
-void EngineWindow::inclineClicked(bool)
+void EngineWindow::slotInclineClicked(bool)
 {
 	char sz[16];
 	if (multipv == 1)
@@ -164,7 +164,7 @@ void EngineWindow::inclineClicked(bool)
 	model->setRowCount(multipv);
 }
 
-void EngineWindow::declineClicked(bool)
+void EngineWindow::slotDeclineClicked(bool)
 {
 	char sz[16];
 	if (multipv > 1)
@@ -178,20 +178,20 @@ void EngineWindow::declineClicked(bool)
 	}
 }
 
-void EngineWindow::engineReady()
+void EngineWindow::slotEngineReady()
 {
 	engine->setMultiPV(multipv);
 	if (analyzing)
 		engine->analyze(currentBoard, movelist);
 }
 
-void EngineWindow::engineStoped()
+void EngineWindow::slotEngineStoped()
 {
 	if (analyzing)
 		engine->analyze(currentBoard, movelist);
 }
 
-void EngineWindow::engineInfo(const EngineInfo& info)
+void EngineWindow::slotEngineInfo(const EngineInfo& info)
 {
 	char sz[16];
 	int line = info.multipv;
@@ -199,12 +199,25 @@ void EngineWindow::engineInfo(const EngineInfo& info)
 		line = 1;
 //	model->clear();
 	if (info.time)
-		time->setText(itoa(info.time / 1000, sz, 10) + QString("s"));
+		time->setText(itoa(info.time / 1000, sz, 10) + QString(" s"));
 	if (info.nodes)
-		nodes->setText(itoa(info.nodes, sz, 10) + QString(" nodes"));
+	{
+		if (info.nodes<10000)
+			nodes->setText(itoa(info.nodes, sz, 10) + QString(" n"));
+		else if (info.nodes<10000000)
+			nodes->setText(itoa(info.nodes/1000, sz, 10) + QString(" kn"));
+		else
+			nodes->setText(itoa(info.nodes/1000000, sz, 10) + QString(" Mn"));
+	}
 	if (info.nps)
-		nps->setText(itoa(info.nps, sz, 10) + QString(" nps"));
-
+	{
+		if (info.nps < 10000)
+			nps->setText(itoa(info.nps / 1000, sz, 10) + QString(" nps"));
+		else if (info.nps < 10000000)
+			nps->setText(itoa(info.nps, sz, 10) + QString(" knps"));
+		else
+			nps->setText(itoa(info.nps, sz, 10) + QString(" Mnps"));
+	}
 	if (info.pv.size)
 	{
 		QStandardItem* item;
@@ -266,14 +279,14 @@ void EngineWindow::engineInfo(const EngineInfo& info)
 	}
 }
 
-void EngineWindow::showContextMenu(const QPoint& pos)
+void EngineWindow::slotShowContextMenu(const QPoint& pos)
 {
 	QMenu* contextMenu = new QMenu(this);
-	contextMenu->addAction(QString("Font"), this, SLOT(selectFont()));
+	contextMenu->addAction(QString("Font"), this, SLOT(slotSelectFont()));
 	contextMenu->exec(mapToGlobal(pos));
 }
 
-void EngineWindow::selectFont()
+void EngineWindow::slotSelectFont()
 {
 	bool ok;
 	QFont f = QFontDialog::getFont(&ok, font, this);
@@ -284,7 +297,7 @@ void EngineWindow::selectFont()
 	}
 }
 
-void EngineWindow::selectEngine(const QString& eng)
+void EngineWindow::slotSelectEngine(const QString& eng)
 {
 	if (analyzing)
 		analyze->animateClick();

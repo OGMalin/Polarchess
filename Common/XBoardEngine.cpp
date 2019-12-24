@@ -34,23 +34,6 @@ XBoardEngine::XBoardEngine()
 	feature.san = false;
 }
 
-void XBoardEngine::fromEngine(std::string& input)
-{
-	string cmd;
-	string line;
-	int index = 0;
-	line = trim(input);
-	cmd = getWord(line, 1);
-	if (cmd == "feature")
-	{
-		index = cmd.size();
-		if (index>= line.size())
-			return;
-		line = trim(line.substr(index+1));
-		readFeature(line);
-	}
-}
-
 XBoardEngine::~XBoardEngine()
 {
 	if (process)
@@ -64,6 +47,52 @@ XBoardEngine::~XBoardEngine()
 			_sleep(500);
 		}
 		write("quit");
+		_sleep(500);
+	}
+}
+
+void XBoardEngine::fromEngine(std::string& input)
+{
+	string cmd;
+	string line;
+	int i = 0;
+	line = trim(input);
+	cmd = getWord(line, 1);
+	if (cmd.empty())
+		return;
+	if (cmd == "feature")
+	{
+		i = cmd.size();
+		if (i>= line.size())
+			return;
+		line = trim(line.substr(i+1));
+		readFeature(line);
+	}
+	else if (cmd.at(0) == '#') // Comment
+	{
+		return;
+	}
+	else if (isNumber(cmd)) // Check if it is a pv line
+	{
+		EngineInfo ei;
+		i = 1;
+		ei.depth = atoi(cmd.c_str());
+		cmd = getWord(input, ++i);
+		if (isNumber(cmd))
+		{
+			ei.cp = atoi(cmd.c_str());
+			cmd = getWord(input, ++i);
+			if (isNumber(cmd))
+			{
+				ei.time = atoi(cmd.c_str()) * 10;
+				cmd = getWord(input, ++i);
+				if (isNumber(cmd))
+				{
+					ei.nodes = atoi(cmd.c_str());
+					emit engineInfo(ei);
+				}
+			}
+		}
 	}
 }
 
@@ -194,7 +223,7 @@ void XBoardEngine::readFeature(std::string& line)
 		else if (cmd == "done")
 		{
 			if (booleanString(line.substr(5, 1)))
-				finnishInit();
+				slotFinnishInit();
 			write("accepted done");
 			index = 7;
 		}
@@ -270,7 +299,7 @@ void XBoardEngine::readFeature(std::string& line)
 	}
 }
 
-void XBoardEngine::started()
+void XBoardEngine::slotStarted()
 {
 	bfinnishInit = false;
 	// XBoard engines should possible send options command before set in xboard mode, but ping/pong could possible not work then because
@@ -291,11 +320,11 @@ void XBoardEngine::started()
 	write("xboard");
 	write("protover 2");
 
-	// Wait 5 sek if the engine don't have done 1
-	QTimer::singleShot(5000, this, SLOT(finnishInit()));
+	// Wait 2 sek if the engine don't have done 1
+	QTimer::singleShot(2000, this, SLOT(slotFinnishInit()));
 }
 
-void XBoardEngine::finnishInit()
+void XBoardEngine::slotFinnishInit()
 {
 	if (bfinnishInit)
 		return;

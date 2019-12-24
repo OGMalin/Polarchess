@@ -21,16 +21,16 @@ public:
 	void setPosition(const ChessBoard& cb, int movenr=1);
 
 public slots:
-	void analyzeClicked(bool);
-	void freezeClicked(bool);
-	void inclineClicked(bool);
-	void declineClicked(bool);
-	void engineReady();
-	void engineStoped();
-	void engineInfo(const EngineInfo&);
-	void showContextMenu(const QPoint& pos);
-	void selectFont();
-	void selectEngine(const QString& eng);
+	void slotAnalyzeClicked(bool);
+	void slotFreezeClicked(bool);
+	void slotInclineClicked(bool);
+	void slotDeclineClicked(bool);
+	void slotEngineReady();
+	void slotEngineStoped();
+	void slotEngineInfo(const EngineInfo&);
+	void slotShowContextMenu(const QPoint& pos);
+	void slotSelectFont();
+	void slotSelectEngine(const QString& eng);
 
 private:
 	int multipv;

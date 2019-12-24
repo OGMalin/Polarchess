@@ -11,8 +11,8 @@ private:
 protected:
 	virtual void fromEngine(std::string& input);
 public slots:
-	virtual void started();
-	virtual void finnishInit();
+	virtual void slotStarted();
+	virtual void slotFinnishInit();
 public:
 	UciEngine();
 	virtual ~UciEngine();

@@ -43,8 +43,8 @@ protected:
 	virtual void fromEngine(std::string& input);
 	void readFeature(std::string& line);
 public slots:
-	virtual void started();
-	virtual void finnishInit();
+	virtual void slotStarted();
+	virtual void slotFinnishInit();
 public:
 	XBoardFeature feature;
 	XBoardEngine();
