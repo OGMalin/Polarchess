@@ -48,7 +48,7 @@ void UciEngine::fromEngine(std::string& input)
 	}
 	else if (cmd == "readyok")
 	{
-		emit finnishStartup();
+		emit engineStarted();
 	}
 	else if (cmd == "bestmove")
 	{
@@ -197,41 +197,39 @@ void UciEngine::fromEngine(std::string& input)
 	}
 }
 
-void UciEngine::analyze(ChessBoard& board, MoveList& moves)
+void UciEngine::analyze(ChessBoard& board)
 {
 	int i;
-	QStringList list;
+//	QStringList list;
 	QString qs;
-
 	stop();
 
-	ChessBoard cb=board;
-	for (i = 0; i < moves.size; i++)
-	{
-		list.append(cb.makeMoveText(moves.at(i), UCI).c_str());
-		if (!cb.doMove(moves.at(i), true))
-			break;
-	}
+	currentBoard=board;
+	//for (i = 0; i < moves.size; i++)
+	//{
+	//	list.append(cb.makeMoveText(moves.at(i), UCI).c_str());
+	//	if (!cb.doMove(moves.at(i), true))
+	//		break;
+	//}
 	string s = board.getFen();
 	qs = "position fen ";
 
-	if (board.isStartposition())
+	if (currentBoard.isStartposition())
 		qs += "startfen";
 	else
-		qs += board.getFen(true).c_str();
-	if (list.size())
-	{
-		qs += " moves";
-		QStringList::iterator lit = list.begin();
-		while (lit != list.end())
-		{
-			qs += " ";
-			qs += *lit;
-			++lit;
-		}
-	}
+		qs += currentBoard.getFen(true).c_str();
+	//if (list.size())
+	//{
+	//	qs += " moves";
+	//	QStringList::iterator lit = list.begin();
+	//	while (lit != list.end())
+	//	{
+	//		qs += " ";
+	//		qs += *lit;
+	//		++lit;
+	//	}
+	//}
 	write(qs);
-	currentBoard = cb;
 	write("go infinite");
 	searchtype = INFINITE_SEARCH;
 }

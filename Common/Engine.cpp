@@ -17,18 +17,18 @@ Engine::~Engine()
 {
 	unload();
 }
-
+/*
 void Engine::setEngine(QString& name, QString& dir)
 {
-/*	unload();
+	unload();
 	engineName = name;
 	workingDir = dir;
 	QString path = dir + "/" + name;
-*/}
+}
+*/
 
 bool Engine::load(QString& enginefile)
 {
-	engFile = enginefile;
 	QSettings settings(enginefile, QSettings::IniFormat);
 	settings.beginGroup("Engine");
 	QString enginepath = settings.value("path").toString();
@@ -54,24 +54,25 @@ bool Engine::load(QString& enginefile)
 
 	if (uci)
 	{
-		connect(uci, SIGNAL(finnishStartup()), SLOT(slotFinnishStartup()));
-		connect(uci, SIGNAL(engineMove(const QString&, const QString&)), SLOT(slotStoped()));
+		connect(uci, SIGNAL(engineStoped()), SLOT(slotEngineStoped()));
+		connect(uci, SIGNAL(engineStarted()), SLOT(slotEngineStarted()));
+//		connect(uci, SIGNAL(engineMove(const QString&, const QString&)), SLOT(slotStoped()));
 		connect(uci, SIGNAL(engineInfo(const EngineInfo&)), SLOT(slotEngineInfo(const EngineInfo&)));
 		return uci->load(enginepath);
 	}
 	
 	connect(xboard, SIGNAL(finnishStartup()), SLOT(slotFinnishStartup()));
-	connect(xboard, SIGNAL(engineStoped()), SLOT(slotStoped()));
+//	connect(xboard, SIGNAL(engineStoped()), SLOT(slotStoped()));
 	connect(xboard, SIGNAL(engineInfo(const EngineInfo&)), SLOT(slotEngineInfo(const EngineInfo&)));
 	return xboard->load(enginepath);
 }
 
-void Engine::slotFinnishStartup()
+void Engine::slotEngineStarted()
 {
-	emit engineReady();
+	emit engineStarted();
 }
 
-void Engine::slotStoped()
+void Engine::slotEngineStoped()
 {
 	emit engineStoped();
 }
@@ -80,10 +81,10 @@ void Engine::slotEngineInfo(const EngineInfo& ei)
 {
 	emit engineInfo(ei);
 }
-
+/*
 bool Engine::loadSetup(QString& setup)
 {
-/*	readyok = false;
+	readyok = false;
 	if (process)
 		return false;
 
@@ -109,33 +110,32 @@ bool Engine::loadSetup(QString& setup)
 
 	emit engineMessage("Starting engine");
 	process->start(engineName);
-	*/
+	
 	return true;
 }
-
+*/
 void Engine::unload()
 {
 	if (xboard)
-		delete xboard;
-	if (uci)
-		delete uci;
-	xboard = NULL;
-	uci = NULL;
-}
-
-void Engine::analyze(ChessBoard& board, MoveList& moves)
-{
-	if (xboard)
 	{
-		if (xboard->feature.reuse)
-		{
-			xboard->analyze(board, moves);
-		}
+		disconnect(xboard);
+		delete xboard;
+		xboard = NULL;
 	}
 	else if (uci)
 	{
-		uci->analyze(board, moves);
+		disconnect(uci);
+		delete uci;
+		uci = NULL;
 	}
+}
+
+void Engine::analyze(ChessBoard& board)
+{
+	if (xboard)
+		xboard->analyze(board);
+	else if (uci)
+		uci->analyze(board);
 }
 
 void Engine::search(ChessBoard& board, MoveList& moves, SEARCHTYPE searchtype, int wtime, int winc, int btime, int binc, int movestogo)

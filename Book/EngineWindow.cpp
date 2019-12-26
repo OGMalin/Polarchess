@@ -14,6 +14,7 @@ EngineWindow::EngineWindow(QWidget *parent)
 	: QWidget(parent)
 {
 	char sz[16];
+	engineReady = false;
 	multipv = 1;
 	movenr = 1;
 	freezemovenr = 1;
@@ -69,6 +70,8 @@ EngineWindow::EngineWindow(QWidget *parent)
 	if (multipv == 1)
 		decline->setEnabled(false);
 
+	//Enable an empty spot in the engine list to unload engines
+	selengine->addItem(QString(""));
 	// Read engine list
 	QFileInfoList qfil = QDir(iniPath, "*.eng").entryInfoList(QDir::NoFilter, QDir::Name | QDir::IgnoreCase);
 	for (int i = 0; i < qfil.size(); i++)
@@ -85,10 +88,9 @@ EngineWindow::EngineWindow(QWidget *parent)
 	connect(freeze, SIGNAL(clicked(bool)), this, SLOT(slotFreezeClicked(bool)));
 	connect(analyze, SIGNAL(clicked(bool)), this, SLOT(slotAnalyzeClicked(bool)));
 	connect(selengine, SIGNAL(activated(const QString&)), this, SLOT(slotSelectEngine(const QString&)));
-	connect(engine, SIGNAL(engineReady()), this, SLOT(slotEngineReady()));
-	connect(engine, SIGNAL(engineMove(const QString&, const QString&)), this, SLOT(slotEngineStoped()));
-	connect(engine, SIGNAL(engineStoped()), this, SLOT(slotSngineStoped()));
 	connect(engine, SIGNAL(engineInfo(const EngineInfo&)), this, SLOT(slotEngineInfo(const EngineInfo&)));
+	connect(engine, SIGNAL(engineStarted()), this, SLOT(slotEngineStarted()));
+	connect(engine, SIGNAL(engineStoped()), this, SLOT(slotEngineStoped()));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(slotShowContextMenu(const QPoint&)));
 
 	font.setPointSize(12);
@@ -100,38 +102,38 @@ EngineWindow::~EngineWindow()
 	delete engine;
 }
 
-void EngineWindow::setPosition(const ChessBoard& cb, int mn)
+void EngineWindow::setPosition(ChessBoard& cb, int mn)
 {
+	if (!engineReady)
+		return;
 	currentBoard = cb;
 	movenr = mn;
 	if (analyzing)
 		if (!freezing)
-			engine->stop();
+			engine->analyze(cb);
 }
 
 void EngineWindow::slotAnalyzeClicked(bool)
 {
+	if (!engineReady)
+		return;
 	if (analyze->isChecked())
 	{
 		if (analyzing)
 			return;
 		if (engineName.isEmpty())
 		{
-
 			analyze->setChecked(false);
 			return;
 		}
-		QString enginePath = iniPath + "/" + engineName + ".eng";
-		if (engine->load(enginePath))
-		{
-			analyzing = true;
-		}
+		engine->analyze(currentBoard);
+		analyzing = true;
 	}
 	else
 	{
 		if (analyzing)
 		{
-			engine->unload();
+			engine->stop();
 			analyzing = false;
 		}
 	}
@@ -176,19 +178,6 @@ void EngineWindow::slotDeclineClicked(bool)
 		engine->setMultiPV(multipv);
 		model->setRowCount(multipv);
 	}
-}
-
-void EngineWindow::slotEngineReady()
-{
-	engine->setMultiPV(multipv);
-	if (analyzing)
-		engine->analyze(currentBoard, movelist);
-}
-
-void EngineWindow::slotEngineStoped()
-{
-	if (analyzing)
-		engine->analyze(currentBoard, movelist);
 }
 
 void EngineWindow::slotEngineInfo(const EngineInfo& info)
@@ -299,7 +288,25 @@ void EngineWindow::slotSelectFont()
 
 void EngineWindow::slotSelectEngine(const QString& eng)
 {
-	if (analyzing)
-		analyze->animateClick();
+	if (engineName == eng)
+		return;
 	engineName = eng;
+	if (analyzing)
+		engine->unload();
+	analyzing = false;
+	engineReady = false;
+	QString enginePath = iniPath + "/" + engineName + ".eng";
+	engine->load(enginePath);
+}
+
+void EngineWindow::slotEngineStarted()
+{
+	engineReady = true;
+}
+
+void EngineWindow::slotEngineStoped()
+{
+	engineReady = false;
+	analyzing = false;
+	analyze->setChecked(false);
 }

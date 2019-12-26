@@ -4,12 +4,9 @@
 
 using namespace std;
 
-static bool bfinnishInit;
-
 XBoardEngine::XBoardEngine()
 	:BaseEngine()
 {
-	bfinnishInit = false;
 	feature.sigint = true;
 	feature.sigterm = true;
 	feature.ping = false;
@@ -36,6 +33,19 @@ XBoardEngine::XBoardEngine()
 
 XBoardEngine::~XBoardEngine()
 {
+	unload();
+}
+
+bool XBoardEngine::load(QString& path)
+{
+	if (!BaseEngine::load(path))
+		return false;
+	needRestart = false;
+	return true;
+}
+
+void XBoardEngine::unload()
+{
 	if (process)
 	{
 		if (searchtype != NO_SEARCH)
@@ -47,7 +57,7 @@ XBoardEngine::~XBoardEngine()
 			_sleep(500);
 		}
 		write("quit");
-		_sleep(500);
+		BaseEngine::unload();
 	}
 }
 
@@ -89,6 +99,17 @@ void XBoardEngine::fromEngine(std::string& input)
 				if (isNumber(cmd))
 				{
 					ei.nodes = atoi(cmd.c_str());
+
+					// Read pv
+					ChessBoard cb = currentBoard;
+					ChessMove m;
+					while ((cmd = getWord(input, ++i)).size())
+					{
+						m = cb.getMoveFromText(cmd);
+						if (!m.empty())
+							if (cb.doMove(m, true))
+								ei.pv.push_back(m);
+					}
 					emit engineInfo(ei);
 				}
 			}
@@ -221,29 +242,29 @@ void XBoardEngine::readFeature(std::string& line)
 			index = 6;
 		}
 		else if (cmd == "done")
-		{
+		{	
+			write("accepted done");
 			if (booleanString(line.substr(5, 1)))
 				slotFinnishInit();
-			write("accepted done");
 			index = 7;
 		}
 		else if (cmd == "exclude")
 		{
-		feature.exclude = booleanString(line.substr(8, 1));
-		write("accepted exclude");
-		index = 10;
+			feature.exclude = booleanString(line.substr(8, 1));
+			write("accepted exclude");
+			index = 10;
 		}
 		else if (cmd == "setscore")
 		{
-		feature.setscore = booleanString(line.substr(9, 1));
-		write("accepted setscore");
-		index = 11;
+			feature.setscore = booleanString(line.substr(9, 1));
+			write("accepted setscore");
+			index = 11;
 		}
 		else if (cmd == "highlight")
 		{
-		feature.highlight = booleanString(line.substr(10, 1));
-		write("accepted highlight");
-		index = 12;
+			feature.highlight = booleanString(line.substr(10, 1));
+			write("accepted highlight");
+			index = 12;
 		}
 		else if (cmd == "myname")
 		{
@@ -299,41 +320,23 @@ void XBoardEngine::readFeature(std::string& line)
 	}
 }
 
-void XBoardEngine::slotStarted()
-{
-	bfinnishInit = false;
-	// XBoard engines should possible send options command before set in xboard mode, but ping/pong could possible not work then because
-	// it is a xboard feature.
-	QString qs;
-	QMap<QString, QString>::iterator it=initOptions.begin();
-	while (it!=initOptions.end())
-	{
-		qs = it.key();
-		if (!it.value().isEmpty())
-		{
-			qs += " ";
-			qs += it.value();
-		}
-		write(qs);
-		++it;
-	}
-	write("xboard");
-	write("protover 2");
-
-	// Wait 2 sek if the engine don't have done 1
-	QTimer::singleShot(2000, this, SLOT(slotFinnishInit()));
-}
-
 void XBoardEngine::slotFinnishInit()
 {
-	if (bfinnishInit)
-		return;
-	bfinnishInit = true;
-	emit finnishStartup();
+	emit engineStarted();
 }
 
-void XBoardEngine::analyze(ChessBoard& board, MoveList& moves)
+void XBoardEngine::analyze(ChessBoard& board)
 {
+	currentBoard = board;
+	if (needRestart)
+	{
+		unload();
+		if (!load(enginePath))
+			return;
+	}
+	if (!feature.reuse)
+		needRestart = true;
+
 	QString qs;
 	int file, row, piece, i, j;
 	char filechar[] = "abcdefgh";
@@ -344,89 +347,49 @@ void XBoardEngine::analyze(ChessBoard& board, MoveList& moves)
 		return;
 
 	// Stop current search
-	switch (searchtype)
+	if (searchtype != NO_SEARCH)
 	{
-	case NORMAL_SEARCH:
-	case NODES_SEARCH:
-	case MATE_SEARCH:
-	case DEPTH_SEARCH:
-	case TIME_SEARCH:
-		write("?");
-		break;
-	case INFINITE_SEARCH:
-		write("exit");
-		break;
+		if (searchtype == INFINITE_SEARCH)
+			write("exit");
+		else
+			write("?");
 	}
 
-	ChessBoard cb = board;
-
-	if (!cb.isStartposition())
+	write("force");
+	if (feature.setboard)
 	{
-		write("force");
-		if (feature.setboard)
+		qs = "setboard ";
+		qs += currentBoard.getFen().c_str();
+		write(qs);
+	}else
+	{
+		// XBoard edit command
+		if (currentBoard.toMove == BLACK)
+			write("a2a3");
+		write("edit");
+		write("#");
+		color = currentBoard.toMove;
+		for (file = 0; file < 8; file++)
 		{
-			qs = "setboard ";
-			qs += cb.getFen().c_str();
-			write(qs);
-		}else
-		{
-			// XBoard edit command
-			if (cb.toMove == BLACK)
-				write("a2a3");
-			write("edit");
-			write("#");
-			color = cb.toMove;
-			for (file = 0; file < 8; file++)
+			for (row = 0; row < 8; row++)
 			{
-				for (row = 0; row < 8; row++)
+				piece = PIECE(currentBoard.pieceAt(file, row));
+				if (piece != EMPTY)
 				{
-					piece = PIECE(cb.pieceAt(file, row));
-					if (piece != EMPTY)
+					qs = piecechar[piece - 1];
+					qs += filechar[file];
+					qs += rowchar[row];
+					if (PIECECOLOR(currentBoard.pieceAt(file, row)) != color)
 					{
-						qs = piecechar[piece - 1];
-						qs += filechar[file];
-						qs += rowchar[row];
-						if (PIECECOLOR(cb.pieceAt(file, row)) != color)
-						{
-							write("c");
-							color = PIECECOLOR(cb.pieceAt(file, row));
-						}
-						write(qs);
+						write("c");
+						color = PIECECOLOR(currentBoard.pieceAt(file, row));
 					}
+					write(qs);
 				}
 			}
-			write(".");
 		}
-		for (i = 0; i < moves.size; i++)
-		{
-			write(cb.makeMoveText(moves.list[i], feature.san ? SAN : COOR).c_str());
-			cb.doMove(moves.list[i], false);
-		}
-		currentMovelist.clear();
+		write(".");
 	}
-	else
-	{
-		for (i = 0; i < currentMovelist.size; i++)
-		{
-			if ((moves.list[i]!= currentMovelist.list[i]) || (moves.size >= i))
-			{
-				for (j = 0; j < currentMovelist.size - i; j++)
-					write("undo");
-				for (j = i; j < moves.size; j++)
-				{
-					write(cb.makeMoveText(moves.list[i], feature.san ? SAN : COOR).c_str());
-					cb.doMove(moves.list[i], false);
-				}
-				break;
-			}
-			else
-			{
-				cb.doMove(moves.list[i], false);
-			}
-		}
-		currentMovelist = moves;
-	}
-	currentBoard = cb;
 	write("post");
 	write("analyze");
 	searchtype = INFINITE_SEARCH;
@@ -449,4 +412,27 @@ void XBoardEngine::stop()
 		emit engineStoped();
 		break;
 	}
+}
+
+void XBoardEngine::slotStarted()
+{
+	// XBoard engines should possible send options command before set in xboard mode, but ping/pong could possible not work then because
+	// it is a xboard feature.
+	QString qs;
+	QMap<QString, QString>::iterator it = initOptions.begin();
+	while (it != initOptions.end())
+	{
+		qs = it.key();
+		if (!it.value().isEmpty())
+		{
+			qs += " ";
+			qs += it.value();
+		}
+		write(qs);
+		++it;
+	}
+	write("xboard");
+	write("protover 2");
+	// Wait 2 sek if the engine don't have done 1
+	QTimer::singleShot(2000, this, SLOT(slotFinnishInit()));
 }

@@ -15,37 +15,33 @@ class Engine :public QObject
 	Q_OBJECT
 
 private:
-	QString engFile;
-	QString engineName;
-	QString workingDir;
 	UciEngine* uci;
 	XBoardEngine* xboard;
-	QString lasterror;
-	QString setup;
-	bool readyok;
-	bool waitforever;
-	QString waitCommand;
-	ChessBoard currentBoard;
-	bool startup;
 public slots:
-	void slotFinnishStartup();
-	void slotStoped();
+	void slotEngineStarted();
+	void slotEngineStoped();
 	void slotEngineInfo(const EngineInfo&);
 signals:
-	void engineMessage(const QString& msg);
-	void engineReady();
-	void engineStoped();
-	void engineMove(const QString& move, const QString& ponder);
+	void engineMessage(const QString&);
+	void engineMove(const QString&, const QString&);
 	void engineInfo(const EngineInfo&);
+	void engineStarted();
+	void engineStoped();
 public:
 	Engine();
 	virtual ~Engine();
-	void setEngine(QString& name, QString& dir);
-	bool loadSetup(QString& setup);
+	// Load an engine
 	bool load(QString& enginefile);
+	// Unload an engine, this is called automatic when loading a new engine.
 	void unload();
-	void analyze(ChessBoard& board, MoveList& moves);
-	void search(ChessBoard& board, MoveList& moves, SEARCHTYPE searchtype, int wtime = 0, int winc = 0, int btime = 0, int binc = 0, int movestogo = 0);
+	// Start analyzing a position, stop the analyze with stop()
+	void analyze(ChessBoard& board);
+	// Stop analyzing
 	void stop();
+	// Set multipv, not all engines support this.
 	void setMultiPV(int n);
+
+	void search(ChessBoard& board, MoveList& moves, SEARCHTYPE searchtype, int wtime = 0, int winc = 0, int btime = 0, int binc = 0, int movestogo = 0);
+	void setEngine(QString& name, QString& dir) {};
+	bool loadSetup(QString& setup) { return false; };
 };

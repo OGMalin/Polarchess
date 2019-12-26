@@ -16,7 +16,7 @@ BaseEngine::~BaseEngine()
 {
 	if (process)
 	{
-		process->waitForFinished(1000);
+		process->waitForFinished();
 		delete process;
 		process = NULL;
 	}
@@ -30,10 +30,10 @@ bool BaseEngine::load(QString& path)
 	if (!process)
 		return false;
 
-	connect(process, SIGNAL(errorOccurred(QProcess::ProcessError)), SLOT(slotErrorOccurred(QProcess::ProcessError)));
-	connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), SLOT(slotFinished(int, QProcess::ExitStatus)));
-	connect(process, SIGNAL(readyReadStandardOutput()), SLOT(slotReadyReadStandardOutput()));
+	enginePath = path;
 	connect(process, SIGNAL(started()), SLOT(slotStarted()));
+	connect(process, SIGNAL(finnished()), SLOT(slotFinnished()));
+	connect(process, SIGNAL(readyReadStandardOutput()), SLOT(slotReadyReadStandardOutput()));
 
 	process->setReadChannel(QProcess::StandardOutput);
 
@@ -46,21 +46,27 @@ bool BaseEngine::load(QString& path)
 		fp = path.left(i);
 		process->setWorkingDirectory(fp);
 	}
+	process->setProcessChannelMode(QProcess::MergedChannels);
 	process->start(path);
 	return true;
 }
 
-void BaseEngine::slotErrorOccurred(QProcess::ProcessError error)
+void BaseEngine::unload()
 {
-	char sz[16];
-	QString err = tr("Error message: ");
-	err.append(itoa(error, sz, 10));
-	emit engineMessage(err);
-}
-
-void BaseEngine::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
-{
-
+	if (!process)
+		return;
+	disconnect(process);
+	int i = 0;
+	process->waitForFinished();
+	while (process->state()!=QProcess::NotRunning)
+	{
+		if (i > 100)
+			process->kill();
+		_sleep(100);
+		++i;
+	}
+	delete process;
+	process = NULL;
 }
 
 void BaseEngine::slotReadyReadStandardOutput()
@@ -81,21 +87,21 @@ void BaseEngine::slotReadyReadStandardOutput()
 	}
 }
 
-void BaseEngine::slotStarted()
+void BaseEngine::write(QString& qs)
 {
-
-}
-
-void BaseEngine::write(const char* sz)
-{
-	qDebug(sz);
 	if (!process)
 		return;
-	process->write(sz);
+	qDebug(qs.toLatin1());
+	process->write(qs.toLatin1());
 	process->write("\n");
 }
 
 void BaseEngine::init(QString&key, QString&val)
 {
 	initOptions.insertMulti(key, val);
+}
+
+void BaseEngine::slotFinnished()
+{
+	emit engineStoped();
 }

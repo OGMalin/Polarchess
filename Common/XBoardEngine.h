@@ -38,17 +38,19 @@ class XBoardEngine:public BaseEngine
 {
 private:
 	ChessBoard currentBoard;
-	MoveList currentMovelist;
+	bool needRestart;
 protected:
 	virtual void fromEngine(std::string& input);
 	void readFeature(std::string& line);
 public slots:
-	virtual void slotStarted();
 	virtual void slotFinnishInit();
+	virtual void slotStarted();
 public:
 	XBoardFeature feature;
 	XBoardEngine();
 	virtual ~XBoardEngine();
-	void analyze(ChessBoard& board, MoveList& moves);
+	virtual bool load(QString& path);
+	virtual void unload();
+	void analyze(ChessBoard& board);
 	void stop();
 };

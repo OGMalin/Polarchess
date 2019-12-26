@@ -71,18 +71,17 @@ protected:
 	QProcess* process;
 	QMap<QString, QString> initOptions;
 	int searchtype;
-	
+	QString enginePath;
 	// Overload this to get the input from the engine
 	virtual void fromEngine(std::string& input) {};
 public slots:
 	// From QProcess
-	virtual void slotErrorOccurred(QProcess::ProcessError error);
-	virtual void slotFinished(int exitCode, QProcess::ExitStatus exitStatus);
 	virtual void slotReadyReadStandardOutput();
-	virtual void slotStarted();
+	virtual void slotStarted() {};
+	virtual void slotFinnished();
 	virtual void slotFinnishInit() {};
 signals:
-	void finnishStartup();
+	void engineStarted();
 	void engineMessage(const QString& msg);
 	void engineInfo(const EngineInfo&);
 	void engineMove(const QString& move, const QString& ponder);
@@ -91,10 +90,10 @@ public:
 	BaseEngine(QObject*parent = 0);
 	virtual ~BaseEngine();
 	virtual bool load(QString& path);
+	virtual void unload();
 	void init(QString&key, QString&val);
-	void write(const char* sz);
-	void write(QString& qs) { write(qs.toLatin1()); };
-	virtual void analyze(ChessBoard& board, MoveList& moves) {};
+	virtual void write(const char* sz) { write(QString(sz)); };
+	virtual void write(QString& qs);
+	virtual void analyze(ChessBoard& board) {};
 	virtual void stop() {};
-
 };

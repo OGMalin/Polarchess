@@ -18,21 +18,22 @@ public:
 	QString iniPath;
 	EngineWindow(QWidget *parent = 0);
 	~EngineWindow();
-	void setPosition(const ChessBoard& cb, int movenr=1);
+	void setPosition(ChessBoard& cb, int movenr=1);
 
 public slots:
 	void slotAnalyzeClicked(bool);
 	void slotFreezeClicked(bool);
 	void slotInclineClicked(bool);
 	void slotDeclineClicked(bool);
-	void slotEngineReady();
-	void slotEngineStoped();
 	void slotEngineInfo(const EngineInfo&);
 	void slotShowContextMenu(const QPoint& pos);
 	void slotSelectFont();
 	void slotSelectEngine(const QString& eng);
+	void slotEngineStarted();
+	void slotEngineStoped();
 
 private:
+	bool engineReady;
 	int multipv;
 	QString engineName;
 	Engine* engine;

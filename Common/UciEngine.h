@@ -16,6 +16,6 @@ public slots:
 public:
 	UciEngine();
 	virtual ~UciEngine();
-	void analyze(ChessBoard& board, MoveList& moves);
+	void analyze(ChessBoard& board);
 	void stop();
 };
