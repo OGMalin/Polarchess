@@ -35,9 +35,11 @@ EngineWindow::EngineWindow(QWidget *parent)
 	decline = new QPushButton("-");
 	incline = new QPushButton("+");
 	analyze = new QPushButton("Analyze");
-	analyze->setCheckable(true);
 	freeze = new QPushButton("Freeze");
+	analyze->setCheckable(true);
 	freeze->setCheckable(true);
+	analyze->setEnabled(false);
+	freeze->setEnabled(false);
 	nodes = new QLabel;
 	nodes->setAlignment(Qt::AlignCenter);
 	nps = new QLabel;
@@ -72,14 +74,11 @@ EngineWindow::EngineWindow(QWidget *parent)
 
 	//Enable an empty spot in the engine list to unload engines
 	selengine->addItem(QString(""));
+	engineName.clear();
 	// Read engine list
 	QFileInfoList qfil = QDir(iniPath, "*.eng").entryInfoList(QDir::NoFilter, QDir::Name | QDir::IgnoreCase);
 	for (int i = 0; i < qfil.size(); i++)
-	{
-		if (i == 0)
-			engineName = qfil[i].completeBaseName(); // Defaults to first engine.
 		selengine->addItem(qfil[i].completeBaseName());
-	}
 
 	setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -110,7 +109,11 @@ void EngineWindow::setPosition(ChessBoard& cb, int mn)
 	movenr = mn;
 	if (analyzing)
 		if (!freezing)
-			engine->analyze(cb);
+		{
+			if (engine->needRestart())
+				return;
+			engine->analyze(currentBoard);
+		}
 }
 
 void EngineWindow::slotAnalyzeClicked(bool)
@@ -126,8 +129,10 @@ void EngineWindow::slotAnalyzeClicked(bool)
 			analyze->setChecked(false);
 			return;
 		}
-		engine->analyze(currentBoard);
 		analyzing = true;
+		if (engine->needRestart())
+			return;
+		engine->analyze(currentBoard);
 	}
 	else
 	{
@@ -291,10 +296,12 @@ void EngineWindow::slotSelectEngine(const QString& eng)
 	if (engineName == eng)
 		return;
 	engineName = eng;
-	if (analyzing)
+	if (engine->isLoaded())
 		engine->unload();
 	analyzing = false;
 	engineReady = false;
+	if (engineName.isEmpty())
+		return;
 	QString enginePath = iniPath + "/" + engineName + ".eng";
 	engine->load(enginePath);
 }
@@ -302,11 +309,16 @@ void EngineWindow::slotSelectEngine(const QString& eng)
 void EngineWindow::slotEngineStarted()
 {
 	engineReady = true;
+	analyze->setEnabled(true);
+	freeze->setEnabled(true);
 }
 
 void EngineWindow::slotEngineStoped()
 {
 	engineReady = false;
-	analyzing = false;
+	freeze->setChecked(false);
+	analyze->setEnabled(false);
+	freeze->setEnabled(false);
 	analyze->setChecked(false);
+	analyzing = false;
 }

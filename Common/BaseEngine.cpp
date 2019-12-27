@@ -32,7 +32,7 @@ bool BaseEngine::load(QString& path)
 
 	enginePath = path;
 	connect(process, SIGNAL(started()), SLOT(slotStarted()));
-	connect(process, SIGNAL(finnished()), SLOT(slotFinnished()));
+	connect(process, SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(slotFinished()));
 	connect(process, SIGNAL(readyReadStandardOutput()), SLOT(slotReadyReadStandardOutput()));
 
 	process->setReadChannel(QProcess::StandardOutput);
@@ -101,7 +101,7 @@ void BaseEngine::init(QString&key, QString&val)
 	initOptions.insertMulti(key, val);
 }
 
-void BaseEngine::slotFinnished()
+void BaseEngine::slotFinished()
 {
 	emit engineStoped();
 }

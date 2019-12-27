@@ -54,15 +54,14 @@ bool Engine::load(QString& enginefile)
 
 	if (uci)
 	{
-		connect(uci, SIGNAL(engineStoped()), SLOT(slotEngineStoped()));
 		connect(uci, SIGNAL(engineStarted()), SLOT(slotEngineStarted()));
-//		connect(uci, SIGNAL(engineMove(const QString&, const QString&)), SLOT(slotStoped()));
+		connect(uci, SIGNAL(engineStoped()), SLOT(slotEngineStoped()));
 		connect(uci, SIGNAL(engineInfo(const EngineInfo&)), SLOT(slotEngineInfo(const EngineInfo&)));
 		return uci->load(enginepath);
 	}
 	
-	connect(xboard, SIGNAL(finnishStartup()), SLOT(slotFinnishStartup()));
-//	connect(xboard, SIGNAL(engineStoped()), SLOT(slotStoped()));
+	connect(xboard, SIGNAL(engineStarted()), SLOT(slotEngineStarted()));
+	connect(xboard, SIGNAL(engineStoped()), SLOT(slotEngineStoped()));
 	connect(xboard, SIGNAL(engineInfo(const EngineInfo&)), SLOT(slotEngineInfo(const EngineInfo&)));
 	return xboard->load(enginepath);
 }
@@ -214,3 +213,16 @@ void Engine::setMultiPV(int n)
 	write(qs);*/
 }
 
+bool Engine::isLoaded()
+{
+	if (xboard || uci)
+		return true;
+	return false;
+}
+
+bool Engine::needRestart()
+{
+	if (xboard)
+		return xboard->needRestart();
+	return false;
+}

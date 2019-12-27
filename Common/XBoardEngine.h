@@ -2,6 +2,7 @@
 
 #include <QString>
 #include <QStringList>
+#include <QTimer>
 #include <string>
 #include "../Common/BaseEngine.h"
 struct XBoardFeature
@@ -38,13 +39,15 @@ class XBoardEngine:public BaseEngine
 {
 private:
 	ChessBoard currentBoard;
-	bool needRestart;
+	QTimer* timer;
+	bool restartNeeded;
 protected:
 	virtual void fromEngine(std::string& input);
 	void readFeature(std::string& line);
 public slots:
-	virtual void slotFinnishInit();
+	virtual void slotFinishInit();
 	virtual void slotStarted();
+	virtual void slotFinished();
 public:
 	XBoardFeature feature;
 	XBoardEngine();
@@ -53,4 +56,5 @@ public:
 	virtual void unload();
 	void analyze(ChessBoard& board);
 	void stop();
+	bool needRestart();
 };

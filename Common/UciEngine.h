@@ -12,7 +12,7 @@ protected:
 	virtual void fromEngine(std::string& input);
 public slots:
 	virtual void slotStarted();
-	virtual void slotFinnishInit();
+	virtual void slotFinishInit();
 public:
 	UciEngine();
 	virtual ~UciEngine();

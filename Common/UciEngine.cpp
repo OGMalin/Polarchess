@@ -38,7 +38,7 @@ void UciEngine::fromEngine(std::string& input)
 		{
 			if (!it.value().isEmpty())
 			{
-				qs = "setoption name " + it.key(); +" value " + it.value();
+				qs = "setoption name " + it.key() +" value " + it.value();
 				write(qs);
 			}
 			++it;
@@ -76,7 +76,7 @@ void UciEngine::fromEngine(std::string& input)
 			}
 			else if (info == "nodes")
 			{
-				ei.nodes = stoi(getWord(input, index));
+				ei.nodes = strtoul(getWord(input, index).c_str(), NULL, 0);
 			}
 			else if (info == "pv")
 			{
@@ -126,15 +126,15 @@ void UciEngine::fromEngine(std::string& input)
 			}
 			else if (info == "nps")
 			{
-				ei.nps = stoi(getWord(input, index));
+				ei.nps = strtoul(getWord(input, index).c_str(), NULL, 0);
 			}
 			else if (info == "tbhits")
 			{
-				ei.tbhits = stoi(getWord(input, index));
+				ei.tbhits = strtoul(getWord(input, index).c_str(), NULL, 0);
 			}
 			else if (info == "sbhits")
 			{
-				ei.sbhits = stoi(getWord(input, index));
+				ei.sbhits = strtoul(getWord(input, index).c_str(), NULL, 0);
 			}
 			else if (info == "cpuload")
 			{
@@ -239,9 +239,10 @@ void UciEngine::stop()
 	// Stop current search
 	if (searchtype != NO_SEARCH)
 		write("stop");
+	searchtype = NO_SEARCH;
 }
 
-void UciEngine::slotFinnishInit()
+void UciEngine::slotFinishInit()
 {
 
 }

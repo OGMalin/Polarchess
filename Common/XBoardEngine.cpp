@@ -1,6 +1,5 @@
 #include "../Common/XBoardEngine.h"
 #include "../Common/Utility.h"
-#include <QTimer>
 
 using namespace std;
 
@@ -29,18 +28,21 @@ XBoardEngine::XBoardEngine()
 	feature.colors = true;
 	feature.time = true;
 	feature.san = false;
+	timer = new QTimer(this);
+	connect(timer, SIGNAL(timeout()), SLOT(slotFinishInit()));
 }
 
 XBoardEngine::~XBoardEngine()
 {
 	unload();
+	delete timer;
 }
 
 bool XBoardEngine::load(QString& path)
 {
 	if (!BaseEngine::load(path))
 		return false;
-	needRestart = false;
+	restartNeeded = false;
 	return true;
 }
 
@@ -94,11 +96,11 @@ void XBoardEngine::fromEngine(std::string& input)
 			cmd = getWord(input, ++i);
 			if (isNumber(cmd))
 			{
-				ei.time = atoi(cmd.c_str()) * 10;
+				ei.time = strtoul(cmd.c_str(), NULL, 0) * 10;
 				cmd = getWord(input, ++i);
 				if (isNumber(cmd))
 				{
-					ei.nodes = atoi(cmd.c_str());
+					ei.nodes = strtoul(cmd.c_str(), NULL, 0);
 
 					// Read pv
 					ChessBoard cb = currentBoard;
@@ -245,7 +247,7 @@ void XBoardEngine::readFeature(std::string& line)
 		{	
 			write("accepted done");
 			if (booleanString(line.substr(5, 1)))
-				slotFinnishInit();
+				slotFinishInit();
 			index = 7;
 		}
 		else if (cmd == "exclude")
@@ -320,32 +322,23 @@ void XBoardEngine::readFeature(std::string& line)
 	}
 }
 
-void XBoardEngine::slotFinnishInit()
+void XBoardEngine::slotFinishInit()
 {
+	timer->stop();
 	emit engineStarted();
 }
 
 void XBoardEngine::analyze(ChessBoard& board)
 {
 	currentBoard = board;
-	if (needRestart)
-	{
-		unload();
-		if (!load(enginePath))
-			return;
-	}
-	if (!feature.reuse)
-		needRestart = true;
 
 	QString qs;
-	int file, row, piece, i, j;
-	char filechar[] = "abcdefgh";
-	char rowchar[] = "12345678";
-	char piecechar[] = "PNBRQK";
-	int color;
+
 	if (!feature.analyze)
 		return;
 
+	if (!feature.reuse)
+		restartNeeded = true;
 	// Stop current search
 	if (searchtype != NO_SEARCH)
 	{
@@ -363,6 +356,11 @@ void XBoardEngine::analyze(ChessBoard& board)
 		write(qs);
 	}else
 	{
+		int file, row, piece, i, j;
+		char filechar[] = "abcdefgh";
+		char rowchar[] = "12345678";
+		char piecechar[] = "PNBRQK";
+		int color;
 		// XBoard edit command
 		if (currentBoard.toMove == BLACK)
 			write("a2a3");
@@ -409,9 +407,9 @@ void XBoardEngine::stop()
 		break;
 	case INFINITE_SEARCH:
 		write("exit");
-		emit engineStoped();
 		break;
 	}
+	searchtype = NO_SEARCH;
 }
 
 void XBoardEngine::slotStarted()
@@ -433,6 +431,19 @@ void XBoardEngine::slotStarted()
 	}
 	write("xboard");
 	write("protover 2");
+
 	// Wait 2 sek if the engine don't have done 1
-	QTimer::singleShot(2000, this, SLOT(slotFinnishInit()));
+	timer->setInterval(2000);
+	timer->setSingleShot(true);
+	timer->start();
+}
+
+void XBoardEngine::slotFinished()
+{
+	BaseEngine::slotFinished();
+}
+
+bool XBoardEngine::needRestart()
+{
+	return restartNeeded;
 }

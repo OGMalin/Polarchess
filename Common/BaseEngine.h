@@ -24,8 +24,8 @@ struct EngineInfo
 {
 	int depth;
 	int seldepth;
-	int time;
-	int nodes;
+	unsigned long time;
+	unsigned long nodes;
 	MoveList pv;
 	int multipv;
 	int cp;
@@ -35,9 +35,9 @@ struct EngineInfo
 	ChessMove currmove;
 	int currmovenumber;
 	int hashfull;
-	int nps;
-	int tbhits;
-	int sbhits;
+	unsigned long nps;
+	unsigned long tbhits;
+	unsigned long sbhits;
 	int cpuload;
 	QString string;
 	MoveList refutation;
@@ -78,8 +78,8 @@ public slots:
 	// From QProcess
 	virtual void slotReadyReadStandardOutput();
 	virtual void slotStarted() {};
-	virtual void slotFinnished();
-	virtual void slotFinnishInit() {};
+	virtual void slotFinished();
+	virtual void slotFinishInit() {};
 signals:
 	void engineStarted();
 	void engineMessage(const QString& msg);

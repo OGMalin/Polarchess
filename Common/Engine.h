@@ -34,12 +34,16 @@ public:
 	bool load(QString& enginefile);
 	// Unload an engine, this is called automatic when loading a new engine.
 	void unload();
+	// Check to see if it has loaded an engine;
+	bool isLoaded();
 	// Start analyzing a position, stop the analyze with stop()
 	void analyze(ChessBoard& board);
 	// Stop analyzing
 	void stop();
 	// Set multipv, not all engines support this.
 	void setMultiPV(int n);
+	// Some engines need a restart before searching on next position
+	bool needRestart();
 
 	void search(ChessBoard& board, MoveList& moves, SEARCHTYPE searchtype, int wtime = 0, int winc = 0, int btime = 0, int binc = 0, int movestogo = 0);
 	void setEngine(QString& name, QString& dir) {};
