@@ -317,6 +317,7 @@ void MainWindow::newGame()
 	clockwindow->settime(gameSetting.startTime*1000, gameSetting.startTime*1000);
 	clockwindow->start(currentGame->getPosition().board().toMove);
 	scoresheet->updateGame(currentGame);
+//	playEngine->load(eng);
 	QString setup = "setoption name Personality value ";
 	setup += gameSetting.computer;
 	setup += "\n";

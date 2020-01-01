@@ -41,6 +41,7 @@ public:
 	// Stop analyzing
 	void stop();
 	// Set multipv, not all engines support this.
+	void newGame();
 	void setMultiPV(int n);
 	// Some engines need a restart before searching on next position
 	bool needRestart();

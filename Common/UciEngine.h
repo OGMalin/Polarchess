@@ -18,4 +18,5 @@ public:
 	virtual ~UciEngine();
 	void analyze(ChessBoard& board);
 	void stop();
+	void newGame();
 };

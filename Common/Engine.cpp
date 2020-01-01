@@ -226,3 +226,11 @@ bool Engine::needRestart()
 		return xboard->needRestart();
 	return false;
 }
+
+void Engine::newGame()
+{
+	if (xboard)
+		xboard->newGame();
+	else if (uci)
+		uci->newGame();
+}

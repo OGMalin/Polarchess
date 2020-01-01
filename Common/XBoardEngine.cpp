@@ -447,3 +447,8 @@ bool XBoardEngine::needRestart()
 {
 	return restartNeeded;
 }
+
+void XBoardEngine::newGame()
+{
+	stop();
+}

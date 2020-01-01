@@ -246,3 +246,8 @@ void UciEngine::slotFinishInit()
 {
 
 }
+
+void UciEngine::newGame()
+{
+	stop();
+}

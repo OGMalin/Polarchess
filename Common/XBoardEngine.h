@@ -56,5 +56,6 @@ public:
 	virtual void unload();
 	void analyze(ChessBoard& board);
 	void stop();
+	void newGame();
 	bool needRestart();
 };
