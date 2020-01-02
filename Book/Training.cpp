@@ -59,6 +59,10 @@ void Training::create(ChessBoard& cb, int color)
 				walkThrough(b, path, 0, pos, rep);
 			}
 		}
+		else
+		{
+			continue;
+		}
 
 		// Remove lines if starting from a position
 		b.setStartposition();

@@ -43,7 +43,10 @@ private:
 public:
 	Training();
 	~Training();
+	// Set the database to use (color=WHITE or BLACK)
 	void SetDatabase(int color, Database* base);
+
+	// Create traininglines from a position (cb) and database (WHITE or BLACK, -1=both)
 	void create(ChessBoard& cb, int color=-1);
 
 	// Get the most needed trainingline (With most error).
