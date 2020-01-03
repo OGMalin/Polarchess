@@ -11,6 +11,7 @@
 #include <QButtonGroup>
 #include <QMessageBox>
 #include <QProgressDialog>
+#include <QApplication>
 #include "../Common/Pgn.h"
 #include "../Common/ChessGame.h"
 
@@ -124,13 +125,15 @@ void ImportPgnDialog::openFile()
 void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnfile, int moves, bool comment, bool variation)
 {
 	QProgressDialog progress("Importing Pgn file: " + pgnfile, "Cancel", 0, 100, this);
-	progress.setMinimumDuration(0);
 	progress.setWindowModality(Qt::WindowModal);
+	progress.setMinimumDuration(0);
+	progress.show();
 	Pgn pgn;
 	if (!pgn.open(pgnfile.toStdString(), true))
 	{
 		QMessageBox msgBox(parent);
 		msgBox.setText("Can't open pgn file: " + pgnfile);
+		progress.setValue(100);
 		return;
 	}
 	int games = pgn.size();
@@ -140,6 +143,7 @@ void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnf
 		QMessageBox msgBox(parent);
 		msgBox.setText("No games in the pgn file: " + pgnfile);
 		pgn.close();
+		progress.setValue(games);
 		return;
 	}
 	ChessGame game;
@@ -150,6 +154,7 @@ void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnf
 	for (i = 0; i < games; i++)
 	{
 		progress.setValue(i);
+		QApplication::processEvents();
 		if (progress.wasCanceled())
 		{
 			pgn.close();
@@ -159,11 +164,6 @@ void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnf
 		{
 			for (j = 0; j < game.position.size(); j++)
 			{
-				if (progress.wasCanceled())
-				{
-					pgn.close();
-					return;
-				}
 				bde = db->find(game.position[j].board);
 				if (comment && !game.position[j].comment.empty())
 				{
@@ -203,5 +203,6 @@ void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnf
 		}
 	}
 	progress.setValue(games);
+	QApplication::processEvents();
 	pgn.close();
 }

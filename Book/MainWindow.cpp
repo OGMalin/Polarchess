@@ -654,13 +654,13 @@ void MainWindow::trainingCreateFull()
 {
 	ChessBoard cb;
 	cb.setStartposition();
-	training->create(cb);
+	training->create(this,cb);
 }
 
 void MainWindow::trainingCreateFromPos()
 {
 	ChessBoard cb = currentPath->getPosition();
-	training->create(cb);
+	training->create(this,cb);
 }
 
 void MainWindow::trainingStart()

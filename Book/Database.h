@@ -108,7 +108,8 @@ public:
 	void getTrainingPosition(QVector<BookDBEntry>&);
 	void clearAllTrainingData();
 	void importBase(Database* iBase);
-	void addTrainingLine(QVector<TrainingLine>& tlines);
+	void addTrainingLines(QVector<TrainingLine>& tlines);
+	void deleteTrainingLines();
 	bool getTrainingLine(TrainingLine& line);
 	bool getTrainingLines(QVector<TrainingLine>& lines);
 	void updateTrainingScore(ChessBoard& cb, int rowid, int score);

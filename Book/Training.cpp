@@ -1,5 +1,7 @@
 #include "Training.h"
 #include <algorithm>
+#include <QProgressDialog>
+#include <QApplication>
 
 bool TrainingPath::isCorrect(ChessMove& move)
 {
@@ -33,7 +35,7 @@ void Training::SetDatabase(int color, Database* base)
 	Base[color] = base;
 }
 
-void Training::create(ChessBoard& cb, int color)
+void Training::create(QWidget* parent, ChessBoard& cb, int color)
 {
 	// Read White base
 	QVector<BookDBEntry> pos;
@@ -44,25 +46,55 @@ void Training::create(ChessBoard& cb, int color)
 	int i, j, rep;
 	bool exist;
 
+	int steps, step;
+	if (color == -1)
+		steps = 21;
+	else
+		steps = 11;
+	QProgressDialog progress("Creating trainingdata...", "Abort", 0, steps, parent);
+	progress.setWindowModality(Qt::WindowModal);
+	progress.show();
+	QApplication::processEvents();
+	step = 0;
 	for (rep = 0; rep < 2; rep++)
 	{
+		// Should it be done for this base?
+		if (!Base[rep])
+			continue;
+		if (color != -1)
+			if (color != rep)
+				continue;
+		progress.setLabelText("Reading from positions from database ...");
+		progress.setValue(++step);
+		QApplication::processEvents();
+		if (progress.wasCanceled())
+			break;
 		list.clear();
 
 		// Collect all lines
-		if (Base[rep] && ((color == -1) || (color == rep)))
+		Base[rep]->getTrainingPosition(pos);
+
+		if (progress.wasCanceled())
+			break;
+		if (pos.size() > 0)
 		{
-			Base[rep]->getTrainingPosition(pos);
-			if (pos.size() > 0)
-			{
-				std::sort(pos.begin(), pos.end());
-				b.setStartposition();
-				walkThrough(b, path, 0, pos, rep);
-			}
+			progress.setLabelText("Sorting positions...");
+			progress.setValue(++step);
+			QApplication::processEvents();
+			std::sort(pos.begin(), pos.end());
+			progress.setLabelText("Creating lines ...");
+			progress.setValue(++step);
+			QApplication::processEvents();
+			if (progress.wasCanceled())
+				break;
+			b.setStartposition();
+			walkThrough(b, path, 0, pos, rep);
 		}
-		else
-		{
-			continue;
-		}
+		progress.setLabelText("Removing unused lines ...");
+		progress.setValue(++step);
+		QApplication::processEvents();
+		if (progress.wasCanceled())
+			break;
 
 		// Remove lines if starting from a position
 		b.setStartposition();
@@ -85,6 +117,11 @@ void Training::create(ChessBoard& cb, int color)
 					list.remove(i--);
 			}
 		}
+		progress.setLabelText("Tuning lines ...");
+		progress.setValue(++step);
+		QApplication::processEvents();
+		if (progress.wasCanceled())
+			break;
 
 		// Remove last move if it not a repertoire move
 		for (i = 0; i < list.size(); i++)
@@ -96,6 +133,12 @@ void Training::create(ChessBoard& cb, int color)
 				list[i].moves.pop_back();
 		}
 
+		progress.setLabelText("Update score ...");
+		progress.setValue(++step);
+		QApplication::processEvents();
+		if (progress.wasCanceled())
+			break;
+
 		// Update score
 		for (i = 0; i < list.size(); i++)
 		{
@@ -105,9 +148,19 @@ void Training::create(ChessBoard& cb, int color)
 				list[i].endscore = 0;
 		}
 
+		progress.setLabelText("Sorting lines ...");
+		progress.setValue(++step);
+		QApplication::processEvents();
+		if (progress.wasCanceled())
+			break;
 		// Sort list based on endscore;
 		std::sort(list.begin(), list.end());
 
+		progress.setLabelText("Preparing for saving to database ...");
+		progress.setValue(++step);
+		QApplication::processEvents();
+		if (progress.wasCanceled())
+			break;
 		// Save the list to db;
 		tlines.clear();
 		for (i = 0; i < list.size(); i++)
@@ -128,8 +181,20 @@ void Training::create(ChessBoard& cb, int color)
 			if (!tline.moves.isEmpty())
 				tlines.push_back(tline);
 		}
-		Base[rep]->addTrainingLine(tlines);
+		progress.setLabelText("Deleting old lines ...");
+		progress.setValue(++step);
+		QApplication::processEvents();
+		if (progress.wasCanceled())
+			break;
+		Base[rep]->deleteTrainingLines();
+		progress.setLabelText("Saving to database ...");
+		progress.setValue(++step);
+		QApplication::processEvents();
+		if (progress.wasCanceled())
+			break;
+		Base[rep]->addTrainingLines(tlines);
 	}
+	progress.setValue(steps);
 }
 
 void Training::walkThrough(ChessBoard& cb, TrainingPath& path, int ply, QVector<BookDBEntry>& pos, int color)

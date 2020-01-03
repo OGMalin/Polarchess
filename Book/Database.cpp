@@ -7,6 +7,7 @@
 #include <QVariant>
 #include <QSqlError>
 #include <QIODevice>
+#include <QVariantList>
 #include <QDebug>
 #include "../Common/ChessBoard.h"
 
@@ -383,7 +384,7 @@ void Database::importBase(Database* iBase)
 	}
 }
 
-void Database::addTrainingLine(QVector<TrainingLine>& tlines)
+void Database::addTrainingLines(QVector<TrainingLine>& tlines)
 {
 	char sz[16];
 	if (!opened)
@@ -392,23 +393,53 @@ void Database::addTrainingLine(QVector<TrainingLine>& tlines)
 	if (!db.open())
 		return;
 	QSqlQuery query(db);
-	query.exec("DELETE FROM training;");
+	QVariantList start, endscore, moves;
 	for (int i = 0; i < tlines.size();i++)
 	{
-		query.prepare("INSERT INTO training ( "
-			"start, endscore, moves"
-			") VALUES ( "
-			":start, :endscore, :moves );");
-		query.bindValue(":start", itoa(tlines[i].start, sz, 10));
-		query.bindValue(":endscore", itoa(tlines[i].endscore, sz, 10));
-		query.bindValue(":moves", tlines[i].moves);
-		query.exec();
+		start.push_back(itoa(tlines[i].start, sz, 10));
+		endscore.push_back(itoa(tlines[i].endscore, sz, 10));
+		moves.push_back(tlines[i].moves);
+		//query.prepare("INSERT INTO training ( "
+		//	"start, endscore, moves"
+		//	") VALUES ( "
+		//	":start, :endscore, :moves );");
+		//query.bindValue(":start", itoa(tlines[i].start, sz, 10));
+		//query.bindValue(":endscore", itoa(tlines[i].endscore, sz, 10));
+		//query.bindValue(":moves", tlines[i].moves);
+		//query.exec();
+		//QSqlError error = query.lastError();
+		//if (error.isValid())
+		//{
+		//	qDebug() << "Database error: " << error.databaseText();
+		//	qDebug() << "Driver error: " << error.driverText();
+		//}
+	}
+	query.prepare("INSERT INTO training VALUES (?, ?, ?);");
+	query.addBindValue(start);
+	query.addBindValue(endscore);
+	query.addBindValue(moves);
+	if (!query.execBatch())
+	{
 		QSqlError error = query.lastError();
-		if (error.isValid())
-		{
-			qDebug() << "Database error: " << error.databaseText();
-			qDebug() << "Driver error: " << error.driverText();
-		}
+		qDebug() << "Database error: " << error.databaseText();
+		qDebug() << "Driver error: " << error.driverText();
+	}
+}
+
+void Database::deleteTrainingLines()
+{
+	if (!opened)
+		return;
+	QSqlDatabase db = QSqlDatabase::database(dbname);
+	if (!db.open())
+		return;
+	QSqlQuery query(db);
+	query.exec("DELETE FROM training;");
+	QSqlError error = query.lastError();
+	if (error.isValid())
+	{
+		qDebug() << "Database error: " << error.databaseText();
+		qDebug() << "Driver error: " << error.driverText();
 	}
 }
 

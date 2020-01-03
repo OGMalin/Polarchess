@@ -4,6 +4,7 @@
 #include "../Common/ChessMove.h"
 #include <QString>
 #include <QVector>
+#include <QWidget>
 
 struct TrainingStat
 {
@@ -47,7 +48,7 @@ public:
 	void SetDatabase(int color, Database* base);
 
 	// Create traininglines from a position (cb) and database (WHITE or BLACK, -1=both)
-	void create(ChessBoard& cb, int color=-1);
+	void create(QWidget* parent, ChessBoard& cb, int color=-1);
 
 	// Get the most needed trainingline (With most error).
 	bool get(TrainingPath& line);
