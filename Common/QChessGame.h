@@ -8,8 +8,6 @@
 #include "../Common/ChessMove.h"
 #include "../Common/MoveList.h"
 
-extern const char* STARTFEN;
-
 class QChessMove
 {
 public:
@@ -53,6 +51,7 @@ public:
 	void enginepv(const QString& s) { _enginepv = s; };
 	void addMove(const QChessMove& m) { _moves.push_back(m); };
 	void setFen(const QString& fen) { _board.setFen(fen.toLatin1()); };
+	void setStartposition() { _board.setStartposition(); };
 };
 
 class QChessGame : public QObject

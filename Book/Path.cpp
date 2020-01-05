@@ -1,6 +1,5 @@
 #include "Path.h"
 #include <QString>
-//const char* STARTFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1";
 
 Path::Path()
 {
@@ -17,7 +16,7 @@ void Path::clear()
 	PathEntry pe;
 	moves.clear();
 	_current = 0;
-	pe.board.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1");
+	pe.board.setStartposition();
 	pe.move.clear();
 	moves.push_back(pe);
 }

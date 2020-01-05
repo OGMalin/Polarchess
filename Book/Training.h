@@ -15,23 +15,23 @@ struct TrainingStat
 struct TrainingPathEntry
 {
 	ChessMove move;
-	int endscore;
-	void clear() { move.clear(); endscore = 0; };
+	int score;
+	void clear() { move.clear(); score = 0; };
 };
 
 struct TrainingPath
 {
 	QVector<TrainingPathEntry> moves;
 	int rowid;
-	int endscore;
+	int score;
 	int color;
-	int start;
 	int current;
 	ChessBoard endposition;
-	void clear() { moves.clear(); endscore = 0; color = 0; current = 0; rowid = 0; endposition.clear(); };
-	friend bool operator<(const TrainingPath& t1, const TrainingPath& t2) { return t1.endscore < t2.endscore; };
+	void clear() { moves.clear(); score = 0; color = 0; current = 0; rowid = 0; endposition.clear(); };
+	friend bool operator<(const TrainingPath& t1, const TrainingPath& t2) { return t1.score < t2.score; };
 	bool isCorrect(ChessMove& move);
 	bool nextMove(ChessMove& move);
+	ChessMove currentMove();
 };
 
 class Training
@@ -48,14 +48,14 @@ public:
 	void SetDatabase(int color, Database* base);
 
 	// Create traininglines from a position (cb) and database (WHITE or BLACK, -1=both)
-	void create(QWidget* parent, ChessBoard& cb, int color=-1);
+	void create(QWidget* parent);
 
 	// Get the most needed trainingline (With most error).
-	bool get(TrainingPath& line);
+	bool get(TrainingPath& line, int color, ChessBoard& cb);
 
 	// Get all traininglines.
-	void getAll(QVector<TrainingPath>& allTP);
+	void getAll(QVector<TrainingPath>& allTP, int color=-1);
 
-	// Update endscore
+	// Update training score
 	void updateScore(int color, ChessBoard& cb, int rowid, int score);
 };

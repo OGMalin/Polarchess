@@ -104,8 +104,7 @@ bool Database::create(const QString& path, int dbtype)
 		"fen	TEXT,"
 		"comment	TEXT,"
 		"eval	TEXT,"
-		"computer	TEXT,"
-		"endscore	TEXT,"
+		"score	TEXT,"
 		"movelist	TEXT,"
 		"PRIMARY KEY(fen)"
 		"); ");
@@ -117,17 +116,9 @@ bool Database::create(const QString& path, int dbtype)
 	}
 
 	query.exec("CREATE TABLE training ( "
-		"start	TEXT,"
-		"endscore	TEXT,"
+		"score	TEXT,"
 		"moves	TEXT"
 		"); ");
-	error = query.lastError();
-	if (error.isValid())
-	{
-		qDebug() << "Database error: " << error.databaseText();
-		qDebug() << "Driver error: " << error.driverText();
-	}
-	query.exec("CREATE INDEX endscore ON training (endscore);");
 	error = query.lastError();
 	if (error.isValid())
 	{
@@ -167,23 +158,21 @@ bool Database::add(BookDBEntry& bde)
 		query.prepare("UPDATE positions SET "
 			"comment = :comment,"
 			"eval = :eval,"
-			"computer = :computer,"
-			"endscore = :endscore,"
+			"score = :score,"
 			"movelist = :movelist "
 			"WHERE fen = :fen;");
 	}
 	else
 	{
 		query.prepare("INSERT INTO positions ( "
-			"fen, comment, eval, computer, endscore, movelist"
+			"fen, comment, eval, score, movelist"
 			") VALUES ( "
-			":fen, :comment, :eval, :computer, :endscore, :movelist );");
+			":fen, :comment, :eval, :score, :movelist );");
 	}
 	query.bindValue(":fen", bde.board.getFen(true).c_str());
 	query.bindValue(":comment", bde.comment);
 	query.bindValue(":eval", itoa(bde.eval, sz, 10));
-	query.bindValue(":computer", bde.computer);
-	query.bindValue(":endscore", itoa(bde.endscore, sz, 10));
+	query.bindValue(":score", itoa(bde.score, sz, 10));
 	QString qs;
 	bde.convertFromMoveList(bde.movelist, qs);
 	query.bindValue(":movelist", qs);
@@ -217,8 +206,7 @@ BookDBEntry Database::find(ChessBoard& board)
 	{
 		bde.comment = query.value("comment").toString();
 		bde.eval = query.value("eval").toInt();
-		bde.computer = query.value("computer").toString();
-		bde.endscore = query.value("endscore").toInt();
+		bde.score = query.value("score").toInt();
 		bde.convertToMoveList(bde.movelist, query.value("movelist").toString());
 		bde.dirty = false;
 	}
@@ -271,7 +259,7 @@ void Database::getTrainingPosition(QVector<BookDBEntry>& pos)
 	if (!db.open())
 		return;
 	QSqlQuery query(db);
-	query.prepare("SELECT fen,endscore,movelist FROM positions;");
+	query.prepare("SELECT fen,score,movelist FROM positions;");
 	query.exec();
 	QSqlError error = query.lastError();
 	if (error.isValid())
@@ -282,7 +270,7 @@ void Database::getTrainingPosition(QVector<BookDBEntry>& pos)
 	while (query.next())
 	{
 		bde.board.setFen(query.value("fen").toString().toStdString().c_str());
-		bde.endscore = query.value("endscore").toInt();
+		bde.score = query.value("score").toInt();
 		bde.convertToMoveList(bde.movelist, query.value("movelist").toString());
 		pos.push_back(bde);
 	}
@@ -299,7 +287,7 @@ void Database::clearAllTrainingData()
 
 	QSqlQuery query(db);
 
-	query.prepare("UPDATE positions SET endscore = '0';");
+	query.prepare("UPDATE positions SET score = '0';");
 	query.exec();
 	QSqlError error = query.lastError();
 	if (error.isValid())
@@ -307,6 +295,7 @@ void Database::clearAllTrainingData()
 		qDebug() << "Database error: " << error.databaseText();
 		qDebug() << "Driver error: " << error.driverText();
 	}
+	deleteTrainingLines();
 }
 
 void Database::importBase(Database* iBase)
@@ -336,8 +325,7 @@ void Database::importBase(Database* iBase)
 		bde2.board.setFen(query2.value("fen").toString().toStdString().c_str());
 		bde2.comment = query2.value("comment").toString();
 		bde2.eval = query2.value("eval").toInt();
-		bde2.computer = query2.value("computer").toString();
-		bde2.endscore = query2.value("endscore").toInt();
+		bde2.score = query2.value("score").toInt();
 		bde2.convertToMoveList(bde2.movelist, query2.value("movelist").toString());
 		bde1.clear();
 		bde1.board = bde2.board;
@@ -347,30 +335,27 @@ void Database::importBase(Database* iBase)
 		{
 			bde1.comment = query1.value("comment").toString();
 			bde1.eval = query1.value("eval").toInt();
-			bde1.computer = query1.value("computer").toString();
-			bde1.endscore = query1.value("endscore").toInt();
+			bde1.score = query1.value("score").toInt();
 			bde1.convertToMoveList(bde1.movelist, query1.value("movelist").toString());
 			query1.prepare("UPDATE positions SET "
 				"comment = :comment,"
 				"eval = :eval,"
-				"computer = :computer,"
-				"endscore = :endscore,"
+				"score = :score,"
 				"movelist = :movelist "
 				"WHERE fen = :fen;");
 		}
 		else
 		{
 			query1.prepare("INSERT INTO positions ( "
-				"fen, comment, eval, computer, endscore, movelist"
+				"fen, comment, eval, score, movelist"
 				") VALUES ( "
-				":fen, :comment, :eval, :computer, :endscore, :movelist );");
+				":fen, :comment, :eval, :score, :movelist );");
 		}
 		bde1.merge(bde2);
 		query1.bindValue(":fen", bde1.board.getFen(true).c_str());
 		query1.bindValue(":comment", bde1.comment);
 		query1.bindValue(":eval", itoa(bde1.eval, sz, 10));
-		query1.bindValue(":computer", bde1.computer);
-		query1.bindValue(":endscore", itoa(bde1.endscore, sz, 10));
+		query1.bindValue(":score", itoa(bde1.score, sz, 10));
 		QString qs;
 		bde1.convertFromMoveList(bde1.movelist, qs);
 		query1.bindValue(":movelist", qs);
@@ -393,18 +378,16 @@ void Database::addTrainingLines(QVector<TrainingLine>& tlines)
 	if (!db.open())
 		return;
 	QSqlQuery query(db);
-	QVariantList start, endscore, moves;
+	QVariantList score, moves;
 	for (int i = 0; i < tlines.size();i++)
 	{
-		start.push_back(itoa(tlines[i].start, sz, 10));
-		endscore.push_back(itoa(tlines[i].endscore, sz, 10));
+		score.push_back(itoa(tlines[i].score, sz, 10));
 		moves.push_back(tlines[i].moves);
 		//query.prepare("INSERT INTO training ( "
-		//	"start, endscore, moves"
+		//	"score, moves"
 		//	") VALUES ( "
-		//	":start, :endscore, :moves );");
-		//query.bindValue(":start", itoa(tlines[i].start, sz, 10));
-		//query.bindValue(":endscore", itoa(tlines[i].endscore, sz, 10));
+		//	":score, :moves );");
+		//query.bindValue(":score", itoa(tlines[i].score, sz, 10));
 		//query.bindValue(":moves", tlines[i].moves);
 		//query.exec();
 		//QSqlError error = query.lastError();
@@ -414,9 +397,8 @@ void Database::addTrainingLines(QVector<TrainingLine>& tlines)
 		//	qDebug() << "Driver error: " << error.driverText();
 		//}
 	}
-	query.prepare("INSERT INTO training VALUES (?, ?, ?);");
-	query.addBindValue(start);
-	query.addBindValue(endscore);
+	query.prepare("INSERT INTO training VALUES (?, ?);");
+	query.addBindValue(score);
 	query.addBindValue(moves);
 	if (!query.execBatch())
 	{
@@ -443,34 +425,6 @@ void Database::deleteTrainingLines()
 	}
 }
 
-bool Database::getTrainingLine(TrainingLine& line)
-{
-	line.moves.clear();
-	if (!opened)
-		return false;
-	QSqlDatabase db = QSqlDatabase::database(dbname);
-	if (!db.open())
-		return false;
-	QSqlQuery query(db);
-	query.prepare("SELECT rowid, * FROM training ORDER BY endscore;");
-	if (query.exec() && query.next())
-	{
-		line.rowid = query.value("rowid").toInt();
-		line.start = query.value("start").toInt();
-		line.endscore = query.value("endscore").toInt();
-		line.moves = query.value("moves").toString();
-	}
-	QSqlError error = query.lastError();
-	if (error.isValid())
-	{
-		qDebug() << "Database error: " << error.databaseText();
-		qDebug() << "Driver error: " << error.driverText();
-	}
-	if (line.moves.isEmpty())
-		return false;
-	return true;
-}
-
 bool Database::getTrainingLines(QVector<TrainingLine>& lines)
 {
 	TrainingLine tl;
@@ -481,12 +435,12 @@ bool Database::getTrainingLines(QVector<TrainingLine>& lines)
 	if (!db.open())
 		return false;
 	QSqlQuery query(db);
-	query.prepare("SELECT * FROM training ORDERBY endscore;");
+	query.prepare("SELECT rowid, * FROM training;");
 	query.exec();
 	while (query.next())
 	{
-		tl.start = query.value("start").toInt();
-		tl.endscore = query.value("endscore").toInt();
+		tl.rowid = query.value("rowid").toInt();
+		tl.score = query.value("score").toInt();
 		tl.moves = query.value("moves").toString();
 		lines.push_back(tl);
 	}
@@ -510,12 +464,12 @@ void Database::updateTrainingScore(ChessBoard& cb, int rowid, int score)
 	if (!db.open())
 		return;
 	QSqlQuery query(db);
-	query.prepare("UPDATE positions SET endscore = :endscore WHERE fen = :fen;");
+	query.prepare("UPDATE positions SET score = :score WHERE fen = :fen;");
 	query.bindValue(":fen", cb.getFen(true).c_str());
-	query.bindValue(":endscore", itoa(score, sz, 10));
+	query.bindValue(":score", itoa(score, sz, 10));
 	query.exec();
-	query.prepare("UPDATE training SET endscore = :endscore WHERE rowid = :rowid;");
-	query.bindValue(":endscore", itoa(score, sz, 10));
+	query.prepare("UPDATE training SET score = :score WHERE rowid = :rowid;");
+	query.bindValue(":score", itoa(score, sz, 10));
 	query.bindValue(":rowid", itoa(rowid, sz, 10));
 	query.exec();
 }
@@ -547,8 +501,6 @@ void BookDBEntry::convertToMoveList(QVector<BookDBMove>& movelist, const QString
 			bdm.move = board.getMoveFromText(qmove[0].toStdString());
 		if (qmove.size() > 1)
 			bdm.comment = qmove[1];
-		if (qmove.size() > 2)
-			bdm.score = qmove[2].toInt();
 		if (!bdm.move.empty())
 			movelist.append(bdm);
 	}
@@ -571,8 +523,6 @@ void BookDBEntry::convertFromMoveList(const QVector<BookDBMove>& movelist, QStri
 			data += board.makeMoveText(it->move, sz, 16, FIDE);
 			data += "|";
 			data += it->comment;
-			data += "|";
-			data += itoa(it->score, sz, 10);
 		}
 		++it;
 	}
@@ -586,8 +536,6 @@ void BookDBEntry::updateMove(BookDBMove& bm, bool mergemove)
 		{
 			if (mergemove)
 			{
-				if (!movelist[i].score)
-					movelist[i].score = bm.score;
 				if (movelist[i].comment.isEmpty())
 					movelist[i].comment = bm.comment;
 				return;
@@ -604,15 +552,6 @@ void BookDBEntry::merge(BookDBEntry& bde)
 	board = bde.board;
 	if (!eval)
 		eval = bde.eval;
-	if (!bde.computer.isEmpty())
-	{
-		if (computer != bde.computer)
-		{
-			if (!computer.isEmpty())
-				computer += ";";
-			computer += bde.computer;
-		}
-	}
 	if (!bde.comment.isEmpty())
 	{
 		if (comment != bde.comment)
@@ -622,8 +561,8 @@ void BookDBEntry::merge(BookDBEntry& bde)
 			comment += bde.comment;
 		}
 	}
-	if (!endscore)
-		endscore = bde.endscore;
+	if (!score)
+		score = bde.score;
 	for (int i = 0; i < bde.movelist.size(); i++)
 		updateMove(bde.movelist[i], true);
 }

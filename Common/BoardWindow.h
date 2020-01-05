@@ -13,6 +13,13 @@ struct BOARDTHEMA
 	QBrush borderBrush;
 	QFont  coordinateFont;
 	QColor coordinateFontColor;
+	QBrush mark1;
+};
+
+struct SQUAREMARK
+{
+	int square;
+	int mark;
 };
 
 class BoardWindow :public QWidget
@@ -24,6 +31,7 @@ public:
 	void newGame();
 	void setPosition(const QString& fen);
 	void setPosition(const ChessBoard& cb);
+	void markSquare(int sq, int mark = 1);
 
 public slots:
 	void showContextMenu(const QPoint& pos);
@@ -39,6 +47,7 @@ protected:
 	void mouseReleaseEvent(QMouseEvent* event) override;
 
 private:
+	QVector<SQUAREMARK> squareMark;
 	ChessBoard currentBoard;
 	bool whiteAtBottom;
 	int squareSize;

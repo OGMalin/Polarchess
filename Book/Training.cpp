@@ -20,6 +20,11 @@ bool TrainingPath::nextMove(ChessMove& move)
 	return true;
 }
 
+ChessMove TrainingPath::currentMove()
+{
+	return moves[current].move;
+};
+
 Training::Training()
 {
 	Base[0] = Base[1] = NULL;
@@ -35,7 +40,7 @@ void Training::SetDatabase(int color, Database* base)
 	Base[color] = base;
 }
 
-void Training::create(QWidget* parent, ChessBoard& cb, int color)
+void Training::create(QWidget* parent)
 {
 	// Read White base
 	QVector<BookDBEntry> pos;
@@ -46,11 +51,7 @@ void Training::create(QWidget* parent, ChessBoard& cb, int color)
 	int i, j, rep;
 	bool exist;
 
-	int steps, step;
-	if (color == -1)
-		steps = 21;
-	else
-		steps = 11;
+	int steps=19, step;
 	QProgressDialog progress("Creating trainingdata...", "Abort", 0, steps, parent);
 	progress.setWindowModality(Qt::WindowModal);
 	progress.show();
@@ -61,9 +62,6 @@ void Training::create(QWidget* parent, ChessBoard& cb, int color)
 		// Should it be done for this base?
 		if (!Base[rep])
 			continue;
-		if (color != -1)
-			if (color != rep)
-				continue;
 		progress.setLabelText("Reading from positions from database ...");
 		progress.setValue(++step);
 		QApplication::processEvents();
@@ -90,33 +88,7 @@ void Training::create(QWidget* parent, ChessBoard& cb, int color)
 			b.setStartposition();
 			walkThrough(b, path, 0, pos, rep);
 		}
-		progress.setLabelText("Removing unused lines ...");
-		progress.setValue(++step);
-		QApplication::processEvents();
-		if (progress.wasCanceled())
-			break;
 
-		// Remove lines if starting from a position
-		b.setStartposition();
-		if (cb != b)
-		{
-			for (i = 0; i < list.size(); i++)
-			{
-				exist = false;
-				b.setStartposition();
-				for (j = 0; j < list[i].moves.size(); j++)
-				{
-					if (b == cb)
-					{
-						exist = true;
-						break;
-					}
-					b.doMove(list[i].moves[j].move, false);
-				}
-				if (!exist)
-					list.remove(i--);
-			}
-		}
 		progress.setLabelText("Tuning lines ...");
 		progress.setValue(++step);
 		QApplication::processEvents();
@@ -143,9 +115,9 @@ void Training::create(QWidget* parent, ChessBoard& cb, int color)
 		for (i = 0; i < list.size(); i++)
 		{
 			if (list[i].moves.size() > 0)
-				list[i].endscore = list[i].moves[list[i].moves.size() - 1].endscore;
+				list[i].score = list[i].moves[list[i].moves.size() - 1].score;
 			else
-				list[i].endscore = 0;
+				list[i].score = 0;
 		}
 
 		progress.setLabelText("Sorting lines ...");
@@ -153,7 +125,7 @@ void Training::create(QWidget* parent, ChessBoard& cb, int color)
 		QApplication::processEvents();
 		if (progress.wasCanceled())
 			break;
-		// Sort list based on endscore;
+		// Sort list based on score;
 		std::sort(list.begin(), list.end());
 
 		progress.setLabelText("Preparing for saving to database ...");
@@ -166,13 +138,11 @@ void Training::create(QWidget* parent, ChessBoard& cb, int color)
 		for (i = 0; i < list.size(); i++)
 		{
 			tline.start = 0;
-			tline.endscore = list[i].endscore;
+			tline.score = list[i].score;
 			tline.moves.clear();
 			b.setStartposition();
 			for (j = 0; j < list[i].moves.size(); j++)
 			{
-				if (b == cb)
-					tline.start = j;
 				if (j > 0)
 					tline.moves += " ";
 				tline.moves += b.makeMoveText(list[i].moves[j].move, FIDE).c_str();
@@ -220,7 +190,7 @@ void Training::walkThrough(ChessBoard& cb, TrainingPath& path, int ply, QVector<
 	while (1)
 	{
 		tpe.move = bid->movelist[curmove].move;
-		tpe.endscore = bid->endscore;
+		tpe.score = bid->score;
 		path.moves.push_back(tpe);
 		cb.doMove(tpe.move, false);
 		walkThrough(cb, path, ply + 1, pos, color);
@@ -235,29 +205,43 @@ void Training::walkThrough(ChessBoard& cb, TrainingPath& path, int ply, QVector<
 	}
 }
 
-bool Training::get(TrainingPath& line)
+bool Training::get(TrainingPath& line, int color, ChessBoard& cb)
 {
-	TrainingLine tline[2];
-	int rep;
-	line.clear();
-	for (rep = 0; rep < 2; rep++)
-		Base[rep]->getTrainingLine(tline[rep]);
-	if (tline[WHITE].moves.isEmpty() && tline[BLACK].moves.isEmpty())
-		return false;
-	line.color = BLACK;
-	if (tline[BLACK].moves.isEmpty())
-		line.color = WHITE;
-	if (!tline[WHITE].moves.isEmpty() && !tline[BLACK].moves.isEmpty())
-		line.color = (tline[WHITE].endscore <= tline[BLACK].endscore) ? WHITE : BLACK;
-	line.endscore = tline[line.color].endscore;
-	line.start = tline[line.color].start;
-	line.rowid = tline[line.color].rowid;
-	convertMoves(tline[line.color].moves, line);
-	return true;
+	int i,j;
+	bool found;
+	ChessBoard b;
+	QVector<TrainingPath> tlines;
 
+	getAll(tlines, color);
+	if (!cb.isStartposition())
+	{
+		for (i = 0; i < tlines.size(); i++)
+		{
+			found = false;
+			b.setStartposition();
+			for (j = 0; j < tlines[i].moves.size(); j++)
+			{
+				b.doMove(tlines[i].moves[j].move, false);
+				if (cb == b)
+				{
+					found = true;
+					break;
+				}
+			}
+			if (!found)
+				tlines.remove(i--);
+		}
+	}
+
+	std::sort(tlines.begin(), tlines.end());
+
+	if (!tlines.size())
+		return false;
+	line = tlines.first();
+	return true;
 }
 
-void Training::getAll(QVector<TrainingPath>& allTP)
+void Training::getAll(QVector<TrainingPath>& allTP, int color)
 {
 	int rep, i;
 	QVector<TrainingLine> lines;
@@ -265,11 +249,17 @@ void Training::getAll(QVector<TrainingPath>& allTP)
 	allTP.clear();
 	for (rep = 0; rep < 2; rep++)
 	{
+		if (!Base[rep])
+			continue;
+		if (color != -1)
+			if (color != rep)
+				continue;
 		Base[rep]->getTrainingLines(lines);
 		for (i = 0; i < lines.size(); i++)
 		{
-			tp.endscore = lines[i].endscore;
-			tp.start = lines[i].start;
+			tp.rowid = lines[i].rowid;
+			tp.score = lines[i].score;
+			tp.color = rep;
 			convertMoves(lines[i].moves, tp);
 			allTP.push_back(tp);
 		}
@@ -284,7 +274,6 @@ void Training::updateScore(int color, ChessBoard& cb, int rowid, int score)
 void Training::convertMoves(const QString& smoves, TrainingPath& tp)
 {
 	ChessBoard cb;
-	ChessMove move;
 	TrainingPathEntry tpe;
 	QStringList slist = smoves.split(" ");
 	cb.setStartposition();
@@ -294,6 +283,6 @@ void Training::convertMoves(const QString& smoves, TrainingPath& tp)
 		tp.endposition = cb;
 		tpe.move=cb.getMoveFromText(slist[i].toStdString());
 		tp.moves.push_back(tpe);
-		cb.doMove(move, false);
+		cb.doMove(tpe.move, false);
 	}
 }

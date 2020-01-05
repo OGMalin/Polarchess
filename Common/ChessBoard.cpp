@@ -913,15 +913,16 @@ char ChessBoard::getCharFromPiece(typePiece p)
 
 bool ChessBoard::isStartposition()
 {
+	string ss = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq";
 	string s=getFen(true);
-	if (s == string("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1"))
+	if (s.substr(0,ss.size()) == ss)
 		return true;
 	return false;
 }
 
 void ChessBoard::setStartposition()
 {
-	setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPPRNBQKBNR w KQkq - 0 1");
+	setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 }
 
 typePiece ChessBoard::pieceAt(int file, int row)

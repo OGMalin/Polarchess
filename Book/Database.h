@@ -11,14 +11,11 @@
 	eval		text
 		Human evaluation
 
-	computer	text
-		Computer evaluation
-
-	endscore		text (Only in use on repertoire db)
+	score		text (Only in use on repertoire db)
 		Successfull guesses (-10000=Not tried, -9999= Tried once then starting from 0)
 
 	movelist	text
-		move1|comment|score;move2|comment|score
+		move1|comment;move2|comment
 */
 #include <QObject>
 #include <QSqlDatabase>
@@ -35,7 +32,7 @@ struct TrainingLine
 	int rowid;
 	int start;
 	QString moves;
-	int endscore;
+	int score;
 };
 
 struct RepPath
@@ -54,22 +51,20 @@ struct BookDBMove
 {
 	ChessMove move;
 	QString comment;
-	int score=0;
 	BookDBMove() { clear(); };
-	void clear() { move.clear(); comment.clear(); score = 0; };
+	void clear() { move.clear(); comment.clear(); };
 };
 
 struct BookDBEntry
 {
 	ChessBoard board;
 	int eval;
-	QString computer;
 	QString comment;
-	int endscore;
+	int score;
 	QVector<BookDBMove> movelist;
 	bool dirty;
 	BookDBEntry() { clear();  dirty = false; };
-	void clear() { board.clear(); comment.clear(); movelist.clear(); computer.clear(); eval = endscore = 0; dirty = false; };
+	void clear() { board.clear(); comment.clear(); movelist.clear(); eval = score = 0; dirty = false; };
 	bool moveExist(ChessMove& move);
 	void updateMove(BookDBMove&bm, bool mergemove=false);
 
@@ -110,7 +105,6 @@ public:
 	void importBase(Database* iBase);
 	void addTrainingLines(QVector<TrainingLine>& tlines);
 	void deleteTrainingLines();
-	bool getTrainingLine(TrainingLine& line);
 	bool getTrainingLines(QVector<TrainingLine>& lines);
 	void updateTrainingScore(ChessBoard& cb, int rowid, int score);
 private:

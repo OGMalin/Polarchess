@@ -11,7 +11,7 @@ BoardWindow::BoardWindow(QWidget* parent)
 	whiteAtBottom = true;
 	dragPiece = EMPTY;
 	autoQueen = true;
-	currentBoard.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+	currentBoard.setStartposition();
 	setBoardTheme();
 	setMinimumSize(200, 200);
 	readImgPieces();
@@ -45,6 +45,8 @@ void BoardWindow::setBoardTheme()
 	theme.borderBrush.setStyle(Qt::SolidPattern);
 	theme.coordinateFont.setBold(true);
 	theme.coordinateFontColor = QColor("white");
+	theme.mark1.setColor(QColor(127, 0, 0, 255));
+	theme.mark1.setStyle(Qt::SolidPattern);
 }
 
 void BoardWindow::drawBorder(QPaintEvent* event, QPainter& painter)
@@ -92,7 +94,7 @@ void BoardWindow::drawCoordinates(QPaintEvent* event, QPainter& painter)
 void BoardWindow::drawBoard(QPaintEvent* event, QPainter& painter)
 {
 
-	int sq;
+	int sq,i;
 	QRect sqR;
 	bool light = true;
 	for (sq=0;sq<64;sq++)
@@ -100,6 +102,16 @@ void BoardWindow::drawBoard(QPaintEvent* event, QPainter& painter)
 		sqR = squareRect(sq);
 		if (event->rect().intersects(sqR))
 			painter.fillRect(sqR, (SQUARECOLOR(SQUARE128(sq))==WHITE) ? theme.lightBrush : theme.darkBrush);
+	}
+	for (i = 0; i < squareMark.size(); i++)
+	{
+		if (squareMark[i].mark == 1)
+		{
+			sqR = squareRect(squareMark[i].square);
+			if (event->rect().intersects(sqR))
+				painter.fillRect(sqR, theme.mark1);
+		}
+
 	}
 }
 
@@ -311,6 +323,7 @@ void BoardWindow::newGame()
 	whiteAtBottom = true;
 	dragPiece = EMPTY;
 	currentBoard.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+	squareMark.clear();
 	update();
 }
 
@@ -318,6 +331,7 @@ void BoardWindow::setPosition(const QString& fen)
 {
 	dragPiece = EMPTY;
 	currentBoard.setFen(fen.toLatin1());
+	squareMark.clear();
 	update();
 }
 
@@ -325,6 +339,7 @@ void BoardWindow::setPosition(const ChessBoard& cb)
 {
 	dragPiece = EMPTY;
 	currentBoard = cb;
+	squareMark.clear();
 	update();
 }
 
@@ -333,4 +348,13 @@ void BoardWindow::showContextMenu(const QPoint& pos)
 	QMenu* contextMenu = new QMenu(this);
 	contextMenu->addAction(QString("Flip"), this, SLOT(flip()));
 	contextMenu->exec(mapToGlobal(pos));
+}
+
+void BoardWindow::markSquare(int sq, int mark)
+{
+	SQUAREMARK sm;
+	sm.square = sq;
+	sm.mark = mark;
+	squareMark.push_back(sm);
+	update();
 }
