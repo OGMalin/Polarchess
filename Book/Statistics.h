@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QString>
 #include <QVector>
+#include <QWidget>
 #include <QSqlDatabase>
 #include "../Common/ChessMove.h"
 #include "../Common/ChessBoard.h"
@@ -21,24 +22,23 @@ struct StatisticsDBMove
 {
 	ChessMove move;
 	int elo;
-	int win, draw, loss;
+	int whitewin, draw, blackwin;
 	int year;
 	StatisticsDBMove() { clear(); };
-	void clear() { move.clear(); win = draw = loss = elo = year = 0; };
+	void clear() { move.clear(); whitewin = draw = blackwin = elo = year = 0; };
 };
 
 struct StatisticsDBEntry
 {
-	ChessBoard board;
+	HASHKEY hash;
 	QVector<StatisticsDBMove> movelist;
-	bool dirty;
-	StatisticsDBEntry() { clear();  dirty = false; };
-	void clear() { board.clear(); movelist.clear(); };
+	StatisticsDBEntry() { clear(); };
+	void clear() { hash = 0; movelist.clear(); };
 	bool moveExist(ChessMove& move);
 	void updateMove(StatisticsDBMove&bm);
 
-	void convertToMoveList(QVector<StatisticsDBMove>&, const QString&);
-	void convertFromMoveList(const QVector<StatisticsDBMove>&, QString&);
+	void convertToMoveList(QVector<StatisticsDBMove>&, const QString&, ChessBoard&);
+	void convertFromMoveList(const QVector<StatisticsDBMove>&, QString&, ChessBoard&);
 };
 
 struct StatisticsDBInfo
@@ -53,11 +53,25 @@ public:
 	StatisticsDBInfo sdi;
 	Statistics(QObject *parent = 0);
 	~Statistics();
+
+	// Open a database
 	bool open(const QString& path);
+
+	// Create a database
 	bool create(const QString& path);
+
+	// Close the database
 	void close();
-	bool find(StatisticsDBEntry& sde);
+
+	// Find a position
+	bool find(StatisticsDBEntry& sde, ChessBoard& cb);
+
+	// Add a move to a position
 	void addMove(StatisticsDBMove& m, ChessBoard& cb);
+
+	// Import pgn-file
+	void importGames(QWidget* parent);
+
 private:
 	bool opened;
 };

@@ -2,7 +2,12 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QDebug>
+#include <QFileDialog>
+#include <QProgressDialog>
+#include <QApplication>
+#include "../Common/Pgn.h"
 
+using namespace std;
 const char* STATISTICS = "Statistics";
 const char* SDBVERSION = "1.0";
 const char* SDBTYPE = "POLARSTATISTICSDB";
@@ -25,6 +30,8 @@ Statistics::~Statistics()
 
 bool Statistics::open(const QString& path)
 {
+	if (!WinFile::exist(path.toStdString()))
+		return false;
 	QSqlDatabase db = QSqlDatabase::database(STATISTICS);
 	db.setDatabaseName(path);
 
@@ -67,9 +74,9 @@ bool Statistics::create(const QString& path)
 	query.bindValue(":version", SDBVERSION);
 	query.exec();
 	query.exec("CREATE TABLE positions ( "
-		"fen	TEXT,"
+		"hash	TEXT,"
 		"movelist	TEXT,"
-		"PRIMARY KEY(fen)"
+		"PRIMARY KEY(hash)"
 		"); ");
 	sdi.db = SDBTYPE;
 	sdi.version = SDBVERSION;
@@ -82,7 +89,7 @@ void Statistics::close()
 	opened = false;
 }
 
-bool Statistics::find(StatisticsDBEntry& sde)
+bool Statistics::find(StatisticsDBEntry& sde, ChessBoard& cb)
 {
 	if (!opened)
 		return false;
@@ -90,11 +97,12 @@ bool Statistics::find(StatisticsDBEntry& sde)
 	if (!db.open())
 		return false;
 	QSqlQuery query(db);
-	query.prepare("SELECT * FROM positions WHERE fen = :fen;");
-	query.bindValue(":fen", sde.board.getFen(true).c_str());
+	sde.hash = cb.hashkey();
+	query.prepare("SELECT * FROM positions WHERE hash = :hash;");
+	query.bindValue(":hash", sde.hash);
 	if (query.exec() && query.next())
 	{
-		sde.convertToMoveList(sde.movelist, query.value("movelist").toString());
+		sde.convertToMoveList(sde.movelist, query.value("movelist").toString(), cb);
 		return true;
 	}
 	return false;
@@ -113,9 +121,8 @@ void Statistics::addMove(StatisticsDBMove& m, ChessBoard& cb)
 		return;
 
 	QSqlQuery query(db);
-	sde.board = cb;
 
-	exist = find(sde);
+	exist = find(sde, cb);
 
 	sde.updateMove(m);
 
@@ -123,18 +130,18 @@ void Statistics::addMove(StatisticsDBMove& m, ChessBoard& cb)
 	{
 		query.prepare("UPDATE positions SET "
 			"movelist = :movelist "
-			"WHERE fen = :fen;");
+			"WHERE hash = :hash;");
 	}
 	else
 	{
 		query.prepare("INSERT INTO positions ( "
-			"fen, movelist"
+			"hash, movelist"
 			") VALUES ( "
-			":fen, :movelist );");
+			":hash, :movelist );");
 	}
-	query.bindValue(":fen", sde.board.getFen(true).c_str());
+	query.bindValue(":hash", sde.hash);
 	QString qs;
-	sde.convertFromMoveList(sde.movelist, qs);
+	sde.convertFromMoveList(sde.movelist, qs, cb);
 	query.bindValue(":movelist", qs);
 	query.exec();
 	QSqlError error = query.lastError();
@@ -144,6 +151,98 @@ void Statistics::addMove(StatisticsDBMove& m, ChessBoard& cb)
 		qDebug() << "Driver error: " << error.driverText();
 	}
 	return;
+}
+
+void Statistics::importGames(QWidget* parent)
+{
+	SYSTEMTIME st;
+	StatisticsDBMove sdm;
+	StatisticsDBEntry sde;
+	ChessBoard cb;
+	std::string ss;
+	Pgn pgn;
+	bool exist;
+	ChessGame game;
+	QSqlDatabase db = QSqlDatabase::database(STATISTICS);
+	if (!opened)
+		return;
+	if (!db.open())
+		return;
+	QString path = QFileDialog::getOpenFileName(parent, "Open pgnfile", QString(), "Pgn files (*.pgn)");
+	if (path.isEmpty())
+		return;
+	if (!pgn.open(path.toStdString(), true))
+		return;
+	QProgressDialog progress("Importing Pgn file.", "Cancel", 0, pgn.file.size(), parent);
+	progress.setWindowModality(Qt::WindowModal);
+	progress.setMinimumDuration(0);
+	progress.show();
+
+	QSqlQuery query(db);
+	QString qs;
+
+	int next = 1;
+	while (pgn.read(game, next++, 25))
+	{
+		sdm.clear();
+		if (game.info.Result == "1-0")
+			sdm.whitewin = 1;
+		else if (game.info.Result == "0-1")
+			sdm.blackwin = 1;
+		else if (game.info.Result.substr(0,3) == "1/2")
+			sdm.draw = 1;
+		else
+			continue;
+		if (cb.toMove == WHITE)
+		{
+			if (game.info.WhiteElo.size())
+				sdm.elo = stoi(game.info.WhiteElo);
+		}
+		else
+		{
+			if (game.info.BlackElo.size())
+				sdm.elo = stoi(game.info.BlackElo);
+		}
+		game.getDate(st);
+		sdm.year = st.wYear;
+		progress.setValue(pgn.file.dwFilepointer);
+		QApplication::processEvents();
+		if (progress.wasCanceled())
+		{
+			pgn.close();
+			return;
+		}
+		game.getStartPosition(cb);
+		game.toStart();
+		while (game.getMove(sdm.move, ss, 0))
+		{
+			exist = find(sde, cb);
+
+			sde.updateMove(sdm);
+
+			if (exist)
+			{
+				query.prepare("UPDATE positions SET "
+					"movelist = :movelist "
+					"WHERE hash = :hash;");
+			}
+			else
+			{
+				query.prepare("INSERT INTO positions ( "
+					"hash, movelist"
+					") VALUES ( "
+					":hash, :movelist );");
+			}
+			query.bindValue(":hash", sde.hash);
+			sde.convertFromMoveList(sde.movelist, qs, cb);
+			query.bindValue(":movelist", qs);
+			query.exec();
+//			addMove(sdm, cb);
+			game.doMove(0);
+			game.getPosition(cb);
+		}
+	}
+	progress.setValue(pgn.file.size());
 }
 
 bool StatisticsDBEntry::moveExist(ChessMove& move)
@@ -159,7 +258,7 @@ bool StatisticsDBEntry::moveExist(ChessMove& move)
 }
 
 
-void StatisticsDBEntry::convertToMoveList(QVector<StatisticsDBMove>& movelist, const QString& data)
+void StatisticsDBEntry::convertToMoveList(QVector<StatisticsDBMove>& movelist, const QString& data, ChessBoard& cb)
 {
 	StatisticsDBMove sdm;
 	QStringList qmove;
@@ -171,13 +270,13 @@ void StatisticsDBEntry::convertToMoveList(QVector<StatisticsDBMove>& movelist, c
 		qmove = qlist[i].split('|');
 		sdm.clear();
 		if (qmove.size() > 0)
-			sdm.move = board.getMoveFromText(qmove[0].toStdString());
+			sdm.move = cb.getMoveFromText(qmove[0].toStdString());
 		if (qmove.size() > 1)
-			sdm.win = qmove[1].toInt();
+			sdm.whitewin = qmove[1].toInt();
 		if (qmove.size() > 2)
 			sdm.draw = qmove[2].toInt();
 		if (qmove.size() > 3)
-			sdm.loss = qmove[3].toInt();
+			sdm.blackwin = qmove[3].toInt();
 		if (qmove.size() > 4)
 			sdm.elo = qmove[4].toInt();
 		if (qmove.size() > 5)
@@ -187,7 +286,7 @@ void StatisticsDBEntry::convertToMoveList(QVector<StatisticsDBMove>& movelist, c
 	}
 }
 
-void StatisticsDBEntry::convertFromMoveList(const QVector<StatisticsDBMove>& movelist, QString& data)
+void StatisticsDBEntry::convertFromMoveList(const QVector<StatisticsDBMove>& movelist, QString& data, ChessBoard& cb)
 {
 	data.clear();
 	char sz[16];
@@ -195,19 +294,19 @@ void StatisticsDBEntry::convertFromMoveList(const QVector<StatisticsDBMove>& mov
 	QVector<StatisticsDBMove>::ConstIterator it = movelist.begin();
 	while (it != movelist.end())
 	{
-		if (board.isLegal(ChessMove(it->move)))
+		if (cb.isLegal(ChessMove(it->move)))
 		{
 			if (!first)
 				data += ";";
 			else
 				first = false;
-			data += board.makeMoveText(it->move, sz, 16, FIDE);
+			data += cb.makeMoveText(it->move, sz, 16, FIDE);
 			data += "|";
-			data += itoa(it->win, sz, 10);
+			data += itoa(it->whitewin, sz, 10);
 			data += "|";
 			data += itoa(it->draw, sz, 10);
 			data += "|";
-			data += itoa(it->loss, sz, 10);
+			data += itoa(it->blackwin, sz, 10);
 			data += "|";
 			data += itoa(it->elo, sz, 10);
 			data += "|";
@@ -223,9 +322,9 @@ void StatisticsDBEntry::updateMove(StatisticsDBMove& bm)
 	{
 		if (bm.move == movelist[i].move)
 		{
-			movelist[i].win += bm.win;
+			movelist[i].whitewin += bm.whitewin;
 			movelist[i].draw += bm.draw;
-			movelist[i].loss += bm.loss;
+			movelist[i].blackwin += bm.blackwin;
 			movelist[i].elo = __max(movelist[i].elo,bm.elo);
 			movelist[i].year = __max(movelist[i].year, bm.year);
 			return;

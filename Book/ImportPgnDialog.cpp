@@ -119,7 +119,6 @@ void ImportPgnDialog::openFile()
 	QString path = QFileDialog::getOpenFileName(this, "Open pgnfile", QString(), "Pgn files (*.pgn)");
 	if (!path.isEmpty())
 		filename->setText(path);
-
 }
 
 void ImportPgnDialog::importPgnFile(QWidget* parent, Database* db, QString& pgnfile, int moves, bool comment, bool variation)
