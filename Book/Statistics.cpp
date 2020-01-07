@@ -216,12 +216,14 @@ void Statistics::importGames(QWidget* parent)
 		game.toStart();
 		while (game.getMove(sdm.move, ss, 0))
 		{
-			exist = find(sde, cb);
-
-			sde.updateMove(sdm);
-
-			if (exist)
+			query.clear();
+			sde.clear();
+			sde.hash = cb.hashkey();
+			query.prepare("SELECT * FROM positions WHERE hash = :hash;");
+			query.bindValue(":hash", sde.hash);
+			if (query.exec() && query.next())
 			{
+				sde.convertToMoveList(sde.movelist, query.value("movelist").toString(), cb);
 				query.prepare("UPDATE positions SET "
 					"movelist = :movelist "
 					"WHERE hash = :hash;");
@@ -233,11 +235,13 @@ void Statistics::importGames(QWidget* parent)
 					") VALUES ( "
 					":hash, :movelist );");
 			}
+
 			query.bindValue(":hash", sde.hash);
+			sde.updateMove(sdm);
+
 			sde.convertFromMoveList(sde.movelist, qs, cb);
 			query.bindValue(":movelist", qs);
 			query.exec();
-//			addMove(sdm, cb);
 			game.doMove(0);
 			game.getPosition(cb);
 		}
