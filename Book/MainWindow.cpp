@@ -63,6 +63,8 @@ MainWindow::MainWindow(QWidget *parent)
 	Base[THEORY] = new Database("theory");
 	Base[REPWHITE] = new Database("white");
 	Base[REPBLACK] = new Database("black");
+	statistics = new Statistics();
+	computer = new Computer();
 	currentPath = new Path();
 	training = new Training();
 	training->SetDatabase(WHITE, Base[REPWHITE]);
@@ -75,6 +77,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(pathwindow, SIGNAL(pathToDB(int)), this, SLOT(pathToDB(int)));
 	connect(pathwindow, SIGNAL(pathSelected(int)), this, SLOT(pathSelected(int)));
 	connect(commentwindow, SIGNAL(commentChanged(QString&)), this, SLOT(commentChanged(QString&)));
+	connect(enginewindow, SIGNAL(enginePV(ComputerDBEngine&)), this, SLOT(enginePV(ComputerDBEngine&)));
 
 	readSettings();
 
@@ -88,6 +91,9 @@ MainWindow::MainWindow(QWidget *parent)
 	if (!dataBlack.isEmpty())
 		if (!Base[REPBLACK]->open(dataBlack))
 			Base[REPBLACK]->create(dataBlack, REPBLACK);
+	if (!dataStatistics.isEmpty())
+		if (!statistics->open(dataStatistics))
+			statistics->create(dataComputer);
 
 	ChessBoard board = currentPath->getPosition();
 
@@ -253,6 +259,8 @@ void MainWindow::writeSettings()
 	settings.setValue("dataTheory", dataTheory);
 	settings.setValue("dataWhite", dataWhite);
 	settings.setValue("dataBlack", dataBlack);
+	settings.setValue("dataStatistics", dataStatistics);
+	settings.setValue("dataComputer", dataComputer);
 }
 
 void MainWindow::readSettings()
@@ -264,9 +272,11 @@ void MainWindow::readSettings()
 	v2Splitter->restoreState(settings.value("v2State").toByteArray());
 	hSplitter->restoreState(settings.value("hState").toByteArray());
 	dataPath = settings.value("dataPath",dataPath).toString();
-	dataTheory = settings.value("dataTheory", dataPath + "/Theory.book").toString();
-	dataWhite = settings.value("dataWhite", dataPath + "/White.book").toString();
-	dataBlack = settings.value("dataBlack", dataPath + "/Black.book").toString();
+	dataTheory = settings.value("dataTheory", dataPath + "/Theory.pbk").toString();
+	dataWhite = settings.value("dataWhite", dataPath + "/White.pbk").toString();
+	dataBlack = settings.value("dataBlack", dataPath + "/Black.pbk").toString();
+	dataStatistics = settings.value("dataStatistics", dataPath + "/Statistics.pst").toString();
+	dataComputer = settings.value("dataComputer", dataPath + "/Computer.pcp").toString();
 
 	/*
 	QSettings settings;
@@ -297,7 +307,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::fileOpen(int type)
 {
 	QMessageBox msgbox;
-	QString path = QFileDialog::getOpenFileName(this, "Open book", dataPath, "Book files (*.book)");
+	QString path = QFileDialog::getOpenFileName(this, "Open book", dataPath, "Book files (*.pbk)");
 	if (!path.isEmpty())
 	{
 		if (!Base[type]->open(path))
@@ -320,7 +330,7 @@ void MainWindow::fileOpen(int type)
 
 void MainWindow::fileNew(int type)
 {
-	QString path = QFileDialog::getSaveFileName(this, "Open book", dataPath, "Book files (*.book)");
+	QString path = QFileDialog::getSaveFileName(this, "Open book", dataPath, "Book files (*.pbk)");
 	if (!path.isEmpty())
 	{
 		QFile file(path);
@@ -614,7 +624,7 @@ void MainWindow::fileImportBook()
 {
 	Database iBase("ImportBase");
 	QMessageBox msgbox;
-	QString path = QFileDialog::getOpenFileName(this, "Open book to import", dataPath, "Book files (*.book)");
+	QString path = QFileDialog::getOpenFileName(this, "Open book to import", dataPath, "Book files (*.pbk)");
 	if (!path.isEmpty())
 	{
 		if (!iBase.open(path))
@@ -653,7 +663,7 @@ void MainWindow::fileImportBook()
 
 void MainWindow::fileCreateStatistics()
 {
-	movewindow->createStatistics();
+	statistics->importGames(this);
 }
 
 void MainWindow::trainingClearData()
@@ -749,4 +759,9 @@ void MainWindow::trainingStop()
 {
 	inTraining = false;
 	updateWindow();
+}
+
+void MainWindow::enginePV(ComputerDBEngine&)
+{
+
 }

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Database.h"
+#include "Statistics.h"
+#include "Computer.h"
 #include "Training.h"
 #include "StatusWatch.h"
 #include "../Common/ChessMove.h"
@@ -37,6 +39,7 @@ public slots:
 	void pathToDB(int);
 	void commentChanged(QString&);
 	void addMoveComment(int rep, int movenr, QString& comment);
+	void enginePV(ComputerDBEngine&);
 
 public:
 	Path* currentPath;
@@ -44,10 +47,14 @@ public:
 	virtual ~MainWindow();
 
 private:
+	QVector<StatisticsDBMove> statList;
+	QVector<ComputerDBEngine> compList;
 	QString dataPath;
 	QString dataTheory;
 	QString dataWhite;
 	QString dataBlack;
+	QString dataStatistics;
+	QString dataComputer;
 	QMenu* fileMenu;
 	QMenu* fileOpenMenu;
 	QMenu* fileNewMenu;
@@ -84,6 +91,8 @@ private:
 	PathWindow* pathwindow;
 	EngineWindow* enginewindow;
 	Database* Base[3];
+	Statistics* statistics;
+	Computer* computer;
 	BookDBEntry bde[3];
 	Training* training;
 	TrainingPath trainingLine;

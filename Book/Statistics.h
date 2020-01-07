@@ -11,8 +11,8 @@
 /*
 	Database format
 
-	fen			text
-		position as fenstring rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR W kqKQ -
+	hash			text
+		position as hashkey.
 
 	movelist	text
 		move1|win|draw|loss|maxelo|lastyear;move2|win|draw|loss|maxelo|lastyear
@@ -72,6 +72,8 @@ public:
 	// Import pgn-file
 	void importGames(QWidget* parent);
 
+	// Get a list of moves from current board
+	void get(QVector<StatisticsDBMove>&, ChessBoard&);
 private:
 	bool opened;
 };

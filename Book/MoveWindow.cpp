@@ -13,11 +13,6 @@
 MoveWindow::MoveWindow(QWidget *parent)
 	: QWidget(parent)
 {
-	QString spath = QStandardPaths::locate(QStandardPaths::DocumentsLocation, QCoreApplication::organizationName(), QStandardPaths::LocateDirectory);
-	spath += "/" + QCoreApplication::applicationName();
-	statistics = new Statistics();
-	if (!statistics->open(spath + "/Statistics.bin"))
-		statistics->create(spath + "/Statistics.bin");
 	QVBoxLayout* vbox = new QVBoxLayout;
 	model = new QStandardItemModel(0, 3);
 	QStringList header;
@@ -145,9 +140,4 @@ void MoveWindow::addComment(QString& comment)
 		if (qmi.isValid())
 			emit addMoveComment(qmi.column(), qmi.row(), comment);
 	}
-}
-
-void MoveWindow::createStatistics()
-{
-	statistics->importGames(this);
 }

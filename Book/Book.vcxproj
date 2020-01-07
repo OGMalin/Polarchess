@@ -130,6 +130,7 @@
     <ClCompile Include="..\Common\WinFile.cpp" />
     <ClCompile Include="AboutDialog.cpp" />
     <ClCompile Include="CommentWindow.cpp" />
+    <ClCompile Include="Computer.cpp" />
     <ClCompile Include="CreateStatisticsDialog.cpp" />
     <ClCompile Include="Database.cpp" />
     <ClCompile Include="EngineWindow.cpp" />
@@ -198,6 +199,7 @@
     </QtMoc>
     <ClInclude Include="..\Common\UciEngine.h" />
     <ClInclude Include="..\Common\XBoardEngine.h" />
+    <ClInclude Include="Computer.h" />
     <ClInclude Include="Training.h" />
     <QtMoc Include="CreateStatisticsDialog.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>

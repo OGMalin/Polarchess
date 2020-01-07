@@ -7,6 +7,7 @@
 #include <QStandardItemModel>
 #include <QFont>
 #include <QComboBox>
+#include "Computer.h"
 
 class QPushButton;
 class QLabel;
@@ -31,7 +32,8 @@ public slots:
 	void slotSelectEngine(const QString& eng);
 	void slotEngineStarted();
 	void slotEngineStoped();
-
+signals:
+	void enginePV(ComputerDBEngine&);
 private:
 	bool engineReady;
 	int multipv;

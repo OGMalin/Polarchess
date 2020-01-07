@@ -153,26 +153,33 @@ void Statistics::addMove(StatisticsDBMove& m, ChessBoard& cb)
 	return;
 }
 
+// Doing this in at bit strange way to try to speed up the database handling., insert on a SqlLight db are very slow.
 void Statistics::importGames(QWidget* parent)
 {
 	SYSTEMTIME st;
 	StatisticsDBMove sdm;
 	StatisticsDBEntry sde;
 	ChessBoard cb;
+	QVector<StatisticsDBEntry> sdes;
 	std::string ss;
 	Pgn pgn;
-	bool exist;
 	ChessGame game;
+	HASHKEY hash;
+	int i;
 	QSqlDatabase db = QSqlDatabase::database(STATISTICS);
 	if (!opened)
 		return;
 	if (!db.open())
 		return;
+
+	// Get pgn filename
 	QString path = QFileDialog::getOpenFileName(parent, "Open pgnfile", QString(), "Pgn files (*.pgn)");
 	if (path.isEmpty())
 		return;
 	if (!pgn.open(path.toStdString(), true))
 		return;
+
+	// Open progress dialog
 	QProgressDialog progress("Importing Pgn file.", "Cancel", 0, pgn.file.size(), parent);
 	progress.setWindowModality(Qt::WindowModal);
 	progress.setMinimumDuration(0);
@@ -184,7 +191,6 @@ void Statistics::importGames(QWidget* parent)
 	int next = 1;
 	while (pgn.read(game, next++, 25))
 	{
-		sdm.clear();
 		if (game.info.Result == "1-0")
 			sdm.whitewin = 1;
 		else if (game.info.Result == "0-1")
@@ -214,39 +220,70 @@ void Statistics::importGames(QWidget* parent)
 		}
 		game.getStartPosition(cb);
 		game.toStart();
+		// Collect all positions from db
+		sdes.clear();
+		query.prepare("SELECT * FROM positions WHERE hash = :hash;");
 		while (game.getMove(sdm.move, ss, 0))
 		{
-			query.clear();
 			sde.clear();
 			sde.hash = cb.hashkey();
-			query.prepare("SELECT * FROM positions WHERE hash = :hash;");
 			query.bindValue(":hash", sde.hash);
 			if (query.exec() && query.next())
 			{
 				sde.convertToMoveList(sde.movelist, query.value("movelist").toString(), cb);
-				query.prepare("UPDATE positions SET "
-					"movelist = :movelist "
-					"WHERE hash = :hash;");
+				sdes.push_back(sde);
 			}
-			else
+			game.doMove(0);
+			game.getPosition(cb);
+		}
+
+		//
+		game.getStartPosition(cb);
+		game.toStart();
+		db.transaction();
+		while (game.getMove(sdm.move, ss, 0))
+		{
+			sde.hash = cb.hashkey();
+			for (i = 0; i < sdes.size(); i++)
+				if (sdes[i].hash == sde.hash)
+					break;
+			// New record
+			if (i >= sdes.size())
 			{
+				sde.movelist.clear();
+				sde.movelist.push_back(sdm);
 				query.prepare("INSERT INTO positions ( "
 					"hash, movelist"
 					") VALUES ( "
 					":hash, :movelist );");
+				sde.convertFromMoveList(sde.movelist, qs, cb);
+				query.bindValue(":movelist", qs);
+				query.bindValue(":hash", sde.hash);
 			}
-
-			query.bindValue(":hash", sde.hash);
-			sde.updateMove(sdm);
-
-			sde.convertFromMoveList(sde.movelist, qs, cb);
-			query.bindValue(":movelist", qs);
+			// Update old record
+			else
+			{
+				sdes[i].updateMove(sdm);
+				query.prepare("UPDATE positions SET "
+					"movelist = :movelist "
+					"WHERE hash = :hash;");
+				sdes[i].convertFromMoveList(sdes[i].movelist, qs, cb);
+				query.bindValue(":movelist", qs);
+				query.bindValue(":hash", sde.hash);
+			}
 			query.exec();
+
 			game.doMove(0);
 			game.getPosition(cb);
 		}
+		db.commit();
 	}
 	progress.setValue(pgn.file.size());
+}
+
+void Statistics::get(QVector<StatisticsDBMove>&, ChessBoard&)
+{
+
 }
 
 bool StatisticsDBEntry::moveExist(ChessMove& move)
@@ -260,7 +297,6 @@ bool StatisticsDBEntry::moveExist(ChessMove& move)
 	}
 	return false;
 }
-
 
 void StatisticsDBEntry::convertToMoveList(QVector<StatisticsDBMove>& movelist, const QString& data, ChessBoard& cb)
 {

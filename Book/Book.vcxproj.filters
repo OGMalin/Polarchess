@@ -123,6 +123,9 @@
     <ClCompile Include="..\Common\BaseEngine.cpp">
       <Filter>Common</Filter>
     </ClCompile>
+    <ClCompile Include="Computer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -222,6 +225,9 @@
     </ClInclude>
     <ClInclude Include="..\Common\XBoardEngine.h">
       <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Computer.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

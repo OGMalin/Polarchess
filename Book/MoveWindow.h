@@ -5,6 +5,7 @@
 #include <QBrush>
 #include <QFont>
 #include "Statistics.h"
+#include "Computer.h"
 
 class QTableView;
 class QStandardItemModel;
@@ -17,7 +18,6 @@ public:
 	MoveWindow(QWidget *parent=0);
 	~MoveWindow();
 	void refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black);
-	void createStatistics();
 	void addComment(QString& comment);
 
 signals:
@@ -39,7 +39,6 @@ public slots:
 	void addComment6() { addComment(QString("?!")); };
 
 private:
-	Statistics* statistics;
 	QTableView * table;
 	QStandardItemModel* model;
 	QBrush repBrush;
