@@ -69,6 +69,7 @@ bool Computer::create(const QString& path)
 	query.bindValue(":db", CDBTYPE);
 	query.bindValue(":version", CDBVERSION);
 	query.exec();
+	query.exec("CREATE TABLE engines ( engine TEXT);");
 	query.exec("CREATE TABLE positions ( "
 		"hash	TEXT,"
 		"enginelist	TEXT,"

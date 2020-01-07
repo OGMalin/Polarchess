@@ -51,6 +51,9 @@ class Computer : public QObject
 {
 public:
 	ComputerDBInfo cdi;
+	// List of all engines with evaluation in this db.
+	QVector<QString> enginelist;
+
 	Computer();
 	~Computer();
 
@@ -71,6 +74,7 @@ public:
 
 	// Get a list of engine analysis from current board
 	void get(QVector<ComputerDBEngine>&, ChessBoard&);
+
 private:
 	bool opened;
 };

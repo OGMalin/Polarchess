@@ -208,9 +208,10 @@ void Engine::stop()
 
 void Engine::setMultiPV(int n)
 {
-/*	QString qs = "setoption name multipv value ";
-	qs += QString().setNum(n);
-	write(qs);*/
+	if (xboard)
+		xboard->setMultiPV(n);
+	else if (uci)
+		uci->setMultiPV(n);
 }
 
 bool Engine::isLoaded()

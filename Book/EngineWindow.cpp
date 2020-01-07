@@ -14,6 +14,7 @@ EngineWindow::EngineWindow(QWidget *parent)
 	: QWidget(parent)
 {
 	char sz[16];
+	timeLimit = 59999;
 	engineReady = false;
 	multipv = 1;
 	movenr = 1;
@@ -188,6 +189,7 @@ void EngineWindow::slotDeclineClicked(bool)
 void EngineWindow::slotEngineInfo(const EngineInfo& info)
 {
 	char sz[16];
+	bool send = false;
 	int line = info.multipv;
 	if (line < 1)
 		line = 1;
@@ -269,6 +271,11 @@ void EngineWindow::slotEngineInfo(const EngineInfo& info)
 			item->setEditable(false);
 			item->setTextAlignment(Qt::AlignLeft);
 			model->setItem(line - 1, 2, item);
+			if (info.time >= timeLimit)
+			{
+				ComputerDBEngine ce;
+				emit enginePV(ce);
+			}
 		}
 	}
 }

@@ -19,4 +19,5 @@ public:
 	void analyze(ChessBoard& board);
 	void stop();
 	void newGame();
+	void setMultiPV(int n);
 };

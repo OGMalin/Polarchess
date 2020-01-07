@@ -93,7 +93,10 @@ MainWindow::MainWindow(QWidget *parent)
 			Base[REPBLACK]->create(dataBlack, REPBLACK);
 	if (!dataStatistics.isEmpty())
 		if (!statistics->open(dataStatistics))
-			statistics->create(dataComputer);
+			statistics->create(dataStatistics);
+	if (!dataComputer.isEmpty())
+		if (!computer->open(dataComputer))
+			computer->create(dataComputer);
 
 	ChessBoard board = currentPath->getPosition();
 

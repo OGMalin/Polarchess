@@ -35,6 +35,7 @@ public slots:
 signals:
 	void enginePV(ComputerDBEngine&);
 private:
+	unsigned int timeLimit;
 	bool engineReady;
 	int multipv;
 	QString engineName;

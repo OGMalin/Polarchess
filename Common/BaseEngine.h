@@ -20,6 +20,54 @@ enum SEARCHTYPE
 	INFINITE_SEARCH
 };
 
+enum OPTION_TYPE {
+	CHECK = 0,
+	SPIN,
+	COMBO,
+	BUTTON,
+	STRING,
+	SAVE,
+	RESET,
+};
+
+struct OptionCheck
+{
+	bool default;
+	bool value;
+};
+
+struct OptionSpin
+{
+	int default;
+	int min;
+	int max;
+	int value;
+};
+
+struct OptionCombo
+{
+	QString default;
+	QStringList var;
+	QString value;
+};
+
+struct OptionString
+{
+	QString default;
+	QString value;
+};
+
+struct EngineOption
+{
+	QString name;
+	OPTION_TYPE type;
+	OptionCheck check;
+	OptionSpin spin;
+	OptionCombo combo;
+	OptionString string;
+};
+
+
 struct EngineInfo
 {
 	int depth;
@@ -68,6 +116,7 @@ class BaseEngine :public QObject
 {
 	Q_OBJECT
 protected:
+	QVector<EngineOption> engineOption;
 	QProcess* process;
 	QMap<QString, QString> initOptions;
 	int searchtype;
@@ -96,4 +145,5 @@ public:
 	virtual void write(QString& qs);
 	virtual void analyze(ChessBoard& board) {};
 	virtual void stop() {};
+	virtual void setMultiPV(int n) {};
 };

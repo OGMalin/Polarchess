@@ -54,6 +54,84 @@ void UciEngine::fromEngine(std::string& input)
 	{
 		emit engineMove(QString(getWord(input, 2).c_str()), QString(getWord(input, 4).c_str()));
 	}
+	else if (cmd == "option")
+	{
+		EngineOption eo;
+		int index = 2;
+		string value = getWord(input, index);
+		++index;
+		while (value.length())
+		{
+			if (value == "name")
+			{
+				eo.name = getWord(input, index).c_str();
+				value = getWord(input, index);
+				while (!value.empty())
+				{
+					if (value == "type")
+						break;
+					eo.name += " ";
+					eo.name += value.c_str();
+					++index;
+					value = getWord(input, index);
+				}
+				--index;
+			}
+			else if (value == "type")
+			{
+				value = getWord(input, index);
+				if (value == "check")
+					eo.type = OPTION_TYPE::CHECK;
+				else if (value=="spin")
+					eo.type = OPTION_TYPE::SPIN;
+				else if (value == "combo")
+					eo.type = OPTION_TYPE::COMBO;
+				else if (value == "button")
+					eo.type = OPTION_TYPE::BUTTON;
+				else if (value == "string")
+					eo.type = OPTION_TYPE::STRING;
+			}
+			else if (value == "default")
+			{
+				if (eo.type == OPTION_TYPE::CHECK)
+				{
+					eo.check.default = booleanString(getWord(input, index));
+					eo.check.value = eo.check.default;
+				}
+				else if (eo.type == OPTION_TYPE::SPIN)
+				{
+					eo.spin.default = stoi(getWord(input, index));
+					eo.spin.value = eo.spin.default;
+				}
+				else if (eo.type == OPTION_TYPE::COMBO)
+				{
+					eo.combo.default = getWord(input, index).c_str();
+					eo.combo.value = eo.combo.default;
+				}
+				else if (eo.type == OPTION_TYPE::STRING)
+				{
+					eo.string.default= getWord(input, index).c_str();
+					eo.string.value = eo.string.default;
+				}
+			}
+			else if (value == "min")
+			{
+				eo.spin.min= stoi(getWord(input, index));
+			}
+			else if (value == "max")
+			{
+				eo.spin.max = stoi(getWord(input, index));
+			}
+			else if (value == "var")
+			{
+				eo.combo.var.push_back(getWord(input, index).c_str());
+			}
+			++index;
+			value = getWord(input, index);
+			++index;
+		}
+		engineOption.push_back(eo);
+	}
 	else if (cmd == "info")
 	{
 		EngineInfo ei;
@@ -186,9 +264,7 @@ void UciEngine::fromEngine(std::string& input)
 					m = b.getMoveFromText(getWord(input, index));
 				}
 				--index;
-
 			}
-
 			++index;
 			info = getWord(input, index);
 			++index;
@@ -200,35 +276,20 @@ void UciEngine::fromEngine(std::string& input)
 void UciEngine::analyze(ChessBoard& board)
 {
 	int i;
-//	QStringList list;
 	QString qs;
+
+	// Stop the engine if needed
 	stop();
 
 	currentBoard=board;
-	//for (i = 0; i < moves.size; i++)
-	//{
-	//	list.append(cb.makeMoveText(moves.at(i), UCI).c_str());
-	//	if (!cb.doMove(moves.at(i), true))
-	//		break;
-	//}
-	string s = board.getFen();
-	qs = "position fen ";
+
+	qs = "position ";
 
 	if (currentBoard.isStartposition())
-		qs += "startfen";
+		qs += "startpos";
 	else
-		qs += currentBoard.getFen(true).c_str();
-	//if (list.size())
-	//{
-	//	qs += " moves";
-	//	QStringList::iterator lit = list.begin();
-	//	while (lit != list.end())
-	//	{
-	//		qs += " ";
-	//		qs += *lit;
-	//		++lit;
-	//	}
-	//}
+		qs += QString("fen ") + currentBoard.getFen(true).c_str();
+
 	write(qs);
 	write("go infinite");
 	searchtype = INFINITE_SEARCH;
@@ -250,4 +311,26 @@ void UciEngine::slotFinishInit()
 void UciEngine::newGame()
 {
 	stop();
+}
+
+void UciEngine::setMultiPV(int n)
+{
+	int i;
+	if (n < 1)
+		return;
+	for (i = 0; i < engineOption.size(); i++)
+	{
+		if (engineOption[i].name == "MultiPV")
+		{
+			if (engineOption[i].spin.value == n)
+				return;
+			if (engineOption[i].spin.max >= n)
+			{
+				QString qs = "setoption name multipv value ";
+				qs += QString().setNum(n);
+				write(qs);
+			}
+			return;
+		}
+	}
 }
