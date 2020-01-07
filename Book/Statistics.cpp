@@ -189,7 +189,7 @@ void Statistics::importGames(QWidget* parent)
 	QString qs;
 
 	int next = 1;
-	while (pgn.read(game, next++, 25))
+	while (pgn.read(game, next++, 20))
 	{
 		if (game.info.Result == "1-0")
 			sdm.whitewin = 1;
