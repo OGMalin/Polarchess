@@ -92,31 +92,35 @@ void Computer::close()
 	opened = false;
 }
 
-//bool Computer::find(ComputerDBEntry& cde, ChessBoard& cb)
-//{
-//	cde.clear();
-//	if (!opened)
-//		return false;
-//	cde.hash = cb.hashkey();
-//	if (lastSearch.hash == cde.hash)
-//	{
-//		cde = lastSearch;
-//		return true;
-//	}
-//
-//	QSqlDatabase db = QSqlDatabase::database(COMPUTER);
-//	if (!db.open())
-//		return false;
-//	QSqlQuery query(db);
-//	query.prepare("SELECT * FROM positions WHERE hash = :hash;");
-//	query.bindValue(":hash", cde.hash);
-//	if (query.exec() && query.next())
-//	{
-//		cde.convertToEngineList(query.value("enginelist").toString(), cb);
-//		return true;
-//	}
-//	return false;
-//}
+ComputerDBEntry Computer::find(ChessBoard& cb)
+{
+	HASHKEY hash = cb.hashkey();
+	if (lastSearch.hash == hash)
+		return lastSearch;
+
+	lastSearch.clear();
+
+	if (!opened)
+		return lastSearch;
+
+	QSqlDatabase db = QSqlDatabase::database(COMPUTER);
+	if (!db.open())
+		return lastSearch;
+
+	QSqlQuery query(db);
+	query.prepare("SELECT * FROM positions WHERE hash = :hash;");
+	query.bindValue(":hash", hash);
+	if (query.exec() && query.next())
+	{
+		lastSearch.convertToEngineList(query.value("enginelist").toString(), cb);
+		lastSearch.hash = hash;
+	}
+	else
+	{
+		lastSearch.clear();
+	}
+	return lastSearch;
+}
 
 void Computer::add(ComputerDBEngine& ce, ChessBoard& cb)
 {

@@ -735,6 +735,35 @@ HASHKEY ChessBoard::newHashkey(const ChessMove& m, HASHKEY key)
 	return key;
 }
 
+char* ChessBoard::makeMoveText(const ChessMove& cm, char* buf, int bufsize, const char* charset)
+{
+
+	int i;
+	makeMoveText(cm, buf, bufsize,FIDE);
+	if (strlen(charset) < 5)
+		return buf;
+	for (i = 0; i < strlen(buf); i++)
+	{
+		if (buf[i] == 'N')
+			buf[i] = charset[0];
+		else if (buf[i] == 'B')
+			buf[i] = charset[1];
+		else if (buf[i] == 'R')
+			buf[i] = charset[2];
+		else if (buf[i] == 'Q')
+			buf[i] = charset[3];
+		else if (buf[i] == 'K')
+			buf[i] = charset[4];
+	}
+	return buf;
+}
+
+const std::string ChessBoard::makeMoveText(const ChessMove& m, const std::string& charset)
+{
+	char buf[16];
+	return makeMoveText(m, buf, 16, charset.c_str());
+}
+
 const std::string ChessBoard::makeMoveText(const ChessMove& m, int type)
 {
 	char buf[16];

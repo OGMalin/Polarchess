@@ -97,7 +97,7 @@ public:
 	bool open(const QString& path);
 	void close();
 	bool add(BookDBEntry& data);
-	BookDBEntry find(ChessBoard& board);
+	BookDBEntry find(ChessBoard&);
 	bool isOpen() { return opened; };
 	BookDBInfo bookInfo();
 	void getTrainingPosition(QVector<BookDBEntry>&);

@@ -54,5 +54,5 @@ public:
 	ChessBoard getStartPosition();
 
 	// Get full movelist.
-	void getMoveList(QStringList& ml);
+	void getMoveList(QStringList& ml, const char* charset=NULL);
 };

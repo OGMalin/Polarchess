@@ -31,6 +31,11 @@
     <Filter Include="Common">
       <UniqueIdentifier>{7d3a5a15-5bd9-4ec4-a776-f2d44eb0789b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Translation Files">
+      <UniqueIdentifier>{639EADAA-A684-42e4-A9AD-28FC9BCB8F7C}</UniqueIdentifier>
+      <Extensions>ts</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -242,8 +247,19 @@
     <Image Include="icon\home48.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="icon\GB.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icon\NO.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ToDo.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="language\book_nb.ts">
+      <Filter>Translation Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

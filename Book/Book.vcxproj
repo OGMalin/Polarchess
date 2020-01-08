@@ -251,11 +251,16 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="icon\GB.png" />
     <Image Include="icon\home48.png" />
+    <Image Include="icon\NO.png" />
     <Image Include="images\pieces.png" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ToDo.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="language\book_nb.ts" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

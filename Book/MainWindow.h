@@ -8,6 +8,8 @@
 #include "../Common/ChessMove.h"
 #include <QMainWindow>
 #include <QString>
+#include <QTranslator>
+#include <QActionGroup>
 
 enum {THEORY=0, REPWHITE, REPBLACK };
 class QMenu;
@@ -31,6 +33,9 @@ private:
 	void closeEvent(QCloseEvent* event) override;
 	void aboutDialog();
 
+protected:
+	void changeEvent(QEvent*);
+
 public slots:
 	void moveEntered(ChessMove&);
 	void moveSelected(int rep, int movenr);
@@ -40,6 +45,7 @@ public slots:
 	void commentChanged(QString&);
 	void addMoveComment(int rep, int movenr, QString& comment);
 	void enginePV(ComputerDBEngine&, ChessBoard&);
+	void slotLanguageChanged(QAction*);
 
 public:
 	Path* currentPath;
@@ -49,12 +55,14 @@ public:
 private:
 	QVector<StatisticsDBMove> statList;
 	QVector<ComputerDBEngine> compList;
+	QTranslator translator;
 	QString dataPath;
 	QString dataTheory;
 	QString dataWhite;
 	QString dataBlack;
 	QString dataStatistics;
 	QString dataComputer;
+	QString locale;
 	QMenu* fileMenu;
 	QMenu* fileOpenMenu;
 	QMenu* fileNewMenu;
@@ -64,6 +72,8 @@ private:
 	QMenu* bookWriteMenu;
 	QMenu* trainingMenu;
 	QMenu* trainingStartMenu;
+	QMenu* settingsMenu;
+	QMenu* langMenu;
 	QToolBar* toolbar;
 	QAction* openAct[3];
 	QAction* newAct[3];
@@ -82,6 +92,9 @@ private:
 	QAction* startTrainingPosWhiteAct;
 	QAction* startTrainingPosBlackAct;
 	QAction* stopTrainingAct;
+	QAction* engAct;
+	QAction* norAct;
+	QActionGroup * langGroup;
 	QSplitter* hSplitter;
 	QSplitter* v1Splitter;
 	QSplitter* v2Splitter;
@@ -95,6 +108,8 @@ private:
 	Statistics* statistics;
 	Computer* computer;
 	BookDBEntry bde[3];
+	StatisticsDBEntry sde;
+	ComputerDBEntry cde;
 	Training* training;
 	TrainingPath trainingLine;
 	TrainingStat trainingStat;
@@ -106,6 +121,7 @@ private:
 	void createMenu();
 	void createStatusbar();
 	void updateWindow();
+	void readDB();
 	void updateMenu();
 	void writeSettings();
 	void readSettings();
@@ -139,4 +155,7 @@ private:
 	void trainingStartPosWhite();
 	void trainingStartPosBlack();
 	void trainingStop();
+	void setLanguage();
+	void loadLanguage();
+	void retranslateUi();
 };

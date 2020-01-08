@@ -2,5 +2,8 @@
     <qresource prefix="/">
         <file>images/pieces.png</file>
         <file>icon/home48.png</file>
+        <file>icon/GB.png</file>
+        <file>icon/NO.png</file>
+        <file>language/book_nb.qm</file>
     </qresource>
 </RCC>

@@ -2,19 +2,6 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="nb_NO">
 <context>
-    <name>Engine</name>
-    <message>
-        <location filename="../../Common/Engine.cpp" line="77"/>
-        <source>Error message: </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../Common/Engine.cpp" line="125"/>
-        <source>Engine started</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>MainWindow</name>
     <message>
         <location filename="../MainWindow.cpp" line="133"/>
@@ -93,12 +80,12 @@
         <translation>Om....</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="379"/>
+        <location filename="../MainWindow.cpp" line="383"/>
         <source>Lost on time.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="495"/>
+        <location filename="../MainWindow.cpp" line="501"/>
         <source>You can&apos;t abort a rated game after move 1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -300,7 +287,7 @@
 <context>
     <name>QChessGame</name>
     <message>
-        <location filename="../../Common/QChessGame.cpp" line="102"/>
+        <location filename="../../Common/QChessGame.cpp" line="101"/>
         <source>NBRQK</source>
         <translation>SLTDK</translation>
     </message>

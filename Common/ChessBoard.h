@@ -56,6 +56,8 @@ public:
 	//  UCI  - UCI standard
 	char* makeMoveText(const ChessMove& cm, char* buf, int bufsize, int type);
 	const std::string makeMoveText(const ChessMove& m, int type);
+	char* makeMoveText(const ChessMove& cm, char* buf, int bufsize, const char* charset);
+	const std::string makeMoveText(const ChessMove& m,  const std::string& charset);
 	bool isStartposition();
 	void setStartposition();
 

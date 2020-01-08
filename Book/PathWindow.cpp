@@ -33,7 +33,7 @@ void PathWindow::refresh(Path* path)
 	QStringList ml;
 	QString p = ".";
 	clear();
-	path->getMoveList(ml);
+	path->getMoveList(ml,tr("NBRQK").toLatin1());
 	addItem("O"); // Start position
 	for (int i = 0; i < ml.size(); i++)
 	{

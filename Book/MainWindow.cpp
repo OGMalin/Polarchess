@@ -37,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
 	createStatusbar();
 
 	statusBar();
+	loadLanguage();
 
 	hSplitter = new QSplitter(Qt::Horizontal);
 	v1Splitter = new QSplitter(Qt::Vertical);
@@ -60,6 +61,10 @@ MainWindow::MainWindow(QWidget *parent)
 
 	setCentralWidget(hSplitter);
 
+	readSettings();
+
+	retranslateUi();
+
 	Base[THEORY] = new Database("theory");
 	Base[REPWHITE] = new Database("white");
 	Base[REPBLACK] = new Database("black");
@@ -78,8 +83,6 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(pathwindow, SIGNAL(pathSelected(int)), this, SLOT(pathSelected(int)));
 	connect(commentwindow, SIGNAL(commentChanged(QString&)), this, SLOT(commentChanged(QString&)));
 	connect(enginewindow, SIGNAL(enginePV(ComputerDBEngine&, ChessBoard&)), this, SLOT(enginePV(ComputerDBEngine&, ChessBoard&)));
-
-	readSettings();
 
 	// Open default databases
 	if (!dataTheory.isEmpty())
@@ -100,10 +103,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	ChessBoard board = currentPath->getPosition();
 
-	for (int i = 0; i < 3; i++)
-	{
-		bde[i] = Base[i]->find(board);
-	}
+	readDB();
 
 	enginewindow->setPosition(board);
 	boardwindow->setPosition(board);
@@ -122,7 +122,7 @@ MainWindow::~MainWindow()
 void MainWindow::createMenu()
 {
 	// File menu
-	fileMenu = menuBar()->addMenu("File");
+	fileMenu = menuBar()->addMenu("*");
 	fileOpenMenu = fileMenu->addMenu("Open book");
 	openAct[THEORY] = fileOpenMenu->addAction("Open theory book", this, &MainWindow::fileOpenTheory);
 	openAct[REPWHITE] = fileOpenMenu->addAction("Open White repertoire book", this, &MainWindow::fileOpenWhite);
@@ -140,7 +140,7 @@ void MainWindow::createMenu()
 	importBookAct = fileImportMenu->addAction("Import book", this, &MainWindow::fileImportBook);
 	createStatAct = fileImportMenu->addAction("Import Statistics", this, &MainWindow::fileCreateStatistics);
 	fileMenu->addSeparator();
-	exitAct = fileMenu->addAction("Exit", this, &QWidget::close);
+	exitAct = fileMenu->addAction("*", this, &QWidget::close);
 
 	bookMenu = menuBar()->addMenu("Book");
 	bookWriteMenu = bookMenu->addMenu("Write enable");
@@ -162,6 +162,24 @@ void MainWindow::createMenu()
 	clearTrainingAct = trainingMenu->addAction("Clear trainingdata", this, &MainWindow::trainingClearData);
 	createTrainingAct = trainingMenu->addAction("Create training", this, &MainWindow::trainingCreate);
 
+	settingsMenu = menuBar()->addMenu("*");
+	//	fileMenu->addSeparator();
+	langMenu = settingsMenu->addMenu("*");
+	engAct = langMenu->addAction(QIcon(":/icon/GB.png"), "*");
+	engAct->setCheckable(true);
+	engAct->setData("gb");
+	norAct = langMenu->addAction(QIcon(":/icon/NO.png"), "*");
+	norAct->setCheckable(true);
+	norAct->setData("nb");
+	langGroup = new QActionGroup(this);
+	connect(langGroup, SIGNAL(triggered(QAction *)), this, SLOT(slotLanguageChanged(QAction *)));
+	langGroup->addAction(engAct);
+	langGroup->addAction(norAct);
+	if (locale == "nb")
+		norAct->setChecked(true);
+	else
+		engAct->setChecked(true);
+
 	// Setting up the toolbar
 	toolbar = addToolBar("Toolbar");
 	toolbar->setObjectName("MainToolbar");
@@ -176,6 +194,32 @@ void MainWindow::createMenu()
 	// No database opened as default
 	importPgnAct->setDisabled(true);
 
+}
+
+void MainWindow::retranslateUi()
+{
+	fileMenu->setTitle(tr("File"));
+	exitAct->setText(tr("Exit"));
+
+	//boardMenu->setTitle(tr("Board"));
+	//flipAct->setText(tr("Flip board"));
+
+	//gameMenu->setTitle(tr("Game"));
+	//newGameAct->setText(tr("New game"));
+	//abortAct->setText(tr("Abort"));
+	//resignAct->setText(tr("Resign"));
+
+	settingsMenu->setTitle(tr("Settings"));
+	langMenu->setTitle(tr("Language"));
+	if (locale == "nb")
+		langMenu->setIcon(QIcon(":/icon/NO.png"));
+	else
+		langMenu->setIcon(QIcon(":/icon/GB.png"));
+	engAct->setText(tr("English"));
+	norAct->setText(tr("Norwegian"));
+	//defAct->setText(tr("Set default settings"));
+	//helpMenu->setTitle(tr("Help"));
+	//aboutAct->setText(tr("About..."));
 }
 
 void MainWindow::updateMenu()
@@ -226,11 +270,10 @@ void MainWindow::updateMenu()
 
 void MainWindow::updateWindow()
 {
-	movewindow->refresh(bde[THEORY], bde[REPWHITE], bde[REPBLACK]);
+	movewindow->refresh(bde[THEORY], bde[REPWHITE], bde[REPBLACK], sde, cde);
 	commentwindow->refresh(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
 	pathwindow->refresh(currentPath);
 
-#ifndef _DEBUG
 	if(inTraining)
 	{
 		movewindow->setVisible(false);
@@ -243,7 +286,19 @@ void MainWindow::updateWindow()
 		commentwindow->setVisible(true);
 		enginewindow->setVisible(true);
 	}
-#endif // !_DEBUG
+}
+
+void MainWindow::readDB()
+{
+	// Change to read from both db
+	ChessBoard cb = currentPath->getPosition();
+
+	for (int i = 0; i < 3; i++)
+	{
+		bde[i] = Base[i]->find(cb);
+	}
+	sde = statistics->find(cb);
+	cde = computer->find(cb);
 
 }
 
@@ -266,6 +321,7 @@ void MainWindow::writeSettings()
 	settings.setValue("dataBlack", dataBlack);
 	settings.setValue("dataStatistics", dataStatistics);
 	settings.setValue("dataComputer", dataComputer);
+	settings.setValue("language", locale);
 }
 
 void MainWindow::readSettings()
@@ -282,6 +338,13 @@ void MainWindow::readSettings()
 	dataBlack = settings.value("dataBlack", dataPath + "/Black.pbk").toString();
 	dataStatistics = settings.value("dataStatistics", dataPath + "/Statistics.pst").toString();
 	dataComputer = settings.value("dataComputer", dataPath + "/Computer.pcp").toString();
+	locale = settings.value("language", QString()).toString();
+	if (locale.isEmpty())
+	{
+		// Find the systems default language
+		locale = QLocale::system().name();
+		locale.truncate(locale.lastIndexOf('_'));
+	}
 
 	/*
 	QSettings settings;
@@ -413,10 +476,7 @@ void MainWindow::moveSelected(int rep, int movenr)
 	// Change to read from both db
 	board = currentPath->getPosition();
 
-	for (int i = 0; i < 3; i++)
-	{
-		bde[i] = Base[i]->find(board);
-	}
+	readDB();
 
 	boardwindow->setPosition(board);
 	enginewindow->setPosition(board, currentPath->current() / 2 + 1);
@@ -472,10 +532,6 @@ void MainWindow::moveEntered(ChessMove& move)
 				currentPath->add(nextMove);
 				board = currentPath->getPosition();
 
-				for (int i = 0; i < 3; i++)
-				{
-					bde[i] = Base[i]->find(board);
-				}
 				boardwindow->setPosition(board);
 				enginewindow->setPosition(board, currentPath->current() / 2 + 1);
 
@@ -532,10 +588,8 @@ void MainWindow::moveEntered(ChessMove& move)
 	// Change to read from both db
 	board = currentPath->getPosition();
 
-	for (int i = 0; i < 3; i++)
-	{
-		bde[i] = Base[i]->find(board);
-	}
+	readDB();
+
 	boardwindow->setPosition(board);
 	enginewindow->setPosition(board,currentPath->current()/2+1);
 
@@ -551,8 +605,7 @@ void MainWindow::pathSelected(int ply)
 
 	ChessBoard board = currentPath->getPosition();
 
-	for (int i = 0; i < 3; i++)
-		bde[i] = Base[i]->find(board);
+	readDB();
 
 	boardwindow->setPosition(board);
 	enginewindow->setPosition(board, currentPath->current() / 2 + 1);
@@ -618,8 +671,9 @@ void MainWindow::fileImportPgn()
 
 	// Change to read from both db
 	ChessBoard board = currentPath->getPosition();
-	for (int i = 0; i < 3; i++)
-		bde[i] = Base[i]->find(board);
+
+	readDB();
+
 	boardwindow->setPosition(board);
 
 	updateWindow();
@@ -660,8 +714,9 @@ void MainWindow::fileImportBook()
 			return;
 
 		ChessBoard board = currentPath->getPosition();
-		for (int i = 0; i < 3; i++)
-			bde[i] = Base[i]->find(board);
+
+		readDB();
+
 		updateWindow();
 	}
 }
@@ -771,3 +826,62 @@ void MainWindow::enginePV(ComputerDBEngine& ce, ChessBoard& cb)
 	// cb could either be current position or a freezing position.
 	computer->add(ce, cb);
 }
+
+void MainWindow::setLanguage()
+{
+	this->repaint();
+}
+
+
+void MainWindow::slotLanguageChanged(QAction* action)
+{
+	if (0 != action) {
+		// load the language dependant on the action content
+		locale = action->data().toString();
+		loadLanguage();
+	}
+}
+
+void MainWindow::loadLanguage()
+{
+	if (locale == "nb")
+	{
+		if (translator.isEmpty())
+		{
+			if (translator.load(":/language/book_nb.qm"))
+				qApp->installTranslator(&translator);
+		}
+		else
+		{
+			qApp->installTranslator(&translator);
+		}
+		return;
+	}
+
+	if (!translator.isEmpty())
+		qApp->removeTranslator(&translator);
+	return;
+}
+
+void MainWindow::changeEvent(QEvent* event)
+{
+	if (0 != event) {
+		switch (event->type()) {
+			// this event is send if a translator is loaded
+		case QEvent::LanguageChange:
+			retranslateUi();
+			break;
+
+			// this event is send, if the system, language changes
+		case QEvent::LocaleChange:
+		{
+			locale = QLocale::system().name();
+			locale.truncate(locale.lastIndexOf('_'));
+			loadLanguage();
+		}
+		break;
+		}
+	}
+	QMainWindow::changeEvent(event);
+}
+

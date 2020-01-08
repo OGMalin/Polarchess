@@ -187,11 +187,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="language\gui_nb.ts">
-      <Filter>Translation Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <Text Include="ToDo.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -213,5 +208,10 @@
     <Image Include="images\pieces.png">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="language\gui_nb.ts">
+      <Filter>Translation Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -39,7 +39,7 @@ MoveWindow::~MoveWindow()
 {
 }
 
-void MoveWindow::refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black)
+void MoveWindow::refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black, StatisticsDBEntry& statistics, ComputerDBEntry& computer)
 {
 	int i,j;
 	QString qs;
@@ -58,7 +58,7 @@ void MoveWindow::refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& b
 	rows = i;
 	for (i = 0; i < white.movelist.size(); i++)
 	{
-		qs = QString(white.board.makeMoveText(white.movelist[i].move, FIDE).c_str());
+		qs = QString(white.board.makeMoveText(white.movelist[i].move, tr("NBRQK").toStdString()).c_str());
 		qs += white.movelist[i].comment;
 		item = new QStandardItem(qs);
 		item->setEditable(false);

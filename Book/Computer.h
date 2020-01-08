@@ -71,6 +71,9 @@ public:
 	// Add an engine analyze to a position
 	void add(ComputerDBEngine& c, ChessBoard& cb);
 
+	// Find a position
+	ComputerDBEntry find(ChessBoard&);
+
 	// Get a list of engine analysis from current board
 //	void get(QVector<ComputerDBEngine>&, ChessBoard&);
 

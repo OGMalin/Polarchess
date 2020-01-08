@@ -89,24 +89,28 @@ void Statistics::close()
 	opened = false;
 }
 
-//bool Statistics::find(StatisticsDBEntry& sde, ChessBoard& cb)
-//{
-//	if (!opened)
-//		return false;
-//	QSqlDatabase db = QSqlDatabase::database(STATISTICS);
-//	if (!db.open())
-//		return false;
-//	QSqlQuery query(db);
-//	sde.hash = cb.hashkey();
-//	query.prepare("SELECT * FROM positions WHERE hash = :hash;");
-//	query.bindValue(":hash", sde.hash);
-//	if (query.exec() && query.next())
-//	{
-//		sde.convertToMoveList(sde.movelist, query.value("movelist").toString(), cb);
-//		return true;
-//	}
-//	return false;
-//}
+StatisticsDBEntry Statistics::find(ChessBoard& cb)
+{
+	StatisticsDBEntry sde;
+
+	if (!opened)
+		return sde;
+
+	QSqlDatabase db = QSqlDatabase::database(STATISTICS);
+	if (!db.open())
+		return sde;
+
+	QSqlQuery query(db);
+	HASHKEY hash = cb.hashkey();
+	query.prepare("SELECT * FROM positions WHERE hash = :hash;");
+	query.bindValue(":hash", hash);
+	if (query.exec() && query.next())
+	{
+		sde.convertToMoveList(sde.movelist, query.value("movelist").toString(), cb);
+		sde.hash = hash;
+	}
+	return sde;
+}
 
 //void Statistics::addMove(StatisticsDBMove& m, ChessBoard& cb)
 //{

@@ -64,7 +64,7 @@ public:
 	void close();
 
 	// Find a position
-//	bool find(StatisticsDBEntry& sde, ChessBoard& cb);
+	StatisticsDBEntry find(ChessBoard&);
 
 	// Add a move to a position
 //	void addMove(StatisticsDBMove& m, ChessBoard& cb);
