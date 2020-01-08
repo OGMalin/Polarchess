@@ -271,10 +271,15 @@ void EngineWindow::slotEngineInfo(const EngineInfo& info)
 			item->setEditable(false);
 			item->setTextAlignment(Qt::AlignLeft);
 			model->setItem(line - 1, 2, item);
-			if (info.time >= timeLimit)
+			if ((info.time >= timeLimit) && (line==1) && !info.lowerbound && !info.upperbound)
 			{
 				ComputerDBEngine ce;
-				emit enginePV(ce);
+				ce.engine = engineName;
+				ce.cp = info.cp;
+				ce.depth = info.depth;
+				ce.time = info.time;
+				ce.pv = info.pv;
+				emit enginePV(ce, freezing?freezeBoard:currentBoard);
 			}
 		}
 	}

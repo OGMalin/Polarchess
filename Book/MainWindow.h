@@ -39,7 +39,7 @@ public slots:
 	void pathToDB(int);
 	void commentChanged(QString&);
 	void addMoveComment(int rep, int movenr, QString& comment);
-	void enginePV(ComputerDBEngine&);
+	void enginePV(ComputerDBEngine&, ChessBoard&);
 
 public:
 	Path* currentPath;
@@ -63,6 +63,7 @@ private:
 	QMenu* bookMenu;
 	QMenu* bookWriteMenu;
 	QMenu* trainingMenu;
+	QMenu* trainingStartMenu;
 	QToolBar* toolbar;
 	QAction* openAct[3];
 	QAction* newAct[3];

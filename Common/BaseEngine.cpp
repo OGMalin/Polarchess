@@ -48,6 +48,9 @@ bool BaseEngine::load(QString& path)
 	}
 	process->setProcessChannelMode(QProcess::MergedChannels);
 	process->start(path);
+	HANDLE h = OpenProcess(PROCESS_SET_INFORMATION, TRUE, process->processId());
+	SetPriorityClass(h, BELOW_NORMAL_PRIORITY_CLASS);
+	CloseHandle(h);
 	return true;
 }
 

@@ -33,7 +33,7 @@ public slots:
 	void slotEngineStarted();
 	void slotEngineStoped();
 signals:
-	void enginePV(ComputerDBEngine&);
+	void enginePV(ComputerDBEngine&, ChessBoard&);
 private:
 	unsigned int timeLimit;
 	bool engineReady;

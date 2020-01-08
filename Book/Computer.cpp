@@ -39,14 +39,19 @@ bool Computer::open(const QString& path)
 	{
 		opened = true;
 		QSqlQuery query(db);
-		query.prepare("SELECT * FROM info;");
-		if (query.exec() && query.next())
+
+		query.exec("SELECT * FROM info;");
+		if (query.next())
 		{
 			cdi.db = query.value("db").toString();
 			cdi.version = query.value("version").toString();
 		}
-	}
 
+		query.exec("SELECT * FROM engines;");
+		while (query.next())
+			enginelist.push_back(query.value("engine").toString());
+	}
+	lastSearch.clear();
 	return opened;
 }
 
@@ -77,6 +82,7 @@ bool Computer::create(const QString& path)
 		"); ");
 	cdi.db = CDBTYPE;
 	cdi.version = CDBVERSION;
+	lastSearch.clear();
 	opened = true;
 	return true;
 }
@@ -86,62 +92,113 @@ void Computer::close()
 	opened = false;
 }
 
-bool Computer::find(ComputerDBEntry& cde, ChessBoard& cb)
-{
-	if (!opened)
-		return false;
-	QSqlDatabase db = QSqlDatabase::database(COMPUTER);
-	if (!db.open())
-		return false;
-	QSqlQuery query(db);
-	cde.hash = cb.hashkey();
-	query.prepare("SELECT * FROM positions WHERE hash = :hash;");
-	query.bindValue(":hash", cde.hash);
-	if (query.exec() && query.next())
-	{
-		cde.convertToEngineList(cde.enginelist, query.value("enginelist").toString(), cb);
-		return true;
-	}
-	return false;
-}
+//bool Computer::find(ComputerDBEntry& cde, ChessBoard& cb)
+//{
+//	cde.clear();
+//	if (!opened)
+//		return false;
+//	cde.hash = cb.hashkey();
+//	if (lastSearch.hash == cde.hash)
+//	{
+//		cde = lastSearch;
+//		return true;
+//	}
+//
+//	QSqlDatabase db = QSqlDatabase::database(COMPUTER);
+//	if (!db.open())
+//		return false;
+//	QSqlQuery query(db);
+//	query.prepare("SELECT * FROM positions WHERE hash = :hash;");
+//	query.bindValue(":hash", cde.hash);
+//	if (query.exec() && query.next())
+//	{
+//		cde.convertToEngineList(query.value("enginelist").toString(), cb);
+//		return true;
+//	}
+//	return false;
+//}
 
-void Computer::addEngine(ComputerDBEngine& e, ChessBoard& cb)
+void Computer::add(ComputerDBEngine& ce, ChessBoard& cb)
 {
-	QSqlDatabase db = QSqlDatabase::database(COMPUTER);
-	ComputerDBEntry cde;
-	bool exist;
-
+	bool needUpdate;
+	HASHKEY hash;
 	char sz[16];
+	QSqlError error;
+
 	if (!opened)
 		return;
+
+	QSqlDatabase db = QSqlDatabase::database(COMPUTER);
 	if (!db.open())
 		return;
-
 	QSqlQuery query(db);
 
-	exist = find(cde, cb);
-
-	cde.updateEngine(e);
-
-	if (exist)
+	// Check to see if this engine have been used before
+	QVector<QString>::iterator eit=enginelist.begin();
+	while (eit != enginelist.end())
 	{
-		query.prepare("UPDATE positions SET "
-			"enginelist = :enginelist "
-			"WHERE hash = :hash;");
+		if (*eit == ce.engine)
+			break;
+		++eit;
 	}
-	else
+
+	// New engine
+	if (eit == enginelist.end())
 	{
-		query.prepare("INSERT INTO positions ( "
-			"hash, enginelist"
-			") VALUES ( "
-			":hash, :enginelist );");
+		enginelist.push_back(ce.engine);
+		query.prepare("INSERT INTO engines ( engine ) VALUES ( :engine );");
+		query.bindValue(":engine", ce.engine);
+		query.exec();
+		error = query.lastError();
+		if (error.isValid())
+		{
+			qDebug() << "Database error: " << error.databaseText();
+			qDebug() << "Driver error: " << error.driverText();
+		}
 	}
-	query.bindValue(":hash", cde.hash);
+
+	hash = cb.hashkey();
+	if (lastSearch.hash != hash)
+	{
+		query.prepare("SELECT * FROM positions WHERE hash = :hash;");
+		query.bindValue(":hash", hash);
+		if (query.exec() && query.next())
+		{
+			lastSearch.convertToEngineList(query.value("enginelist").toString(), cb);
+			lastSearch.hash = hash;
+		}
+		else
+		{
+			lastSearch.clear();
+		}
+	}
+
+
+	needUpdate = lastSearch.updateEngine(ce);
+
+	if (needUpdate)
+	{
+		if (lastSearch.hash != hash)
+		{
+			query.prepare("INSERT INTO positions ( "
+				"hash, enginelist"
+				") VALUES ( "
+				":hash, :enginelist );");
+			lastSearch.hash = hash;
+		}
+		else
+		{
+			query.prepare("UPDATE positions SET "
+				"enginelist = :enginelist "
+				"WHERE hash = :hash;");
+		}
+	}
+	query.bindValue(":hash", lastSearch.hash);
 	QString qs;
-	cde.convertFromEngineList(cde.enginelist, qs, cb);
+	lastSearch.convertFromEngineList(qs, cb);
 	query.bindValue(":enginelist", qs);
 	query.exec();
-	QSqlError error = query.lastError();
+	error = query.lastError();
 	if (error.isValid())
 	{
 		qDebug() << "Database error: " << error.databaseText();
@@ -150,95 +207,121 @@ void Computer::addEngine(ComputerDBEngine& e, ChessBoard& cb)
 	return;
 }
 
-void Computer::get(QVector<ComputerDBEngine>&, ChessBoard&)
-{
+//void Computer::get(QVector<ComputerDBEngine>&, ChessBoard&)
+//{
+//
+//}
 
+//bool ComputerDBEntry::engineExist(QString& e)
+//{
+//	QVector<ComputerDBEngine>::iterator it = enginelist.begin();
+//	while (it != enginelist.end())
+//	{
+//		if (it->engine == e)
+//			return true;
+//		++it;
+//	}
+//	return false;
+//}
+
+void ComputerDBEntry::convertToEngineList(const QString& data, ChessBoard& cb)
+{
+	//	engine1 | cp | depth | time | pv; engine2 | cb | depth | time | pv
+	
+	QStringList qlist = data.split(';');
+	QStringList entry;
+	QStringList smoves;
+	ComputerDBEngine ce;
+	ChessBoard b;
+	ChessMove m;
+	QStringList::iterator mit;
+	enginelist.clear();
+
+	QStringList::iterator it = qlist.begin();
+	while (it != qlist.end())
+	{
+		entry = it->split('|');
+		if (entry.size() > 0)
+			ce.engine = entry[0];
+		if (entry.size() > 1)
+			ce.cp = entry[1].toInt();
+		if (entry.size() > 2)
+			ce.depth = entry[2].toInt();
+		if (entry.size() > 3)
+			ce.time = entry[3].toInt();
+		if (entry.size() > 4)
+		{
+			smoves = entry[4].split(' ');
+			mit = smoves.begin();
+			b = cb;
+			while (mit != smoves.end())
+			{
+				m = b.getMoveFromText(mit->toStdString());
+				ce.pv.push_back(m);
+				b.doMove(m, false);
+				++mit;
+			}
+		}
+		enginelist.push_back(ce);
+		++it;
+	}
 }
 
-bool ComputerDBEntry::engineExist(QString& e)
+void ComputerDBEntry::convertFromEngineList(QString& data, ChessBoard& cb)
+{
+//	engine1 | cp | depth | time | pv; engine2 | cb | depth | time | pv
+	data.clear();
+	char sz[16];
+	string s;
+	ChessBoard b;
+	int mit;
+	QVector<ComputerDBEngine>::iterator it = enginelist.begin();
+	while (it != enginelist.end())
+	{
+		if (it!=enginelist.begin())
+			data += ";";
+		data += it->engine;
+		data += "|";
+		data += itoa(it->cp, sz, 10);
+		data += "|";
+		data += itoa(it->depth, sz, 10);
+		data += "|";
+		data += itoa(it->time, sz, 10);
+		data += "|";
+		b = cb;
+		for (mit = 0;mit<it->pv.size;mit)
+		{
+			s=b.makeMoveText(it->pv.list[mit], FIDE);
+			if (mit>0)
+				data += " ";
+			data += s.c_str();
+			b.doMove(it->pv.list[mit], false);
+			++mit;
+		}
+		++it;
+	}
+}
+
+bool ComputerDBEntry::updateEngine(ComputerDBEngine& ce)
 {
 	QVector<ComputerDBEngine>::iterator it = enginelist.begin();
 	while (it != enginelist.end())
 	{
-		if (it->engine == e)
-			return true;
+		if (it->engine == ce.engine)
+		{
+			if ((ce.depth>it->depth) || (ce.time > it->time) && (ce.depth == it->depth))
+			{
+				*it = ce;
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
 		++it;
 	}
-	return false;
-}
-
-void ComputerDBEntry::convertToEngineList(QVector<ComputerDBEngine>& enginelist, const QString& data, ChessBoard& cb)
-{
-	//ComputerDBEngine cde;
-	//QStringList qmove;
-	//QStringList qlist = data.split(';');
-
-	//enginelist.clear();
-	//for (int i = 0; i < qlist.size(); i++)
-	//{
-	//	qmove = qlist[i].split('|');
-	//	sdm.clear();
-	//	if (qmove.size() > 0)
-	//		sdm.move = cb.getMoveFromText(qmove[0].toStdString());
-	//	if (qmove.size() > 1)
-	//		sdm.whitewin = qmove[1].toInt();
-	//	if (qmove.size() > 2)
-	//		sdm.draw = qmove[2].toInt();
-	//	if (qmove.size() > 3)
-	//		sdm.blackwin = qmove[3].toInt();
-	//	if (qmove.size() > 4)
-	//		sdm.elo = qmove[4].toInt();
-	//	if (qmove.size() > 5)
-	//		sdm.year = qmove[5].toInt();
-	//	if (!sdm.move.empty())
-	//		movelist.append(sdm);
-	//}
-}
-
-void ComputerDBEntry::convertFromEngineList(const QVector<ComputerDBEngine>& enginelist, QString& data, ChessBoard& cb)
-{
-	//data.clear();
-	//char sz[16];
-	//bool first = true;
-	//QVector<StatisticsDBMove>::ConstIterator it = movelist.begin();
-	//while (it != movelist.end())
-	//{
-	//	if (cb.isLegal(ChessMove(it->move)))
-	//	{
-	//		if (!first)
-	//			data += ";";
-	//		else
-	//			first = false;
-	//		data += cb.makeMoveText(it->move, sz, 16, FIDE);
-	//		data += "|";
-	//		data += itoa(it->whitewin, sz, 10);
-	//		data += "|";
-	//		data += itoa(it->draw, sz, 10);
-	//		data += "|";
-	//		data += itoa(it->blackwin, sz, 10);
-	//		data += "|";
-	//		data += itoa(it->elo, sz, 10);
-	//		data += "|";
-	//		data += itoa(it->year, sz, 10);
-	//	}
-	//	++it;
-	//}
-}
-
-void ComputerDBEntry::updateEngine(ComputerDBEngine& ce)
-{
-	//for (int i = 0; i < movelist.size(); i++)
-	//{
-	//	if (bm.move == movelist[i].move)
-	//	{
-	//		movelist[i].whitewin += bm.whitewin;
-	//		movelist[i].draw += bm.draw;
-	//		movelist[i].blackwin += bm.blackwin;
-	//		movelist[i].elo = __max(movelist[i].elo, bm.elo);
-	//		movelist[i].year = __max(movelist[i].year, bm.year);
-	//		return;
-	//	}
-	//}
-	//movelist.append(bm);
+	enginelist.push_back(ce);
+	return true;
 }
 

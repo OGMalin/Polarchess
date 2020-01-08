@@ -34,7 +34,7 @@ struct StatisticsDBEntry
 	QVector<StatisticsDBMove> movelist;
 	StatisticsDBEntry() { clear(); };
 	void clear() { hash = 0; movelist.clear(); };
-	bool moveExist(ChessMove& move);
+//	bool moveExist(ChessMove& move);
 	void updateMove(StatisticsDBMove&bm);
 
 	void convertToMoveList(QVector<StatisticsDBMove>&, const QString&, ChessBoard&);
@@ -64,16 +64,16 @@ public:
 	void close();
 
 	// Find a position
-	bool find(StatisticsDBEntry& sde, ChessBoard& cb);
+//	bool find(StatisticsDBEntry& sde, ChessBoard& cb);
 
 	// Add a move to a position
-	void addMove(StatisticsDBMove& m, ChessBoard& cb);
+//	void addMove(StatisticsDBMove& m, ChessBoard& cb);
 
 	// Import pgn-file
 	void importGames(QWidget* parent);
 
 	// Get a list of moves from current board
-	void get(QVector<StatisticsDBMove>&, ChessBoard&);
+//	void get(QVector<StatisticsDBMove>&, ChessBoard&);
 private:
 	bool opened;
 };

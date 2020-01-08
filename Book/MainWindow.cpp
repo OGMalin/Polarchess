@@ -77,7 +77,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(pathwindow, SIGNAL(pathToDB(int)), this, SLOT(pathToDB(int)));
 	connect(pathwindow, SIGNAL(pathSelected(int)), this, SLOT(pathSelected(int)));
 	connect(commentwindow, SIGNAL(commentChanged(QString&)), this, SLOT(commentChanged(QString&)));
-	connect(enginewindow, SIGNAL(enginePV(ComputerDBEngine&)), this, SLOT(enginePV(ComputerDBEngine&)));
+	connect(enginewindow, SIGNAL(enginePV(ComputerDBEngine&, ChessBoard&)), this, SLOT(enginePV(ComputerDBEngine&, ChessBoard&)));
 
 	readSettings();
 
@@ -150,12 +150,13 @@ void MainWindow::createMenu()
 	bookMenu->addSeparator();
 
 	trainingMenu = menuBar()->addMenu("Training");
-	startTrainingBothAct = trainingMenu->addAction("Start training", this, &MainWindow::trainingStartBoth);
-	startTrainingWhiteAct = trainingMenu->addAction("Start training for White", this, &MainWindow::trainingStartWhite);
-	startTrainingBlackAct = trainingMenu->addAction("Start training for Black", this, &MainWindow::trainingStartBlack);
-	startTrainingPosBothAct = trainingMenu->addAction("Start training from current position", this, &MainWindow::trainingStartPosBoth);
-	startTrainingPosWhiteAct = trainingMenu->addAction("Start training from current position for White", this, &MainWindow::trainingStartPosWhite);
-	startTrainingPosBlackAct = trainingMenu->addAction("Start training from current position for Black", this, &MainWindow::trainingStartPosBlack);
+	trainingStartMenu = trainingMenu->addMenu("Start training");
+	startTrainingBothAct = trainingStartMenu->addAction("Start training", this, &MainWindow::trainingStartBoth);
+	startTrainingWhiteAct = trainingStartMenu->addAction("Start training for White", this, &MainWindow::trainingStartWhite);
+	startTrainingBlackAct = trainingStartMenu->addAction("Start training for Black", this, &MainWindow::trainingStartBlack);
+	startTrainingPosBothAct = trainingStartMenu->addAction("Start training from current position", this, &MainWindow::trainingStartPosBoth);
+	startTrainingPosWhiteAct = trainingStartMenu->addAction("Start training from current position for White", this, &MainWindow::trainingStartPosWhite);
+	startTrainingPosBlackAct = trainingStartMenu->addAction("Start training from current position for Black", this, &MainWindow::trainingStartPosBlack);
 	stopTrainingAct = trainingMenu->addAction("Stop training", this, &MainWindow::trainingStop);
 	bookMenu->addSeparator();
 	clearTrainingAct = trainingMenu->addAction("Clear trainingdata", this, &MainWindow::trainingClearData);
@@ -163,6 +164,7 @@ void MainWindow::createMenu()
 
 	// Setting up the toolbar
 	toolbar = addToolBar("Toolbar");
+	toolbar->setObjectName("MainToolbar");
 	for (int i = 0; i < 3; i++)
 	{
 		toolbar->addAction(writeAct[i]);
@@ -764,7 +766,8 @@ void MainWindow::trainingStop()
 	updateWindow();
 }
 
-void MainWindow::enginePV(ComputerDBEngine&)
+void MainWindow::enginePV(ComputerDBEngine& ce, ChessBoard& cb)
 {
-
+	// cb could either be current position or a freezing position.
+	computer->add(ce, cb);
 }

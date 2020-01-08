@@ -11,7 +11,7 @@
 
 using namespace std;
 
-const char* ENGINENAME = "PolarChess 2.0 B5";
+const char* ENGINENAME = "PolarChess 2.0 B6";
 
 // To calculate rating
 // Testmachine speed in MHz
@@ -32,7 +32,7 @@ FrontEnd::FrontEnd()
 	minElo = 600;
 	limitStrength = false;
 	contempt = 0;
-	currentBoard.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+	currentBoard.setStartposition();
 }
 
 FrontEnd::~FrontEnd()

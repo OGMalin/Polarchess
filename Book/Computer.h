@@ -7,6 +7,7 @@
 #include <QSqlDatabase>
 #include "../Common/ChessMove.h"
 #include "../Common/ChessBoard.h"
+#include "../Common/MoveList.h"
 
 /*
 	Database format
@@ -15,7 +16,7 @@
 		position as hashkey.
 
 	enginelist	text
-		engine1|cp|depth|pv;engine2|cb|depth|pv
+		engine1|cp|depth|time|pv;engine2|cb|depth|time|pv
 */
 
 struct ComputerDBEngine
@@ -23,7 +24,8 @@ struct ComputerDBEngine
 	QString engine;
 	int cp;
 	int depth;
-	QVector<ChessMove> pv;
+	int time;
+	MoveList pv;
 	ComputerDBEngine() { clear(); };
 	void clear() { engine.clear(); cp = depth = 0; pv.clear(); };
 };
@@ -34,11 +36,11 @@ struct ComputerDBEntry
 	QVector<ComputerDBEngine> enginelist;
 	ComputerDBEntry() { clear(); };
 	void clear() { hash = 0; enginelist.clear(); };
-	bool engineExist(QString& e);
-	void updateEngine(ComputerDBEngine&bm);
+//	bool engineExist(QString& e);
+	bool updateEngine(ComputerDBEngine&);
 
-	void convertToEngineList(QVector<ComputerDBEngine>&, const QString&, ChessBoard&);
-	void convertFromEngineList(const QVector<ComputerDBEngine>&, QString&, ChessBoard&);
+	void convertToEngineList(const QString&, ChessBoard&);
+	void convertFromEngineList(QString&, ChessBoard&);
 };
 
 struct ComputerDBInfo
@@ -66,15 +68,15 @@ public:
 	// Close the database
 	void close();
 
-	// Find a position
-	bool find(ComputerDBEntry& sde, ChessBoard& cb);
-
-	// Add an engine to a position
-	void addEngine(ComputerDBEngine& c, ChessBoard& cb);
+	// Add an engine analyze to a position
+	void add(ComputerDBEngine& c, ChessBoard& cb);
 
 	// Get a list of engine analysis from current board
-	void get(QVector<ComputerDBEngine>&, ChessBoard&);
+//	void get(QVector<ComputerDBEngine>&, ChessBoard&);
 
 private:
 	bool opened;
+	ComputerDBEntry lastSearch;
+	// Find a position
+//	bool find(ComputerDBEntry& sde, ChessBoard& cb);
 };

@@ -89,69 +89,69 @@ void Statistics::close()
 	opened = false;
 }
 
-bool Statistics::find(StatisticsDBEntry& sde, ChessBoard& cb)
-{
-	if (!opened)
-		return false;
-	QSqlDatabase db = QSqlDatabase::database(STATISTICS);
-	if (!db.open())
-		return false;
-	QSqlQuery query(db);
-	sde.hash = cb.hashkey();
-	query.prepare("SELECT * FROM positions WHERE hash = :hash;");
-	query.bindValue(":hash", sde.hash);
-	if (query.exec() && query.next())
-	{
-		sde.convertToMoveList(sde.movelist, query.value("movelist").toString(), cb);
-		return true;
-	}
-	return false;
-}
+//bool Statistics::find(StatisticsDBEntry& sde, ChessBoard& cb)
+//{
+//	if (!opened)
+//		return false;
+//	QSqlDatabase db = QSqlDatabase::database(STATISTICS);
+//	if (!db.open())
+//		return false;
+//	QSqlQuery query(db);
+//	sde.hash = cb.hashkey();
+//	query.prepare("SELECT * FROM positions WHERE hash = :hash;");
+//	query.bindValue(":hash", sde.hash);
+//	if (query.exec() && query.next())
+//	{
+//		sde.convertToMoveList(sde.movelist, query.value("movelist").toString(), cb);
+//		return true;
+//	}
+//	return false;
+//}
 
-void Statistics::addMove(StatisticsDBMove& m, ChessBoard& cb)
-{
-	QSqlDatabase db = QSqlDatabase::database(STATISTICS);
-	StatisticsDBEntry sde;
-	bool exist;
-
-	char sz[16];
-	if (!opened)
-		return;
-	if (!db.open())
-		return;
-
-	QSqlQuery query(db);
-
-	exist = find(sde, cb);
-
-	sde.updateMove(m);
-
-	if (exist)
-	{
-		query.prepare("UPDATE positions SET "
-			"movelist = :movelist "
-			"WHERE hash = :hash;");
-	}
-	else
-	{
-		query.prepare("INSERT INTO positions ( "
-			"hash, movelist"
-			") VALUES ( "
-			":hash, :movelist );");
-	}
-	query.bindValue(":hash", sde.hash);
-	QString qs;
-	sde.convertFromMoveList(sde.movelist, qs, cb);
-	query.bindValue(":movelist", qs);
-	query.exec();
-	QSqlError error = query.lastError();
-	if (error.isValid())
-	{
-		qDebug() << "Database error: " << error.databaseText();
-		qDebug() << "Driver error: " << error.driverText();
-	}
-	return;
-}
+//void Statistics::addMove(StatisticsDBMove& m, ChessBoard& cb)
+//{
+//	QSqlDatabase db = QSqlDatabase::database(STATISTICS);
+//	StatisticsDBEntry sde;
+//	bool exist;
+//
+//	char sz[16];
+//	if (!opened)
+//		return;
+//	if (!db.open())
+//		return;
+//
+//	QSqlQuery query(db);
+//
+//	exist = find(sde, cb);
+//
+//	sde.updateMove(m);
+//
+//	if (exist)
+//	{
+//		query.prepare("UPDATE positions SET "
+//			"movelist = :movelist "
+//			"WHERE hash = :hash;");
+//	}
+//	else
+//	{
+//		query.prepare("INSERT INTO positions ( "
+//			"hash, movelist"
+//			") VALUES ( "
+//			":hash, :movelist );");
+//	}
+//	query.bindValue(":hash", sde.hash);
+//	QString qs;
+//	sde.convertFromMoveList(sde.movelist, qs, cb);
+//	query.bindValue(":movelist", qs);
+//	query.exec();
+//	QSqlError error = query.lastError();
+//	if (error.isValid())
+//	{
+//		qDebug() << "Database error: " << error.databaseText();
+//		qDebug() << "Driver error: " << error.driverText();
+//	}
+//	return;
+//}
 
 // Doing this in at bit strange way to try to speed up the database handling., insert on a SqlLight db are very slow.
 void Statistics::importGames(QWidget* parent)
@@ -281,22 +281,22 @@ void Statistics::importGames(QWidget* parent)
 	progress.setValue(pgn.file.size());
 }
 
-void Statistics::get(QVector<StatisticsDBMove>&, ChessBoard&)
-{
+//void Statistics::get(QVector<StatisticsDBMove>&, ChessBoard&)
+//{
+//
+//}
 
-}
-
-bool StatisticsDBEntry::moveExist(ChessMove& move)
-{
-	QVector<StatisticsDBMove>::iterator it = movelist.begin();
-	while (it != movelist.end())
-	{
-		if (it->move == move)
-			return true;
-		++it;
-	}
-	return false;
-}
+//bool StatisticsDBEntry::moveExist(ChessMove& move)
+//{
+//	QVector<StatisticsDBMove>::iterator it = movelist.begin();
+//	while (it != movelist.end())
+//	{
+//		if (it->move == move)
+//			return true;
+//		++it;
+//	}
+//	return false;
+//}
 
 void StatisticsDBEntry::convertToMoveList(QVector<StatisticsDBMove>& movelist, const QString& data, ChessBoard& cb)
 {
