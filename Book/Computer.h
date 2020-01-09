@@ -74,9 +74,6 @@ public:
 	// Find a position
 	ComputerDBEntry find(ChessBoard&);
 
-	// Get a list of engine analysis from current board
-//	void get(QVector<ComputerDBEngine>&, ChessBoard&);
-
 private:
 	bool opened;
 	ComputerDBEntry lastSearch;

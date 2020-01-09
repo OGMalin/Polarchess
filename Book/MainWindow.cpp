@@ -74,6 +74,7 @@ MainWindow::MainWindow(QWidget *parent)
 	training = new Training();
 	training->SetDatabase(WHITE, Base[REPWHITE]);
 	training->SetDatabase(BLACK, Base[REPBLACK]);
+	movewindow->computer = computer;
 
 	connect(boardwindow, SIGNAL(moveEntered(ChessMove&)), this, SLOT(moveEntered(ChessMove&)));
 	connect(movewindow, SIGNAL(moveSelected(int, int)), this, SLOT(moveSelected(int, int)));
@@ -270,7 +271,7 @@ void MainWindow::updateMenu()
 
 void MainWindow::updateWindow()
 {
-	movewindow->refresh(bde[THEORY], bde[REPWHITE], bde[REPBLACK], sde, cde);
+	movewindow->refresh(bde[THEORY], bde[REPWHITE], bde[REPBLACK], sde, cde, currentPath->getPosition());
 	commentwindow->refresh(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
 	pathwindow->refresh(currentPath);
 

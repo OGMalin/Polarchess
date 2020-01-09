@@ -26,6 +26,7 @@ struct StatisticsDBMove
 	int year;
 	StatisticsDBMove() { clear(); };
 	void clear() { move.clear(); whitewin = draw = blackwin = elo = year = 0; };
+	friend bool operator<(const StatisticsDBMove& m1, const StatisticsDBMove& m2) { return (m2.whitewin + m2.draw + m2.blackwin) < (m1.whitewin + m1.draw + m1.blackwin); };
 };
 
 struct StatisticsDBEntry
