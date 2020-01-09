@@ -271,7 +271,7 @@ void MainWindow::updateMenu()
 
 void MainWindow::updateWindow()
 {
-	movewindow->refresh(bde[THEORY], bde[REPWHITE], bde[REPBLACK], sde, cde, currentPath->getPosition());
+	movewindow->refresh(bde[THEORY], bde[REPWHITE], bde[REPBLACK], sde, cde, currentPath->getPosition(), currentPath->current() / 2 + 1);
 	commentwindow->refresh(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
 	pathwindow->refresh(currentPath);
 

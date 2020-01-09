@@ -40,7 +40,7 @@ public:
 	Computer* computer;
 	MoveWindow(QWidget *parent=0);
 	~MoveWindow();
-	void refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black, StatisticsDBEntry& statistics, ComputerDBEntry& compdata, ChessBoard&);
+	void refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black, StatisticsDBEntry& statistics, ComputerDBEntry& compdata, ChessBoard&, int movenr);
 	void addComment(QString& comment);
 
 signals:
@@ -67,6 +67,8 @@ private:
 	QBrush repBrush;
 	QBrush normalBrush;
 	QFont font;
+	ChessBoard currentBoard;
+	int currentMoveNr;
 	MoveTableHeader hMoves;
 	MoveTableHeader hTheory;
 	MoveTableHeader hWhite;
@@ -81,4 +83,5 @@ private:
 	void add(StatisticsDBEntry&);
 	void add(ComputerDBEntry&);
 	int existInTable(ChessMove& m);
+	void refresh();
 };

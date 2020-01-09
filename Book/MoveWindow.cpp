@@ -15,9 +15,6 @@ MoveWindow::MoveWindow(QWidget *parent)
 	computer = NULL;
 	QVBoxLayout* vbox = new QVBoxLayout;
 	model = new QStandardItemModel(0, 0);
-	//QStringList h;
-	//h << tr("Move") << tr("Theory") << tr("White") << tr("Black") << tr("Score") << tr("Games") << tr("Comp");
-	//model->setHorizontalHeaderLabels(h);
 	table = new QTableView;
 	table->setModel(model);
 	table->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -33,6 +30,34 @@ MoveWindow::MoveWindow(QWidget *parent)
 	connect(table, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(moveClicked(const QModelIndex&)));
 	font.setPointSize(12);
 	this->setFont(font);
+
+	hMoves.label = tr("Moves");
+	hMoves.inUse = true;
+	hMoves.column = 0;
+	hTheory.label = tr("Theory");
+	hTheory.inUse = true;
+	hTheory.column = 1;
+	hWhite.label = tr("White");
+	hWhite.inUse = true;
+	hWhite.column = 2;
+	hBlack.label = tr("Black");
+	hBlack.inUse = true;
+	hBlack.column = 3;
+	hScore.label = tr("Score");
+	hScore.inUse = true;
+	hScore.column = 4;
+	hGames.label = tr("Games");
+	hGames.inUse = true;
+	hGames.column = 5;
+	hComp.label = tr("Comp");
+	hComp.inUse = true;
+	hComp.column = 6;
+	hWin.label = tr("Win");
+	hWin.inUse = true;
+	hWin.column = 7;
+	hDraw.label = tr("Draw");
+	hDraw.inUse = true;
+	hDraw.column = 8;
 }
 
 MoveWindow::~MoveWindow()
@@ -152,12 +177,10 @@ int MoveWindow::existInTable(ChessMove& m)
 	return -1;
 }
 
-void MoveWindow::refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black, StatisticsDBEntry& stat, ComputerDBEntry& compdata, ChessBoard& cb)
+void MoveWindow::refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black, StatisticsDBEntry& stat, ComputerDBEntry& compdata, ChessBoard& cb, int movenr)
 {
-	int i,j;
-	int rows;
-	QString qs;
-	QStandardItem* item;
+	currentMoveNr = movenr;
+	currentBoard = cb;
 	movetable.clear();
 	add(stat);
 	if (computer)
@@ -165,88 +188,188 @@ void MoveWindow::refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& b
 	add(theory, 0, cb);
 	add(white, 1, cb);
 	add(black, 2, cb);
+	refresh();
+}
+
+void MoveWindow::refresh()
+{
+	int i, j;
+	int col;
+	QString qs;
+	QStandardItem* item;
 
 	model->setRowCount(0);
-
+	col = 0;
 	for (i = 0; i < movetable.size(); i++)
 	{
 		// Moves
-		qs = QString(cb.makeMoveText(movetable[i].move, tr("NBRQK").toStdString()).c_str());
-		item = new QStandardItem(qs);
-		model->setItem(i, 0, item);
+		if (hMoves.inUse)
+		{
+			if (i == 0)
+			{
+				model->setHorizontalHeaderItem(hMoves.column, new QStandardItem(hMoves.label));
+				++col;
+			}
+			qs = QString(currentBoard.makeMoveText(movetable[i].move, tr("NBRQK").toStdString()).c_str());
+			item = new QStandardItem(qs);
+			model->setItem(i, hMoves.column, item);
+		}
 
 		// Theory
-		if (movetable[i].rep[0])
+		if (hTheory.inUse)
 		{
-			item = new QStandardItem();
-			item->setBackground(QBrush(QColor("gray")));
-			model->setItem(i, 1, item);
+			if (i == 0)
+			{
+				model->setHorizontalHeaderItem(hTheory.column, new QStandardItem(hTheory.label));
+				++col;
+			}
+			if (movetable[i].rep[0])
+			{
+				item = new QStandardItem();
+				item->setBackground(QBrush(QColor("gray")));
+				model->setItem(i, hTheory.column, item);
+			}
 		}
 
 		// White repertoire
-		if (movetable[i].rep[1])
+		if (hWhite.inUse)
 		{
-			item = new QStandardItem();
-			if (movetable[i].rep[1]==1)
-				item->setBackground(QBrush(QColor("gray")));
-			else if (movetable[i].rep[1] == 2)
-				item->setBackground(QBrush(QColor("green")));
-			else if (movetable[i].rep[1] == 3)
-					item->setBackground(QBrush(QColor("yellow")));
-			model->setItem(i, 2, item);
-		}
-
-		// Black repertoire
-		if (movetable[i].rep[2])
-		{
-			item = new QStandardItem();
-			if (movetable[i].rep[2] == 1)
-				item->setBackground(QBrush(QColor("gray")));
-			else if (movetable[i].rep[2] == 2)
+			if (i == 0)
+			{
+				model->setHorizontalHeaderItem(hWhite.column, new QStandardItem(hWhite.label));
+				++col;
+			}
+			if (movetable[i].rep[1])
+			{
+				item = new QStandardItem();
+				if (movetable[i].rep[1] == 1)
+					item->setBackground(QBrush(QColor("gray")));
+				else if (movetable[i].rep[1] == 2)
 					item->setBackground(QBrush(QColor("green")));
-			else if (movetable[i].rep[2] == 3)
-						item->setBackground(QBrush(QColor("yellow")));
-			model->setItem(i, 3, item);
+				else if (movetable[i].rep[1] == 3)
+					item->setBackground(QBrush(QColor("yellow")));
+				model->setItem(i, hWhite.column, item);
+			}
+		}
+		// Black repertoire
+		if (hBlack.inUse)
+		{
+			if (i == 0)
+			{
+				model->setHorizontalHeaderItem(hBlack.column, new QStandardItem(hBlack.label));
+				++col;
+			}
+			if (movetable[i].rep[2])
+			{
+				item = new QStandardItem();
+				if (movetable[i].rep[2] == 1)
+					item->setBackground(QBrush(QColor("gray")));
+				else if (movetable[i].rep[2] == 2)
+					item->setBackground(QBrush(QColor("green")));
+				else if (movetable[i].rep[2] == 3)
+					item->setBackground(QBrush(QColor("yellow")));
+				model->setItem(i, hBlack.column, item);
+			}
+		}
+		// Score
+		if (hScore.inUse)
+		{
+			if (i == 0)
+			{
+				model->setHorizontalHeaderItem(hScore.column, new QStandardItem(hScore.label));
+				++col;
+			}
+			if ((movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin) > 0)
+			{
+				qs.clear();
+				QTextStream(&qs) << movetable[i].whitewin << "/" << movetable[i].draw << "/" << movetable[i].blackwin;
+				item = new QStandardItem(qs);
+				model->setItem(i, hScore.column, item);
+			}
 		}
 
-		// Score
-		if ((movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin) > 0)
+				// Games
+		if (hGames.inUse)
 		{
-			qs.clear();
-			QTextStream(&qs) << movetable[i].whitewin << "/" << movetable[i].draw << "/" << movetable[i].blackwin;
-			item = new QStandardItem(qs);
-			model->setItem(i, 4, item);
-
-			// Games
-			qs.clear();
-			QTextStream(&qs) << movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin;
-			item = new QStandardItem(qs);
-			model->setItem(i, 5, item);
+			if (i == 0)
+			{
+				model->setHorizontalHeaderItem(hGames.column, new QStandardItem(hGames.label));
+				++col;
+			}
+			if ((movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin) > 0)
+			{
+				qs.clear();
+				QTextStream(&qs) << movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin;
+				item = new QStandardItem(qs);
+				model->setItem(i, hGames.column, item);
+			}
 		}
 
 		// Comp
-		if (!movetable[i].engine.isEmpty())
+		if (hComp.inUse)
 		{
-			qs.sprintf("%i", movetable[i].cp);
-			item = new QStandardItem(qs);
-			qs.clear();
-			QTextStream(&qs) << movetable[i].engine << endl << "Depth: " << movetable[i].depth;
-			item->setToolTip(qs);
-			model->setItem(i, 6, item);
+			if (i == 0)
+			{
+				model->setHorizontalHeaderItem(hComp.column, new QStandardItem(hComp.label));
+				++col;
+			}
+			if (!movetable[i].engine.isEmpty())
+			{
+				qs.clear();
+				QTextStream(&qs) << movetable[i].cp;
+				item = new QStandardItem(qs);
+				qs.clear();
+				QTextStream(&qs) << movetable[i].engine << endl << "Depth: " << movetable[i].depth;
+				item->setToolTip(qs);
+				model->setItem(i, hComp.column, item);
+			}
 		}
 
+		if (hWin.inUse)
+		{
+			if (i == 0)
+			{
+				model->setHorizontalHeaderItem(hWin.column, new QStandardItem(hWin.label));
+				++col;
+			}
+			if ((movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin) > 0)
+			{
+				qs.clear();
+				QTextStream(&qs) << 100 * movetable[i].whitewin / (movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin) << "%";
+				item = new QStandardItem(qs);
+				model->setItem(i, hWin.column, item);
+			}
+		}
+
+		if (hDraw.inUse)
+		{
+			if (i == 0)
+			{
+				model->setHorizontalHeaderItem(hDraw.column, new QStandardItem(hDraw.label));
+				++col;
+			}
+			if ((movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin) > 0)
+			{
+				qs.clear();
+				QTextStream(&qs) << 100 * movetable[i].draw / (movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin) << "%";
+				item = new QStandardItem(qs);
+				model->setItem(i, hDraw.column, item);
+			}
+		}
 	}
 
 	QStringList label;
+	qs.clear();
+	QTextStream(&qs) << currentMoveNr << ".";
 	for (i = 0; i < movetable.size(); i++)
 	{
-		if (cb.toMove == BLACK)
-			label.push_back("...");
+		if (currentBoard.toMove == BLACK)
+			label.push_back(qs + "...");
 		else
-			label.push_back("");
+			label.push_back(qs);
 	}
 	model->setVerticalHeaderLabels(label);
-	model->setColumnCount(7);
+	model->setColumnCount(col);
 	model->setRowCount(movetable.size());
 }
 
