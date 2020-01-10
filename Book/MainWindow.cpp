@@ -140,6 +140,7 @@ void MainWindow::createMenu()
 	importPgnAct = fileImportMenu->addAction("Import pgnfiles", this, &MainWindow::fileImportPgn);
 	importBookAct = fileImportMenu->addAction("Import book", this, &MainWindow::fileImportBook);
 	createStatAct = fileImportMenu->addAction("Import Statistics", this, &MainWindow::fileCreateStatistics);
+	compactStatAct = fileImportMenu->addAction("Compact Statistics", this, &MainWindow::fileCompactStatistics);
 	fileMenu->addSeparator();
 	exitAct = fileMenu->addAction("*", this, &QWidget::close);
 
@@ -725,6 +726,11 @@ void MainWindow::fileImportBook()
 void MainWindow::fileCreateStatistics()
 {
 	statistics->importGames(this);
+}
+
+void MainWindow::fileCompactStatistics()
+{
+	statistics->removeSingleGame(this);
 }
 
 void MainWindow::trainingClearData()

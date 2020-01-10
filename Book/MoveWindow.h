@@ -73,11 +73,13 @@ private:
 	MoveTableHeader hTheory;
 	MoveTableHeader hWhite;
 	MoveTableHeader hBlack;
-	MoveTableHeader hScore;
+	MoveTableHeader hWDL;
 	MoveTableHeader hGames;
 	MoveTableHeader hComp;
-	MoveTableHeader hWin;
+	MoveTableHeader hScore;
 	MoveTableHeader hDraw;
+	MoveTableHeader hElo;
+	MoveTableHeader hYear;
 	QVector<MoveTableEntry> movetable;
 	void add(BookDBEntry&, int rep, ChessBoard&);
 	void add(StatisticsDBEntry&);

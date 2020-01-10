@@ -5,6 +5,7 @@
 #include <QFileDialog>
 #include <QProgressDialog>
 #include <QApplication>
+#include <QVariantList>
 #include "../Common/Pgn.h"
 
 using namespace std;
@@ -286,6 +287,93 @@ void Statistics::importGames(QWidget* parent)
 	progress.setValue(pgn.file.size());
 }
 
+void Statistics::removeSingleGame(QWidget* parent)
+{
+	QSqlDatabase db = QSqlDatabase::database(STATISTICS);
+	if (!opened)
+		return;
+	if (!db.open())
+		return;
+	QSqlQuery query(db);
+
+	QVariantList hashlist;
+	HASHKEY hash;
+
+	// Open progress dialog
+	QProgressDialog progress("Searching for single games in statistics.", "Cancel", 0, 100, parent);
+	progress.setWindowModality(Qt::WindowModal);
+	progress.setMinimumDuration(0);
+	progress.show();
+
+	QApplication::processEvents();
+	query.exec("SELECT * FROM positions;");
+	while (query.next())
+	{
+		if (haveSingleMove(query.value("movelist").toString()))
+		{
+			hashlist.push_back(query.value("hash"));
+		}
+	}
+	progress.setLabelText("Removing single games in statistics.");
+
+	QApplication::processEvents();
+	if (progress.wasCanceled())
+	{
+		return;
+	}
+	int next = 0;
+	int i;
+	progress.setMaximum(hashlist.size());
+	while (next < hashlist.size())
+	{
+		db.transaction();
+		for (i = 0; i < 100; i++)
+		{
+			if (next>=hashlist.size())
+				break;
+			query.prepare("DELETE FROM positions WHERE hash=:hash;");
+			query.bindValue(":hash", hashlist[next]);
+			query.exec();
+			++next;
+		}
+		db.commit();
+		progress.setValue(next);
+		QApplication::processEvents();
+		if (progress.wasCanceled())
+		{
+			return;
+		}
+	}
+	progress.setLabelText("Compacting statistics.");
+	QApplication::processEvents();
+	if (progress.wasCanceled())
+	{
+		return;
+	}
+	if (!query.exec("VACUUM;"))
+	{
+		QSqlError error = query.lastError();
+			qDebug() << "Database error: " << error.databaseText();
+			qDebug() << "Driver error: " << error.driverText();
+	}
+}
+
+bool Statistics::haveSingleMove(QString& qs)
+{
+	if (qs.contains(';'))
+		return false;
+	QStringList sl= qs.split('|');
+	int games = 0;
+	if (sl.size() > 1)
+		games += sl[1].toInt();
+	if (sl.size() > 2)
+		games += sl[2].toInt();
+	if (sl.size() > 3)
+		games += sl[3].toInt();
+	if (games < 2)
+		return true;
+	return false;
+}
 //void Statistics::get(QVector<StatisticsDBMove>&, ChessBoard&)
 //{
 //

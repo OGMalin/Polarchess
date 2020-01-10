@@ -1,5 +1,5 @@
 #include "MoveWindow.h"
-#include "CreateStatisticsDialog.h"
+#include "WDLBar.h"
 #include <QTableView>
 #include <QStandardItemModel>
 #include <QVBoxLayout>
@@ -17,7 +17,8 @@ MoveWindow::MoveWindow(QWidget *parent)
 	model = new QStandardItemModel(0, 0);
 	table = new QTableView;
 	table->setModel(model);
-	table->setSelectionMode(QAbstractItemView::SingleSelection);
+	table->setSelectionMode(QAbstractItemView::NoSelection);
+	table->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	vbox->setMargin(0);
 	vbox->addWidget(table);
 	setLayout(vbox);
@@ -43,21 +44,27 @@ MoveWindow::MoveWindow(QWidget *parent)
 	hBlack.label = tr("Black");
 	hBlack.inUse = true;
 	hBlack.column = 3;
-	hScore.label = tr("Score");
-	hScore.inUse = true;
-	hScore.column = 4;
+	hWDL.label = tr("W/D/L");
+	hWDL.inUse = true;
+	hWDL.column = 4;
 	hGames.label = tr("Games");
 	hGames.inUse = true;
 	hGames.column = 5;
 	hComp.label = tr("Comp");
 	hComp.inUse = true;
 	hComp.column = 6;
-	hWin.label = tr("Win");
-	hWin.inUse = true;
-	hWin.column = 7;
+	hScore.label = tr("Score");
+	hScore.inUse = true;
+	hScore.column = 7;
 	hDraw.label = tr("Draw");
 	hDraw.inUse = true;
 	hDraw.column = 8;
+	hElo.label = tr("Elo");
+	hElo.inUse = true;
+	hElo.column = 9;
+	hYear.label = tr("Year");
+	hYear.inUse = true;
+	hYear.column = 10;
 }
 
 MoveWindow::~MoveWindow()
@@ -197,6 +204,7 @@ void MoveWindow::refresh()
 	int col;
 	QString qs;
 	QStandardItem* item;
+	WDLBar* bar;
 
 	model->setRowCount(0);
 	col = 0;
@@ -271,20 +279,23 @@ void MoveWindow::refresh()
 				model->setItem(i, hBlack.column, item);
 			}
 		}
-		// Score
-		if (hScore.inUse)
+		// Win/Draw/Loss
+		if (hWDL.inUse)
 		{
 			if (i == 0)
 			{
-				model->setHorizontalHeaderItem(hScore.column, new QStandardItem(hScore.label));
+				model->setHorizontalHeaderItem(hWDL.column, new QStandardItem(hWDL.label));
 				++col;
 			}
 			if ((movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin) > 0)
 			{
-				qs.clear();
-				QTextStream(&qs) << movetable[i].whitewin << "/" << movetable[i].draw << "/" << movetable[i].blackwin;
-				item = new QStandardItem(qs);
-				model->setItem(i, hScore.column, item);
+				//qs.clear();
+				//QTextStream(&qs) << movetable[i].whitewin << "/" << movetable[i].draw << "/" << movetable[i].blackwin;
+				//item = new QStandardItem(qs);
+				//item->setTextAlignment(Qt::AlignCenter);
+				//model->setItem(i, hWDL.column, item);
+				item = new QStandardItem();
+				item->setBackground(WDLBar(movetable[i].whitewin, movetable[i].draw, movetable[i].blackwin));
 			}
 		}
 
@@ -301,6 +312,7 @@ void MoveWindow::refresh()
 				qs.clear();
 				QTextStream(&qs) << movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin;
 				item = new QStandardItem(qs);
+				item->setTextAlignment(Qt::AlignRight);
 				model->setItem(i, hGames.column, item);
 			}
 		}
@@ -321,23 +333,28 @@ void MoveWindow::refresh()
 				qs.clear();
 				QTextStream(&qs) << movetable[i].engine << endl << "Depth: " << movetable[i].depth;
 				item->setToolTip(qs);
+				item->setTextAlignment(Qt::AlignCenter);
 				model->setItem(i, hComp.column, item);
 			}
 		}
 
-		if (hWin.inUse)
+		if (hScore.inUse)
 		{
 			if (i == 0)
 			{
-				model->setHorizontalHeaderItem(hWin.column, new QStandardItem(hWin.label));
+				model->setHorizontalHeaderItem(hScore.column, new QStandardItem(hScore.label));
 				++col;
 			}
 			if ((movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin) > 0)
 			{
 				qs.clear();
-				QTextStream(&qs) << 100 * movetable[i].whitewin / (movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin) << "%";
+				if (currentBoard.toMove==WHITE)
+					QTextStream(&qs) << 100 * (movetable[i].whitewin + movetable[i].draw / 2) / (movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin) << "%";
+				else
+					QTextStream(&qs) << 100 * (movetable[i].blackwin + movetable[i].draw / 2) / (movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin) << "%";
 				item = new QStandardItem(qs);
-				model->setItem(i, hWin.column, item);
+				item->setTextAlignment(Qt::AlignRight);
+				model->setItem(i, hScore.column, item);
 			}
 		}
 
@@ -353,7 +370,40 @@ void MoveWindow::refresh()
 				qs.clear();
 				QTextStream(&qs) << 100 * movetable[i].draw / (movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin) << "%";
 				item = new QStandardItem(qs);
+				item->setTextAlignment(Qt::AlignRight);
 				model->setItem(i, hDraw.column, item);
+			}
+		}
+		if (hElo.inUse)
+		{
+			if (i == 0)
+			{
+				model->setHorizontalHeaderItem(hElo.column, new QStandardItem(hElo.label));
+				++col;
+			}
+			if (movetable[i].elo > 0)
+			{
+				qs.clear();
+				QTextStream(&qs) << movetable[i].elo;
+				item = new QStandardItem(qs);
+				item->setTextAlignment(Qt::AlignRight);
+				model->setItem(i, hElo.column, item);
+			}
+		}
+		if (hYear.inUse)
+		{
+			if (i == 0)
+			{
+				model->setHorizontalHeaderItem(hYear.column, new QStandardItem(hYear.label));
+				++col;
+			}
+			if (movetable[i].year > 0)
+			{
+				qs.clear();
+				QTextStream(&qs) << movetable[i].year;
+				item = new QStandardItem(qs);
+				item->setTextAlignment(Qt::AlignRight);
+				model->setItem(i, hYear.column, item);
 			}
 		}
 	}
@@ -390,7 +440,7 @@ void MoveWindow::showContextMenu(const QPoint& pos)
 	//contextMenu->addAction(QString("!?"), this, SLOT(addComment5()));
 	//contextMenu->addAction(QString("?!"), this, SLOT(addComment6()));
 	//contextMenu->addAction(QString("Delete move"), this, SLOT(deleteMove()));
-	//contextMenu->addAction(QString("Font"), this, SLOT(selectFont()));
+	contextMenu->addAction(QString("Font"), this, SLOT(selectFont()));
 	contextMenu->exec(mapToGlobal(pos));
 }
 

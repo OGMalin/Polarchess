@@ -383,28 +383,28 @@ void Database::addTrainingLines(QVector<TrainingLine>& tlines)
 	{
 		score.push_back(itoa(tlines[i].score, sz, 10));
 		moves.push_back(tlines[i].moves);
-		//query.prepare("INSERT INTO training ( "
-		//	"score, moves"
-		//	") VALUES ( "
-		//	":score, :moves );");
-		//query.bindValue(":score", itoa(tlines[i].score, sz, 10));
-		//query.bindValue(":moves", tlines[i].moves);
-		//query.exec();
-		//QSqlError error = query.lastError();
-		//if (error.isValid())
-		//{
-		//	qDebug() << "Database error: " << error.databaseText();
-		//	qDebug() << "Driver error: " << error.driverText();
-		//}
 	}
-	query.prepare("INSERT INTO training VALUES (?, ?);");
-	query.addBindValue(score);
-	query.addBindValue(moves);
-	if (!query.execBatch())
+	if (score.size() != moves.size())
 	{
-		QSqlError error = query.lastError();
-		qDebug() << "Database error: " << error.databaseText();
-		qDebug() << "Driver error: " << error.driverText();
+		qDebug() << "Score and moves missmatch";
+		return;
+	}
+	int next = 0;
+	int i;
+	while (next < score.size())
+	{
+		db.transaction();
+		for (i = 0; i < 100; i++)
+		{
+			if (next >= score.size())
+				break;
+			query.prepare("INSERT INTO training ( score, moves ) VALUES ( :score, :moves );");
+			query.bindValue(":score", score[next]);
+			query.bindValue(":moves", moves[next]);
+			query.exec();
+			++next;
+		}
+		db.commit();
 	}
 }
 

@@ -83,6 +83,7 @@ private:
 	QAction* importPgnAct;
 	QAction* importBookAct;
 	QAction* createStatAct;
+	QAction* compactStatAct;
 	QAction* clearTrainingAct;
 	QAction* createTrainingAct;
 	QAction* startTrainingBothAct;
@@ -141,6 +142,7 @@ private:
 	void fileImportPgn();
 	void fileImportBook();
 	void fileCreateStatistics();
+	void fileCompactStatistics();
 	void bookWriteTheory() { bookWrite(THEORY); };
 	void bookWriteWhite() { bookWrite(REPWHITE); };
 	void bookWriteBlack() { bookWrite(REPBLACK); };

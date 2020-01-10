@@ -107,9 +107,6 @@
     <ClCompile Include="Statistics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CreateStatisticsDialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Training.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -129,6 +126,9 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="Computer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WDLBar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -164,9 +164,6 @@
       <Filter>Common</Filter>
     </QtMoc>
     <QtMoc Include="ImportPgnDialog.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="CreateStatisticsDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="StatusWatch.h">
@@ -232,6 +229,9 @@
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="Computer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WDLBar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

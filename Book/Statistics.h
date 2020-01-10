@@ -73,8 +73,12 @@ public:
 	// Import pgn-file
 	void importGames(QWidget* parent);
 
+	// Remove positions with only one game
+	void removeSingleGame(QWidget* parent);
+
 	// Get a list of moves from current board
 //	void get(QVector<StatisticsDBMove>&, ChessBoard&);
 private:
 	bool opened;
+	bool haveSingleMove(QString&);
 };
