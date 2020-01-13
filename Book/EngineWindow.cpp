@@ -210,11 +210,11 @@ void EngineWindow::slotEngineInfo(const EngineInfo& info)
 	if (info.nps)
 	{
 		if (info.nps < 10000)
-			nps->setText(itoa(info.nps / 1000, sz, 10) + QString(" nps"));
+			nps->setText(itoa(info.nps, sz, 10) + QString(" nps"));
 		else if (info.nps < 10000000)
-			nps->setText(itoa(info.nps, sz, 10) + QString(" knps"));
+			nps->setText(itoa(info.nps / 1000, sz, 10) + QString(" knps"));
 		else
-			nps->setText(itoa(info.nps, sz, 10) + QString(" Mnps"));
+			nps->setText(itoa(info.nps / 1000000, sz, 10) + QString(" Mnps"));
 	}
 	if (info.pv.size)
 	{
