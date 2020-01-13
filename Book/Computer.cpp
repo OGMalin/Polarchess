@@ -251,6 +251,7 @@ void ComputerDBEntry::convertToEngineList(const QString& data, ChessBoard& cb)
 	QStringList::iterator it = qlist.begin();
 	while (it != qlist.end())
 	{
+		ce.clear();
 		entry = it->split('|');
 		if (entry.size() > 0)
 			ce.engine = entry[0];

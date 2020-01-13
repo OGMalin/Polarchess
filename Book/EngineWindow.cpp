@@ -9,6 +9,7 @@
 #include <QMenu>
 #include <QFontDialog>
 #include <QDir>
+#include <QTime>
 
 EngineWindow::EngineWindow(QWidget *parent)
 	: QWidget(parent)
@@ -61,7 +62,7 @@ EngineWindow::EngineWindow(QWidget *parent)
 
 	model = new QStandardItemModel(multipv, 3);
 	QStringList header;
-	header << "Score" << "Depth" << "PV";
+	header << "Score" << "Depth" << "Time" << "PV";
 	model->setHorizontalHeaderLabels(header);
 	QTableView* output = new QTableView;
 	output->setModel(model);
@@ -93,7 +94,7 @@ EngineWindow::EngineWindow(QWidget *parent)
 	connect(engine, SIGNAL(engineStoped()), this, SLOT(slotEngineStoped()));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(slotShowContextMenu(const QPoint&)));
 
-	font.setPointSize(12);
+	font.setPointSize(10);
 	this->setFont(font);
 }
 
@@ -196,8 +197,8 @@ void EngineWindow::slotEngineInfo(const EngineInfo& info)
 	if (line < 1)
 		line = 1;
 //	model->clear();
-	if (info.time)
-		time->setText(itoa(info.time / 1000, sz, 10) + QString(" s"));
+	//if (info.time)
+	//	time->setText(itoa(info.time / 1000, sz, 10) + QString(" s"));
 	if (info.nodes)
 	{
 		if (info.nodes<10000)
@@ -252,6 +253,11 @@ void EngineWindow::slotEngineInfo(const EngineInfo& info)
 			item->setTextAlignment(Qt::AlignCenter);
 			model->setItem(line - 1, 1, item);
 
+			item = new QStandardItem(QTime(0, 0).addMSecs(info.time).toString());
+			item->setEditable(false);
+			item->setTextAlignment(Qt::AlignCenter);
+			model->setItem(line - 1, 2, item);
+
 			for (int i = 0; i < info.pv.size; i++)
 			{
 				m = info.pv.list[i];
@@ -272,7 +278,7 @@ void EngineWindow::slotEngineInfo(const EngineInfo& info)
 			item = new QStandardItem(s);
 			item->setEditable(false);
 			item->setTextAlignment(Qt::AlignLeft);
-			model->setItem(line - 1, 2, item);
+			model->setItem(line - 1, 3, item);
 			if ((info.time >= timeLimit) && (line==1) && !info.lowerbound && !info.upperbound)
 			{
 				ComputerDBEngine ce;

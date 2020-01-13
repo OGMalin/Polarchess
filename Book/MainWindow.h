@@ -67,6 +67,7 @@ private:
 	QString dataBlack;
 	QString dataStatistics;
 	QString dataComputer;
+	QString dataTraining;
 	QString locale;
 	QMenu* fileMenu;
 	QMenu* fileOpenMenu;

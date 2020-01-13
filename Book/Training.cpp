@@ -2,6 +2,14 @@
 #include <algorithm>
 #include <QProgressDialog>
 #include <QApplication>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QDebug>
+#include "../Common/WinFile.h"
+
+const char* TRAINING = "Training";
+const char* TDBVERSION = "1.0";
+const char* TDBTYPE = "POLARTRAININGDB";
 
 bool TrainingPath::isCorrect(ChessMove& move)
 {
@@ -28,11 +36,85 @@ ChessMove TrainingPath::currentMove()
 Training::Training()
 {
 	Base[0] = Base[1] = NULL;
+	opened = false;
+	if (!QSqlDatabase::isDriverAvailable("QSQLITE"))
+	{
+		qWarning("No SQLITE driver available.");
+		return;
+	}
+	QSqlDatabase::addDatabase("QSQLITE", TRAINING);
 }
 
 Training::~Training()
 {
 
+}
+
+bool Training::open(const QString& path)
+{
+	if (!WinFile::exist(path.toStdString()))
+		return false;
+	QSqlDatabase db = QSqlDatabase::database(TRAINING);
+	db.setDatabaseName(path);
+
+	if (!db.open())
+	{
+		opened = false;
+	}
+	else
+	{
+		opened = true;
+		QSqlQuery query(db);
+
+		query.exec("SELECT * FROM info;");
+		if (query.next())
+		{
+			tdi.db = query.value("db").toString();
+			tdi.version = query.value("version").toString();
+		}
+
+	}
+	return opened;
+}
+
+bool Training::create(const QString& path)
+{
+	QSqlDatabase db = QSqlDatabase::database(TRAINING);
+	char sz[16];
+
+	db.setDatabaseName(path);
+
+	if (!db.open())
+	{
+		qDebug() << "Create database error. Database: " << db.lastError().databaseText() << "Driver: " << db.lastError().driverText();
+		opened = false;
+		return false;
+	}
+	QSqlQuery query(db);
+	query.exec("CREATE TABLE info ( db TEXT, version TEXT);");
+	query.prepare("INSERT INTO info (db, version) VALUES ( :db, :version);");
+	query.bindValue(":db", TDBTYPE);
+	query.bindValue(":version", TDBVERSION);
+	query.exec();
+	query.exec("CREATE TABLE training ( "
+		"color TEXT,"
+		"score	TEXT,"
+		"moves	TEXT"
+		"); ");
+	query.exec("CREATE INDEX score on training (score);");
+	query.exec("CREATE INDEX color on training (color);");
+
+	//query.exec("CREATE TABLE traininngstat ( "
+	//	"); ");
+	tdi.db = TDBTYPE;
+	tdi.version = TDBVERSION;
+	opened = true;
+	return true;
+}
+
+void Training::close()
+{
+	opened = false;
 }
 
 void Training::SetDatabase(int color, Database* base)

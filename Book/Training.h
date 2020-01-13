@@ -5,6 +5,23 @@
 #include <QString>
 #include <QVector>
 #include <QWidget>
+#include <QSqlDatabase>
+
+/*
+	Database format
+
+	hash			text
+		position as hashkey.
+
+	enginelist	text
+		engine1|cp|depth|time|pv;engine2|cb|depth|time|pv
+*/
+
+struct TrainingDBInfo
+{
+	QString db;
+	QString version;
+};
 
 struct TrainingStat
 {
@@ -37,13 +54,25 @@ struct TrainingPath
 class Training
 {
 private:
+	TrainingDBInfo tdi;
 	Database* Base[2];
 	QVector<TrainingPath> list;
 	void walkThrough(ChessBoard& cur, TrainingPath& path, int ply, QVector<BookDBEntry>& pos, int color);
 	void convertMoves(const QString& smoves, TrainingPath& tp);
+	bool opened;
 public:
 	Training();
 	~Training();
+
+	// Open a database
+	bool open(const QString& path);
+
+	// Create a database
+	bool create(const QString& path);
+
+	// Close the database
+	void close();
+
 	// Set the database to use (color=WHITE or BLACK)
 	void SetDatabase(int color, Database* base);
 

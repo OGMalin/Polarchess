@@ -99,6 +99,9 @@ MainWindow::MainWindow(QWidget *parent)
 	if (!dataComputer.isEmpty())
 		if (!computer->open(dataComputer))
 			computer->create(dataComputer);
+	if (!dataTraining.isEmpty())
+		if (!training->open(dataTraining))
+			training->create(dataTraining);
 
 	ChessBoard board = currentPath->getPosition();
 
@@ -321,6 +324,7 @@ void MainWindow::writeSettings()
 	settings.setValue("dataBlack", dataBlack);
 	settings.setValue("dataStatistics", dataStatistics);
 	settings.setValue("dataComputer", dataComputer);
+	settings.setValue("dataTraining", dataTraining);
 	settings.setValue("language", locale);
 }
 
@@ -338,6 +342,7 @@ void MainWindow::readSettings()
 	dataBlack = settings.value("dataBlack", dataPath + "/Black.pbk").toString();
 	dataStatistics = settings.value("dataStatistics", dataPath + "/Statistics.pst").toString();
 	dataComputer = settings.value("dataComputer", dataPath + "/Computer.pcp").toString();
+	dataComputer = settings.value("dataTraining", dataPath + "/Training.tcp").toString();
 	locale = settings.value("language", QString()).toString();
 	if (locale.isEmpty())
 	{

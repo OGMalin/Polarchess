@@ -115,17 +115,6 @@ bool Database::create(const QString& path, int dbtype)
 		qDebug() << "Driver error: " << error.driverText();
 	}
 
-	query.exec("CREATE TABLE training ( "
-		"score	TEXT,"
-		"moves	TEXT"
-		"); ");
-	error = query.lastError();
-	if (error.isValid())
-	{
-		qDebug() << "Database error: " << error.databaseText();
-		qDebug() << "Driver error: " << error.driverText();
-	}
-
 	bdi.db = DBTYPE;
 	bdi.version = DBVERSION;
 	bdi.type = dbtype;
