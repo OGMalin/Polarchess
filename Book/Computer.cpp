@@ -138,7 +138,7 @@ void Computer::add(ComputerDBEngine& ce, ChessBoard& cb)
 	QSqlQuery query(db);
 
 	// Check to see if this engine have been used before
-	QVector<QString>::iterator eit=enginelist.begin();
+	QStringList::iterator eit=enginelist.begin();
 	while (eit != enginelist.end())
 	{
 		if (*eit == ce.engine)
@@ -211,22 +211,29 @@ void Computer::add(ComputerDBEngine& ce, ChessBoard& cb)
 	return;
 }
 
-//void Computer::get(QVector<ComputerDBEngine>&, ChessBoard&)
-//{
-//
-//}
+void Computer::saveEngineList()
+{
+	if (!opened)
+		return;
 
-//bool ComputerDBEntry::engineExist(QString& e)
-//{
-//	QVector<ComputerDBEngine>::iterator it = enginelist.begin();
-//	while (it != enginelist.end())
-//	{
-//		if (it->engine == e)
-//			return true;
-//		++it;
-//	}
-//	return false;
-//}
+	QSqlDatabase db = QSqlDatabase::database(COMPUTER);
+	if (!db.open())
+		return;
+	QSqlQuery query(db);
+
+	query.exec("DELETE FROM engines;");
+
+	QStringList::iterator eit = enginelist.begin();
+	db.transaction();
+	while (eit != enginelist.end())
+	{
+		query.prepare("INSERT INTO engines ( engine ) VALUES ( :engine );");
+		query.bindValue(":engine", *eit);
+		query.exec();
+		++eit;
+	}
+	db.commit();
+}
 
 void ComputerDBEntry::convertToEngineList(const QString& data, ChessBoard& cb)
 {

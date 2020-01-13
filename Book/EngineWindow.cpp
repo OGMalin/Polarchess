@@ -104,10 +104,10 @@ EngineWindow::~EngineWindow()
 
 void EngineWindow::setPosition(ChessBoard& cb, int mn)
 {
-	if (!engineReady)
-		return;
 	currentBoard = cb;
 	movenr = mn;
+	if (!engineReady)
+		return;
 	if (analyzing)
 		if (!freezing)
 		{
@@ -133,6 +133,8 @@ void EngineWindow::slotAnalyzeClicked(bool)
 		analyzing = true;
 		if (engine->needRestart())
 			return;
+		if (multipv > 1)
+			engine->setMultiPV(multipv);
 		engine->analyze(currentBoard);
 	}
 	else

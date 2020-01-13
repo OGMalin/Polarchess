@@ -3,6 +3,9 @@
 #include <QStringList>
 #include <QMenu>
 #include <QFontDialog>
+#include <QApplication>
+#include <QClipboard>
+#include <QMimeData>
 
 PathWindow::PathWindow(QWidget *parent)
 	: QListWidget(parent)
@@ -34,7 +37,10 @@ void PathWindow::refresh(Path* path)
 	QString p = ".";
 	clear();
 	path->getMoveList(ml,tr("NBRQK").toLatin1());
-	addItem("O"); // Start position
+	QListWidgetItem* lwi = new QListWidgetItem(QIcon(":/icon/home48.png"), QString());
+	addItem(lwi);
+
+//	addItem("O"); // Start position
 	for (int i = 0; i < ml.size(); i++)
 	{
 		if (!(i % 2))
@@ -55,10 +61,20 @@ void PathWindow::moveClicked(QListWidgetItem* item)
 
 void PathWindow::showContextMenu(const QPoint& pos)
 {
+	const QClipboard *clipboard = QApplication::clipboard();
+	const QMimeData *mimeData = clipboard->mimeData();
+	bool hasText = mimeData->hasText();
+
 	QMenu* contextMenu = new QMenu(this);
 	contextMenu->addAction(QString("Add line to theory"), this, SLOT(addPathT()));
 	contextMenu->addAction(QString("Add line to White repertoire"), this, SLOT(addPathW()));
 	contextMenu->addAction(QString("Add line to Black repertoire"), this, SLOT(addPathB()));
+	contextMenu->addSeparator();
+	contextMenu->addAction(QString("Copy"), this, SLOT(copy()));
+	QAction* act=contextMenu->addAction(QString("Paste"), this, SLOT(paste()));
+	if (!hasText)
+		act->setDisabled(true);
+	contextMenu->addSeparator();
 	contextMenu->addAction(QString("Font"), this, SLOT(selectFont()));
 	contextMenu->exec(mapToGlobal(pos));
 }
@@ -77,4 +93,14 @@ void PathWindow::selectFont()
 void PathWindow::addPath(int rep)
 {
 	emit pathToDB(rep);
+}
+
+void PathWindow::copy()
+{
+	emit pathCopy();
+}
+
+void PathWindow::paste()
+{
+	emit pathPaste();
 }

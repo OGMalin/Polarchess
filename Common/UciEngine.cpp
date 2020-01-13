@@ -65,6 +65,7 @@ void UciEngine::fromEngine(std::string& input)
 			if (value == "name")
 			{
 				eo.name = getWord(input, index).c_str();
+				++index;
 				value = getWord(input, index);
 				while (!value.empty())
 				{
@@ -326,7 +327,7 @@ void UciEngine::setMultiPV(int n)
 				return;
 			if (engineOption[i].spin.max >= n)
 			{
-				QString qs = "setoption name multipv value ";
+				QString qs = "setoption name MultiPV value ";
 				qs += QString().setNum(n);
 				write(qs);
 			}

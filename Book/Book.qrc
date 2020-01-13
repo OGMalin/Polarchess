@@ -5,5 +5,8 @@
         <file>icon/GB.png</file>
         <file>icon/NO.png</file>
         <file>language/book_nb.qm</file>
+        <file>icon/blackOK.png</file>
+        <file>icon/greenOK.png</file>
+        <file>icon/yellowOK.png</file>
     </qresource>
 </RCC>

@@ -474,7 +474,7 @@ void Database::updateTrainingScore(ChessBoard& cb, int rowid, int score)
 	query.exec();
 }
 
-bool BookDBEntry::moveExist(ChessMove& move)
+bool BookDBEntry::moveExist(const ChessMove& move)
 {
 	QVector<BookDBMove>::iterator it = movelist.begin();
 	while (it != movelist.end())
@@ -484,6 +484,34 @@ bool BookDBEntry::moveExist(ChessMove& move)
 		++it;
 	}
 	return false;
+}
+
+void BookDBEntry::deleteMove(const ChessMove& move)
+{
+	int i;
+	for (i = 0; i < movelist.size(); i++)
+	{
+		if (movelist[i].move == move)
+		{
+			movelist.remove(i);
+			return;
+		}
+	}
+}
+
+void BookDBEntry::setFirst(const ChessMove& move)
+{
+	int i;
+	for (i = 0; i < movelist.size(); i++)
+		if (movelist[i].move == move)
+			break;
+	if (i == movelist.size()) // Not found
+		return;
+	if (i == 0) // Allready first
+		return;
+	BookDBMove bm = movelist[0];
+	movelist[0] = movelist[i];
+	movelist[i] = bm;
 }
 
 void BookDBEntry::convertToMoveList(QVector<BookDBMove>& movelist, const QString& data)

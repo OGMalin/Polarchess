@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QVector>
 #include <QWidget>
 #include <QSqlDatabase>
@@ -54,7 +55,7 @@ class Computer : public QObject
 public:
 	ComputerDBInfo cdi;
 	// List of all engines with evaluation in this db.
-	QVector<QString> enginelist;
+	QStringList enginelist;
 
 	Computer();
 	~Computer();
@@ -73,6 +74,9 @@ public:
 
 	// Find a position
 	ComputerDBEntry find(ChessBoard&);
+
+	// Save the engine priority list
+	void saveEngineList();
 
 private:
 	bool opened;

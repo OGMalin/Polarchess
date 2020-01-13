@@ -10,20 +10,21 @@
 #include <QString>
 #include <QTranslator>
 #include <QActionGroup>
+#include <QMenu>
+#include <QToolBar>
+#include <QAction>
+#include <QCloseEvent>
+#include <QSplitter>
+#include "../Common/BoardWindow.h"
+#include "MoveTableWindow.h"
+#include "OpeningWindow.h"
+#include "CommentWindow.h"
+#include "PathWindow.h"
+#include "EngineWindow.h"
+#include "Path.h"
 
 enum {THEORY=0, REPWHITE, REPBLACK };
-class QMenu;
-class QToolBar;
-class QAction;
-class QCloseEvent;
-class QSplitter;
-class BoardWindow;
-class MoveWindow;
-class OpeningWindow;
-class CommentWindow;
-class PathWindow;
-class EngineWindow;
-class Path;
+
 
 class MainWindow : public QMainWindow
 {
@@ -38,10 +39,14 @@ protected:
 
 public slots:
 	void moveEntered(ChessMove&);
-	void moveSelected(int rep, int movenr);
-	void moveDelete(int rep, int movenr);
+	void moveSelected(ChessMove&);
+	void childNeedRefresh();
+	void moveDelete(int rep, const ChessMove&);
+	void moveSetAsMain(int rep, const ChessMove&);
 	void pathSelected(int);
 	void pathToDB(int);
+	void pathCopy();
+	void pathPaste();
 	void commentChanged(QString&);
 	void addMoveComment(int rep, int movenr, QString& comment);
 	void enginePV(ComputerDBEngine&, ChessBoard&);
@@ -100,7 +105,7 @@ private:
 	QSplitter* v1Splitter;
 	QSplitter* v2Splitter;
 	BoardWindow* boardwindow;
-	MoveWindow* movewindow;
+	MoveTableWindow* movewindow;
 	CommentWindow* commentwindow;
 	OpeningWindow* openingwindow;
 	PathWindow* pathwindow;

@@ -1,15 +1,15 @@
-#include "MoveWindow.h"
+#include "MoveTableWindow.h"
+#include "ListOrderDialog.h"
 #include "WDLBar.h"
-#include <QTableView>
-#include <QStandardItemModel>
 #include <QVBoxLayout>
 #include <QStringList>
 #include <QVector>
 #include <QMenu>
 #include <QFontDialog>
 #include <QTextStream>
+#include <QHeaderView>
 
-MoveWindow::MoveWindow(QWidget *parent)
+MoveTableWindow::MoveTableWindow(QWidget *parent)
 	: QWidget(parent)
 {
 	computer = NULL;
@@ -29,7 +29,7 @@ MoveWindow::MoveWindow(QWidget *parent)
 	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 	connect(table, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(moveClicked(const QModelIndex&)));
-	font.setPointSize(12);
+	font.setPointSize(10);
 	this->setFont(font);
 
 	hMoves.label = tr("Moves");
@@ -67,11 +67,11 @@ MoveWindow::MoveWindow(QWidget *parent)
 	hYear.column = 10;
 }
 
-MoveWindow::~MoveWindow()
+MoveTableWindow::~MoveTableWindow()
 {
 }
 
-void MoveWindow::add(BookDBEntry& book, int rep, ChessBoard& cb)
+void MoveTableWindow::add(BookDBEntry& book, int rep, ChessBoard& cb)
 {
 	MoveTableEntry mte;
 	QVector<BookDBMove>::iterator bit;
@@ -115,7 +115,7 @@ void MoveWindow::add(BookDBEntry& book, int rep, ChessBoard& cb)
 	}
 }
 
-void MoveWindow::add(StatisticsDBEntry& stat)
+void MoveTableWindow::add(StatisticsDBEntry& stat)
 {
 	MoveTableEntry mte;
 	QVector<StatisticsDBMove>::iterator sit;
@@ -135,19 +135,19 @@ void MoveWindow::add(StatisticsDBEntry& stat)
 	}
 }
 
-void MoveWindow::add(ComputerDBEntry& comp)
+void MoveTableWindow::add(ComputerDBEntry& comp)
 {
 	MoveTableEntry mte;
 	int index;
 	QVector<ComputerDBEngine>::iterator cit;
-	QVector<QString>::iterator eit;
+	QStringList::iterator eit;
 	eit = computer->enginelist.begin();
 	while (eit != computer->enginelist.end())
 	{
 		cit = comp.enginelist.begin();
 		while (cit != comp.enginelist.end())
 		{
-			if (eit == cit->engine)
+			if (*eit == cit->engine)
 			{
 				if (cit->pv.size)
 				{
@@ -157,15 +157,17 @@ void MoveWindow::add(ComputerDBEntry& comp)
 						mte.clear();
 						mte.move = cit->pv.list[0];
 						mte.cp = cit->cp;
-						mte.engine = cit->engine;
-						mte.depth = cit->depth;
+						QTextStream(&mte.engine) << cit->engine << endl << "Cp: " << float(cit->cp/100.0) << ", Depth: " << cit->depth << endl;
 						movetable.push_back(mte);
 					}
 					else if (movetable[index].engine.isEmpty())
 					{
 						movetable[index].cp = cit->cp;
-						movetable[index].engine = cit->engine;
-						movetable[index].depth = cit->depth;
+						QTextStream(&movetable[index].engine) << cit->engine << endl << "Cp: " << float(cit->cp / 100.0) << ", Depth: " << cit->depth << endl;
+					}
+					else
+					{
+						QTextStream(&movetable[index].engine) << cit->engine << endl << "Cp: " << float(cit->cp / 100.0) << ", Depth: " << cit->depth << endl;
 					}
 				}
 			}
@@ -175,7 +177,7 @@ void MoveWindow::add(ComputerDBEntry& comp)
 	}
 }
 
-int MoveWindow::existInTable(ChessMove& m)
+int MoveTableWindow::existInTable(ChessMove& m)
 {
 	int i;
 	for (i = 0; i < movetable.size(); i++)
@@ -184,7 +186,7 @@ int MoveWindow::existInTable(ChessMove& m)
 	return -1;
 }
 
-void MoveWindow::refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black, StatisticsDBEntry& stat, ComputerDBEntry& compdata, ChessBoard& cb, int movenr)
+void MoveTableWindow::refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black, StatisticsDBEntry& stat, ComputerDBEntry& compdata, ChessBoard& cb, int movenr)
 {
 	currentMoveNr = movenr;
 	currentBoard = cb;
@@ -198,7 +200,7 @@ void MoveWindow::refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& b
 	refresh();
 }
 
-void MoveWindow::refresh()
+void MoveTableWindow::refresh()
 {
 	int i, j;
 	int col;
@@ -218,7 +220,9 @@ void MoveWindow::refresh()
 				model->setHorizontalHeaderItem(hMoves.column, new QStandardItem(hMoves.label));
 				++col;
 			}
-			qs = QString(currentBoard.makeMoveText(movetable[i].move, tr("NBRQK").toStdString()).c_str());
+			qs.clear();
+			QTextStream(&qs) << currentMoveNr << ((currentBoard.toMove == WHITE) ? "." : "...");
+			qs += QString(currentBoard.makeMoveText(movetable[i].move, tr("NBRQK").toStdString()).c_str());
 			item = new QStandardItem(qs);
 			model->setItem(i, hMoves.column, item);
 		}
@@ -234,7 +238,8 @@ void MoveWindow::refresh()
 			if (movetable[i].rep[0])
 			{
 				item = new QStandardItem();
-				item->setBackground(QBrush(QColor("gray")));
+				item->setIcon(QIcon(":/icon/blackOK.png"));
+				item->setTextAlignment(Qt::AlignCenter);
 				model->setItem(i, hTheory.column, item);
 			}
 		}
@@ -251,11 +256,11 @@ void MoveWindow::refresh()
 			{
 				item = new QStandardItem();
 				if (movetable[i].rep[1] == 1)
-					item->setBackground(QBrush(QColor("gray")));
+					item->setIcon(QIcon(":/icon/blackOK.png"));
 				else if (movetable[i].rep[1] == 2)
-					item->setBackground(QBrush(QColor("green")));
+					item->setIcon(QIcon(":/icon/greenOK.png"));
 				else if (movetable[i].rep[1] == 3)
-					item->setBackground(QBrush(QColor("yellow")));
+					item->setIcon(QIcon(":/icon/yellowOK.png"));
 				model->setItem(i, hWhite.column, item);
 			}
 		}
@@ -271,11 +276,11 @@ void MoveWindow::refresh()
 			{
 				item = new QStandardItem();
 				if (movetable[i].rep[2] == 1)
-					item->setBackground(QBrush(QColor("gray")));
+					item->setIcon(QIcon(":/icon/blackOK.png"));
 				else if (movetable[i].rep[2] == 2)
-					item->setBackground(QBrush(QColor("green")));
+					item->setIcon(QIcon(":/icon/greenOK.png"));
 				else if (movetable[i].rep[2] == 3)
-					item->setBackground(QBrush(QColor("yellow")));
+					item->setIcon(QIcon(":/icon/yellowOK.png"));
 				model->setItem(i, hBlack.column, item);
 			}
 		}
@@ -312,7 +317,7 @@ void MoveWindow::refresh()
 				qs.clear();
 				QTextStream(&qs) << movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin;
 				item = new QStandardItem(qs);
-				item->setTextAlignment(Qt::AlignRight);
+				item->setTextAlignment(Qt::AlignVCenter | Qt::AlignRight);
 				model->setItem(i, hGames.column, item);
 			}
 		}
@@ -328,11 +333,9 @@ void MoveWindow::refresh()
 			if (!movetable[i].engine.isEmpty())
 			{
 				qs.clear();
-				QTextStream(&qs) << movetable[i].cp;
+				QTextStream(&qs) << float(movetable[i].cp/100.0);
 				item = new QStandardItem(qs);
-				qs.clear();
-				QTextStream(&qs) << movetable[i].engine << endl << "Depth: " << movetable[i].depth;
-				item->setToolTip(qs);
+				item->setToolTip(movetable[i].engine);
 				item->setTextAlignment(Qt::AlignCenter);
 				model->setItem(i, hComp.column, item);
 			}
@@ -348,12 +351,12 @@ void MoveWindow::refresh()
 			if ((movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin) > 0)
 			{
 				qs.clear();
-				if (currentBoard.toMove==WHITE)
-					QTextStream(&qs) << 100 * (movetable[i].whitewin + movetable[i].draw / 2) / (movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin) << "%";
+				if (currentBoard.toMove == WHITE)
+					QTextStream(&qs) << (100 * movetable[i].whitewin + 50 * movetable[i].draw) / (movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin) << "%";
 				else
-					QTextStream(&qs) << 100 * (movetable[i].blackwin + movetable[i].draw / 2) / (movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin) << "%";
+					QTextStream(&qs) << (100 * movetable[i].blackwin + 50 * movetable[i].draw) / (movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin) << "%";
 				item = new QStandardItem(qs);
-				item->setTextAlignment(Qt::AlignRight);
+				item->setTextAlignment(Qt::AlignVCenter | Qt::AlignRight);
 				model->setItem(i, hScore.column, item);
 			}
 		}
@@ -370,7 +373,7 @@ void MoveWindow::refresh()
 				qs.clear();
 				QTextStream(&qs) << 100 * movetable[i].draw / (movetable[i].whitewin + movetable[i].draw + movetable[i].blackwin) << "%";
 				item = new QStandardItem(qs);
-				item->setTextAlignment(Qt::AlignRight);
+				item->setTextAlignment(Qt::AlignVCenter | Qt::AlignRight);
 				model->setItem(i, hDraw.column, item);
 			}
 		}
@@ -386,7 +389,7 @@ void MoveWindow::refresh()
 				qs.clear();
 				QTextStream(&qs) << movetable[i].elo;
 				item = new QStandardItem(qs);
-				item->setTextAlignment(Qt::AlignRight);
+				item->setTextAlignment(Qt::AlignVCenter | Qt::AlignRight);
 				model->setItem(i, hElo.column, item);
 			}
 		}
@@ -402,49 +405,67 @@ void MoveWindow::refresh()
 				qs.clear();
 				QTextStream(&qs) << movetable[i].year;
 				item = new QStandardItem(qs);
-				item->setTextAlignment(Qt::AlignRight);
+				item->setTextAlignment(Qt::AlignVCenter | Qt::AlignRight);
 				model->setItem(i, hYear.column, item);
 			}
 		}
 	}
 
-	QStringList label;
-	qs.clear();
-	QTextStream(&qs) << currentMoveNr << ".";
-	for (i = 0; i < movetable.size(); i++)
-	{
-		if (currentBoard.toMove == BLACK)
-			label.push_back(qs + "...");
-		else
-			label.push_back(qs);
-	}
-	model->setVerticalHeaderLabels(label);
+	table->verticalHeader()->hide();
 	model->setColumnCount(col);
 	model->setRowCount(movetable.size());
+	table->resizeColumnsToContents();
 }
 
-void MoveWindow::showContextMenu(const QPoint& pos)
+void MoveTableWindow::showContextMenu(const QPoint& pos)
 {
 	QMenu* contextMenu = new QMenu(this);
-	QModelIndex qmi = table->indexAt(pos);
-	if (qmi.row() == 0)
-	{
-		contextMenu->addAction(QString("v"), this, SLOT(addComment0()));
+	int col = table->columnAt(pos.x());
+	int row = table->rowAt(pos.y());
 
+	// Header
+	if (row == 0)
+	{
+//		contextMenu->addAction(QString("v"), this, SLOT(addComment0()));
 	}
-	//contextMenu->addAction(QString("No comment"), this, SLOT(addComment0()));
-	//contextMenu->addAction(QString("!"), this, SLOT(addComment1()));
-	//contextMenu->addAction(QString("?"), this, SLOT(addComment2()));
-	//contextMenu->addAction(QString("!!"), this, SLOT(addComment3()));
-	//contextMenu->addAction(QString("??"), this, SLOT(addComment4()));
-	//contextMenu->addAction(QString("!?"), this, SLOT(addComment5()));
-	//contextMenu->addAction(QString("?!"), this, SLOT(addComment6()));
-	//contextMenu->addAction(QString("Delete move"), this, SLOT(deleteMove()));
+	else if ((col > 0) && (row > 0) && (row <= movetable.size()))
+	{
+		--row; // Row 0 is the header
+		if (col == hTheory.column)
+		{
+			if (movetable[row].rep[0])
+			{
+				contextMenu->addAction(QString("Remove from theory"), this, [=] {deleteMove(0, movetable[row].move); });
+			}
+		}
+		else if (col == hWhite.column)
+		{
+			if (movetable[row].rep[1])
+			{
+				contextMenu->addAction(QString("Remove from White repertoire"), this, [=] {deleteMove(1, movetable[row].move); });
+				if (movetable[row].rep[1] == 3)
+					contextMenu->addAction(QString("Set as main White repertoire move"), this, [=] {setMainMove(1, movetable[row].move); });
+			}
+		}
+		else if (col == hBlack.column)
+		{
+			if (movetable[row].rep[2])
+			{
+				contextMenu->addAction(QString("Remove from Black repertoire"), this, [=] {deleteMove(2, movetable[row].move); });
+				if (movetable[row].rep[2] == 3)
+					contextMenu->addAction(QString("Set as main White repertoire move"), this, [=] {setMainMove(2, movetable[row].move); });
+			}
+		}
+		else if (col == hComp.column)
+		{
+			contextMenu->addAction(QString("Set engine priority"), this, SLOT(rearrangeEngines()));
+		}
+	}
 	contextMenu->addAction(QString("Font"), this, SLOT(selectFont()));
 	contextMenu->exec(mapToGlobal(pos));
 }
 
-void MoveWindow::selectFont()
+void MoveTableWindow::selectFont()
 {
 	bool ok;
 	QFont f = QFontDialog::getFont(&ok, font, this);
@@ -455,23 +476,41 @@ void MoveWindow::selectFont()
 	}
 }
 
-void MoveWindow::moveClicked(const QModelIndex& index)
+void MoveTableWindow::moveClicked(const QModelIndex& index)
 {
-//	emit moveSelected(index.column(), index.row());
+	int col = index.column();
+	int row = index.row();
+
+	if (col == hMoves.column)
+	{
+		if ((row>=0) && (row < movetable.size()))
+			emit moveSelected(movetable[row].move);
+	}
 }
 
-void MoveWindow::deleteMove()
+void MoveTableWindow::deleteMove(int rep, const ChessMove& move)
 {
-	//QItemSelectionModel* sel = table->selectionModel();
-	//if (sel->hasSelection())
-	//{
-	//	QModelIndex qmi = sel->currentIndex();
-	//	if (qmi.isValid())
-	//		emit moveDelete(qmi.column(), qmi.row());
-	//}
+	emit moveDelete(rep, move);
 }
 
-void MoveWindow::addComment(QString& comment)
+void MoveTableWindow::setMainMove(int rep, const ChessMove& move)
+{
+	emit moveSetAsMain(rep, move);
+}
+
+void MoveTableWindow::rearrangeEngines()
+{
+	ListOrderDialog dialog(tr("Arrange engine priority"), this);
+	dialog.setList(computer->enginelist);
+	if (dialog.exec() == QDialog::Rejected)
+		return;
+	QStringList l = dialog.getList();
+	computer->enginelist = l;
+	computer->saveEngineList();
+	emit needRefresh();
+};
+
+void MoveTableWindow::addComment(QString& comment)
 {
 	//QItemSelectionModel* sel = table->selectionModel();
 	//if (sel->hasSelection())

@@ -1,5 +1,6 @@
 #include "WDLBar.h"
 #include <QImage>
+#include <QPainter>
 
 WDLBar::WDLBar(int w, int d, int l)
 	: QBrush()
@@ -8,16 +9,10 @@ WDLBar::WDLBar(int w, int d, int l)
 	sizeD = d;
 	sizeL = l;
 	image = new QImage(100, 20, QImage::Format_RGB32);
-	setStyle(Qt::SolidPattern);
-	for (int x = 0; x < 100; x++)
-	{
-		image->setPixel(x, 8, 0xff555555);
-		image->setPixel(x, 9, 0xff555555);
-		image->setPixel(x, 10, 0xff555555);
-		image->setPixel(x, 11, 0xff555555);
-		image->setPixel(x, 12, 0xff555555);
-		image->setPixel(x, 13, 0xff555555);
-	}
+	QPainter* paint = new QPainter(image);
+	paint->setPen(QColor(Qt::black));
+//	setStyle(Qt::SolidPattern);
+	paint->drawLine(8, 9, 90, 9);
+	paint->drawLine(8, 10, 90, 10);
 	setTextureImage(*image);
 }
-

@@ -89,7 +89,7 @@ PathEntry Path::getEntry(int n)
 	return p;
 }
 
-void Path::getMoveList(QStringList& ml, const char* charset)
+void Path::getMoveList(QStringList& ml, const char* charset, int type)
 {
 	QString s;
 	char sz[16];
@@ -101,7 +101,7 @@ void Path::getMoveList(QStringList& ml, const char* charset)
 		if (charset)
 			s = moves[i].board.makeMoveText(moves[i].move, sz, 16, charset);
 		else
-			s = moves[i].board.makeMoveText(moves[i].move, sz, 16, FIDE);
+			s = moves[i].board.makeMoveText(moves[i].move, sz, 16, type);
 		ml.append(s);
 	}
 }

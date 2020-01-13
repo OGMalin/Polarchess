@@ -65,7 +65,9 @@ struct BookDBEntry
 	bool dirty;
 	BookDBEntry() { clear();  dirty = false; };
 	void clear() { board.clear(); comment.clear(); movelist.clear(); eval = score = 0; dirty = false; };
-	bool moveExist(ChessMove& move);
+	bool moveExist(const ChessMove& move);
+	void deleteMove(const ChessMove&);
+	void setFirst(const ChessMove&);
 	void updateMove(BookDBMove&bm, bool mergemove=false);
 
 	void convertToMoveList(QVector<BookDBMove>&, const QString&);

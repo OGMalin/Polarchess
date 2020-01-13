@@ -44,9 +44,6 @@
     <ClCompile Include="MainWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MoveWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CommentWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -131,12 +128,15 @@
     <ClCompile Include="WDLBar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ListOrderDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MoveTableWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="MoveWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="CommentWindow.h">
@@ -171,6 +171,9 @@
     </QtMoc>
     <QtMoc Include="..\Common\BaseEngine.h">
       <Filter>Common</Filter>
+    </QtMoc>
+    <QtMoc Include="MoveTableWindow.h">
+      <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
@@ -232,6 +235,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WDLBar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ListOrderDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

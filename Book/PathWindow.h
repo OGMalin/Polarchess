@@ -21,6 +21,8 @@ public:
 signals:
 	void pathSelected(int);
 	void pathToDB(int);
+	void pathCopy();
+	void pathPaste();
 
 public slots:
 	void moveClicked(QListWidgetItem*);
@@ -29,6 +31,8 @@ public slots:
 	void addPathT() { addPath(0); };
 	void addPathW() { addPath(1); };
 	void addPathB() { addPath(2); };
+	void copy();
+	void paste();
 
 private:
 	QFont font;

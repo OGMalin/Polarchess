@@ -1,29 +1,23 @@
 #include "MainWindow.h"
-#include "MoveWindow.h"
-#include "OpeningWindow.h"
-#include "CommentWindow.h"
-#include "PathWindow.h"
-#include "EngineWindow.h"
 #include "AboutDialog.h"
 #include "ImportPgnDialog.h"
-#include "../Common/BoardWindow.h"
-#include "Path.h"
-#include <QMenu>
-#include <QToolBar>
-#include <QAction>
+#include "../Common/Pgn.h"
+#include "../Common/ChessGame.h"
 #include <QMenuBar>
 #include <QSettings>
 #include <QApplication>
 #include <QRect>
 #include <QDesktopWidget>
-#include <QCloseEvent>
-#include <QSplitter>
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QMessageBox>
 #include <QSplitter>
 #include <QPushButton>
 #include <QStatusBar>
+#include <QClipboard>
+#include <QMimeData>
+#include <QTextStream>
+#include <string>
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
@@ -45,10 +39,10 @@ MainWindow::MainWindow(QWidget *parent)
 
 	boardwindow = new BoardWindow;
 	openingwindow = new OpeningWindow;
-	movewindow = new MoveWindow;
 	commentwindow = new CommentWindow;
 	pathwindow = new PathWindow;
 	enginewindow = new EngineWindow;
+	movewindow = new MoveTableWindow;
 
 	v1Splitter->addWidget(openingwindow);
 	v1Splitter->addWidget(boardwindow);
@@ -77,11 +71,15 @@ MainWindow::MainWindow(QWidget *parent)
 	movewindow->computer = computer;
 
 	connect(boardwindow, SIGNAL(moveEntered(ChessMove&)), this, SLOT(moveEntered(ChessMove&)));
-	connect(movewindow, SIGNAL(moveSelected(int, int)), this, SLOT(moveSelected(int, int)));
-	connect(movewindow, SIGNAL(moveDelete(int, int)), this, SLOT(moveDelete(int, int)));
+	connect(movewindow, SIGNAL(moveSelected(ChessMove&)), this, SLOT(moveSelected(ChessMove&)));
+	connect(movewindow, SIGNAL(moveDelete(int, const ChessMove&)), this, SLOT(moveDelete(int, const ChessMove&)));
+	connect(movewindow, SIGNAL(moveSetAsMain(int, const ChessMove&)), this, SLOT(moveSetAsMain(int, const ChessMove&)));
+	connect(movewindow, SIGNAL(needRefresh()), this, SLOT(childNeedRefresh()));
 	connect(movewindow, SIGNAL(addMoveComment(int, int, QString&)), this, SLOT(addMoveComment(int, int, QString&)));
 	connect(pathwindow, SIGNAL(pathToDB(int)), this, SLOT(pathToDB(int)));
 	connect(pathwindow, SIGNAL(pathSelected(int)), this, SLOT(pathSelected(int)));
+	connect(pathwindow, SIGNAL(pathCopy()), this, SLOT(pathCopy()));
+	connect(pathwindow, SIGNAL(pathPaste()), this, SLOT(pathPaste()));
 	connect(commentwindow, SIGNAL(commentChanged(QString&)), this, SLOT(commentChanged(QString&)));
 	connect(enginewindow, SIGNAL(enginePV(ComputerDBEngine&, ChessBoard&)), this, SLOT(enginePV(ComputerDBEngine&, ChessBoard&)));
 
@@ -462,18 +460,27 @@ void MainWindow::aboutDialog()
 	dialog.exec();
 }
 
-void MainWindow::moveSelected(int rep, int movenr)
+void MainWindow::moveSelected(ChessMove& move)
 {
-	if ((rep < 0) || (rep > 2))
-		return;
-	if (bde[rep].movelist.size() <= movenr)
-		return;
-	ChessBoard board = currentPath->getPosition();
-	int i;
+	BookDBMove bm;
+	ChessBoard board;
 
 	// Do the move if it is legal
-	if (!currentPath->add(bde[rep].movelist[movenr].move))
+	if (!currentPath->add(move))
 		return;
+
+
+	if (write >= 0)
+	{
+		// Save the move if it doesn't exist
+		if (!bde[write].moveExist(move))
+		{
+			bm.clear();
+			bm.move = move;
+			bde[write].movelist.append(bm);
+			Base[write]->add(bde[write]);
+		}
+	}
 
 	// Change to read from both db
 	board = currentPath->getPosition();
@@ -486,26 +493,33 @@ void MainWindow::moveSelected(int rep, int movenr)
 	updateWindow();
 }
 
-void MainWindow::moveDelete(int rep, int movenr)
+void MainWindow::moveDelete(int rep, const ChessMove& move)
 {
 	if ((rep < 0) || (rep > 2))
 		return;
-	if (bde[rep].movelist.size() <= movenr)
+	bde[rep].deleteMove(move);
+	Base[rep]->add(bde[rep]);
+	updateWindow();
+}
+
+void MainWindow::moveSetAsMain(int rep, const ChessMove& move)
+{
+	if ((rep < 1) || (rep > 2))
 		return;
-	bde[rep].movelist.removeAt(movenr);
+	bde[rep].setFirst(move);
 	Base[rep]->add(bde[rep]);
 	updateWindow();
 }
 
 void MainWindow::addMoveComment(int rep, int movenr, QString& comment)
 {
-	if ((rep < 0) || (rep > 2))
-		return;
-	if (bde[rep].movelist.size() <= movenr)
-		return;
-	bde[rep].movelist[movenr].comment = comment;
-	Base[rep]->add(bde[rep]);
-	updateWindow();
+	//if ((rep < 0) || (rep > 2))
+	//	return;
+	//if (bde[rep].movelist.size() <= movenr)
+	//	return;
+	//bde[rep].movelist[movenr].comment = comment;
+	//Base[rep]->add(bde[rep]);
+	//updateWindow();
 }
 
 void MainWindow::moveEntered(ChessMove& move)
@@ -846,6 +860,7 @@ void MainWindow::slotLanguageChanged(QAction* action)
 		// load the language dependant on the action content
 		locale = action->data().toString();
 		loadLanguage();
+		updateWindow();
 	}
 }
 
@@ -892,3 +907,63 @@ void MainWindow::changeEvent(QEvent* event)
 	QMainWindow::changeEvent(event);
 }
 
+void MainWindow::pathCopy()
+{
+	QStringList qsl;
+	QString qs;
+	QClipboard* clipboard = QApplication::clipboard();
+	currentPath->getMoveList(qsl,NULL,SAN);
+	QTextStream(&qs) << "[Event \"?\"]" << endl << "[Site \"?\"]" << endl << "[Date \"????.??.??\"]" << endl << "[Round \"?\"]" << endl << "[White \"?\"]" << endl << "[Black \"?\"]" << endl << "[Result \"*\"]" << endl << endl;
+	int i;
+	for (i = 0; i < qsl.size(); i++)
+	{
+		if (i % 2)
+			QTextStream(&qs) << " ";
+		else
+			QTextStream(&qs) << " " << (2+i)/2 << ". ";
+		QTextStream(&qs) << qsl[i];
+	}
+	QTextStream(&qs) << " *" << endl << endl;
+
+	clipboard->setText(qs);
+}
+
+void MainWindow::pathPaste()
+{
+	QString qs;
+	Pgn pgn;
+	ChessGame game;
+	ChessMove move;
+	std::string ss;
+	const QClipboard *clipboard = QApplication::clipboard();
+	const QMimeData *mimeData = clipboard->mimeData();
+	if (!mimeData->hasText())
+		return;
+	qs = clipboard->text();
+	// Is pgn format
+	if (qs.indexOf("[Event ", 0) >= 0)
+	{
+		if (pgn.read(game, 1, 999, false, qs.toLatin1()))
+		{
+			currentPath->clear();
+			game.toStart();
+			while (game.getMove(move, ss, 0))
+			{
+				currentPath->add(move);
+				game.doMove(0);
+			}
+			readDB();
+
+			ChessBoard board = currentPath->getPosition();
+			boardwindow->setPosition(board);
+			enginewindow->setPosition(board, currentPath->current() / 2 + 1);
+			updateWindow();
+		}
+	}
+}
+
+void MainWindow::childNeedRefresh()
+{
+	readDB();
+	updateWindow();
+}

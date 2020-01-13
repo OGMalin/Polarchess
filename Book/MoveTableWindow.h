@@ -5,12 +5,11 @@
 #include <QBrush>
 #include <QFont>
 #include <QVector>
+#include <QTableView>
+#include <QStandardItemModel>
 #include "Statistics.h"
 #include "Computer.h"
 #include "../Common/ChessMove.h"
-
-class QTableView;
-class QStandardItemModel;
 
 struct MoveTableHeader
 {
@@ -27,31 +26,34 @@ struct MoveTableEntry
 	int whitewin, draw, blackwin, elo, year;
 	QString engine;
 	int cp;
-	int depth;
 	int rep[3];
-	void clear() { move.clear(); whitewin = draw = blackwin = elo = year = 0; engine.clear(); cp = depth = 0; rep[0] = rep[1] = rep[2] = 0; };
+	void clear() { move.clear(); whitewin = draw = blackwin = elo = year = 0; engine.clear(); cp = 0; rep[0] = rep[1] = rep[2] = 0; };
 };
 
-class MoveWindow : public QWidget
+class MoveTableWindow : public QWidget
 {
 	Q_OBJECT
 
 public:
 	Computer* computer;
-	MoveWindow(QWidget *parent=0);
-	~MoveWindow();
+	MoveTableWindow(QWidget *parent=0);
+	~MoveTableWindow();
 	void refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black, StatisticsDBEntry& statistics, ComputerDBEntry& compdata, ChessBoard&, int movenr);
 	void addComment(QString& comment);
 
 signals:
-	void moveSelected(int rep, int movenr);
-	void moveDelete(int rep, int movenr);
+	void moveSelected(ChessMove&);
+	void moveDelete(int rep, const ChessMove&);
+	void moveSetAsMain(int rep, const ChessMove&);
 	void addMoveComment(int rep, int movenr, QString& comment);
+	void needRefresh();
 
 public slots:
 	void showContextMenu(const QPoint& pos);
 	void selectFont();
-	void deleteMove();
+	void deleteMove(int rep, const ChessMove&);
+	void setMainMove(int rep, const ChessMove&);
+	void rearrangeEngines();
 	void moveClicked(const QModelIndex& index);
 	void addComment0() { addComment(QString("")); };
 	void addComment1() { addComment(QString("!")); };
