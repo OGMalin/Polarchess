@@ -19,9 +19,6 @@ PathWindow::PathWindow(QWidget *parent)
 	connect(this, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(moveClicked(QListWidgetItem*)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 
-	font.setPointSize(12);
-	this->setFont(font);
-
 	normalBrush.setColor(Qt::black);
 	grayedBrush.setColor(Qt::gray);
 }
@@ -82,11 +79,10 @@ void PathWindow::showContextMenu(const QPoint& pos)
 void PathWindow::selectFont()
 {
 	bool ok;
-	QFont f = QFontDialog::getFont(&ok, font, this);
+	QFont f = QFontDialog::getFont(&ok, font(), this);
 	if (ok)
 	{
-		font = f;
-		this->setFont(font);
+		setFont(f);
 	}
 }
 
@@ -103,4 +99,17 @@ void PathWindow::copy()
 void PathWindow::paste()
 {
 	emit pathPaste();
+}
+
+QString PathWindow::fontToString()
+{
+	return font().toString();
+}
+
+void PathWindow::fontFromString(const QString& sFont)
+{
+	QFont f;
+	f.fromString(sFont);
+	setFont(f);
+	//	table->resizeColumnsToContents();
 }

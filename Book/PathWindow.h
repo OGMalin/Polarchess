@@ -17,6 +17,8 @@ public:
 	~PathWindow();
 	void refresh(Path* path);
 	void addPath(int);
+	QString fontToString();
+	void fontFromString(const QString&);
 
 signals:
 	void pathSelected(int);
@@ -35,7 +37,6 @@ public slots:
 	void paste();
 
 private:
-	QFont font;
 	QBrush normalBrush;
 	QBrush grayedBrush;
 };

@@ -25,6 +25,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	group = new QGroupBox(tr("Theory book"));
 	grid = new QGridLayout();
 	theoryFile = new QLineEdit;
+	theoryFile->setDisabled(true);
 	grid->addWidget(theoryFile, 0, 0, 1, -1);
 	button = new QPushButton(tr("Open"));
 	connect(button, SIGNAL(clicked()), this, SLOT(openTheoryDB()));
@@ -49,6 +50,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 
 	group = new QGroupBox(tr("White repertoire book"));
 	whiteFile = new QLineEdit;
+	whiteFile->setDisabled(true);
 	grid = new QGridLayout();
 	grid->addWidget(whiteFile, 0, 0, 1, -1);
 	button = new QPushButton(tr("Open"));
@@ -75,6 +77,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	group = new QGroupBox(tr("Black repertoire book"));
 	grid = new QGridLayout();
 	blackFile = new QLineEdit;
+	blackFile->setDisabled(true);
 	grid->addWidget(blackFile, 0, 0, 1, -1);
 	button = new QPushButton(tr("Open"));
 	connect(button, SIGNAL(clicked()), this, SLOT(openBlackDB()));
@@ -100,6 +103,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	group = new QGroupBox(tr("Training statistics"));
 	grid = new QGridLayout();
 	trainingFile = new QLineEdit;
+	trainingFile->setDisabled(true);
 	grid->addWidget(trainingFile, 0, 0, 1, -1);
 	button = new QPushButton(tr("Open"));
 	connect(button, SIGNAL(clicked()), this, SLOT(openTrainingDB()));
@@ -122,6 +126,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	group = new QGroupBox(tr("Computer evaluation"));
 	grid = new QGridLayout();
 	computerFile = new QLineEdit;
+	computerFile->setDisabled(true);
 	grid->addWidget(computerFile, 0, 0, 1, -1);
 	button = new QPushButton(tr("Open"));
 	connect(button, SIGNAL(clicked()), this, SLOT(openComputerDB()));
@@ -143,6 +148,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	group = new QGroupBox(tr("Games statistic"));
 	grid = new QGridLayout();
 	statisticFile = new QLineEdit;
+	statisticFile->setDisabled(true);
 	grid->addWidget(statisticFile, 0, 0, 1, -1);
 	button = new QPushButton(tr("Open"));
 	connect(button, SIGNAL(clicked()), this, SLOT(openStatisticDB()));
@@ -165,7 +171,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	group->setLayout(grid);
 	vbox->addWidget(group);
 
-	QDialogButtonBox* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+	QDialogButtonBox* buttons = new QDialogButtonBox(QDialogButtonBox::Close, this);
 	vbox->addWidget(buttons);
 	setLayout(vbox);
 

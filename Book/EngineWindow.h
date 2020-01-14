@@ -7,6 +7,7 @@
 #include <QStandardItemModel>
 #include <QFont>
 #include <QComboBox>
+#include <QTableView>
 #include "Computer.h"
 
 class QPushButton;
@@ -20,6 +21,8 @@ public:
 	EngineWindow(QWidget *parent = 0);
 	~EngineWindow();
 	void setPosition(ChessBoard& cb, int movenr=1);
+	QString fontToString();
+	void fontFromString(const QString&);
 
 public slots:
 	void slotAnalyzeClicked(bool);
@@ -50,6 +53,7 @@ private:
 	QLabel* time;
 	QComboBox* selengine;
 	QStandardItemModel* model;
+	QTableView* table;
 	bool analyzing;
 	bool freezing;
 	ChessBoard currentBoard;
@@ -57,6 +61,5 @@ private:
 	MoveList movelist;
 	int movenr;
 	int freezemovenr;
-	QFont font;
 };
 

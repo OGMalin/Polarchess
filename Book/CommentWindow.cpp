@@ -23,9 +23,6 @@ CommentWindow::CommentWindow(QWidget *parent)
 
 	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
-
-	font.setPointSize(12);
-	this->setFont(font);
 }
 
 CommentWindow::~CommentWindow()
@@ -97,10 +94,22 @@ void CommentWindow::showContextMenu(const QPoint& pos)
 void CommentWindow::selectFont()
 {
 	bool ok;
-	QFont f = QFontDialog::getFont(&ok, font, this);
+	QFont f = QFontDialog::getFont(&ok, font(), this);
 	if (ok)
 	{
-		font = f;
-		this->setFont(font);
+		this->setFont(f);
 	}
+}
+
+QString CommentWindow::fontToString()
+{
+	return font().toString();
+}
+
+void CommentWindow::fontFromString(const QString& sFont)
+{
+	QFont f;
+	f.fromString(sFont);
+	setFont(f);
+	//	table->resizeColumnsToContents();
 }

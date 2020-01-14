@@ -17,6 +17,8 @@ public:
 	~CommentWindow();
 	void refresh(QString theory, QString white, QString black);
 	void disableWrite() { write = -1; };
+	QString fontToString();
+	void fontFromString(const QString&);
 
 signals:
 	void commentChanged(QString&);
@@ -29,7 +31,6 @@ private:
 	QTextEdit* comment;
 	QColor theoryColor;
 	QColor repColor;
-	QFont font;
 	QString cTheory, cWhite, cBlack;
 protected:
 	virtual void mouseDoubleClickEvent(QMouseEvent* event);

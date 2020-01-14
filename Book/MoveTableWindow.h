@@ -40,6 +40,8 @@ public:
 	~MoveTableWindow();
 	void refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black, StatisticsDBEntry& statistics, ComputerDBEntry& compdata, ChessBoard&, int movenr);
 	void addComment(QString& comment);
+	QString fontToString();
+	void fontFromString(const QString&);
 
 signals:
 	void moveSelected(ChessMove&);
@@ -68,7 +70,6 @@ private:
 	QStandardItemModel* model;
 	QBrush repBrush;
 	QBrush normalBrush;
-	QFont font;
 	ChessBoard currentBoard;
 	int currentMoveNr;
 	MoveTableHeader hMoves;

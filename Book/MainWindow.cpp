@@ -32,7 +32,6 @@ MainWindow::MainWindow(QWidget *parent)
 	createStatusbar();
 
 	statusBar();
-	loadLanguage();
 
 	hSplitter = new QSplitter(Qt::Horizontal);
 	v1Splitter = new QSplitter(Qt::Vertical);
@@ -58,6 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	readSettings();
 
+	loadLanguage();
 	retranslateUi();
 
 	Base[THEORY] = new Database("theory");
@@ -165,10 +165,6 @@ void MainWindow::createMenu()
 	connect(langGroup, SIGNAL(triggered(QAction *)), this, SLOT(slotLanguageChanged(QAction *)));
 	langGroup->addAction(engAct);
 	langGroup->addAction(norAct);
-	if (locale == "nb")
-		norAct->setChecked(true);
-	else
-		engAct->setChecked(true);
 
 	// Setting up the toolbar
 	toolbar = addToolBar("Toolbar");
@@ -254,6 +250,11 @@ void MainWindow::updateMenu()
 		importPgnAct->setDisabled(true);
 	else
 		importPgnAct->setDisabled(false);
+
+	if (locale == "nb")
+		norAct->setChecked(true);
+	else
+		engAct->setChecked(true);
 }
 
 void MainWindow::updateWindow()
@@ -311,6 +312,10 @@ void MainWindow::writeSettings()
 	settings.setValue("dataComputer", dataComputer);
 	settings.setValue("dataTraining", dataTraining);
 	settings.setValue("language", locale);
+	settings.setValue("movewindowFont", movewindow->fontToString());
+	settings.setValue("enginewindowFont", enginewindow->fontToString());
+	settings.setValue("pathwindowFont", pathwindow->fontToString());
+	settings.setValue("commentwindowFont", commentwindow->fontToString());
 }
 
 void MainWindow::readSettings()
@@ -335,7 +340,10 @@ void MainWindow::readSettings()
 		locale = QLocale::system().name();
 		locale.truncate(locale.lastIndexOf('_'));
 	}
-
+	movewindow->fontFromString(settings.value("movewindowFont", QString()).toString());
+	enginewindow->fontFromString(settings.value("enginewindowFont", QString()).toString());
+	pathwindow->fontFromString(settings.value("pathwindowFont", QString()).toString());
+	commentwindow->fontFromString(settings.value("commentwindowFont", QString()).toString());
 	/*
 	QSettings settings;
 	QByteArray maingeometry = settings.value("maingeometry", QByteArray()).toByteArray();
@@ -361,73 +369,6 @@ void MainWindow::closeEvent(QCloseEvent* event)
 	writeSettings();
 //	event->accept();
 }
-
-//void MainWindow::fileOpen(int type)
-//{
-//	QMessageBox msgbox;
-//	QString path = QFileDialog::getOpenFileName(this, "Open book", dataPath, "Book files (*.pbk)");
-//	if (!path.isEmpty())
-//	{
-//		if (!Base[type]->open(path))
-//		{
-//			msgbox.setText("Can't open book");
-//			msgbox.exec();
-//			return;
-//		}
-//		bde[type] = Base[type]->find(currentPath->getPosition());
-//
-//		updateWindow();
-//
-//		if (write == type)
-//		{
-//			write = -1;
-//		}
-//		updateMenu();
-//	}
-//}
-//
-//void MainWindow::fileNew(int type)
-//{
-//	QString path = QFileDialog::getSaveFileName(this, "Open book", dataPath, "Book files (*.pbk)");
-//	if (!path.isEmpty())
-//	{
-//		QFile file(path);
-//		if (file.exists())
-//		{
-//			QMessageBox msgbox;
-//			msgbox.setText("The book allready exist. Do you want to delete it?");
-//			msgbox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-//			if (msgbox.exec() != QMessageBox::Ok)
-//				return;
-//			file.remove();
-//		}
-//		Base[type]->create(path, type);
-//		bde[type].clear();
-//		bde[type].board = currentPath->getStartPosition();
-//		Base[type]->add(bde[type]);
-//
-//		bde[type] = Base[type]->find(currentPath->getPosition());
-//		
-//		updateWindow();
-//
-//		if (write == type)
-//			write = -1;
-//		updateMenu();
-//	}
-//}
-//
-//void MainWindow::fileClose(int type)
-//{
-//	Base[type]->close();
-//	bde[type].clear();
-//
-//	if (write == type)
-//		write = -1;
-//
-//	updateMenu();
-//	updateWindow();
-//}
-
 
 void MainWindow::bookWrite(int type)
 {

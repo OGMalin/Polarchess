@@ -5,12 +5,12 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
-#include <QTableView>
 #include <QMenu>
 #include <QFontDialog>
 #include <QDir>
 #include <QTime>
 #include <QTextStream>
+#include <QHeaderView>
 
 EngineWindow::EngineWindow(QWidget *parent)
 	: QWidget(parent)
@@ -67,15 +67,16 @@ EngineWindow::EngineWindow(QWidget *parent)
 	grid->addLayout(hbox, 0, 0);
 
 	model = new QStandardItemModel(multipv, 4);
-	QStringList header;
-	header << "Score" << "Depth" << "Time" << "PV";
-	model->setHorizontalHeaderLabels(header);
-	QTableView* output = new QTableView;
-	output->setModel(model);
-	output->setSelectionMode(QAbstractItemView::NoSelection);
-	output->setEditTriggers(QAbstractItemView::NoEditTriggers);
+	table = new QTableView;
+	table->setModel(model);
+	model->setHorizontalHeaderItem(0, new QStandardItem("Score"));
+	model->setHorizontalHeaderItem(1, new QStandardItem("Depth"));
+	model->setHorizontalHeaderItem(2, new QStandardItem("Time"));
+	model->setHorizontalHeaderItem(3, new QStandardItem("pv"));
+	table->setSelectionMode(QAbstractItemView::NoSelection);
+	table->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-	grid->addWidget(output, 1, 0);// , Qt::AlignLeft);
+	grid->addWidget(table, 1, 0);// , Qt::AlignLeft);
 
 	setLayout(grid);
 
@@ -102,8 +103,6 @@ EngineWindow::EngineWindow(QWidget *parent)
 	connect(engine, SIGNAL(engineStoped()), this, SLOT(slotEngineStoped()));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(slotShowContextMenu(const QPoint&)));
 
-	font.setPointSize(10);
-	this->setFont(font);
 }
 
 EngineWindow::~EngineWindow()
@@ -319,11 +318,11 @@ void EngineWindow::slotShowContextMenu(const QPoint& pos)
 void EngineWindow::slotSelectFont()
 {
 	bool ok;
-	QFont f = QFontDialog::getFont(&ok, font, this);
+	QFont f = QFontDialog::getFont(&ok, font(), this);
 	if (ok)
 	{
-		font = f;
-		this->setFont(font);
+		setFont(f);
+		table->resizeColumnsToContents();
 	}
 }
 
@@ -357,4 +356,16 @@ void EngineWindow::slotEngineStoped()
 	freeze->setEnabled(false);
 	analyze->setChecked(false);
 	analyzing = false;
+}
+
+QString EngineWindow::fontToString()
+{
+	return font().toString();
+}
+
+void EngineWindow::fontFromString(const QString& sFont)
+{
+	QFont f;
+	f.fromString(sFont);
+	setFont(f);
 }

@@ -29,8 +29,6 @@ MoveTableWindow::MoveTableWindow(QWidget *parent)
 	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 	connect(table, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(moveClicked(const QModelIndex&)));
-	font.setPointSize(10);
-	this->setFont(font);
 
 	hMoves.label = tr("Moves");
 	hMoves.inUse = true;
@@ -472,11 +470,11 @@ void MoveTableWindow::showContextMenu(const QPoint& pos)
 void MoveTableWindow::selectFont()
 {
 	bool ok;
-	QFont f = QFontDialog::getFont(&ok, font, this);
+	QFont f = QFontDialog::getFont(&ok, font(), this);
 	if (ok)
 	{
-		font = f;
-		this->setFont(font);
+		setFont(f);
+		table->resizeColumnsToContents();
 	}
 }
 
@@ -523,4 +521,17 @@ void MoveTableWindow::addComment(QString& comment)
 	//	if (qmi.isValid())
 	//		emit addMoveComment(qmi.column(), qmi.row(), comment);
 	//}
+}
+
+QString MoveTableWindow::fontToString()
+{
+	return font().toString();
+}
+
+void MoveTableWindow::fontFromString(const QString& sFont)
+{
+	QFont f;
+	f.fromString(sFont);
+	setFont(f);
+	table->resizeColumnsToContents();
 }
