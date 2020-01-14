@@ -134,6 +134,9 @@
     <ClCompile Include="MoveTableWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DatabaseDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -173,6 +176,9 @@
       <Filter>Common</Filter>
     </QtMoc>
     <QtMoc Include="MoveTableWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="DatabaseDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

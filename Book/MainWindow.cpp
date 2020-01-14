@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "AboutDialog.h"
 #include "ImportPgnDialog.h"
+#include "DatabaseDialog.h"
 #include "../Common/Pgn.h"
 #include "../Common/ChessGame.h"
 #include <QMenuBar>
@@ -125,23 +126,8 @@ void MainWindow::createMenu()
 {
 	// File menu
 	fileMenu = menuBar()->addMenu("*");
-	fileOpenMenu = fileMenu->addMenu("Open book");
-	openAct[THEORY] = fileOpenMenu->addAction("Open theory book", this, &MainWindow::fileOpenTheory);
-	openAct[REPWHITE] = fileOpenMenu->addAction("Open White repertoire book", this, &MainWindow::fileOpenWhite);
-	openAct[REPBLACK] = fileOpenMenu->addAction("Open Black repertoire book", this, &MainWindow::fileOpenBlack);
-	fileNewMenu = fileMenu->addMenu("New book");
-	newAct[THEORY] = fileNewMenu->addAction("New theory book", this, &MainWindow::fileNewTheory);
-	newAct[REPWHITE] = fileNewMenu->addAction("New White repertoire book", this, &MainWindow::fileNewWhite);
-	newAct[REPBLACK] = fileNewMenu->addAction("New Black repertoire book", this, &MainWindow::fileNewBlack);
-	fileCloseMenu = fileMenu->addMenu("Close book");
-	closeAct[THEORY] = fileCloseMenu->addAction("Close theory book", this, &MainWindow::fileCloseTheory);
-	closeAct[REPWHITE] = fileCloseMenu->addAction("Close White repertoire book", this, &MainWindow::fileCloseWhite);
-	closeAct[REPBLACK] = fileCloseMenu->addAction("Close Black repertoire book", this, &MainWindow::fileCloseBlack);
 	fileImportMenu = fileMenu->addMenu("Import");
 	importPgnAct = fileImportMenu->addAction("Import pgnfiles", this, &MainWindow::fileImportPgn);
-	importBookAct = fileImportMenu->addAction("Import book", this, &MainWindow::fileImportBook);
-	createStatAct = fileImportMenu->addAction("Import Statistics", this, &MainWindow::fileCreateStatistics);
-	compactStatAct = fileImportMenu->addAction("Compact Statistics", this, &MainWindow::fileCompactStatistics);
 	fileMenu->addSeparator();
 	exitAct = fileMenu->addAction("*", this, &QWidget::close);
 
@@ -166,6 +152,7 @@ void MainWindow::createMenu()
 	createTrainingAct = trainingMenu->addAction("Create training", this, &MainWindow::trainingCreate);
 
 	settingsMenu = menuBar()->addMenu("*");
+	setupDatabaseAct = settingsMenu->addAction("*", this, &MainWindow::setupDatabase);
 	//	fileMenu->addSeparator();
 	langMenu = settingsMenu->addMenu("*");
 	engAct = langMenu->addAction(QIcon(":/icon/GB.png"), "*");
@@ -190,7 +177,6 @@ void MainWindow::createMenu()
 	{
 		toolbar->addAction(writeAct[i]);
 		writeAct[i]->setCheckable(true);
-		closeAct[i]->setDisabled(true);
 		writeAct[i]->setDisabled(true);
 	}
 
@@ -213,6 +199,7 @@ void MainWindow::retranslateUi()
 	//resignAct->setText(tr("Resign"));
 
 	settingsMenu->setTitle(tr("Settings"));
+	setupDatabaseAct->setText(tr("setup database"));
 	langMenu->setTitle(tr("Language"));
 	if (locale == "nb")
 		langMenu->setIcon(QIcon(":/icon/NO.png"));
@@ -256,12 +243,10 @@ void MainWindow::updateMenu()
 	{
 		if (Base[i]->isOpen())
 		{
-			closeAct[i]->setDisabled(false);
 			writeAct[i]->setDisabled(false);
 			++open;
 		}else
 		{
-			closeAct[i]->setDisabled(true);
 			writeAct[i]->setDisabled(true);
 		}
 	}
@@ -342,7 +327,7 @@ void MainWindow::readSettings()
 	dataBlack = settings.value("dataBlack", dataPath + "/Black.pbk").toString();
 	dataStatistics = settings.value("dataStatistics", dataPath + "/Statistics.pst").toString();
 	dataComputer = settings.value("dataComputer", dataPath + "/Computer.pcp").toString();
-	dataTraining = settings.value("dataTraining", dataPath + "/Training.tcp").toString();
+	dataTraining = settings.value("dataTraining", dataPath + "/Training.ptr").toString();
 	locale = settings.value("language", QString()).toString();
 	if (locale.isEmpty())
 	{
@@ -377,71 +362,71 @@ void MainWindow::closeEvent(QCloseEvent* event)
 //	event->accept();
 }
 
-void MainWindow::fileOpen(int type)
-{
-	QMessageBox msgbox;
-	QString path = QFileDialog::getOpenFileName(this, "Open book", dataPath, "Book files (*.pbk)");
-	if (!path.isEmpty())
-	{
-		if (!Base[type]->open(path))
-		{
-			msgbox.setText("Can't open book");
-			msgbox.exec();
-			return;
-		}
-		bde[type] = Base[type]->find(currentPath->getPosition());
-
-		updateWindow();
-
-		if (write == type)
-		{
-			write = -1;
-		}
-		updateMenu();
-	}
-}
-
-void MainWindow::fileNew(int type)
-{
-	QString path = QFileDialog::getSaveFileName(this, "Open book", dataPath, "Book files (*.pbk)");
-	if (!path.isEmpty())
-	{
-		QFile file(path);
-		if (file.exists())
-		{
-			QMessageBox msgbox;
-			msgbox.setText("The book allready exist. Do you want to delete it?");
-			msgbox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-			if (msgbox.exec() != QMessageBox::Ok)
-				return;
-			file.remove();
-		}
-		Base[type]->create(path, type);
-		bde[type].clear();
-		bde[type].board = currentPath->getStartPosition();
-		Base[type]->add(bde[type]);
-
-		bde[type] = Base[type]->find(currentPath->getPosition());
-		
-		updateWindow();
-
-		if (write == type)
-			write = -1;
-		updateMenu();
-	}
-}
-
-void MainWindow::fileClose(int type)
-{
-	Base[type]->close();
-	bde[type].clear();
-
-	if (write == type)
-		write = -1;
-
-	updateMenu();
-	updateWindow();
-}
+//void MainWindow::fileOpen(int type)
+//{
+//	QMessageBox msgbox;
+//	QString path = QFileDialog::getOpenFileName(this, "Open book", dataPath, "Book files (*.pbk)");
+//	if (!path.isEmpty())
+//	{
+//		if (!Base[type]->open(path))
+//		{
+//			msgbox.setText("Can't open book");
+//			msgbox.exec();
+//			return;
+//		}
+//		bde[type] = Base[type]->find(currentPath->getPosition());
+//
+//		updateWindow();
+//
+//		if (write == type)
+//		{
+//			write = -1;
+//		}
+//		updateMenu();
+//	}
+//}
+//
+//void MainWindow::fileNew(int type)
+//{
+//	QString path = QFileDialog::getSaveFileName(this, "Open book", dataPath, "Book files (*.pbk)");
+//	if (!path.isEmpty())
+//	{
+//		QFile file(path);
+//		if (file.exists())
+//		{
+//			QMessageBox msgbox;
+//			msgbox.setText("The book allready exist. Do you want to delete it?");
+//			msgbox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+//			if (msgbox.exec() != QMessageBox::Ok)
+//				return;
+//			file.remove();
+//		}
+//		Base[type]->create(path, type);
+//		bde[type].clear();
+//		bde[type].board = currentPath->getStartPosition();
+//		Base[type]->add(bde[type]);
+//
+//		bde[type] = Base[type]->find(currentPath->getPosition());
+//		
+//		updateWindow();
+//
+//		if (write == type)
+//			write = -1;
+//		updateMenu();
+//	}
+//}
+//
+//void MainWindow::fileClose(int type)
+//{
+//	Base[type]->close();
+//	bde[type].clear();
+//
+//	if (write == type)
+//		write = -1;
+//
+//	updateMenu();
+//	updateWindow();
+//}
 
 
 void MainWindow::bookWrite(int type)
@@ -700,58 +685,6 @@ void MainWindow::fileImportPgn()
 	updateWindow();
 }
 
-void MainWindow::fileImportBook()
-{
-	Database iBase("ImportBase");
-	QMessageBox msgbox;
-	QString path = QFileDialog::getOpenFileName(this, "Open book to import", dataPath, "Book files (*.pbk)");
-	if (!path.isEmpty())
-	{
-		if (!iBase.open(path))
-		{
-			msgbox.setText("Can't open book to import");
-			msgbox.exec();
-			return;
-		}
-		msgbox.setText("Select book to import to");
-		QPushButton *theoryButton = msgbox.addButton("Theory", QMessageBox::ActionRole);
-		QPushButton *whiteButton = msgbox.addButton("White repertoire", QMessageBox::ActionRole);
-		QPushButton *blackButton = msgbox.addButton("Black repertoire", QMessageBox::ActionRole);
-		QPushButton *abortButton = msgbox.addButton(QMessageBox::Abort);
-		if (!Base[THEORY]->isOpen())
-			theoryButton->setDisabled(true);
-		if (!Base[REPWHITE]->isOpen())
-			whiteButton->setDisabled(true);
-		if (!Base[REPBLACK]->isOpen())
-			blackButton->setDisabled(true);
-		msgbox.exec();
-		if (msgbox.clickedButton() == theoryButton)
-			Base[THEORY]->importBase(&iBase);
-		else if (msgbox.clickedButton() == whiteButton)
-			Base[REPWHITE]->importBase(&iBase);
-		else if (msgbox.clickedButton() == blackButton)
-			Base[REPBLACK]->importBase(&iBase);
-		else
-			return;
-
-		ChessBoard board = currentPath->getPosition();
-
-		readDB();
-
-		updateWindow();
-	}
-}
-
-void MainWindow::fileCreateStatistics()
-{
-	statistics->importGames(this);
-}
-
-void MainWindow::fileCompactStatistics()
-{
-	statistics->removeSingleGame(this);
-}
-
 void MainWindow::trainingClearData()
 {
 	Base[REPWHITE]->clearAllTrainingData();
@@ -971,4 +904,46 @@ void MainWindow::childNeedRefresh()
 {
 	readDB();
 	updateWindow();
+}
+
+void MainWindow::setupDatabase()
+{
+	DatabaseDialog dialog(this, Base[THEORY], Base[REPWHITE], Base[REPBLACK], statistics);
+	dialog.setItems(dataTheory, dataWhite, dataBlack, dataTraining, dataComputer, dataStatistics);
+	if (dialog.exec() == QDialog::Rejected)
+		return;
+	dialog.getItems(dataTheory, dataWhite, dataBlack, dataTraining, dataComputer, dataStatistics);
+
+	if (!dataStatistics.isEmpty())
+	{
+		if (!statistics->open(dataStatistics))
+			statistics->create(dataStatistics);
+	}
+	else
+	{
+		statistics->close();
+	}
+	if (!dataComputer.isEmpty())
+	{
+		if (!computer->open(dataComputer))
+			computer->create(dataComputer);
+	}
+	else
+	{
+		computer->close();
+	}
+	if (!dataTraining.isEmpty())
+	{
+		if (!training->open(dataTraining))
+			training->create(dataTraining);
+	}
+	else
+	{
+		training->close();
+	}
+
+	write = -1;
+	readDB();
+	updateWindow();
+	updateMenu();
 }
