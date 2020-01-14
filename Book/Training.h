@@ -77,7 +77,7 @@ public:
 	void SetDatabase(int color, Database* base);
 
 	// Create traininglines from a position (cb) and database (WHITE or BLACK, -1=both)
-	void create(QWidget* parent);
+	void createLines(QWidget* parent);
 
 	// Get the most needed trainingline (With most error).
 	bool get(TrainingPath& line, int color, ChessBoard& cb);

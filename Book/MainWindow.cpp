@@ -342,7 +342,7 @@ void MainWindow::readSettings()
 	dataBlack = settings.value("dataBlack", dataPath + "/Black.pbk").toString();
 	dataStatistics = settings.value("dataStatistics", dataPath + "/Statistics.pst").toString();
 	dataComputer = settings.value("dataComputer", dataPath + "/Computer.pcp").toString();
-	dataComputer = settings.value("dataTraining", dataPath + "/Training.tcp").toString();
+	dataTraining = settings.value("dataTraining", dataPath + "/Training.tcp").toString();
 	locale = settings.value("language", QString()).toString();
 	if (locale.isEmpty())
 	{
@@ -760,7 +760,7 @@ void MainWindow::trainingClearData()
 
 void MainWindow::trainingCreate()
 {
-	training->create(this);
+	training->createLines(this);
 }
 
 void MainWindow::trainingStart(int color, ChessBoard& board)

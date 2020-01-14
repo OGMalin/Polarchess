@@ -10,6 +10,7 @@
 #include <QFontDialog>
 #include <QDir>
 #include <QTime>
+#include <QTextStream>
 
 EngineWindow::EngineWindow(QWidget *parent)
 	: QWidget(parent)
@@ -38,6 +39,11 @@ EngineWindow::EngineWindow(QWidget *parent)
 	incline = new QPushButton("+");
 	analyze = new QPushButton("Analyze");
 	freeze = new QPushButton("Freeze");
+	decline->setFixedWidth(30);
+	incline->setFixedWidth(30);
+	analyze->setFixedWidth(analyze->minimumSizeHint().width());
+	freeze->setFixedWidth(analyze->minimumSizeHint().width());
+	lines->setFixedWidth(lines->minimumSizeHint().width());
 	analyze->setCheckable(true);
 	freeze->setCheckable(true);
 	analyze->setEnabled(false);
@@ -60,12 +66,14 @@ EngineWindow::EngineWindow(QWidget *parent)
 	hbox->addWidget(selengine);
 	grid->addLayout(hbox, 0, 0);
 
-	model = new QStandardItemModel(multipv, 3);
+	model = new QStandardItemModel(multipv, 4);
 	QStringList header;
 	header << "Score" << "Depth" << "Time" << "PV";
 	model->setHorizontalHeaderLabels(header);
 	QTableView* output = new QTableView;
 	output->setModel(model);
+	output->setSelectionMode(QAbstractItemView::NoSelection);
+	output->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
 	grid->addWidget(output, 1, 0);// , Qt::AlignLeft);
 
@@ -171,6 +179,7 @@ void EngineWindow::slotInclineClicked(bool)
 		decline->setEnabled(true);
 	++multipv;
 	lines->setText(itoa(multipv, sz, 10));
+	lines->setFixedWidth(lines->minimumSizeHint().width());
 	engine->setMultiPV(multipv);
 	model->setRowCount(multipv);
 }
@@ -182,6 +191,7 @@ void EngineWindow::slotDeclineClicked(bool)
 	{
 		--multipv;
 		lines->setText(itoa(multipv, sz, 10));
+		lines->setFixedWidth(lines->minimumSizeHint().width());
 		if (multipv == 1)
 			decline->setEnabled(false);
 		engine->setMultiPV(multipv);
@@ -220,7 +230,7 @@ void EngineWindow::slotEngineInfo(const EngineInfo& info)
 	if (info.pv.size)
 	{
 		QStandardItem* item;
-		QString s;
+		QString qs;
 		ChessBoard b;
 		ChessMove m;
 		int mn;
@@ -237,47 +247,53 @@ void EngineWindow::slotEngineInfo(const EngineInfo& info)
 		if (b.isLegal(ChessMove(info.pv.list[0])))
 		{
 			if (info.lowerbound)
+			{
 				item = new QStandardItem("--");
+			}
 			else if (info.upperbound)
+			{
 				item = new QStandardItem("++");
+			}
 			else if (info.mate)
+			{
 				item = new QStandardItem(QString("M") + itoa(info.mate, sz, 10));
+			}
 			else
-				item = new QStandardItem(itoa(info.cp, sz, 10));
-			item->setEditable(false);
+			{
+				qs.clear();
+				QTextStream(&qs) << float(info.cp / 100.0);
+				item = new QStandardItem(qs);
+			}
 			item->setTextAlignment(Qt::AlignCenter);
 			model->setItem(line - 1, 0, item);
 
 			item = new QStandardItem(itoa(info.depth, sz, 10));
-			item->setEditable(false);
 			item->setTextAlignment(Qt::AlignCenter);
 			model->setItem(line - 1, 1, item);
 
 			item = new QStandardItem(QTime(0, 0).addMSecs(info.time).toString());
-			item->setEditable(false);
 			item->setTextAlignment(Qt::AlignCenter);
 			model->setItem(line - 1, 2, item);
-
+			qs.clear();
 			for (int i = 0; i < info.pv.size; i++)
 			{
 				m = info.pv.list[i];
 				if (b.toMove == WHITE)
 				{
-					s += itoa(mn + i / 2, sz, 10) + QString(".");
+					QTextStream(&qs) << (mn + i / 2) << ".";
 				}
 				else if (i == 0)
 				{
-					s += itoa(mn, sz, 10) + QString("...");
+					QTextStream(&qs) << mn << "...";
 					++mn;
 				}
-				s += QString(b.makeMoveText(m, FIDE).c_str());
+				qs += b.makeMoveText(m, tr("NBRQK").toStdString()).c_str();
 				if (i < (info.pv.size - 1))
-					s += " ";
+					qs += " ";
 				b.doMove(m, false);
 			}
-			item = new QStandardItem(s);
-			item->setEditable(false);
-			item->setTextAlignment(Qt::AlignLeft);
+			item = new QStandardItem(qs);
+			item->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
 			model->setItem(line - 1, 3, item);
 			if ((info.time >= timeLimit) && (line==1) && !info.lowerbound && !info.upperbound)
 			{

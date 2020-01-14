@@ -420,8 +420,12 @@ void MoveTableWindow::refresh()
 void MoveTableWindow::showContextMenu(const QPoint& pos)
 {
 	QMenu* contextMenu = new QMenu(this);
-	int col = table->columnAt(pos.x());
-	int row = table->rowAt(pos.y());
+	QPoint lpos=mapFrom(this, pos);
+	//QModelIndex index = table->indexAt(lpos);
+	//int col = index.column();
+	//int row = index.row();
+	int col = table->columnAt(lpos.x());
+	int row = table->rowAt(lpos.y());
 
 	// Header
 	if (row == 0)

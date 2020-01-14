@@ -122,7 +122,7 @@ void Training::SetDatabase(int color, Database* base)
 	Base[color] = base;
 }
 
-void Training::create(QWidget* parent)
+void Training::createLines(QWidget* parent)
 {
 	// Read White base
 	QVector<BookDBEntry> pos;
