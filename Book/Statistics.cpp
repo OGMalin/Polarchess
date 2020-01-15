@@ -374,6 +374,13 @@ bool Statistics::haveSingleMove(QString& qs)
 		return true;
 	return false;
 }
+
+QString Statistics::getPath()
+{
+	QSqlDatabase db = QSqlDatabase::database(STATISTICS);
+	return db.databaseName();
+}
+
 //void Statistics::get(QVector<StatisticsDBMove>&, ChessBoard&)
 //{
 //

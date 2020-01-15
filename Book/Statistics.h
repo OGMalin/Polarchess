@@ -76,6 +76,9 @@ public:
 	// Remove positions with only one game
 	void removeSingleGame(QWidget* parent);
 
+	// Get db path
+	QString getPath();
+
 	// Get a list of moves from current board
 //	void get(QVector<StatisticsDBMove>&, ChessBoard&);
 private:

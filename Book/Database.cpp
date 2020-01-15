@@ -463,6 +463,12 @@ void Database::updateTrainingScore(ChessBoard& cb, int rowid, int score)
 	query.exec();
 }
 
+QString Database::getPath()
+{
+	QSqlDatabase db = QSqlDatabase::database(dbname);
+	return db.databaseName();
+}
+
 bool BookDBEntry::moveExist(const ChessMove& move)
 {
 	QVector<BookDBMove>::iterator it = movelist.begin();

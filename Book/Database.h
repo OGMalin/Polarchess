@@ -109,6 +109,9 @@ public:
 	void deleteTrainingLines();
 	bool getTrainingLines(QVector<TrainingLine>& lines);
 	void updateTrainingScore(ChessBoard& cb, int rowid, int score);
+
+	// Get db path
+	QString getPath();
 private:
 	bool opened;
 //	QSqlDatabase bookdb;

@@ -92,6 +92,13 @@ void Computer::close()
 	opened = false;
 }
 
+QString Computer::getPath()
+{
+	QSqlDatabase db = QSqlDatabase::database(COMPUTER);
+	return db.databaseName();
+}
+
+
 ComputerDBEntry Computer::find(ChessBoard& cb)
 {
 	HASHKEY hash = cb.hashkey();

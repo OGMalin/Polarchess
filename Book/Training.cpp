@@ -54,6 +54,7 @@ bool Training::open(const QString& path)
 {
 	if (!WinFile::exist(path.toStdString()))
 		return false;
+
 	QSqlDatabase db = QSqlDatabase::database(TRAINING);
 	db.setDatabaseName(path);
 
@@ -117,7 +118,7 @@ void Training::close()
 	opened = false;
 }
 
-void Training::SetDatabase(int color, Database* base)
+void Training::SetRepertoireDatabase(int color, Database* base)
 {
 	Base[color] = base;
 }
@@ -367,4 +368,10 @@ void Training::convertMoves(const QString& smoves, TrainingPath& tp)
 		tp.moves.push_back(tpe);
 		cb.doMove(tpe.move, false);
 	}
+}
+
+QString Training::getPath()
+{
+	QSqlDatabase db = QSqlDatabase::database(TRAINING);
+	return db.databaseName();
 }

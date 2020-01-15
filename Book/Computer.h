@@ -78,6 +78,9 @@ public:
 	// Save the engine priority list
 	void saveEngineList();
 
+	// Get db path
+	QString getPath();
+
 private:
 	bool opened;
 	ComputerDBEntry lastSearch;

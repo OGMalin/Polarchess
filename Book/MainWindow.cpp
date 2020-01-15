@@ -23,8 +23,6 @@
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
-	dataPath = QStandardPaths::locate(QStandardPaths::DocumentsLocation, QCoreApplication::organizationName(), QStandardPaths::LocateDirectory);
-	dataPath += "/" + QCoreApplication::applicationName();
 	write = -1;
 	inTraining = false;
 
@@ -55,11 +53,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 	setCentralWidget(hSplitter);
 
-	readSettings();
-
-	loadLanguage();
-	retranslateUi();
-
 	Base[THEORY] = new Database("theory");
 	Base[REPWHITE] = new Database("white");
 	Base[REPBLACK] = new Database("black");
@@ -67,9 +60,14 @@ MainWindow::MainWindow(QWidget *parent)
 	computer = new Computer();
 	currentPath = new Path();
 	training = new Training();
-	training->SetDatabase(WHITE, Base[REPWHITE]);
-	training->SetDatabase(BLACK, Base[REPBLACK]);
+	training->SetRepertoireDatabase(WHITE, Base[REPWHITE]);
+	training->SetRepertoireDatabase(BLACK, Base[REPBLACK]);
 	movewindow->computer = computer;
+
+	readSettings();
+
+	loadLanguage();
+	retranslateUi();
 
 	connect(boardwindow, SIGNAL(moveEntered(ChessMove&)), this, SLOT(moveEntered(ChessMove&)));
 	connect(movewindow, SIGNAL(moveSelected(ChessMove&)), this, SLOT(moveSelected(ChessMove&)));
@@ -83,26 +81,6 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(pathwindow, SIGNAL(pathPaste()), this, SLOT(pathPaste()));
 	connect(commentwindow, SIGNAL(commentChanged(QString&)), this, SLOT(commentChanged(QString&)));
 	connect(enginewindow, SIGNAL(enginePV(ComputerDBEngine&, ChessBoard&)), this, SLOT(enginePV(ComputerDBEngine&, ChessBoard&)));
-
-	// Open default databases
-	if (!dataTheory.isEmpty())
-		if (!Base[THEORY]->open(dataTheory))
-			Base[THEORY]->create(dataTheory,THEORY);
-	if (!dataWhite.isEmpty())
-		if (!Base[REPWHITE]->open(dataWhite))
-			Base[REPWHITE]->create(dataWhite, REPWHITE);
-	if (!dataBlack.isEmpty())
-		if (!Base[REPBLACK]->open(dataBlack))
-			Base[REPBLACK]->create(dataBlack, REPBLACK);
-	if (!dataStatistics.isEmpty())
-		if (!statistics->open(dataStatistics))
-			statistics->create(dataStatistics);
-	if (!dataComputer.isEmpty())
-		if (!computer->open(dataComputer))
-			computer->create(dataComputer);
-	if (!dataTraining.isEmpty())
-		if (!training->open(dataTraining))
-			training->create(dataTraining);
 
 	ChessBoard board = currentPath->getPosition();
 
@@ -305,12 +283,12 @@ void MainWindow::writeSettings()
 	settings.setValue("v1State", v1Splitter->saveState());
 	settings.setValue("v2State", v2Splitter->saveState());
 	settings.setValue("hState", hSplitter->saveState());
-	settings.setValue("dataTheory", dataTheory);
-	settings.setValue("dataWhite", dataWhite);
-	settings.setValue("dataBlack", dataBlack);
-	settings.setValue("dataStatistics", dataStatistics);
-	settings.setValue("dataComputer", dataComputer);
-	settings.setValue("dataTraining", dataTraining);
+	settings.setValue("dataTheory", Base[THEORY]->getPath());
+	settings.setValue("dataWhite", Base[REPWHITE]->getPath());
+	settings.setValue("dataBlack", Base[REPBLACK]->getPath());
+	settings.setValue("dataStatistics", statistics->getPath());
+	settings.setValue("dataComputer", computer->getPath());
+	settings.setValue("dataTraining", training->getPath());
 	settings.setValue("language", locale);
 	settings.setValue("movewindowFont", movewindow->fontToString());
 	settings.setValue("enginewindowFont", enginewindow->fontToString());
@@ -321,6 +299,17 @@ void MainWindow::writeSettings()
 void MainWindow::readSettings()
 {
 	QSettings settings;
+	QString dataPath;
+	QString dataTheory;
+	QString dataWhite;
+	QString dataBlack;
+	QString dataStatistics;
+	QString dataComputer;
+	QString dataTraining;
+
+	dataPath = QStandardPaths::locate(QStandardPaths::DocumentsLocation, QCoreApplication::organizationName(), QStandardPaths::LocateDirectory);
+	dataPath += "/" + QCoreApplication::applicationName();
+
 	restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
 	restoreState(settings.value("mainWindowState").toByteArray());
 	v1Splitter->restoreState(settings.value("v1State").toByteArray());
@@ -344,6 +333,27 @@ void MainWindow::readSettings()
 	enginewindow->fontFromString(settings.value("enginewindowFont", QString()).toString());
 	pathwindow->fontFromString(settings.value("pathwindowFont", QString()).toString());
 	commentwindow->fontFromString(settings.value("commentwindowFont", QString()).toString());
+
+	// Open default databases
+	if (!dataTheory.isEmpty())
+		if (!Base[THEORY]->open(dataTheory))
+			Base[THEORY]->create(dataTheory, THEORY);
+	if (!dataWhite.isEmpty())
+		if (!Base[REPWHITE]->open(dataWhite))
+			Base[REPWHITE]->create(dataWhite, REPWHITE);
+	if (!dataBlack.isEmpty())
+		if (!Base[REPBLACK]->open(dataBlack))
+			Base[REPBLACK]->create(dataBlack, REPBLACK);
+	if (!dataStatistics.isEmpty())
+		if (!statistics->open(dataStatistics))
+			statistics->create(dataStatistics);
+	if (!dataComputer.isEmpty())
+		if (!computer->open(dataComputer))
+			computer->create(dataComputer);
+	if (!dataTraining.isEmpty())
+		if (!training->open(dataTraining))
+			training->create(dataTraining);
+
 	/*
 	QSettings settings;
 	QByteArray maingeometry = settings.value("maingeometry", QByteArray()).toByteArray();
@@ -849,40 +859,8 @@ void MainWindow::childNeedRefresh()
 
 void MainWindow::setupDatabase()
 {
-	DatabaseDialog dialog(this, Base[THEORY], Base[REPWHITE], Base[REPBLACK], statistics);
-	dialog.setItems(dataTheory, dataWhite, dataBlack, dataTraining, dataComputer, dataStatistics);
-	if (dialog.exec() == QDialog::Rejected)
-		return;
-	dialog.getItems(dataTheory, dataWhite, dataBlack, dataTraining, dataComputer, dataStatistics);
-
-	if (!dataStatistics.isEmpty())
-	{
-		if (!statistics->open(dataStatistics))
-			statistics->create(dataStatistics);
-	}
-	else
-	{
-		statistics->close();
-	}
-	if (!dataComputer.isEmpty())
-	{
-		if (!computer->open(dataComputer))
-			computer->create(dataComputer);
-	}
-	else
-	{
-		computer->close();
-	}
-	if (!dataTraining.isEmpty())
-	{
-		if (!training->open(dataTraining))
-			training->create(dataTraining);
-	}
-	else
-	{
-		training->close();
-	}
-
+	DatabaseDialog dialog(this, Base[THEORY], Base[REPWHITE], Base[REPBLACK], training, computer, statistics);
+	dialog.exec();
 	write = -1;
 	readDB();
 	updateWindow();

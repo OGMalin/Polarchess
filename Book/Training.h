@@ -74,12 +74,12 @@ public:
 	void close();
 
 	// Set the database to use (color=WHITE or BLACK)
-	void SetDatabase(int color, Database* base);
+	void SetRepertoireDatabase(int color, Database* base);
 
-	// Create traininglines from a position (cb) and database (WHITE or BLACK, -1=both)
+	// Create traininglines.
 	void createLines(QWidget* parent);
 
-	// Get the most needed trainingline (With most error).
+	// Get next training line
 	bool get(TrainingPath& line, int color, ChessBoard& cb);
 
 	// Get all traininglines.
@@ -87,4 +87,7 @@ public:
 
 	// Update training score
 	void updateScore(int color, ChessBoard& cb, int rowid, int score);
+
+	// Get db path
+	QString getPath();
 };

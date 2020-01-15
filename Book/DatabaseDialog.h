@@ -5,6 +5,8 @@
 #include <QString>
 #include "Statistics.h"
 #include "Database.h"
+#include "Training.h"
+#include "Computer.h"
 
 class DatabaseDialog : public QDialog
 {
@@ -38,9 +40,9 @@ public slots:
 	void importBookWhite();
 	void importBookBlack();
 public:
-	DatabaseDialog(QWidget *parent, Database* theory, Database* white, Database* black, Statistics*);
-	void getItems(QString& theory, QString& white, QString& black, QString& training, QString& computer, QString& statistics);
-	void setItems(const QString& theory, const QString& white, const QString& black, const QString& training, const QString& computer, const QString& statistics);
+	DatabaseDialog(QWidget *parent, Database* theory, Database* white, Database* black, Training*, Computer*, Statistics*);
+//	void getItems(QString& theory, QString& white, QString& black, QString& training, QString& computer, QString& statistics);
+//	void setItems(const QString& theorypath, const QString& whitepath, const QString& blackpath, const QString& trainingpath, const QString& computerpath, const QString& statisticspath);
 private:
 	QLineEdit* theoryFile;
 	QLineEdit* whiteFile;
@@ -52,6 +54,8 @@ private:
 	Database* theoryDB;
 	Database* whiteDB;
 	Database* blackDB;
+	Training* trainingDB;
+	Computer* computerDB;
 	//bool theoryChanged;
 	//bool whiteChanged;
 	//bool blackChanged;

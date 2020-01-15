@@ -8,13 +8,15 @@
 #include <QSpacerItem>
 #include <QMessageBox>
 
-DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* white, Database* black, Statistics* stat)
+DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* white, Database* black, Training* training, Computer* computer, Statistics* stat)
 	:QDialog(parent)
 {
-	statDB = stat;
 	theoryDB = theory;
 	whiteDB = white;
 	blackDB = black;
+	trainingDB = training;
+	computerDB = computer;
+	statDB = stat;
 	QVBoxLayout* vbox;
 	QGroupBox* group;
 	QPushButton* button;
@@ -24,7 +26,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 
 	group = new QGroupBox(tr("Theory book"));
 	grid = new QGridLayout();
-	theoryFile = new QLineEdit;
+	theoryFile = new QLineEdit(theoryDB->getPath());
 	theoryFile->setDisabled(true);
 	grid->addWidget(theoryFile, 0, 0, 1, -1);
 	button = new QPushButton(tr("Open"));
@@ -49,7 +51,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	vbox->addWidget(group);
 
 	group = new QGroupBox(tr("White repertoire book"));
-	whiteFile = new QLineEdit;
+	whiteFile = new QLineEdit(whiteDB->getPath());
 	whiteFile->setDisabled(true);
 	grid = new QGridLayout();
 	grid->addWidget(whiteFile, 0, 0, 1, -1);
@@ -76,7 +78,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 
 	group = new QGroupBox(tr("Black repertoire book"));
 	grid = new QGridLayout();
-	blackFile = new QLineEdit;
+	blackFile = new QLineEdit(blackDB->getPath());
 	blackFile->setDisabled(true);
 	grid->addWidget(blackFile, 0, 0, 1, -1);
 	button = new QPushButton(tr("Open"));
@@ -102,7 +104,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 
 	group = new QGroupBox(tr("Training statistics"));
 	grid = new QGridLayout();
-	trainingFile = new QLineEdit;
+	trainingFile = new QLineEdit(trainingDB->getPath());
 	trainingFile->setDisabled(true);
 	grid->addWidget(trainingFile, 0, 0, 1, -1);
 	button = new QPushButton(tr("Open"));
@@ -125,7 +127,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 
 	group = new QGroupBox(tr("Computer evaluation"));
 	grid = new QGridLayout();
-	computerFile = new QLineEdit;
+	computerFile = new QLineEdit(computerDB->getPath());
 	computerFile->setDisabled(true);
 	grid->addWidget(computerFile, 0, 0, 1, -1);
 	button = new QPushButton(tr("Open"));
@@ -147,7 +149,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 
 	group = new QGroupBox(tr("Games statistic"));
 	grid = new QGridLayout();
-	statisticFile = new QLineEdit;
+	statisticFile = new QLineEdit(statDB->getPath());
 	statisticFile->setDisabled(true);
 	grid->addWidget(statisticFile, 0, 0, 1, -1);
 	button = new QPushButton(tr("Open"));
@@ -184,8 +186,9 @@ void DatabaseDialog::openTheoryDB()
 	QString path = QFileDialog::getOpenFileName(this, tr("Open theory book"), theoryFile->text(), tr("Book files (*.pbk)"));
 	if (!path.isEmpty())
 	{
+		theoryDB->close();
 		theoryFile->setText(path);
-		if (!theoryDB->open(path))
+		if (theoryDB->open(path))
 			theoryDB->create(path, 0);
 	}
 }
@@ -195,10 +198,17 @@ void DatabaseDialog::newTheoryDB()
 	QString path = QFileDialog::getSaveFileName(this, tr("New theory book"), theoryFile->text(), tr("Book files (*.pbk)"));
 	if (!path.isEmpty())
 	{
+		theoryDB->close();
 		theoryFile->setText(path);
 		if (!theoryDB->open(path))
 			theoryDB->create(path, 0);
 	}
+}
+
+void DatabaseDialog::closeTheoryDB()
+{
+	theoryFile->setText("");
+	theoryDB->close();
 }
 
 void DatabaseDialog::openWhiteDB()
@@ -206,6 +216,7 @@ void DatabaseDialog::openWhiteDB()
 	QString path = QFileDialog::getOpenFileName(this, tr("Open White repertoire book"), whiteFile->text(), tr("Book files (*.pbk)"));
 	if (!path.isEmpty())
 	{
+		whiteDB->close();
 		whiteFile->setText(path);
 		if (!whiteDB->open(path))
 			whiteDB->create(path, 1);
@@ -217,10 +228,17 @@ void DatabaseDialog::newWhiteDB()
 	QString path = QFileDialog::getSaveFileName(this, tr("New White repertoire book"), whiteFile->text(), tr("Book files (*.pbk)"));
 	if (!path.isEmpty())
 	{
+		whiteDB->close();
 		whiteFile->setText(path);
 		if (!whiteDB->open(path))
 			whiteDB->create(path, 1);
 	}
+}
+
+void DatabaseDialog::closeWhiteDB()
+{
+	whiteFile->setText("");
+	whiteDB->close();
 }
 
 void DatabaseDialog::openBlackDB()
@@ -228,6 +246,7 @@ void DatabaseDialog::openBlackDB()
 	QString path = QFileDialog::getOpenFileName(this, tr("Open Black repertoire book"), blackFile->text(), tr("Book files (*.pbk)"));
 	if (!path.isEmpty())
 	{
+		blackDB->close();
 		blackFile->setText(path);
 		if (!blackDB->open(path))
 			blackDB->create(path, 2);
@@ -239,64 +258,11 @@ void DatabaseDialog::newBlackDB()
 	QString path = QFileDialog::getSaveFileName(this, tr("New Black repertoire book"), blackFile->text(), tr("Book files (*.pbk)"));
 	if (!path.isEmpty())
 	{
+		blackDB->close();
 		blackFile->setText(path);
 		if (!blackDB->open(path))
 			blackDB->create(path, 2);
 	}
-}
-
-void DatabaseDialog::openTrainingDB()
-{
-	QString path = QFileDialog::getOpenFileName(this, tr("Open training book"), trainingFile->text(), tr("Training files (*.ptr)"));
-	if (!path.isEmpty())
-		trainingFile->setText(path);
-}
-
-void DatabaseDialog::newTrainingDB()
-{
-	QString path = QFileDialog::getSaveFileName(this, tr("New training book"), trainingFile->text(), tr("Training files (*.ptr)"));
-	if (!path.isEmpty())
-		trainingFile->setText(path);
-}
-
-void DatabaseDialog::openComputerDB()
-{
-	QString path = QFileDialog::getOpenFileName(this, tr("Open computer evaluation book"), computerFile->text(), tr("Computer evaluation files (*.pcp)"));
-	if (!path.isEmpty())
-		computerFile->setText(path);
-}
-
-void DatabaseDialog::newComputerDB()
-{
-	QString path = QFileDialog::getSaveFileName(this, tr("New computer evaluation book"), computerFile->text(), tr("Computer evaluation files (*.pcp)"));
-	if (!path.isEmpty())
-		computerFile->setText(path);
-}
-
-void DatabaseDialog::openStatisticDB()
-{
-	QString path = QFileDialog::getOpenFileName(this, tr("Open statistics book"), statisticFile->text(), tr("Statistic files (*.pst)"));
-	if (!path.isEmpty())
-		statisticFile->setText(path);
-}
-
-void DatabaseDialog::newStatisticDB()
-{
-	QString path = QFileDialog::getSaveFileName(this, tr("New statistics book"), statisticFile->text(), tr("Statistic files (*.pst)"));
-	if (!path.isEmpty())
-		statisticFile->setText(path);
-}
-
-void DatabaseDialog::closeTheoryDB()
-{
-	theoryFile->setText("");
-	theoryDB->close();
-}
-
-void DatabaseDialog::closeWhiteDB()
-{
-	whiteFile->setText("");
-	whiteDB->close();
 }
 
 void DatabaseDialog::closeBlackDB()
@@ -305,9 +271,58 @@ void DatabaseDialog::closeBlackDB()
 	blackDB->close();
 }
 
+void DatabaseDialog::openTrainingDB()
+{
+	QString path = QFileDialog::getOpenFileName(this, tr("Open training book"), trainingFile->text(), tr("Training files (*.ptr)"));
+	if (!path.isEmpty())
+	{
+		trainingDB->close();
+		trainingFile->setText(path);
+		if (!trainingDB->open(path))
+			trainingDB->create(path);
+	}
+}
+
+void DatabaseDialog::newTrainingDB()
+{
+	QString path = QFileDialog::getSaveFileName(this, tr("New training book"), trainingFile->text(), tr("Training files (*.ptr)"));
+	if (!path.isEmpty())
+	{
+		trainingDB->close();
+		trainingFile->setText(path);
+		if (!trainingDB->open(path))
+			trainingDB->create(path);
+	}
+}
+
 void DatabaseDialog::closeTrainingDB()
 {
 	trainingFile->setText("");
+	trainingDB->close();
+}
+
+void DatabaseDialog::openComputerDB()
+{
+	QString path = QFileDialog::getOpenFileName(this, tr("Open computer evaluation book"), computerFile->text(), tr("Computer evaluation files (*.pcp)"));
+	if (!path.isEmpty())
+	{
+		computerDB->close();
+		computerFile->setText(path);
+		if (!computerDB->open(path))
+			computerDB->create(path);
+	}
+}
+
+void DatabaseDialog::newComputerDB()
+{
+	QString path = QFileDialog::getSaveFileName(this, tr("New computer evaluation book"), computerFile->text(), tr("Computer evaluation files (*.pcp)"));
+	if (!path.isEmpty())
+	{
+		computerDB->close();
+		computerFile->setText(path);
+		if (!computerDB->open(path))
+			computerDB->create(path);
+	}
 }
 
 void DatabaseDialog::closeComputerDB()
@@ -315,30 +330,34 @@ void DatabaseDialog::closeComputerDB()
 	computerFile->setText("");
 }
 
+void DatabaseDialog::openStatisticDB()
+{
+	QString path = QFileDialog::getOpenFileName(this, tr("Open statistics book"), statisticFile->text(), tr("Statistic files (*.pst)"));
+	if (!path.isEmpty())
+	{
+		statDB->close();
+		statisticFile->setText(path);
+		if (!statDB->open(path))
+			statDB->create(path);
+	}
+}
+
+void DatabaseDialog::newStatisticDB()
+{
+	QString path = QFileDialog::getSaveFileName(this, tr("New statistics book"), statisticFile->text(), tr("Statistic files (*.pst)"));
+	if (!path.isEmpty())
+	{
+		statDB->close();
+		statisticFile->setText(path);
+		if (!statDB->open(path))
+			statDB->create(path);
+	}
+}
+
 void DatabaseDialog::closeStatisticDB()
 {
 	statisticFile->setText("");
 	statDB->close();
-}
-
-void DatabaseDialog::getItems(QString& theory, QString& white, QString& black, QString& training, QString& computer, QString& statistic)
-{
-	theory = theoryFile->text();
-	white = whiteFile->text();
-	black = blackFile->text();
-	training = trainingFile->text();
-	computer = computerFile->text();
-	statistic = statisticFile->text();
-}
-
-void DatabaseDialog::setItems(const QString& theory, const QString& white, const QString& black, const QString& training, const QString& computer, const QString& statistic)
-{
-	theoryFile->setText(theory);
-	whiteFile->setText(white);
-	blackFile->setText(black);
-	trainingFile->setText(training);
-	computerFile->setText(computer);
-	statisticFile->setText(statistic);
 }
 
 void DatabaseDialog::importBookTheory()
