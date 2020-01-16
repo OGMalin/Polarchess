@@ -13,7 +13,7 @@ class CommentWindow : public QWidget
 
 public:
 	int write;
-	CommentWindow(QWidget *parent=0);
+	CommentWindow(QWidget *parent = 0);
 	~CommentWindow();
 	void refresh(QString theory, QString white, QString black);
 	void disableWrite() { write = -1; };

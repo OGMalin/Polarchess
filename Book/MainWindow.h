@@ -21,6 +21,7 @@
 #include "CommentWindow.h"
 #include "PathWindow.h"
 #include "EngineWindow.h"
+#include "TrainingWindow.h"
 #include "Path.h"
 
 enum {THEORY=0, REPWHITE, REPBLACK };
@@ -61,13 +62,6 @@ private:
 	QVector<StatisticsDBMove> statList;
 	QVector<ComputerDBEngine> compList;
 	QTranslator translator;
-	//QString dataPath;
-	//QString dataTheory;
-	//QString dataWhite;
-	//QString dataBlack;
-	//QString dataStatistics;
-	//QString dataComputer;
-	//QString dataTraining;
 	QString locale;
 	QMenu* fileMenu;
 	QMenu* bookMenu;
@@ -101,6 +95,7 @@ private:
 	OpeningWindow* openingwindow;
 	PathWindow* pathwindow;
 	EngineWindow* enginewindow;
+	TrainingWindow* trainingwindow;
 	Database* Base[3];
 	Statistics* statistics;
 	Computer* computer;

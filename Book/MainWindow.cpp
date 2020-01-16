@@ -40,13 +40,15 @@ MainWindow::MainWindow(QWidget *parent)
 	pathwindow = new PathWindow;
 	enginewindow = new EngineWindow;
 	movewindow = new MoveTableWindow;
-
+	trainingwindow = new TrainingWindow;
 	v1Splitter->addWidget(openingwindow);
 	v1Splitter->addWidget(boardwindow);
 	v1Splitter->addWidget(enginewindow);
 	v2Splitter->addWidget(pathwindow);
 	v2Splitter->addWidget(movewindow);
 	v2Splitter->addWidget(commentwindow);
+	v2Splitter->addWidget(trainingwindow);
+
 	hSplitter->addWidget(v1Splitter);
 	hSplitter->addWidget(v2Splitter);
 
@@ -85,11 +87,11 @@ MainWindow::MainWindow(QWidget *parent)
 
 	readDB();
 
-	enginewindow->setPosition(board);
 	boardwindow->setPosition(board);
 	enginewindow->setPosition(board, currentPath->current() / 2 + 1);
 
 	openingwindow->hide();
+	trainingwindow->hide();
 	updateMenu();
 	updateWindow();
 }
