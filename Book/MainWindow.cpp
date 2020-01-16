@@ -90,6 +90,7 @@ MainWindow::MainWindow(QWidget *parent)
 	boardwindow->setPosition(board);
 	enginewindow->setPosition(board, currentPath->current() / 2 + 1);
 
+	openingwindow->hide();
 	updateMenu();
 	updateWindow();
 }

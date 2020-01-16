@@ -411,7 +411,7 @@ void MoveTableWindow::refresh()
 
 	table->verticalHeader()->hide();
 	model->setColumnCount(col);
-	model->setRowCount(movetable.size());
+	model->setRowCount(movetable.size()+1); // +1 pga bug
 	table->resizeColumnsToContents();
 }
 
