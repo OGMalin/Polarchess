@@ -70,7 +70,6 @@ private:
 	//QString dataTraining;
 	QString locale;
 	QMenu* fileMenu;
-	QMenu* fileImportMenu;
 	QMenu* bookMenu;
 	QMenu* bookWriteMenu;
 	QMenu* trainingMenu;
@@ -80,7 +79,6 @@ private:
 	QToolBar* toolbar;
 	QAction* writeAct[3];
 	QAction* exitAct;
-	QAction* importPgnAct;
 	QAction* clearTrainingAct;
 	QAction* createTrainingAct;
 	QAction* startTrainingBothAct;
@@ -125,7 +123,6 @@ private:
 	void writeSettings();
 	void readSettings();
 	void flipBoard();
-	void fileImportPgn();
 	void bookWriteTheory() { bookWrite(THEORY); };
 	void bookWriteWhite() { bookWrite(REPWHITE); };
 	void bookWriteBlack() { bookWrite(REPBLACK); };

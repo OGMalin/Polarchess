@@ -35,24 +35,6 @@ ImportPgnDialog::ImportPgnDialog(QWidget *parent)
 	vbox->addLayout(hbox);
 
 	hbox = new QHBoxLayout;
-	label = new QLabel("Book type:");
-	theory= new QRadioButton("Theory");
-	whiterep = new QRadioButton("White");
-	blackrep = new QRadioButton("Black");
-	group = new QButtonGroup;
-	group->addButton(theory);
-	group->addButton(whiterep);
-	group->addButton(blackrep);
-	hbox->addWidget(label);
-	hbox->addWidget(theory);
-	hbox->addWidget(whiterep);
-	hbox->addWidget(blackrep);
-	vbox->addLayout(hbox);
-	theory->setEnabled(false);
-	whiterep->setEnabled(false);
-	blackrep->setEnabled(false);
-
-	hbox = new QHBoxLayout;
 	comment = new QCheckBox("Include comment");
 	variation = new QCheckBox("Include varitions");
 	hbox->addWidget(comment);
@@ -80,37 +62,25 @@ ImportPgnDialog::ImportPgnDialog(QWidget *parent)
 	setLayout(vbox);
 }
 
-void ImportPgnDialog::setItems(bool theorybase, bool white, bool black, int moves, bool var)
+void ImportPgnDialog::setItems(int moves, bool com, bool var)
 {
-	if (theorybase)
-		theory->setEnabled(true);
-	if (white)
-		whiterep->setEnabled(true);
-	if (black)
-		blackrep->setEnabled(true);
-
-	if (theorybase)
-		theory->setChecked(true);
-	else if (white)
-		whiterep->setChecked(true);
-	else if (black)
-		blackrep->setChecked(true);
-
 	if (var)
 		variation->setChecked(true);
+	else
+		variation->setChecked(false);
+	if (com)
+		comment->setChecked(true);
+	else
+		comment->setChecked(false);
 	char sz[16];
 	numberofmoves->setText(itoa(moves, sz, 10));
 }
 
-void ImportPgnDialog::getItems(QString& path, bool& theorybase, bool& white, bool& black, int& moves, bool& com, bool& var)
+void ImportPgnDialog::getItems(QString& path, int& moves, bool& com, bool& var)
 {
 	path=filename->text();
-	theorybase = theory->isChecked();
-	white = whiterep->isChecked();
-	black = blackrep->isChecked();
 	com = comment->isChecked();
 	var = variation->isChecked();
-
 	moves=numberofmoves->text().toInt();
 }
 

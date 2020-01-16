@@ -14,8 +14,8 @@ class ImportPgnDialog : public QDialog
 
 public:
 	ImportPgnDialog(QWidget *parent);
-	void setItems(bool theorybase, bool white, bool black, int moves, bool var);
-	void getItems(QString& path, bool& theorybase, bool& white, bool& black, int& moves, bool& com, bool& var);
+	void setItems(int moves, bool com, bool var);
+	void getItems(QString& path, int& moves, bool& com, bool& var);
 	void importPgnFile(QWidget* parent, Database* db, QString& pgnfile, int moves, bool comment, bool variation);
 
 public slots:
@@ -23,9 +23,6 @@ public slots:
 
 private:
 	QLineEdit* filename;
-	QRadioButton* theory;
-	QRadioButton* whiterep;
-	QRadioButton* blackrep; 
 	QCheckBox* comment;
 	QCheckBox* variation;
 	QLineEdit* numberofmoves;

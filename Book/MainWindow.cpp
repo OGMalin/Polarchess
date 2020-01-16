@@ -1,6 +1,5 @@
 #include "MainWindow.h"
 #include "AboutDialog.h"
-#include "ImportPgnDialog.h"
 #include "DatabaseDialog.h"
 #include "../Common/Pgn.h"
 #include "../Common/ChessGame.h"
@@ -105,9 +104,6 @@ void MainWindow::createMenu()
 {
 	// File menu
 	fileMenu = menuBar()->addMenu("*");
-	fileImportMenu = fileMenu->addMenu("Import");
-	importPgnAct = fileImportMenu->addAction("Import pgnfiles", this, &MainWindow::fileImportPgn);
-	fileMenu->addSeparator();
 	exitAct = fileMenu->addAction("*", this, &QWidget::close);
 
 	bookMenu = menuBar()->addMenu("Book");
@@ -154,10 +150,6 @@ void MainWindow::createMenu()
 		writeAct[i]->setCheckable(true);
 		writeAct[i]->setDisabled(true);
 	}
-
-	// No database opened as default
-	importPgnAct->setDisabled(true);
-
 }
 
 void MainWindow::retranslateUi()
@@ -225,10 +217,6 @@ void MainWindow::updateMenu()
 			writeAct[i]->setDisabled(true);
 		}
 	}
-	if (open==0)
-		importPgnAct->setDisabled(true);
-	else
-		importPgnAct->setDisabled(false);
 
 	if (locale == "nb")
 		norAct->setChecked(true);
@@ -602,39 +590,6 @@ void MainWindow::commentChanged(QString& comment)
 		bde[write].comment = comment;
 		Base[write]->add(bde[write]);
 	}
-}
-
-void MainWindow::fileImportPgn()
-{
-	int rep;
-	int moves=999;
-	ImportPgnDialog dialog(this);
-	dialog.setItems(Base[THEORY]->isOpen(), Base[REPWHITE]->isOpen(), Base[REPBLACK]->isOpen(), moves, true);
-	if (dialog.exec() == QDialog::Rejected)
-		return;
-	bool theory, white, black, variation, comment;
-	QString path;
-	dialog.getItems(path, theory, white, black, moves, comment, variation);
-
-	if (theory)
-		rep = THEORY;
-	else if (white)
-		rep = REPWHITE;
-	else if (black)
-		rep = REPBLACK;
-	else
-		return;
-
-	dialog.importPgnFile(this, Base[rep], path, moves, comment, variation);
-
-	// Change to read from both db
-	ChessBoard board = currentPath->getPosition();
-
-	readDB();
-
-	boardwindow->setPosition(board);
-
-	updateWindow();
 }
 
 void MainWindow::trainingClearData()

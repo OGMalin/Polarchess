@@ -1,4 +1,5 @@
 #include "DatabaseDialog.h"
+#include "ImportPgnDialog.h"
 #include <QBoxLayout>
 #include <QDialogButtonBox>
 #include <QGroupBox>
@@ -7,6 +8,7 @@
 #include <QGridLayout>
 #include <QSpacerItem>
 #include <QMessageBox>
+#include <QFile>
 
 DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* white, Database* black, Training* training, Computer* computer, Statistics* stat)
 	:QDialog(parent)
@@ -413,14 +415,59 @@ void DatabaseDialog::importBookBlack()
 
 void DatabaseDialog::importPGNTheory()
 {
+	if (!theoryDB->isOpen())
+		return;
+	bool variation = true;
+	bool comment = true;
+	int nummoves=999;
+	QString path;
+	ImportPgnDialog dialog(this);
+	dialog.setItems(nummoves, comment, variation);
+	if (dialog.exec() == QDialog::Rejected)
+		return;
+	QFile file(path);
+	if (!file.exists())
+		return;
+	dialog.getItems(path, nummoves, comment, variation);
+	dialog.importPgnFile(this, theoryDB, path, nummoves, comment, variation);
 }
 
 void DatabaseDialog::importPGNWhite()
 {
+	if (!whiteDB->isOpen())
+		return;
+	bool variation = true;
+	bool comment = true;
+	int nummoves = 999;
+	QString path;
+	ImportPgnDialog dialog(this);
+	dialog.setItems(nummoves, comment, variation);
+	if (dialog.exec() == QDialog::Rejected)
+		return;
+	QFile file(path);
+	if (!file.exists())
+		return;
+	dialog.getItems(path, nummoves, comment, variation);
+	dialog.importPgnFile(this, whiteDB, path, nummoves, comment, variation);
 }
 
 void DatabaseDialog::importPGNBlack()
 {
+	if (!blackDB->isOpen())
+		return;
+	bool variation = true;
+	bool comment = true;
+	int nummoves = 999;
+	QString path;
+	ImportPgnDialog dialog(this);
+	dialog.setItems(nummoves, comment, variation);
+	if (dialog.exec() == QDialog::Rejected)
+		return;
+	QFile file(path);
+	if (!file.exists())
+		return;
+	dialog.getItems(path, nummoves, comment, variation);
+	dialog.importPgnFile(this, blackDB, path, nummoves, comment, variation);
 }
 
 void DatabaseDialog::importStatistics()
