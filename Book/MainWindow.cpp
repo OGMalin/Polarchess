@@ -17,12 +17,15 @@
 #include <QClipboard>
 #include <QMimeData>
 #include <QTextStream>
+#include <QToolButton>
+#include <QList>
 #include <string>
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
 	write = -1;
+	trainingRunning = false;
 	inTraining = false;
 
 	createMenu();
@@ -63,8 +66,9 @@ MainWindow::MainWindow(QWidget *parent)
 	training = new Training();
 	training->SetRepertoireDatabase(WHITE, Base[REPWHITE]);
 	training->SetRepertoireDatabase(BLACK, Base[REPBLACK]);
+	trainingwindow->training = training;
 	movewindow->computer = computer;
-
+	dgt = new DgtBoard();
 	readSettings();
 
 	loadLanguage();
@@ -82,6 +86,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(pathwindow, SIGNAL(pathPaste()), this, SLOT(pathPaste()));
 	connect(commentwindow, SIGNAL(commentChanged(QString&)), this, SLOT(commentChanged(QString&)));
 	connect(enginewindow, SIGNAL(enginePV(ComputerDBEngine&, ChessBoard&)), this, SLOT(enginePV(ComputerDBEngine&, ChessBoard&)));
+	connect(dgt, SIGNAL(dgtStatus(int)), this, SLOT(dgtStatus(int)));
 
 	ChessBoard board = currentPath->getPosition();
 
@@ -115,14 +120,15 @@ void MainWindow::createMenu()
 	writeAct[REPBLACK] = bookWriteMenu->addAction("Write to Black repertoire book", this, &MainWindow::bookWriteBlack);
 	bookMenu->addSeparator();
 
-	trainingMenu = menuBar()->addMenu("Training");
-	trainingStartMenu = trainingMenu->addMenu("Start training");
-	startTrainingBothAct = trainingStartMenu->addAction("Start training", this, &MainWindow::trainingStartBoth);
-	startTrainingWhiteAct = trainingStartMenu->addAction("Start training for White", this, &MainWindow::trainingStartWhite);
-	startTrainingBlackAct = trainingStartMenu->addAction("Start training for Black", this, &MainWindow::trainingStartBlack);
-	startTrainingPosBothAct = trainingStartMenu->addAction("Start training from current position", this, &MainWindow::trainingStartPosBoth);
-	startTrainingPosWhiteAct = trainingStartMenu->addAction("Start training from current position for White", this, &MainWindow::trainingStartPosWhite);
-	startTrainingPosBlackAct = trainingStartMenu->addAction("Start training from current position for Black", this, &MainWindow::trainingStartPosBlack);
+	trainingMenu = menuBar()->addMenu("*");
+	//trainingStartMenu = trainingMenu->addMenu("Start training");
+	//startTrainingBothAct = trainingStartMenu->addAction("Start training", this, &MainWindow::trainingStartBoth);
+	//startTrainingWhiteAct = trainingStartMenu->addAction("Start training for White", this, &MainWindow::trainingStartWhite);
+	//startTrainingBlackAct = trainingStartMenu->addAction("Start training for Black", this, &MainWindow::trainingStartBlack);
+	//startTrainingPosBothAct = trainingStartMenu->addAction("Start training from current position", this, &MainWindow::trainingStartPosBoth);
+	//startTrainingPosWhiteAct = trainingStartMenu->addAction("Start training from current position for White", this, &MainWindow::trainingStartPosWhite);
+	//startTrainingPosBlackAct = trainingStartMenu->addAction("Start training from current position for Black", this, &MainWindow::trainingStartPosBlack);
+	startTrainingAct = trainingMenu->addAction("Start training", this, &MainWindow::trainingStart);
 	stopTrainingAct = trainingMenu->addAction("Stop training", this, &MainWindow::trainingStop);
 	bookMenu->addSeparator();
 	clearTrainingAct = trainingMenu->addAction("Clear trainingdata", this, &MainWindow::trainingClearData);
@@ -159,6 +165,9 @@ void MainWindow::retranslateUi()
 	fileMenu->setTitle(tr("File"));
 	exitAct->setText(tr("Exit"));
 
+	trainingMenu->setTitle(tr("Training"));
+	startTrainingAct->setText(tr("Start training"));
+
 	//boardMenu->setTitle(tr("Board"));
 	//flipAct->setText(tr("Flip board"));
 
@@ -183,6 +192,10 @@ void MainWindow::retranslateUi()
 
 void MainWindow::updateMenu()
 {
+	if (inTraining)
+	{
+
+	}
 	switch (write)
 	{
 		case 0:
@@ -237,9 +250,11 @@ void MainWindow::updateWindow()
 		movewindow->setVisible(false);
 		commentwindow->setVisible(false);
 		enginewindow->setVisible(false);
+		trainingwindow->setVisible(true);
 	}
 	else
 	{
+		trainingwindow->setVisible(false);
 		movewindow->setVisible(true);
 		commentwindow->setVisible(true);
 		enginewindow->setVisible(true);
@@ -264,6 +279,11 @@ void MainWindow::createStatusbar()
 {
 	statusWatch = new StatusWatch();
 	statusBar()->addPermanentWidget(statusWatch);
+
+	QToolButton* dgticon = new QToolButton();
+	dgticon->setIcon(QIcon(":/icon/blackOK.png"));
+	connect(dgticon, SIGNAL(clicked(bool)), this, SLOT(dgtStatusClicked(bool)));
+	statusBar()->addPermanentWidget(dgticon);
 }
 
 void MainWindow::writeSettings()
@@ -285,6 +305,7 @@ void MainWindow::writeSettings()
 	settings.setValue("enginewindowFont", enginewindow->fontToString());
 	settings.setValue("pathwindowFont", pathwindow->fontToString());
 	settings.setValue("commentwindowFont", commentwindow->fontToString());
+	settings.setValue("trainingwindowFont", trainingwindow->fontToString());
 }
 
 void MainWindow::readSettings()
@@ -324,6 +345,7 @@ void MainWindow::readSettings()
 	enginewindow->fontFromString(settings.value("enginewindowFont", QString()).toString());
 	pathwindow->fontFromString(settings.value("pathwindowFont", QString()).toString());
 	commentwindow->fontFromString(settings.value("commentwindowFont", QString()).toString());
+	trainingwindow->fontFromString(settings.value("trainingwindowFont", QString()).toString());
 
 	// Open default databases
 	if (!dataTheory.isEmpty())
@@ -466,7 +488,7 @@ void MainWindow::moveEntered(ChessMove& move)
 		return;
 	}
 		
-	if (inTraining)
+	if (trainingRunning)
 	{
 		int score=0;
 		if (trainingLine.isCorrect(move))
@@ -495,7 +517,7 @@ void MainWindow::moveEntered(ChessMove& move)
 					score = -1;
 				training->updateScore(trainingLine.color, currentPath->getPosition(), trainingLine.rowid, trainingLine.score + score);
 				statusBar()->showMessage(QString("Next line"), 5000);
-				trainingStart(trainingColor,trainingBoard);
+				trainingRun(trainingColor,trainingBoard);
 				return;
 			}
 		}
@@ -546,7 +568,7 @@ void MainWindow::moveEntered(ChessMove& move)
 
 void MainWindow::pathSelected(int ply)
 {
-	if (inTraining)
+	if (trainingRunning)
 		return;
 
 	currentPath->current(ply);
@@ -562,7 +584,7 @@ void MainWindow::pathSelected(int ply)
 
 void MainWindow::pathToDB(int rep)
 {
-	if (inTraining)
+	if (trainingRunning)
 		return;
 	if (Base[rep]->isOpen())
 	{
@@ -594,6 +616,21 @@ void MainWindow::commentChanged(QString& comment)
 	}
 }
 
+void MainWindow::trainingStart()
+{
+	inTraining = true;
+	updateWindow();
+	updateMenu();
+}
+
+void MainWindow::trainingStop()
+{
+	trainingRunning = false;
+	inTraining = false;
+	updateWindow();
+	updateMenu();
+}
+
 void MainWindow::trainingClearData()
 {
 	Base[REPWHITE]->clearAllTrainingData();
@@ -605,7 +642,7 @@ void MainWindow::trainingCreate()
 	training->createLines(this);
 }
 
-void MainWindow::trainingStart(int color, ChessBoard& board)
+void MainWindow::trainingRun(int color, ChessBoard& board)
 {
 	int i;
 	trainingStat.clear();
@@ -640,7 +677,7 @@ void MainWindow::trainingStart(int color, ChessBoard& board)
 		cb.doMove(trainingLine.moves[i].move, false);
 		++trainingLine.current;
 	}
-	inTraining = true;
+	trainingRunning = true;
 	write = -1;
 	boardwindow->setPosition(cb);
 	updateWindow();
@@ -650,44 +687,38 @@ void MainWindow::trainingStartBoth()
 {
 	ChessBoard cb;
 	cb.setStartposition();
-	trainingStart(-1, cb);
+	trainingRun(-1, cb);
 }
 
 void MainWindow::trainingStartWhite()
 {
 	ChessBoard cb;
 	cb.setStartposition();
-	trainingStart(WHITE, cb);
+	trainingRun(WHITE, cb);
 }
 
 void MainWindow::trainingStartBlack()
 {
 	ChessBoard cb;
 	cb.setStartposition();
-	trainingStart(BLACK, cb);
+	trainingRun(BLACK, cb);
 }
 
 void MainWindow::trainingStartPosBoth()
 {
-	trainingStart(-1, currentPath->getPosition());
+	trainingRun(-1, currentPath->getPosition());
 }
 
 void MainWindow::trainingStartPosWhite()
 {
-	trainingStart(WHITE, currentPath->getPosition());
+	trainingRun(WHITE, currentPath->getPosition());
 }
 
 void MainWindow::trainingStartPosBlack()
 {
-	trainingStart(BLACK, currentPath->getPosition());
+	trainingRun(BLACK, currentPath->getPosition());
 }
 
-
-void MainWindow::trainingStop()
-{
-	inTraining = false;
-	updateWindow();
-}
 
 void MainWindow::enginePV(ComputerDBEngine& ce, ChessBoard& cb)
 {
@@ -823,4 +854,21 @@ void MainWindow::setupDatabase()
 	readDB();
 	updateWindow();
 	updateMenu();
+}
+
+void MainWindow::dgtStatus(int status)
+{
+	QList<QToolButton*> list;
+	list = statusBar()->findChildren<QToolButton*>();
+	QList<QToolButton*>::iterator it=list.begin();
+	while (it != list.end())
+	{
+		++it;
+	}
+}
+
+void MainWindow::dgtStatusClicked(bool)
+{
+	dgt->show();
+	dgtStatus(2);
 }

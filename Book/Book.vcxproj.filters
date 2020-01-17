@@ -140,6 +140,9 @@
     <ClCompile Include="TrainingWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Common\DgtBoard.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -186,6 +189,9 @@
     </QtMoc>
     <QtMoc Include="TrainingWindow.h">
       <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\Common\DgtBoard.h">
+      <Filter>Common</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

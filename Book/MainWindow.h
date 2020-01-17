@@ -5,7 +5,16 @@
 #include "Computer.h"
 #include "Training.h"
 #include "StatusWatch.h"
+#include "MoveTableWindow.h"
+#include "OpeningWindow.h"
+#include "CommentWindow.h"
+#include "PathWindow.h"
+#include "EngineWindow.h"
+#include "TrainingWindow.h"
+#include "Path.h"
 #include "../Common/ChessMove.h"
+#include "../Common/BoardWindow.h"
+#include "../Common/DgtBoard.h"
 #include <QMainWindow>
 #include <QString>
 #include <QTranslator>
@@ -15,14 +24,6 @@
 #include <QAction>
 #include <QCloseEvent>
 #include <QSplitter>
-#include "../Common/BoardWindow.h"
-#include "MoveTableWindow.h"
-#include "OpeningWindow.h"
-#include "CommentWindow.h"
-#include "PathWindow.h"
-#include "EngineWindow.h"
-#include "TrainingWindow.h"
-#include "Path.h"
 
 enum {THEORY=0, REPWHITE, REPBLACK };
 
@@ -52,7 +53,8 @@ public slots:
 	void addMoveComment(int rep, int movenr, QString& comment);
 	void enginePV(ComputerDBEngine&, ChessBoard&);
 	void slotLanguageChanged(QAction*);
-
+	void dgtStatus(int);
+	void dgtStatusClicked(bool);
 public:
 	Path* currentPath;
 	MainWindow(QWidget *parent = Q_NULLPTR);
@@ -67,7 +69,6 @@ private:
 	QMenu* bookMenu;
 	QMenu* bookWriteMenu;
 	QMenu* trainingMenu;
-	QMenu* trainingStartMenu;
 	QMenu* settingsMenu;
 	QMenu* langMenu;
 	QToolBar* toolbar;
@@ -75,12 +76,13 @@ private:
 	QAction* exitAct;
 	QAction* clearTrainingAct;
 	QAction* createTrainingAct;
-	QAction* startTrainingBothAct;
-	QAction* startTrainingWhiteAct;
-	QAction* startTrainingBlackAct;
-	QAction* startTrainingPosBothAct;
-	QAction* startTrainingPosWhiteAct;
-	QAction* startTrainingPosBlackAct;
+	QAction* startTrainingAct;
+	//QAction* startTrainingBothAct;
+	//QAction* startTrainingWhiteAct;
+	//QAction* startTrainingBlackAct;
+	//QAction* startTrainingPosBothAct;
+	//QAction* startTrainingPosWhiteAct;
+	//QAction* startTrainingPosBlackAct;
 	QAction* stopTrainingAct;
 	QAction* setupDatabaseAct;
 	QAction* engAct;
@@ -107,8 +109,13 @@ private:
 	TrainingStat trainingStat;
 	ChessBoard trainingBoard;
 	int trainingColor;
+	DgtBoard* dgt;
 	StatusWatch* statusWatch;
+	// You are in training mode;
 	bool inTraining;
+	// Training is running
+	bool trainingRunning;
+	// Which DB to write to when moving pieces on the chessboard. (-1=none)
 	int write;
 	void createMenu();
 	void createStatusbar();
@@ -122,16 +129,19 @@ private:
 	void bookWriteWhite() { bookWrite(REPWHITE); };
 	void bookWriteBlack() { bookWrite(REPBLACK); };
 	void bookWrite(int);
+	void trainingStop();
+	void trainingStart();
 	void trainingClearData();
 	void trainingCreate();
-	void trainingStart(int color, ChessBoard& pos);
+
+	void trainingRun(int color, ChessBoard& pos);
 	void trainingStartBoth();
 	void trainingStartWhite();
 	void trainingStartBlack();
 	void trainingStartPosBoth();
 	void trainingStartPosWhite();
 	void trainingStartPosBlack();
-	void trainingStop();
+
 	void setLanguage();
 	void loadLanguage();
 	void retranslateUi();
