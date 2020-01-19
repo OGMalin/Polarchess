@@ -24,6 +24,7 @@
 #include <QAction>
 #include <QCloseEvent>
 #include <QSplitter>
+#include <QToolButton>
 
 enum {THEORY=0, REPWHITE, REPBLACK };
 
@@ -49,12 +50,14 @@ public slots:
 	void pathToDB(int);
 	void pathCopy();
 	void pathPaste();
-	void commentChanged(QString&);
+	void commentChanged(QString&, int);
 	void addMoveComment(int rep, int movenr, QString& comment);
 	void enginePV(ComputerDBEngine&, ChessBoard&);
 	void slotLanguageChanged(QAction*);
 	void dgtStatus(int);
 	void dgtStatusClicked(bool);
+	void toolbarAction(QAction*);
+
 public:
 	Path* currentPath;
 	MainWindow(QWidget *parent = Q_NULLPTR);
@@ -85,9 +88,12 @@ private:
 	//QAction* startTrainingPosBlackAct;
 	QAction* stopTrainingAct;
 	QAction* setupDatabaseAct;
+	QAction* useDgtAct;
 	QAction* engAct;
 	QAction* norAct;
 	QActionGroup * langGroup;
+	QAction* toolbarTrainingAct;
+	QToolButton* dgtIcon;
 	QSplitter* hSplitter;
 	QSplitter* v1Splitter;
 	QSplitter* v2Splitter;
@@ -133,7 +139,6 @@ private:
 	void trainingStart();
 	void trainingClearData();
 	void trainingCreate();
-
 	void trainingRun(int color, ChessBoard& pos);
 	void trainingStartBoth();
 	void trainingStartWhite();
@@ -146,4 +151,5 @@ private:
 	void loadLanguage();
 	void retranslateUi();
 	void setupDatabase();
+	void useDgt();
 };

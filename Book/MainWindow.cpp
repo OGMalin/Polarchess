@@ -17,7 +17,6 @@
 #include <QClipboard>
 #include <QMimeData>
 #include <QTextStream>
-#include <QToolButton>
 #include <QList>
 #include <string>
 
@@ -68,7 +67,7 @@ MainWindow::MainWindow(QWidget *parent)
 	training->SetRepertoireDatabase(BLACK, Base[REPBLACK]);
 	trainingwindow->training = training;
 	movewindow->computer = computer;
-	dgt = new DgtBoard();
+	dgt = NULL;
 	readSettings();
 
 	loadLanguage();
@@ -84,7 +83,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(pathwindow, SIGNAL(pathSelected(int)), this, SLOT(pathSelected(int)));
 	connect(pathwindow, SIGNAL(pathCopy()), this, SLOT(pathCopy()));
 	connect(pathwindow, SIGNAL(pathPaste()), this, SLOT(pathPaste()));
-	connect(commentwindow, SIGNAL(commentChanged(QString&)), this, SLOT(commentChanged(QString&)));
+	connect(commentwindow, SIGNAL(commentChanged(QString&, int)), this, SLOT(commentChanged(QString&, int)));
 	connect(enginewindow, SIGNAL(enginePV(ComputerDBEngine&, ChessBoard&)), this, SLOT(enginePV(ComputerDBEngine&, ChessBoard&)));
 	connect(dgt, SIGNAL(dgtStatus(int)), this, SLOT(dgtStatus(int)));
 
@@ -121,13 +120,6 @@ void MainWindow::createMenu()
 	bookMenu->addSeparator();
 
 	trainingMenu = menuBar()->addMenu("*");
-	//trainingStartMenu = trainingMenu->addMenu("Start training");
-	//startTrainingBothAct = trainingStartMenu->addAction("Start training", this, &MainWindow::trainingStartBoth);
-	//startTrainingWhiteAct = trainingStartMenu->addAction("Start training for White", this, &MainWindow::trainingStartWhite);
-	//startTrainingBlackAct = trainingStartMenu->addAction("Start training for Black", this, &MainWindow::trainingStartBlack);
-	//startTrainingPosBothAct = trainingStartMenu->addAction("Start training from current position", this, &MainWindow::trainingStartPosBoth);
-	//startTrainingPosWhiteAct = trainingStartMenu->addAction("Start training from current position for White", this, &MainWindow::trainingStartPosWhite);
-	//startTrainingPosBlackAct = trainingStartMenu->addAction("Start training from current position for Black", this, &MainWindow::trainingStartPosBlack);
 	startTrainingAct = trainingMenu->addAction("Start training", this, &MainWindow::trainingStart);
 	stopTrainingAct = trainingMenu->addAction("Stop training", this, &MainWindow::trainingStop);
 	bookMenu->addSeparator();
@@ -136,7 +128,9 @@ void MainWindow::createMenu()
 
 	settingsMenu = menuBar()->addMenu("*");
 	setupDatabaseAct = settingsMenu->addAction("*", this, &MainWindow::setupDatabase);
-	//	fileMenu->addSeparator();
+	useDgtAct = settingsMenu->addAction("*", this, &MainWindow::useDgt);
+	useDgtAct->setCheckable(true);
+	settingsMenu->addSeparator();
 	langMenu = settingsMenu->addMenu("*");
 	engAct = langMenu->addAction(QIcon(":/icon/GB.png"), "*");
 	engAct->setCheckable(true);
@@ -152,12 +146,16 @@ void MainWindow::createMenu()
 	// Setting up the toolbar
 	toolbar = addToolBar("Toolbar");
 	toolbar->setObjectName("MainToolbar");
-	for (int i = 0; i < 3; i++)
-	{
-		toolbar->addAction(writeAct[i]);
-		writeAct[i]->setCheckable(true);
-		writeAct[i]->setDisabled(true);
-	}
+	toolbarTrainingAct = toolbar->addAction(QIcon(":/icon/training.png"),"Training");
+	toolbarTrainingAct->setCheckable(true);
+	connect(toolbar, SIGNAL(actionTriggered(QAction*)), this, SLOT(toolbarAction(QAction*)));
+//	connect(act, toggled(bool),this, &MainWindow::toolbarTraining(bool));
+	//for (int i = 0; i < 3; i++)
+	//{
+	//	toolbar->addAction(writeAct[i]);
+	//	writeAct[i]->setCheckable(true);
+	//	writeAct[i]->setDisabled(true);
+	//}
 }
 
 void MainWindow::retranslateUi()
@@ -177,7 +175,8 @@ void MainWindow::retranslateUi()
 	//resignAct->setText(tr("Resign"));
 
 	settingsMenu->setTitle(tr("Settings"));
-	setupDatabaseAct->setText(tr("setup database"));
+	setupDatabaseAct->setText(tr("Setup database"));
+	useDgtAct->setText(tr("Use DGT Electronic board"));
 	langMenu->setTitle(tr("Language"));
 	if (locale == "nb")
 		langMenu->setIcon(QIcon(":/icon/NO.png"));
@@ -279,11 +278,6 @@ void MainWindow::createStatusbar()
 {
 	statusWatch = new StatusWatch();
 	statusBar()->addPermanentWidget(statusWatch);
-
-	QToolButton* dgticon = new QToolButton();
-	dgticon->setIcon(QIcon(":/icon/blackOK.png"));
-	connect(dgticon, SIGNAL(clicked(bool)), this, SLOT(dgtStatusClicked(bool)));
-	statusBar()->addPermanentWidget(dgticon);
 }
 
 void MainWindow::writeSettings()
@@ -607,13 +601,10 @@ void MainWindow::pathToDB(int rep)
 	}
 }
 
-void MainWindow::commentChanged(QString& comment)
+void MainWindow::commentChanged(QString& comment, int rep)
 {
-	if (write >= 0)
-	{
-		bde[write].comment = comment;
-		Base[write]->add(bde[write]);
-	}
+	bde[rep].comment = comment;
+	Base[rep]->add(bde[rep]);
 }
 
 void MainWindow::trainingStart()
@@ -858,17 +849,62 @@ void MainWindow::setupDatabase()
 
 void MainWindow::dgtStatus(int status)
 {
-	QList<QToolButton*> list;
-	list = statusBar()->findChildren<QToolButton*>();
-	QList<QToolButton*>::iterator it=list.begin();
-	while (it != list.end())
-	{
-		++it;
-	}
+	//QList<QToolButton*> list;
+	//list = statusBar()->findChildren<QToolButton*>();
+	//QList<QToolButton*>::iterator it=list.begin();
+	//while (it != list.end())
+	//{
+	//	++it;
+	//}
 }
 
 void MainWindow::dgtStatusClicked(bool)
 {
-	dgt->show();
-	dgtStatus(2);
+	if (dgt->isVisible())
+		dgt->hide();
+	else
+		dgt->show();
+}
+
+void MainWindow::toolbarAction(QAction* action)
+{
+	if (action == toolbarTrainingAct)
+	{
+		if (action->isChecked())
+		{
+			if (!inTraining)
+				trainingStart();
+		}
+		else
+		{
+			if (inTraining)
+				trainingStop();
+		}
+	}
+}
+
+void MainWindow::useDgt()
+{
+	if (useDgtAct->isChecked())
+	{
+		if (!dgt)
+		{
+			dgt = new DgtBoard();
+			dgtIcon = new QToolButton();
+			dgtIcon->setIcon(QIcon(":/icon/dgtDisconnect.png"));
+			connect(dgtIcon, SIGNAL(clicked(bool)), this, SLOT(dgtStatusClicked(bool)));
+			statusBar()->addPermanentWidget(dgtIcon);
+		}
+	}
+	else
+	{
+		if (dgt)
+		{
+			statusBar()->removeWidget(dgtIcon);
+			disconnect(dgtIcon);
+			delete dgt;
+			delete dgtIcon;
+			dgt = NULL;
+		}
+	}
 }

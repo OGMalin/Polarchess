@@ -8,5 +8,9 @@
         <file>icon/blackOK.png</file>
         <file>icon/greenOK.png</file>
         <file>icon/yellowOK.png</file>
+        <file>icon/dgtConnect.png</file>
+        <file>icon/dgtDisconnect.png</file>
+        <file>icon/dgtSync.png</file>
+        <file>icon/training.png</file>
     </qresource>
 </RCC>

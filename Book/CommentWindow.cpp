@@ -54,40 +54,30 @@ void CommentWindow::refresh(QString theory, QString white, QString black)
 
 void CommentWindow::mouseDoubleClickEvent(QMouseEvent* event)
 {
-	bool res = false;
-	QString newText;
-
 	switch (write)
 	{
 		case 0:
-			newText = QInputDialog::getMultiLineText(this, "PolarBook", "Theory comment", cTheory, &res);
-			if (res)
-				cTheory = newText;
+			editTheory();
 			break;
 		case 1:
-			newText = QInputDialog::getMultiLineText(this, "PolarBook", "White repertoire comment", cWhite, &res);
-			if (res)
-				cWhite = newText;
+			editWhite();
 			break;
 		case 2:
-			newText = QInputDialog::getMultiLineText(this, "PolarBook", "Black repertoire comment", cBlack, &res);
-			if (res)
-				cBlack = newText;
+			editBlack();
 			break;
 		default:
-			return;
-	}
-	if (res)
-	{
-		refresh(cTheory, cWhite, cBlack);
-		emit commentChanged(newText);
+			break;
 	}
 }
 
 void CommentWindow::showContextMenu(const QPoint& pos)
 {
 	QMenu* contextMenu = new QMenu(this);
-	contextMenu->addAction(QString("Font"), this, SLOT(selectFont()));
+	contextMenu->addAction(tr("Edit theory comment"), this, &CommentWindow::editTheory);
+	contextMenu->addAction(tr("Edit White repertoire comment"), this, &CommentWindow::editWhite);
+	contextMenu->addAction(tr("Edit Black repertoire comment"), this, &CommentWindow::editBlack);
+	contextMenu->addSeparator();
+	contextMenu->addAction(tr("Font"), this, &CommentWindow::selectFont);
 	contextMenu->exec(mapToGlobal(pos));
 }
 
@@ -112,4 +102,43 @@ void CommentWindow::fontFromString(const QString& sFont)
 	f.fromString(sFont);
 	setFont(f);
 	//	table->resizeColumnsToContents();
+}
+
+void CommentWindow::editTheory()
+{
+	bool res = false;
+	QString newText;
+	newText = QInputDialog::getMultiLineText(this, "PolarBook", "Theory book comment", cTheory, &res);
+	if (res && (newText != cTheory))
+	{
+		cTheory = newText;
+		refresh(cTheory, cWhite, cBlack);
+		emit commentChanged(cTheory, 0);
+	}
+}
+
+void CommentWindow::editWhite()
+{
+	bool res = false;
+	QString newText;
+	newText = QInputDialog::getMultiLineText(this, "PolarBook", "White repertoire comment", cWhite, &res);
+	if (res && (newText != cWhite))
+	{
+		cWhite = newText;
+		refresh(cTheory, cWhite, cBlack);
+		emit commentChanged(cWhite, 1);
+	}
+}
+
+void CommentWindow::editBlack()
+{
+	bool res = false;
+	QString newText;
+	newText = QInputDialog::getMultiLineText(this, "PolarBook", "White repertoire comment", cBlack, &res);
+	if (res && (newText != cBlack))
+	{
+		cBlack = newText;
+		refresh(cTheory, cWhite, cBlack);
+		emit commentChanged(cBlack, 2);
+	}
 }

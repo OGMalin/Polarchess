@@ -21,11 +21,10 @@ public:
 	void fontFromString(const QString&);
 
 signals:
-	void commentChanged(QString&);
+	void commentChanged(QString&, int rep);
 
 public slots:
 	void showContextMenu(const QPoint& pos);
-	void selectFont();
 
 private:
 	QTextEdit* comment;
@@ -34,4 +33,8 @@ private:
 	QString cTheory, cWhite, cBlack;
 protected:
 	virtual void mouseDoubleClickEvent(QMouseEvent* event);
+	void editTheory();
+	void editWhite();
+	void editBlack();
+	void selectFont();
 };
