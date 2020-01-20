@@ -9,6 +9,7 @@ ToDo List
 	*Create new training lines automatic when a reportoire are changed. (Ask before training start).
 ?Number of variation in rep. base.
 =Opening names (ECO code). (Own database)
+*Dgt support
 
 ? Maybe
 * Needed

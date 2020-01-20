@@ -120,11 +120,11 @@ void MainWindow::createMenu()
 	bookMenu->addSeparator();
 
 	trainingMenu = menuBar()->addMenu("*");
-	startTrainingAct = trainingMenu->addAction("Start training", this, &MainWindow::trainingStart);
-	stopTrainingAct = trainingMenu->addAction("Stop training", this, &MainWindow::trainingStop);
+	startTrainingAct = trainingMenu->addAction("*", this, &MainWindow::trainingStart);
+	stopTrainingAct = trainingMenu->addAction("*", this, &MainWindow::trainingStop);
 	bookMenu->addSeparator();
-	clearTrainingAct = trainingMenu->addAction("Clear trainingdata", this, &MainWindow::trainingClearData);
-	createTrainingAct = trainingMenu->addAction("Create training", this, &MainWindow::trainingCreate);
+	clearTrainingAct = trainingMenu->addAction("*", this, &MainWindow::trainingClearData);
+	createTrainingAct = trainingMenu->addAction("*", this, &MainWindow::trainingCreate);
 
 	settingsMenu = menuBar()->addMenu("*");
 	setupDatabaseAct = settingsMenu->addAction("*", this, &MainWindow::setupDatabase);
@@ -165,6 +165,9 @@ void MainWindow::retranslateUi()
 
 	trainingMenu->setTitle(tr("Training"));
 	startTrainingAct->setText(tr("Start training"));
+	stopTrainingAct->setText(tr("Stop training"));
+	clearTrainingAct->setText(tr("Clear trainingdata"));
+	createTrainingAct->setText(tr("Create training"));
 
 	//boardMenu->setTitle(tr("Board"));
 	//flipAct->setText(tr("Flip board"));
@@ -484,49 +487,49 @@ void MainWindow::moveEntered(ChessMove& move)
 		
 	if (trainingRunning)
 	{
-		int score=0;
-		if (trainingLine.isCorrect(move))
-		{
-			statusBar()->showMessage(QString("correct move"), 5000);
-			currentPath->add(move);
-			boardwindow->setPosition(currentPath->getPosition());
-			ChessMove nextMove;
-			if (trainingLine.nextMove(nextMove))
-			{
-				currentPath->add(nextMove);
-				board = currentPath->getPosition();
-
-				boardwindow->setPosition(board);
-				enginewindow->setPosition(board, currentPath->current() / 2 + 1);
-
-				updateWindow();
-				return;
-			}
-			else
-			{
-				currentPath->current(currentPath->current() - 1);
-				if (!trainingStat.moveerror)
-					score = 1;
-				else
-					score = -1;
-				training->updateScore(trainingLine.color, currentPath->getPosition(), trainingLine.rowid, trainingLine.score + score);
-				statusBar()->showMessage(QString("Next line"), 5000);
-				trainingRun(trainingColor,trainingBoard);
-				return;
-			}
-		}
-		else
-		{
-			boardwindow->setPosition(currentPath->getPosition());
-			++trainingStat.moveerror;
-			statusBar()->showMessage(QString("Wrong move"), 5000);
-
-			ChessMove m=trainingLine.currentMove();
-			boardwindow->markSquare(SQUARE64(m.fromSquare));
-			updateWindow();
-			return;
-		}
-
+//		int score=0;
+//		if (trainingLine.isCorrect(move))
+//		{
+//			statusBar()->showMessage(QString("correct move"), 5000);
+//			currentPath->add(move);
+//			boardwindow->setPosition(currentPath->getPosition());
+//			ChessMove nextMove;
+//			if (trainingLine.nextMove(nextMove))
+//			{
+//				currentPath->add(nextMove);
+//				board = currentPath->getPosition();
+//
+//				boardwindow->setPosition(board);
+//				enginewindow->setPosition(board, currentPath->current() / 2 + 1);
+//
+//				updateWindow();
+//				return;
+//			}
+//			else
+//			{
+//				currentPath->current(currentPath->current() - 1);
+//				if (!trainingStat.moveerror)
+//					score = 1;
+//				else
+//					score = -1;
+////				training->updateScore(trainingLine.color, currentPath->getPosition(), trainingLine.rowid, trainingLine.score + score);
+//				statusBar()->showMessage(QString("Next line"), 5000);
+//				trainingRun(trainingColor,trainingBoard);
+//				return;
+//			}
+//		}
+//		else
+//		{
+//			boardwindow->setPosition(currentPath->getPosition());
+//			++trainingStat.moveerror;
+//			statusBar()->showMessage(QString("Wrong move"), 5000);
+//
+//			ChessMove m=trainingLine.currentMove();
+//			boardwindow->markSquare(SQUARE64(m.fromSquare));
+//			updateWindow();
+//			return;
+//		}
+//
 	}
 
 	// Do the move if it is legal
@@ -624,8 +627,7 @@ void MainWindow::trainingStop()
 
 void MainWindow::trainingClearData()
 {
-	Base[REPWHITE]->clearAllTrainingData();
-	Base[REPBLACK]->clearAllTrainingData();
+	training->clearAll();
 }
 
 void MainWindow::trainingCreate()
@@ -635,43 +637,43 @@ void MainWindow::trainingCreate()
 
 void MainWindow::trainingRun(int color, ChessBoard& board)
 {
-	int i;
-	trainingStat.clear();
-	trainingColor = color;
-	trainingBoard = board;
-	training->get(trainingLine, color, trainingBoard);
-	if (trainingLine.moves.size() == 0)
-		return;
-	boardwindow->flip(trainingLine.color == BLACK);
-	ChessBoard cb;
-	cb.setStartposition();
-	currentPath->clear();
-	trainingLine.current = 0;
-	// Go to startposition of this training line
-	for (i = 0; i < trainingLine.moves.size(); i++)
-	{
-		if (cb == trainingBoard)
-			break;
-		currentPath->add(trainingLine.moves[i].move);
-		cb.doMove(trainingLine.moves[i].move,false);
-		++trainingLine.current;
-	}
+	//int i;
+	//trainingStat.clear();
+	//trainingColor = color;
+	//trainingBoard = board;
+	//training->get(trainingLine, color, trainingBoard);
+	//if (trainingLine.moves.size() == 0)
+	//	return;
+	//boardwindow->flip(trainingLine.color == BLACK);
+	//ChessBoard cb;
+	//cb.setStartposition();
+	//currentPath->clear();
+	//trainingLine.current = 0;
+	//// Go to startposition of this training line
+	//for (i = 0; i < trainingLine.moves.size(); i++)
+	//{
+	//	if (cb == trainingBoard)
+	//		break;
+	//	currentPath->add(trainingLine.moves[i].move);
+	//	cb.doMove(trainingLine.moves[i].move,false);
+	//	++trainingLine.current;
+	//}
 
-	// Startposition not found
-	if (i == trainingLine.moves.size())
-		return;
-	
-	// If wrong color to move go one move forward
-	if (currentPath->getPosition().toMove != trainingLine.color)
-	{
-		currentPath->add(trainingLine.moves[i].move);
-		cb.doMove(trainingLine.moves[i].move, false);
-		++trainingLine.current;
-	}
-	trainingRunning = true;
-	write = -1;
-	boardwindow->setPosition(cb);
-	updateWindow();
+	//// Startposition not found
+	//if (i == trainingLine.moves.size())
+	//	return;
+	//
+	//// If wrong color to move go one move forward
+	//if (currentPath->getPosition().toMove != trainingLine.color)
+	//{
+	//	currentPath->add(trainingLine.moves[i].move);
+	//	cb.doMove(trainingLine.moves[i].move, false);
+	//	++trainingLine.current;
+	//}
+	//trainingRunning = true;
+	//write = -1;
+	//boardwindow->setPosition(cb);
+	//updateWindow();
 }
 
 void MainWindow::trainingStartBoth()

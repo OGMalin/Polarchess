@@ -27,25 +27,25 @@
 #include "../Common/ChessBoard.h"
 #include "Path.h"
 
-struct TrainingLine
-{
-	int rowid;
-	int start;
-	QString moves;
-	int score;
-};
-
-struct RepPath
-{
-	Path path;
-	int count;
-};
-
-struct RepPaths
-{
-	QVector<RepPath> paths;
-	int sum;
-};
+//struct TrainingLine
+//{
+//	int rowid;
+//	int start;
+//	QString moves;
+//	int score;
+//};
+//
+//struct RepPath
+//{
+//	Path path;
+//	int count;
+//};
+//
+//struct RepPaths
+//{
+//	QVector<RepPath> paths;
+//	int sum;
+//};
 
 struct BookDBMove
 {
@@ -60,11 +60,12 @@ struct BookDBEntry
 	ChessBoard board;
 	int eval;
 	QString comment;
+	int attempt;
 	int score;
 	QVector<BookDBMove> movelist;
 	bool dirty;
 	BookDBEntry() { clear();  dirty = false; };
-	void clear() { board.clear(); comment.clear(); movelist.clear(); eval = score = 0; dirty = false; };
+	void clear() { board.clear(); comment.clear(); movelist.clear(); eval = attempt = score = 0; dirty = false; };
 	bool moveExist(const ChessMove& move);
 	void deleteMove(const ChessMove&);
 	void setFirst(const ChessMove&);
@@ -105,10 +106,10 @@ public:
 	void getTrainingPosition(QVector<BookDBEntry>&);
 	void clearAllTrainingData();
 	void importBase(Database* iBase);
-	void addTrainingLines(QVector<TrainingLine>& tlines);
-	void deleteTrainingLines();
-	bool getTrainingLines(QVector<TrainingLine>& lines);
-	void updateTrainingScore(ChessBoard& cb, int rowid, int score);
+	//void addTrainingLines(QVector<TrainingLine>& tlines);
+	//void deleteTrainingLines();
+	//bool getTrainingLines(QVector<TrainingLine>& lines);
+	void updateTrainingScore(ChessBoard& cb, int attempt, int score);
 
 	// Get db path
 	QString getPath();

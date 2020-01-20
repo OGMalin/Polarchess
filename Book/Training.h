@@ -23,29 +23,31 @@ struct TrainingDBInfo
 	QString version;
 };
 
-struct TrainingStat
-{
-	int moveerror;
-	void clear() { moveerror = 0; };
-};
+//struct TrainingStat
+//{
+//	int moveerror;
+//	void clear() { moveerror = 0; };
+//};
 
-struct TrainingPathEntry
+struct TrainingDBMove
 {
 	ChessMove move;
+	int attempt;
 	int score;
 	void clear() { move.clear(); score = 0; };
 };
 
-struct TrainingPath
+struct TrainingDBEntry
 {
-	QVector<TrainingPathEntry> moves;
+	QVector<TrainingDBMove> moves;
 	int rowid;
+	int attempt;
 	int score;
 	int color;
 	int current;
 	ChessBoard endposition;
-	void clear() { moves.clear(); score = 0; color = 0; current = 0; rowid = 0; endposition.clear(); };
-	friend bool operator<(const TrainingPath& t1, const TrainingPath& t2) { return t1.score < t2.score; };
+	void clear() { moves.clear(); attempt = 0, score = 0; color = 0; current = 0; rowid = 0; endposition.clear(); };
+	friend bool operator<(const TrainingDBMove& t1, const TrainingDBMove& t2) { return t1.score < t2.score; };
 	bool isCorrect(ChessMove& move);
 	bool nextMove(ChessMove& move);
 	ChessMove currentMove();
@@ -56,9 +58,9 @@ class Training
 private:
 	TrainingDBInfo tdi;
 	Database* Base[2];
-	QVector<TrainingPath> list;
-	void walkThrough(ChessBoard& cur, TrainingPath& path, int ply, QVector<BookDBEntry>& pos, int color);
-	void convertMoves(const QString& smoves, TrainingPath& tp);
+	QVector<TrainingDBEntry> list;
+	void walkThrough(ChessBoard& cur, TrainingDBEntry& path, int ply, QVector<BookDBEntry>& pos, int color);
+	void convertMoves(const QString& smoves, TrainingDBEntry& tp);
 	bool opened;
 public:
 	Training();
@@ -76,14 +78,17 @@ public:
 	// Set the database to use (color=WHITE or BLACK)
 	void SetRepertoireDatabase(int color, Database* base);
 
+	// Removing all trainingdata and statistics
+	void clearAll();
+
 	// Create traininglines.
 	void createLines(QWidget* parent);
 
 	// Get next training line
-	bool get(TrainingPath& line, int color, ChessBoard& cb);
+	bool get(TrainingDBEntry& line, int color, ChessBoard& cb);
 
 	// Get all traininglines.
-	void getAll(QVector<TrainingPath>& allTP, int color=-1);
+	void getAll(QVector<TrainingDBEntry>& allTP, int color=-1);
 
 	// Update training score
 	void updateScore(int color, ChessBoard& cb, int rowid, int score);

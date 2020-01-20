@@ -111,8 +111,8 @@ private:
 	StatisticsDBEntry sde;
 	ComputerDBEntry cde;
 	Training* training;
-	TrainingPath trainingLine;
-	TrainingStat trainingStat;
+	TrainingDBEntry trainingLine;
+//	TrainingStat trainingStat;
 	ChessBoard trainingBoard;
 	int trainingColor;
 	DgtBoard* dgt;
