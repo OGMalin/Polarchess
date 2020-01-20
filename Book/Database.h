@@ -11,11 +11,18 @@
 	eval		text
 		Human evaluation
 
-	score		text (Only in use on repertoire db)
-		Successfull guesses (-10000=Not tried, -9999= Tried once then starting from 0)
+	attempt		text (used for training)
+		Attempt in this position
+
+	score		text (used for training)
+		Successfull guesses
 
 	movelist	text
 		move1|comment;move2|comment
+
+	Attemt and score are saved on the position where the move are listet.
+	Score and attempt for the line are saved on the last position in this line (opponent to move).
+
 */
 #include <QObject>
 #include <QSqlDatabase>

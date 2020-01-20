@@ -198,6 +198,7 @@ BookDBEntry Database::find(ChessBoard& board)
 	{
 		bde.comment = query.value("comment").toString();
 		bde.eval = query.value("eval").toInt();
+		bde.attempt = query.value("attempt").toInt();
 		bde.score = query.value("score").toInt();
 		bde.convertToMoveList(bde.movelist, query.value("movelist").toString());
 		bde.dirty = false;
@@ -251,7 +252,7 @@ void Database::getTrainingPosition(QVector<BookDBEntry>& pos)
 	if (!db.open())
 		return;
 	QSqlQuery query(db);
-	query.prepare("SELECT fen,attempt, score,movelist FROM positions;");
+	query.prepare("SELECT fen, attempt, score,movelist FROM positions;");
 	query.exec();
 	QSqlError error = query.lastError();
 	if (error.isValid())

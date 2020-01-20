@@ -99,6 +99,7 @@ bool Training::create(const QString& path)
 	query.exec();
 	query.exec("CREATE TABLE training ( "
 		"color TEXT,"
+		"attempt	TEXT,"
 		"score	TEXT,"
 		"moves	TEXT"
 		"); ");
@@ -125,75 +126,77 @@ void Training::SetRepertoireDatabase(int color, Database* base)
 
 void Training::createLines(QWidget* parent)
 {
-	//// Read White base
-	//QVector<BookDBEntry> pos;
-	//ChessBoard b;
-	//TrainingDBEntry path;
+	QVector<BookDBEntry> pos;
+	ChessBoard cb;
+	TrainingDBEntry path;
 	//TrainingLine tline;
 	//QVector<TrainingLine> tlines;
-	//int i, j, rep;
+	int i, j, rep;
 	//bool exist;
 
-	//int steps=19, step;
-	//QProgressDialog progress("Creating trainingdata...", "Abort", 0, steps, parent);
-	//progress.setWindowModality(Qt::WindowModal);
-	//progress.show();
-	//QApplication::processEvents();
-	//step = 0;
-	//for (rep = 0; rep < 2; rep++)
-	//{
-	//	// Should it be done for this base?
-	//	if (!Base[rep])
-	//		continue;
-	//	progress.setLabelText("Reading from positions from database ...");
-	//	progress.setValue(++step);
-	//	QApplication::processEvents();
-	//	if (progress.wasCanceled())
-	//		break;
-	//	list.clear();
+	int steps=19, step;
+	QProgressDialog progress("Creating trainingdata...", "Abort", 0, steps, parent);
+	progress.setWindowModality(Qt::WindowModal);
+	progress.show();
+	QApplication::processEvents();
+	step = 0;
+	
+	list.clear();
+	for (rep = 0; rep < 2; rep++)
+	{
+		progress.setLabelText("Reading positions from database ...");
+		progress.setValue(++step);
+		QApplication::processEvents();
+		if (progress.wasCanceled())
+			break;
 
-	//	// Collect all lines
-	//	Base[rep]->getTrainingPosition(pos);
+		// Should it be done for this base?
+		if (!Base[rep])
+			continue;
 
-	//	if (progress.wasCanceled())
-	//		break;
-	//	if (pos.size() > 0)
-	//	{
-	//		progress.setLabelText("Sorting positions...");
-	//		progress.setValue(++step);
-	//		QApplication::processEvents();
-	//		std::sort(pos.begin(), pos.end());
-	//		progress.setLabelText("Creating lines ...");
-	//		progress.setValue(++step);
-	//		QApplication::processEvents();
-	//		if (progress.wasCanceled())
-	//			break;
-	//		b.setStartposition();
-	//		walkThrough(b, path, 0, pos, rep);
-	//	}
+		// Collect all lines
+		Base[rep]->getTrainingPosition(pos);
 
-	//	progress.setLabelText("Tuning lines ...");
-	//	progress.setValue(++step);
-	//	QApplication::processEvents();
-	//	if (progress.wasCanceled())
-	//		break;
+		QApplication::processEvents();
+		if (progress.wasCanceled())
+			break;
+		progress.setLabelText("Sorting positions...");
+		progress.setValue(++step);
+		if (pos.size() > 0)
+		{
+			QApplication::processEvents();
+			std::sort(pos.begin(), pos.end());
+			progress.setLabelText("Creating lines ...");
+			progress.setValue(++step);
+			QApplication::processEvents();
+			if (progress.wasCanceled())
+				break;
+			cb.setStartposition();
+			walkThrough(cb, path, 0, pos, rep);
+		}
+	}
 
-	//	// Remove last move if it not a repertoire move
-	//	for (i = 0; i < list.size(); i++)
-	//	{
-	//		j = list[i].moves.size() % 2;
-	//		if ((rep == WHITE) && (j == 0))
-	//			list[i].moves.pop_back();
-	//		else if ((rep == BLACK) && (j == 1))
-	//			list[i].moves.pop_back();
-	//	}
+	progress.setLabelText("Tuning lines ...");
+	progress.setValue(++step);
+	QApplication::processEvents();
+	if (progress.wasCanceled())
+		return;
 
-	//	progress.setLabelText("Update score ...");
-	//	progress.setValue(++step);
-	//	QApplication::processEvents();
-	//	if (progress.wasCanceled())
-	//		break;
+	// Remove last move if it not a repertoire move
+	for (i = 0; i < list.size(); i++)
+	{
+		j = list[i].moves.size() % 2;
+		if ((rep == WHITE) && (j == 0))
+			list[i].moves.pop_back();
+		else if ((rep == BLACK) && (j == 1))
+			list[i].moves.pop_back();
+	}
 
+	progress.setLabelText("Update score ...");
+	progress.setValue(++step);
+	QApplication::processEvents();
+	if (progress.wasCanceled())
+		return;
 	//	// Update score
 	//	for (i = 0; i < list.size(); i++)
 	//	{
@@ -252,40 +255,40 @@ void Training::createLines(QWidget* parent)
 
 void Training::walkThrough(ChessBoard& cb, TrainingDBEntry& path, int ply, QVector<BookDBEntry>& pos, int color)
 {
-	//int  curmove = 0;
-	//BookDBEntry bde;
-	//QVector<BookDBEntry>::iterator bid;
-	//TrainingDBMove tpe;
+	int  curmove = 0;
+	BookDBEntry bde;
+	QVector<BookDBEntry>::iterator bid;
+	TrainingDBMove tpe;
 
-	//// Get position 
-	//bde.board = cb;
-	//bid = std::lower_bound(pos.begin(), pos.end(), bde);
+	// Get position 
+	bde.board = cb;
+	bid = std::lower_bound(pos.begin(), pos.end(), bde);
 
-	//// The position don't exist or no moves or repeating move
-	//if ((bid->board != cb) || (bid->movelist.size() == 0) || (bid->dirty))
-	//{
-	//	list.push_back(path);
-	//	return;
-	//}
-	//
-	//bid->dirty = true;
+	// The position don't exist or no moves or repeating move
+	if ((bid->board != cb) || (bid->movelist.size() == 0) || (bid->dirty))
+	{
+		list.push_back(path);
+		return;
+	}
+	
+	bid->dirty = true;
 
-	//while (1)
-	//{
-	//	tpe.move = bid->movelist[curmove].move;
-	//	tpe.score = bid->score;
-	//	path.moves.push_back(tpe);
-	//	cb.doMove(tpe.move, false);
-	//	walkThrough(cb, path, ply + 1, pos, color);
-	//	path.moves.pop_back();
-	//	// Only first move for repertoire
-	//	if (bde.board.toMove == color)
-	//		break;
-	//	++curmove;
-	//	if (curmove >= bid->movelist.size())
-	//		break;
-	//	cb = bde.board;
-	//}
+	while (1)
+	{
+		tpe.move = bid->movelist[curmove].move;
+		tpe.score = bid->score;
+		path.moves.push_back(tpe);
+		cb.doMove(tpe.move, false);
+		walkThrough(cb, path, ply + 1, pos, color);
+		path.moves.pop_back();
+		// Only first move for repertoire
+		if (bde.board.toMove == color)
+			break;
+		++curmove;
+		if (curmove >= bid->movelist.size())
+			break;
+		cb = bde.board;
+	}
 }
 
 bool Training::get(TrainingDBEntry& line, int color, ChessBoard& cb)
