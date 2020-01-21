@@ -85,7 +85,6 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(pathwindow, SIGNAL(pathPaste()), this, SLOT(pathPaste()));
 	connect(commentwindow, SIGNAL(commentChanged(QString&, int)), this, SLOT(commentChanged(QString&, int)));
 	connect(enginewindow, SIGNAL(enginePV(ComputerDBEngine&, ChessBoard&)), this, SLOT(enginePV(ComputerDBEngine&, ChessBoard&)));
-	connect(dgt, SIGNAL(dgtStatus(int)), this, SLOT(dgtStatus(int)));
 
 	ChessBoard board = currentPath->getPosition();
 

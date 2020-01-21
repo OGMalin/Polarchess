@@ -25,6 +25,9 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	QPushButton* button;
 	QGridLayout* grid;
 
+	setWindowTitle(tr("Database setup"));
+	setMinimumSize(200, 200);
+
 	vbox = new QVBoxLayout;
 
 	group = new QGroupBox(tr("Theory book"));
@@ -167,11 +170,11 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	connect(button, SIGNAL(clicked()), this, SLOT(closeStatisticDB()));
 	grid->addWidget(button, 1, 2);
 	button = new QPushButton(tr("Import"));
-	connect(button, SIGNAL(clicked()), this, SLOT(importStatisticDB()));
+	connect(button, SIGNAL(clicked()), this, SLOT(importStatisticsDB()));
 	button->setToolTip(tr("Import pgn file into the statistics."));
 	grid->addWidget(button, 1, 3);
 	button = new QPushButton(tr("Compact"));
-	connect(button, SIGNAL(clicked()), this, SLOT(compactStatisticDB()));
+	connect(button, SIGNAL(clicked()), this, SLOT(compactStatisticsDB()));
 	button->setToolTip(tr("Remove positions with just a single game."));
 	grid->addWidget(button, 1, 4);
 	grid->setAlignment(Qt::AlignLeft);

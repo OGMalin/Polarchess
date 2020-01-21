@@ -261,6 +261,9 @@
     <ClInclude Include="..\Common\DgtProtocol.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="Book.qrc">
@@ -280,6 +283,7 @@
     <Image Include="icon\NO.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="icon1.ico" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ToDo.txt" />
@@ -288,5 +292,8 @@
     <None Include="language\book_nb.ts">
       <Filter>Translation Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Book.rc" />
   </ItemGroup>
 </Project>

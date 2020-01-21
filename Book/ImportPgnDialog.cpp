@@ -35,8 +35,8 @@ ImportPgnDialog::ImportPgnDialog(QWidget *parent)
 	vbox->addLayout(hbox);
 
 	hbox = new QHBoxLayout;
-	comment = new QCheckBox("Include comment");
-	variation = new QCheckBox("Include varitions");
+	comment = new QCheckBox(tr("Include comment"));
+	variation = new QCheckBox(tr("Include varitions"));
 	hbox->addWidget(comment);
 	hbox->addWidget(variation);
 	vbox->addLayout(hbox);
@@ -44,7 +44,7 @@ ImportPgnDialog::ImportPgnDialog(QWidget *parent)
 	variation->setChecked(true);
 
 	hbox = new QHBoxLayout;
-	label = new QLabel("Game length:");
+	label = new QLabel(tr("Game length:"));
 	numberofmoves = new QLineEdit;
 	hbox->addWidget(label);
 	hbox->addWidget(numberofmoves);

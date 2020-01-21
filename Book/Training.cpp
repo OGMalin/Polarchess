@@ -435,5 +435,12 @@ void Training::clearAll()
 	for (i = 0; i < 2; i++)
 		Base[i]->clearAllTrainingData();
 
-	// TODO Clear data from
+	if (!opened)
+		return;
+	QSqlDatabase db = QSqlDatabase::database(TRAINING);
+	if (!db.open())
+		return;
+	QSqlQuery query(db);
+	query.exec("DELETE FROM training;");
+	query.exec("VACUUM;");
 }
