@@ -13,6 +13,7 @@
 DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* white, Database* black, Training* training, Computer* computer, Statistics* stat)
 	:QDialog(parent)
 {
+	QSpacerItem* spacer;
 	theoryDB = theory;
 	whiteDB = white;
 	blackDB = black;
@@ -32,6 +33,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	theoryFile->setDisabled(true);
 	grid->addWidget(theoryFile, 0, 0, 1, -1);
 	button = new QPushButton(tr("Open"));
+	QSize spacersize = button->sizeHint();
 	connect(button, SIGNAL(clicked()), this, SLOT(openTheoryDB()));
 	grid->addWidget(button,1,0);
 	button = new QPushButton(tr("New"));
@@ -118,11 +120,12 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	button = new QPushButton(tr("Close"));
 	connect(button, SIGNAL(clicked()), this, SLOT(closeTrainingDB()));
 	grid->addWidget(button, 1, 2);
-	QSize size = button->sizeHint();
-	QSpacerItem* spacer = new QSpacerItem(size.width(), size.height());
-	grid->addItem(spacer, 1, 3);
-	spacer = new QSpacerItem(size.width(), size.height());
-	grid->addItem(spacer, 1, 4);
+	button = new QPushButton(tr("Clear trainingdata"));
+	connect(button, SIGNAL(clicked()), this, SLOT(clearTrainingDB()));
+	grid->addWidget(button, 1, 3);
+	button = new QPushButton(tr("Create trainingdata"));
+	connect(button, SIGNAL(clicked()), this, SLOT(createTrainingDB()));
+	grid->addWidget(button, 1, 4);
 	grid->setAlignment(Qt::AlignLeft);
 	group->setLayout(grid);
 	vbox->addWidget(group);
@@ -141,9 +144,9 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	button = new QPushButton(tr("Close"));
 	connect(button, SIGNAL(clicked()), this, SLOT(closeComputerDB()));
 	grid->addWidget(button, 1, 2);
-	spacer = new QSpacerItem(size.width(), size.height());
+	spacer = new QSpacerItem(spacersize.width(), spacersize.height());
 	grid->addItem(spacer, 1, 3);
-	spacer = new QSpacerItem(size.width(), size.height());
+	spacer = new QSpacerItem(spacersize.width(), spacersize.height());
 	grid->addItem(spacer, 1, 4);
 	grid->setAlignment(Qt::AlignLeft);
 	group->setLayout(grid);
@@ -301,6 +304,16 @@ void DatabaseDialog::closeTrainingDB()
 {
 	trainingFile->setText("");
 	trainingDB->close();
+}
+
+void DatabaseDialog::clearTrainingDB()
+{
+	trainingDB->clearAll();
+}
+
+void DatabaseDialog::createTrainingDB()
+{
+	trainingDB->createLines(this);
 }
 
 void DatabaseDialog::openComputerDB()
@@ -470,12 +483,12 @@ void DatabaseDialog::importPGNBlack()
 	dialog.importPgnFile(this, blackDB, path, nummoves, comment, variation);
 }
 
-void DatabaseDialog::importStatistics()
+void DatabaseDialog::importStatisticsDB()
 {
 	statDB->importGames(this);
 }
 
-void DatabaseDialog::compactStatistics()
+void DatabaseDialog::compactStatisticsDB()
 {
 	statDB->removeSingleGame(this);
 }

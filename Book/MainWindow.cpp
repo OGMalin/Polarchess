@@ -59,14 +59,14 @@ MainWindow::MainWindow(QWidget *parent)
 	Base[THEORY] = new Database("theory");
 	Base[REPWHITE] = new Database("white");
 	Base[REPBLACK] = new Database("black");
-	statistics = new Statistics();
-	computer = new Computer();
+	statisticsDB = new Statistics();
+	computerDB = new Computer();
 	currentPath = new Path();
-	training = new Training();
-	training->SetRepertoireDatabase(WHITE, Base[REPWHITE]);
-	training->SetRepertoireDatabase(BLACK, Base[REPBLACK]);
-	trainingwindow->training = training;
-	movewindow->computer = computer;
+	trainingDB = new Training();
+	trainingDB->SetRepertoireDatabase(WHITE, Base[REPWHITE]);
+	trainingDB->SetRepertoireDatabase(BLACK, Base[REPBLACK]);
+	trainingwindow->trainingDB = trainingDB;
+	movewindow->computerDB = computerDB;
 	dgt = NULL;
 	readSettings();
 
@@ -103,7 +103,7 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
 	delete currentPath;
-	delete training;
+	delete trainingDB;
 }
 
 void MainWindow::createMenu()
@@ -272,8 +272,8 @@ void MainWindow::readDB()
 	{
 		bde[i] = Base[i]->find(cb);
 	}
-	sde = statistics->find(cb);
-	cde = computer->find(cb);
+	sde = statisticsDB->find(cb);
+	cde = computerDB->find(cb);
 
 }
 
@@ -294,9 +294,9 @@ void MainWindow::writeSettings()
 	settings.setValue("dataTheory", Base[THEORY]->getPath());
 	settings.setValue("dataWhite", Base[REPWHITE]->getPath());
 	settings.setValue("dataBlack", Base[REPBLACK]->getPath());
-	settings.setValue("dataStatistics", statistics->getPath());
-	settings.setValue("dataComputer", computer->getPath());
-	settings.setValue("dataTraining", training->getPath());
+	settings.setValue("dataStatistics", statisticsDB->getPath());
+	settings.setValue("dataComputer", computerDB->getPath());
+	settings.setValue("dataTraining", trainingDB->getPath());
 	settings.setValue("language", locale);
 	settings.setValue("movewindowFont", movewindow->fontToString());
 	settings.setValue("enginewindowFont", enginewindow->fontToString());
@@ -355,14 +355,14 @@ void MainWindow::readSettings()
 		if (!Base[REPBLACK]->open(dataBlack))
 			Base[REPBLACK]->create(dataBlack, REPBLACK);
 	if (!dataStatistics.isEmpty())
-		if (!statistics->open(dataStatistics))
-			statistics->create(dataStatistics);
+		if (!statisticsDB->open(dataStatistics))
+			statisticsDB->create(dataStatistics);
 	if (!dataComputer.isEmpty())
-		if (!computer->open(dataComputer))
-			computer->create(dataComputer);
+		if (!computerDB->open(dataComputer))
+			computerDB->create(dataComputer);
 	if (!dataTraining.isEmpty())
-		if (!training->open(dataTraining))
-			training->create(dataTraining);
+		if (!trainingDB->open(dataTraining))
+			trainingDB->create(dataTraining);
 
 	/*
 	QSettings settings;
@@ -627,12 +627,12 @@ void MainWindow::trainingStop()
 
 void MainWindow::trainingClearData()
 {
-	training->clearAll();
+	trainingDB->clearAll();
 }
 
 void MainWindow::trainingCreate()
 {
-	training->createLines(this);
+	trainingDB->createLines(this);
 }
 
 void MainWindow::trainingRun(int color, ChessBoard& board)
@@ -716,7 +716,7 @@ void MainWindow::trainingStartPosBlack()
 void MainWindow::enginePV(ComputerDBEngine& ce, ChessBoard& cb)
 {
 	// cb could either be current position or a freezing position.
-	computer->add(ce, cb);
+	computerDB->add(ce, cb);
 }
 
 void MainWindow::setLanguage()
@@ -841,7 +841,7 @@ void MainWindow::childNeedRefresh()
 
 void MainWindow::setupDatabase()
 {
-	DatabaseDialog dialog(this, Base[THEORY], Base[REPWHITE], Base[REPBLACK], training, computer, statistics);
+	DatabaseDialog dialog(this, Base[THEORY], Base[REPWHITE], Base[REPBLACK], trainingDB, computerDB, statisticsDB);
 	dialog.exec();
 	write = -1;
 	readDB();

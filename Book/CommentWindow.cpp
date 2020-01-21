@@ -98,6 +98,8 @@ QString CommentWindow::fontToString()
 
 void CommentWindow::fontFromString(const QString& sFont)
 {
+	if (sFont.isEmpty())
+		return;
 	QFont f;
 	f.fromString(sFont);
 	setFont(f);

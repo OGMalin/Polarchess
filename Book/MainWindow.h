@@ -105,12 +105,12 @@ private:
 	EngineWindow* enginewindow;
 	TrainingWindow* trainingwindow;
 	Database* Base[3];
-	Statistics* statistics;
-	Computer* computer;
+	Statistics* statisticsDB;
+	Computer* computerDB;
 	BookDBEntry bde[3];
 	StatisticsDBEntry sde;
 	ComputerDBEntry cde;
-	Training* training;
+	Training* trainingDB;
 	TrainingDBEntry trainingLine;
 //	TrainingStat trainingStat;
 	ChessBoard trainingBoard;

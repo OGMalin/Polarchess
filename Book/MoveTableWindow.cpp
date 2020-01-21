@@ -12,7 +12,7 @@
 MoveTableWindow::MoveTableWindow(QWidget *parent)
 	: QWidget(parent)
 {
-	computer = NULL;
+	computerDB = NULL;
 	QVBoxLayout* vbox = new QVBoxLayout;
 	model = new QStandardItemModel(0, 0);
 	table = new QTableView;
@@ -139,8 +139,8 @@ void MoveTableWindow::add(ComputerDBEntry& comp)
 	int index;
 	QVector<ComputerDBEngine>::iterator cit;
 	QStringList::iterator eit;
-	eit = computer->enginelist.begin();
-	while (eit != computer->enginelist.end())
+	eit = computerDB->enginelist.begin();
+	while (eit != computerDB->enginelist.end())
 	{
 		cit = comp.enginelist.begin();
 		while (cit != comp.enginelist.end())
@@ -190,7 +190,7 @@ void MoveTableWindow::refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEnt
 	currentBoard = cb;
 	movetable.clear();
 	add(stat);
-	if (computer)
+	if (computerDB)
 		add(compdata);
 	add(theory, 0, cb);
 	add(white, 1, cb);
@@ -503,12 +503,12 @@ void MoveTableWindow::setMainMove(int rep, const ChessMove& move)
 void MoveTableWindow::rearrangeEngines()
 {
 	ListOrderDialog dialog(tr("Arrange engine priority"), this);
-	dialog.setList(computer->enginelist);
+	dialog.setList(computerDB->enginelist);
 	if (dialog.exec() == QDialog::Rejected)
 		return;
 	QStringList l = dialog.getList();
-	computer->enginelist = l;
-	computer->saveEngineList();
+	computerDB->enginelist = l;
+	computerDB->saveEngineList();
 	emit needRefresh();
 };
 
@@ -530,6 +530,8 @@ QString MoveTableWindow::fontToString()
 
 void MoveTableWindow::fontFromString(const QString& sFont)
 {
+	if (sFont.isEmpty())
+		return;
 	QFont f;
 	f.fromString(sFont);
 	setFont(f);

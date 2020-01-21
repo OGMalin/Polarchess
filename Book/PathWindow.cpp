@@ -108,6 +108,8 @@ QString PathWindow::fontToString()
 
 void PathWindow::fontFromString(const QString& sFont)
 {
+	if (sFont.isEmpty())
+		return;
 	QFont f;
 	f.fromString(sFont);
 	setFont(f);

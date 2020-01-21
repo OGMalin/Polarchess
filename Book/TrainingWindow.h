@@ -13,7 +13,7 @@ public slots:
 	void selectFont();
 
 public:
-	Training* training;
+	Training* trainingDB;
 	TrainingWindow(QWidget* parent = 0);
 	~TrainingWindow();
 	QString fontToString();

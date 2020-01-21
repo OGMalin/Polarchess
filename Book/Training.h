@@ -10,11 +10,14 @@
 /*
 	Database format
 
-	hash			text
-		position as hashkey.
+	color			text
+		The color for the player.
 
-	enginelist	text
-		engine1|cp|depth|time|pv;engine2|cb|depth|time|pv
+	score	text
+		Calculated score from attempt and score for each move
+
+	moves
+		move1|attempt|score;move1|attempt|score
 */
 
 struct TrainingDBInfo
@@ -41,16 +44,17 @@ struct TrainingDBEntry
 {
 	QVector<TrainingDBMove> moves;
 	int rowid;
-	int attempt;
-	int score;
+	int score; // Score for this line made by calculating score and attempt for each move.
 	int color;
 	int current;
-	ChessBoard endposition;
-	void clear() { moves.clear(); attempt = 0, score = 0; color = 0; current = 0; rowid = 0; endposition.clear(); };
-	friend bool operator<(const TrainingDBMove& t1, const TrainingDBMove& t2) { return t1.score < t2.score; };
+//	ChessBoard endposition;
+	void clear() { moves.clear(); score = 0; color = 0; current = 0; rowid = 0;/* endposition.clear(); */};
+	friend bool operator<(const TrainingDBEntry& t1, const TrainingDBEntry& t2) { return t1.score < t2.score; };
 	bool isCorrect(ChessMove& move);
 	bool nextMove(ChessMove& move);
 	ChessMove currentMove();
+	QString MovesToString();
+	void MovesFromString(const QString&);
 };
 
 class Training
@@ -60,7 +64,8 @@ private:
 	Database* Base[2];
 	QVector<TrainingDBEntry> list;
 	void walkThrough(ChessBoard& cur, TrainingDBEntry& path, int ply, QVector<BookDBEntry>& pos, int color);
-	void convertMoves(const QString& smoves, TrainingDBEntry& tp);
+//	void convertMovesFromString(const QString& smoves, TrainingDBEntry& tp);
+//	void convertMovesToString(QString& smoves, TrainingDBEntry& tp);
 	bool opened;
 public:
 	Training();
@@ -81,7 +86,7 @@ public:
 	// Removing all trainingdata and statistics
 	void clearAll();
 
-	// Create traininglines.
+	// Create traininglines. 
 	void createLines(QWidget* parent);
 
 	// Get next training line

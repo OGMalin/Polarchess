@@ -35,7 +35,7 @@ class MoveTableWindow : public QWidget
 	Q_OBJECT
 
 public:
-	Computer* computer;
+	Computer* computerDB;
 	MoveTableWindow(QWidget *parent=0);
 	~MoveTableWindow();
 	void refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black, StatisticsDBEntry& statistics, ComputerDBEntry& compdata, ChessBoard&, int movenr);

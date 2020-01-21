@@ -14,31 +14,38 @@ class DatabaseDialog : public QDialog
 
 public slots:
 	void openTheoryDB();
-	void openWhiteDB();
-	void openBlackDB();
-	void openTrainingDB();
-	void openComputerDB();
-	void openStatisticDB();
 	void newTheoryDB();
-	void newWhiteDB();
-	void newBlackDB();
-	void newTrainingDB();
-	void newComputerDB();
-	void newStatisticDB();
 	void closeTheoryDB();
-	void closeWhiteDB();
-	void closeBlackDB();
-	void closeTrainingDB();
-	void closeComputerDB();
-	void closeStatisticDB();
-	void importStatistics();
-	void compactStatistics();
 	void importPGNTheory();
-	void importPGNWhite();
-	void importPGNBlack();
 	void importBookTheory();
+
+	void openWhiteDB();
+	void newWhiteDB();
+	void closeWhiteDB();
+	void importPGNWhite();
 	void importBookWhite();
+
+	void openBlackDB();
+	void newBlackDB();
+	void closeBlackDB();
+	void importPGNBlack();
 	void importBookBlack();
+
+	void openTrainingDB();
+	void newTrainingDB();
+	void closeTrainingDB();
+	void clearTrainingDB();
+	void createTrainingDB();
+
+	void openComputerDB();
+	void newComputerDB();
+	void closeComputerDB();
+
+	void openStatisticDB();
+	void newStatisticDB();
+	void closeStatisticDB();
+	void importStatisticsDB();
+	void compactStatisticsDB();
 public:
 	DatabaseDialog(QWidget *parent, Database* theory, Database* white, Database* black, Training*, Computer*, Statistics*);
 //	void getItems(QString& theory, QString& white, QString& black, QString& training, QString& computer, QString& statistics);

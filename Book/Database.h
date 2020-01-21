@@ -34,26 +34,6 @@
 #include "../Common/ChessBoard.h"
 #include "Path.h"
 
-//struct TrainingLine
-//{
-//	int rowid;
-//	int start;
-//	QString moves;
-//	int score;
-//};
-//
-//struct RepPath
-//{
-//	Path path;
-//	int count;
-//};
-//
-//struct RepPaths
-//{
-//	QVector<RepPath> paths;
-//	int sum;
-//};
-
 struct BookDBMove
 {
 	ChessMove move;
