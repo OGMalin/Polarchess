@@ -290,6 +290,12 @@ void MainWindow::writeSettings()
 	settings.setValue("v1State", v1Splitter->saveState());
 	settings.setValue("v2State", v2Splitter->saveState());
 	settings.setValue("hState", hSplitter->saveState());
+	settings.setValue("pathwindowGeometry", pathwindow->saveGeometry());
+	settings.setValue("movewindowGeometry", movewindow->saveGeometry());
+	settings.setValue("commentwindowGeometry", commentwindow->saveGeometry());
+	settings.setValue("boardwindowGeometry", boardwindow->saveGeometry());
+	settings.setValue("enginewindowGeometry", enginewindow->saveGeometry());
+	settings.setValue("trainingwindowGeometry", trainingwindow->saveGeometry());
 	settings.setValue("dataTheory", Base[THEORY]->getPath());
 	settings.setValue("dataWhite", Base[REPWHITE]->getPath());
 	settings.setValue("dataBlack", Base[REPBLACK]->getPath());
@@ -323,6 +329,14 @@ void MainWindow::readSettings()
 	v1Splitter->restoreState(settings.value("v1State").toByteArray());
 	v2Splitter->restoreState(settings.value("v2State").toByteArray());
 	hSplitter->restoreState(settings.value("hState").toByteArray());
+
+	pathwindow->restoreGeometry(settings.value("pathwindowGeometry").toByteArray());
+	movewindow->restoreGeometry(settings.value("movewindowGeometry").toByteArray());
+	commentwindow->restoreGeometry(settings.value("commentwindowGeometry").toByteArray());
+	boardwindow->restoreGeometry(settings.value("boardwindowGeometry").toByteArray());
+	enginewindow->restoreGeometry(settings.value("enginewindowGeometry").toByteArray());
+	trainingwindow->restoreGeometry(settings.value("trainingwindowGeometry").toByteArray());
+
 	dataPath = settings.value("dataPath",dataPath).toString();
 	dataTheory = settings.value("dataTheory", dataPath + "/Theory.pbk").toString();
 	dataWhite = settings.value("dataWhite", dataPath + "/White.pbk").toString();

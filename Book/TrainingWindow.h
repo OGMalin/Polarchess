@@ -3,6 +3,9 @@
 #include <QWidget>
 #include <QString>
 #include "Training.h"
+#include "StatusWatch.h"
+#include <QComboBox>
+#include <QCheckBox>
 
 class TrainingWindow : public QWidget
 {
@@ -11,6 +14,7 @@ class TrainingWindow : public QWidget
 public slots:
 	void showContextMenu(const QPoint& pos);
 	void selectFont();
+	void next();
 
 public:
 	Training* trainingDB;
@@ -19,4 +23,8 @@ public:
 	QString fontToString();
 	void fontFromString(const QString&);
 
+private:
+	StatusWatch* watch;
+	QComboBox* colorBox;
+	QCheckBox* positionBox;
 };
