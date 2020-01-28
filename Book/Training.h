@@ -63,6 +63,7 @@ private:
 	TrainingDBInfo tdi;
 	Database* Base[2];
 	QVector<TrainingDBEntry> list;
+	QVector<TrainingDBEntry> currentList;
 	void walkThrough(ChessBoard& cur, TrainingDBEntry& path, int ply, QVector<BookDBEntry>& pos, int color);
 //	void convertMovesFromString(const QString& smoves, TrainingDBEntry& tp);
 //	void convertMovesToString(QString& smoves, TrainingDBEntry& tp);
@@ -90,7 +91,7 @@ public:
 	void createLines(QWidget* parent);
 
 	// Get next training line
-	bool get(TrainingDBEntry& line, int color, ChessBoard& cb);
+	bool getNext(TrainingDBEntry& line, int color, ChessBoard& cb);
 
 	// Get all traininglines.
 	void getAll(QVector<TrainingDBEntry>& allTP, int color=-1);

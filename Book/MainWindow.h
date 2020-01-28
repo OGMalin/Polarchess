@@ -25,6 +25,7 @@
 #include <QCloseEvent>
 #include <QSplitter>
 #include <QToolButton>
+#include <QColor>
 
 enum {THEORY=0, REPWHITE, REPBLACK };
 
@@ -57,6 +58,7 @@ public slots:
 	void dgtStatus(int);
 	void dgtStatusClicked(bool);
 	void toolbarAction(QAction*);
+	void trainingNext(ChessBoard&, int color);
 
 public:
 	Path* currentPath;
@@ -68,6 +70,8 @@ private:
 	QVector<ComputerDBEngine> compList;
 	QTranslator translator;
 	QString locale;
+	QColor goodColor;
+	QColor badColor;
 	QMenu* fileMenu;
 	QMenu* bookMenu;
 	QMenu* bookWriteMenu;

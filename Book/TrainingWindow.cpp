@@ -84,5 +84,16 @@ void TrainingWindow::fontFromString(const QString& sFont)
 
 void TrainingWindow::next()
 {
+	ChessBoard cb;
+	int color = colorBox->currentIndex()-1;
+	if (positionBox->isChecked())
+		cb = currentBoard;
+	else
+		cb.setStartposition();
+	emit trainingNext(cb, color);
+}
 
+void TrainingWindow::setCurrentBoard(const ChessBoard& cb)
+{
+	currentBoard = cb;
 }

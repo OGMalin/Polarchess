@@ -307,8 +307,28 @@ void Training::walkThrough(ChessBoard& cb, TrainingDBEntry& path, int ply, QVect
 	}
 }
 
-bool Training::get(TrainingDBEntry& line, int color, ChessBoard& cb)
+bool Training::getNext(TrainingDBEntry& line, int color, ChessBoard& cb)
 {
+	if (currentList.size() == 0)
+	{
+		QSqlDatabase db = QSqlDatabase::database(TRAINING);
+		if (!db.open())
+			return false;
+		QSqlQuery query(db);
+		query.exec("SELECT * FROM training ORDER BY score;");
+		if (!query.next())
+		{
+			createLines(NULL);
+			query.exec("SELECT * FROM training ORDER BY score;");
+			if (!query.next())
+				return false;
+		}
+		while (1)
+		{
+			if (!query.next())
+				break;
+		}
+	}
 	//int i,j;
 	//bool found;
 	//ChessBoard b;

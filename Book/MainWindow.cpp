@@ -85,6 +85,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(pathwindow, SIGNAL(pathPaste()), this, SLOT(pathPaste()));
 	connect(commentwindow, SIGNAL(commentChanged(QString&, int)), this, SLOT(commentChanged(QString&, int)));
 	connect(enginewindow, SIGNAL(enginePV(ComputerDBEngine&, ChessBoard&)), this, SLOT(enginePV(ComputerDBEngine&, ChessBoard&)));
+	connect(trainingwindow, SIGNAL(trainingNext(ChessBoard&, int)), this, SLOT(trainingNext(ChessBoard&, int)));
 
 	ChessBoard board = currentPath->getPosition();
 
@@ -308,6 +309,8 @@ void MainWindow::writeSettings()
 	settings.setValue("pathwindowFont", pathwindow->fontToString());
 	settings.setValue("commentwindowFont", commentwindow->fontToString());
 	settings.setValue("trainingwindowFont", trainingwindow->fontToString());
+	settings.setValue("goodColor", goodColor.name());
+	settings.setValue("badColor", badColor.name());
 }
 
 void MainWindow::readSettings()
@@ -356,6 +359,9 @@ void MainWindow::readSettings()
 	pathwindow->fontFromString(settings.value("pathwindowFont", QString()).toString());
 	commentwindow->fontFromString(settings.value("commentwindowFont", QString()).toString());
 	trainingwindow->fontFromString(settings.value("trainingwindowFont", QString()).toString());
+
+	goodColor.setNamedColor(settings.value("goodColor", "#00CC00").toString());
+	badColor.setNamedColor(settings.value("badColor", "#CC0000").toString());
 
 	// Open default databases
 	if (!dataTheory.isEmpty())
@@ -625,7 +631,10 @@ void MainWindow::commentChanged(QString& comment, int rep)
 
 void MainWindow::trainingStart()
 {
+	//boardwindow->markSquare(3, badColor, 5);
+	//boardwindow->markArrow(5,34, goodColor, 8);
 	inTraining = true;
+	trainingwindow->setCurrentBoard(currentPath->getPosition());
 	updateWindow();
 	updateMenu();
 }
@@ -646,6 +655,11 @@ void MainWindow::trainingClearData()
 void MainWindow::trainingCreate()
 {
 	trainingDB->createLines(this);
+}
+
+void MainWindow::trainingNext(ChessBoard& cb, int color)
+{
+	trainingDB->getNext(trainingLine, color, cb);
 }
 
 void MainWindow::trainingRun(int color, ChessBoard& board)

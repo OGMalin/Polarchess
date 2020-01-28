@@ -3,6 +3,7 @@
 #include <QResizeEvent>
 #include <QPainter>
 #include <QMenu>
+#include <QTimer>
 #include "defs.h"
 
 BoardWindow::BoardWindow(QWidget* parent)
@@ -15,6 +16,9 @@ BoardWindow::BoardWindow(QWidget* parent)
 	setBoardTheme();
 	setMinimumSize(200, 200);
 	readImgPieces();
+	QTimer* timer = new QTimer();
+	connect(timer, SIGNAL(timeout()), this, SLOT(timeout()));
+	timer->start(1000);
 	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 }
@@ -29,9 +33,11 @@ void BoardWindow::paintEvent(QPaintEvent* event)
 	QPainter painter(this);
 	drawBorder(event, painter);
 	drawBoard(event, painter);
+	drawMarkupSquare(event, painter);
 	drawCoordinates(event, painter);
 	painter.setRenderHint(QPainter::SmoothPixmapTransform);
 	drawPieces(event, painter);
+	drawMarkupArrow(event, painter);
 	drawDragPiece(event, painter);
 }
 
@@ -45,8 +51,6 @@ void BoardWindow::setBoardTheme()
 	theme.borderBrush.setStyle(Qt::SolidPattern);
 	theme.coordinateFont.setBold(true);
 	theme.coordinateFontColor = QColor("white");
-	theme.mark1.setColor(QColor(127, 0, 0, 255));
-	theme.mark1.setStyle(Qt::SolidPattern);
 }
 
 void BoardWindow::drawBorder(QPaintEvent* event, QPainter& painter)
@@ -103,16 +107,6 @@ void BoardWindow::drawBoard(QPaintEvent* event, QPainter& painter)
 		if (event->rect().intersects(sqR))
 			painter.fillRect(sqR, (SQUARECOLOR(SQUARE128(sq))==WHITE) ? theme.lightBrush : theme.darkBrush);
 	}
-	for (i = 0; i < squareMark.size(); i++)
-	{
-		if (squareMark[i].mark == 1)
-		{
-			sqR = squareRect(squareMark[i].square);
-			if (event->rect().intersects(sqR))
-				painter.fillRect(sqR, theme.mark1);
-		}
-
-	}
 }
 
 void BoardWindow::drawPieces(QPaintEvent* event, QPainter& painter)
@@ -139,6 +133,44 @@ void BoardWindow::drawSquare(QPaintEvent* event, QPainter& painter, int sq, bool
 		typePiece p = currentBoard.board[SQUARE128(sq)];
 		if (p != EMPTY)
 			painter.drawPixmap(sqR, imgPieces[p - 1]);
+	}
+}
+
+void BoardWindow::drawMarkupSquare(QPaintEvent* event, QPainter& painter)
+{
+	QRect sqR;
+	int i;
+	for (i = 0; i < squareMarkup.size(); i++)
+	{
+		sqR = squareRect(squareMarkup[i].square);
+		if (event->rect().intersects(sqR))
+			painter.fillRect(sqR, squareMarkup[i].color);
+	}
+}
+
+void BoardWindow::drawMarkupArrow(QPaintEvent* event, QPainter& painter)
+{
+	QRect sqR;
+	QPoint from, to;
+	QPen pen;
+	int i,w;
+	pen = painter.pen();
+	pen.setStyle(Qt::SolidLine);
+	for (i = 0; i < arrowMarkup.size(); i++)
+	{
+		pen.setColor(arrowMarkup[i].color);
+		sqR = squareRect(arrowMarkup[i].fromSquare);
+		from.setX(sqR.x()+sqR.width()/2);
+		from.setY(sqR.y() + sqR.width() / 2);
+		sqR = squareRect(arrowMarkup[i].toSquare);
+		to.setX(sqR.x() + sqR.width() / 2);
+		to.setY(sqR.y() + sqR.width() / 2);
+		w = sqR.width() / 10;
+		if (w < 2)
+			w = 2;
+		pen.setWidth(w);
+		painter.setPen(pen);
+		painter.drawLine(from, to);
 	}
 }
 
@@ -323,7 +355,8 @@ void BoardWindow::newGame()
 	whiteAtBottom = true;
 	dragPiece = EMPTY;
 	currentBoard.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-	squareMark.clear();
+	squareMarkup.clear();
+	arrowMarkup.clear();
 	update();
 }
 
@@ -331,7 +364,8 @@ void BoardWindow::setPosition(const QString& fen)
 {
 	dragPiece = EMPTY;
 	currentBoard.setFen(fen.toLatin1());
-	squareMark.clear();
+	squareMarkup.clear();
+	arrowMarkup.clear();
 	update();
 }
 
@@ -339,7 +373,8 @@ void BoardWindow::setPosition(const ChessBoard& cb)
 {
 	dragPiece = EMPTY;
 	currentBoard = cb;
-	squareMark.clear();
+	squareMarkup.clear();
+	arrowMarkup.clear();
 	update();
 }
 
@@ -350,11 +385,57 @@ void BoardWindow::showContextMenu(const QPoint& pos)
 	contextMenu->exec(mapToGlobal(pos));
 }
 
-void BoardWindow::markSquare(int sq, int mark)
+void BoardWindow::markSquare(int sq, QColor color, int t)
 {
-	SQUAREMARK sm;
-	sm.square = sq;
-	sm.mark = mark;
-	squareMark.push_back(sm);
+	BoardWindowMarkupSquare mark;
+	mark.square = sq;
+	mark.color = color;
+	mark.timeout = t;
+	squareMarkup.push_back(mark);
 	update();
+}
+
+void BoardWindow::markArrow(int from, int to, QColor color, int t)
+{
+	BoardWindowMarkupArrow mark;
+	mark.fromSquare = from;
+	mark.toSquare = to;
+	mark.color = color;
+	mark.timeout = t;
+	arrowMarkup.push_back(mark);
+	update();
+}
+
+void BoardWindow::timeout()
+{
+	bool updateNow = false;
+	int i;
+	for (i = 0; i < squareMarkup.size(); i++)
+	{
+		if (squareMarkup[i].timeout > 0)
+		{
+			--squareMarkup[i].timeout;
+			if (squareMarkup[i].timeout == 0)
+			{
+				squareMarkup.remove(i);
+				--i;
+				updateNow = true;
+			}
+		}
+	}
+	for (i = 0; i < arrowMarkup.size(); i++)
+	{
+		if (arrowMarkup[i].timeout > 0)
+		{
+			--arrowMarkup[i].timeout;
+			if (arrowMarkup[i].timeout == 0)
+			{
+				arrowMarkup.remove(i);
+				--i;
+				updateNow = true;
+			}
+		}
+	}
+	if (updateNow)
+		update();
 }

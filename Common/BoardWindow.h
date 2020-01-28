@@ -3,6 +3,7 @@
 #include <QWidget>
 #include <QPixmap>
 #include <QPoint>
+#include <QColor>
 #include "ChessBoard.h"
 #include "ChessMove.h"
 
@@ -13,13 +14,21 @@ struct BOARDTHEMA
 	QBrush borderBrush;
 	QFont  coordinateFont;
 	QColor coordinateFontColor;
-	QBrush mark1;
 };
 
-struct SQUAREMARK
+struct BoardWindowMarkupArrow
+{
+	int fromSquare;
+	int toSquare;
+	QColor color;
+	int timeout;
+};
+
+struct BoardWindowMarkupSquare
 {
 	int square;
-	int mark;
+	QColor color;
+	int timeout;
 };
 
 class BoardWindow :public QWidget
@@ -31,11 +40,13 @@ public:
 	void newGame();
 	void setPosition(const QString& fen);
 	void setPosition(const ChessBoard& cb);
-	void markSquare(int sq, int mark = 1);
+	void markSquare(int sq, QColor color, int timeout);
+	void markArrow(int from, int to, QColor color, int timeout);
 
 public slots:
 	void showContextMenu(const QPoint& pos);
 	void flip();
+	void timeout();
 
 signals:
 	void moveEntered(ChessMove&);
@@ -47,7 +58,8 @@ protected:
 	void mouseReleaseEvent(QMouseEvent* event) override;
 
 private:
-	QVector<SQUAREMARK> squareMark;
+	QVector<BoardWindowMarkupSquare> squareMarkup;
+	QVector<BoardWindowMarkupArrow> arrowMarkup;
 	ChessBoard currentBoard;
 	bool whiteAtBottom;
 	int squareSize;
@@ -62,6 +74,8 @@ private:
 	void drawCoordinates(QPaintEvent* event, QPainter& painter);
 	void drawBoard(QPaintEvent* event, QPainter& painter);
 	void drawPieces(QPaintEvent* event, QPainter& painter);
+	void drawMarkupSquare(QPaintEvent* event, QPainter& painter);
+	void drawMarkupArrow(QPaintEvent* event, QPainter& painter);
 	void drawDragPiece(QPaintEvent* event, QPainter& painter);
 	void drawSquare(QPaintEvent* event, QPainter& painter, int sq, bool clear = false);
 	int findSquare(const QPoint& point);
