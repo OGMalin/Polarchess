@@ -55,6 +55,7 @@ struct TrainingDBEntry
 	ChessMove currentMove();
 	QString MovesToString();
 	void MovesFromString(const QString&);
+	int toMove();
 };
 
 struct TrainingStatistics

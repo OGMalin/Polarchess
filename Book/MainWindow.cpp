@@ -24,7 +24,6 @@ MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
 	write = -1;
-	trainingRunning = false;
 	inTraining = false;
 
 	createMenu();
@@ -85,7 +84,9 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(pathwindow, SIGNAL(pathPaste()), this, SLOT(pathPaste()));
 	connect(commentwindow, SIGNAL(commentChanged(QString&, int)), this, SLOT(commentChanged(QString&, int)));
 	connect(enginewindow, SIGNAL(enginePV(ComputerDBEngine&, ChessBoard&)), this, SLOT(enginePV(ComputerDBEngine&, ChessBoard&)));
-	connect(trainingwindow, SIGNAL(trainingNext(ChessBoard&, int)), this, SLOT(trainingNext(ChessBoard&, int)));
+	connect(trainingwindow, SIGNAL(trainingFlipBoard(int)), this, SLOT(trainingFlipBoard(int)));
+	connect(trainingwindow, SIGNAL(trainingAddMoves(QVector<ChessMove>&, bool)), this, SLOT(trainingAddMoves(QVector<ChessMove>&, bool)));
+	//	connect(trainingwindow, SIGNAL(trainingNext(ChessBoard&, int)), this, SLOT(trainingNext(ChessBoard&, int)));
 
 	ChessBoard board = currentPath->getPosition();
 
@@ -243,8 +244,6 @@ void MainWindow::updateMenu()
 
 void MainWindow::updateWindow()
 {
-	movewindow->refresh(bde[THEORY], bde[REPWHITE], bde[REPBLACK], sde, cde, currentPath->getPosition(), currentPath->current() / 2 + 1);
-	commentwindow->refresh(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
 	pathwindow->refresh(currentPath);
 
 	if(inTraining)
@@ -256,6 +255,8 @@ void MainWindow::updateWindow()
 	}
 	else
 	{
+		movewindow->refresh(bde[THEORY], bde[REPWHITE], bde[REPBLACK], sde, cde, currentPath->getPosition(), currentPath->current() / 2 + 1);
+		commentwindow->refresh(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
 		trainingwindow->setVisible(false);
 		movewindow->setVisible(true);
 		commentwindow->setVisible(true);
@@ -504,8 +505,18 @@ void MainWindow::moveEntered(ChessMove& move)
 		return;
 	}
 		
-	if (trainingRunning)
+	if (inTraining)
 	{
+		if (trainingwindow->isRunning())
+		{
+			if (!trainingwindow->moveEntered(move))
+				boardwindow->setPosition(board);
+		}
+		else
+		{
+			boardwindow->setPosition(board);
+
+		}
 //		int score=0;
 //		if (trainingLine.isCorrect(move))
 //		{
@@ -584,7 +595,7 @@ void MainWindow::moveEntered(ChessMove& move)
 
 void MainWindow::pathSelected(int ply)
 {
-	if (trainingRunning)
+	if (inTraining)
 		return;
 
 	currentPath->current(ply);
@@ -600,7 +611,7 @@ void MainWindow::pathSelected(int ply)
 
 void MainWindow::pathToDB(int rep)
 {
-	if (trainingRunning)
+	if (inTraining)
 		return;
 	if (Base[rep]->isOpen())
 	{
@@ -631,8 +642,6 @@ void MainWindow::commentChanged(QString& comment, int rep)
 
 void MainWindow::trainingStart()
 {
-	//boardwindow->markSquare(3, badColor, 5);
-	//boardwindow->markArrow(5,34, goodColor, 8);
 	inTraining = true;
 	trainingwindow->setCurrentBoard(currentPath->getPosition());
 	trainingwindow->updateStat();
@@ -642,10 +651,31 @@ void MainWindow::trainingStart()
 
 void MainWindow::trainingStop()
 {
-	trainingRunning = false;
 	inTraining = false;
 	updateWindow();
 	updateMenu();
+}
+
+void MainWindow::trainingFlipBoard(int color)
+{
+	boardwindow->flip(color == BLACK);
+}
+
+void MainWindow::trainingAddMoves(QVector<ChessMove>& moves, bool arrow)
+{
+	int i;
+	currentPath->getStartPosition();
+	for (i = 0; i < moves.size(); i++)
+	{
+		currentPath->add(moves[i]);
+	}
+	boardwindow->setPosition(currentPath->getPosition());
+	if (arrow && moves.size())
+	{
+		i = moves.size() - 1;
+		boardwindow->markArrow(moves[i].fromSquare, moves[i].toSquare, goodColor, 10);
+	}
+	updateWindow();
 }
 
 void MainWindow::trainingClearData()
@@ -658,13 +688,13 @@ void MainWindow::trainingCreate()
 	trainingDB->createLines(this);
 }
 
-void MainWindow::trainingNext(ChessBoard& cb, int color)
-{
-	trainingDB->getNext(trainingLine, color, cb);
-}
+//void MainWindow::trainingNext(ChessBoard& cb, int color)
+//{
+//	trainingDB->getNext(trainingLine, color, cb);
+//}
 
-void MainWindow::trainingRun(int color, ChessBoard& board)
-{
+//void MainWindow::trainingRun(int color, ChessBoard& board)
+//{
 	//int i;
 	//trainingStat.clear();
 	//trainingColor = color;
@@ -702,43 +732,43 @@ void MainWindow::trainingRun(int color, ChessBoard& board)
 	//write = -1;
 	//boardwindow->setPosition(cb);
 	//updateWindow();
-}
+//}
 
-void MainWindow::trainingStartBoth()
-{
-	ChessBoard cb;
-	cb.setStartposition();
-	trainingRun(-1, cb);
-}
+//void MainWindow::trainingStartBoth()
+//{
+//	ChessBoard cb;
+//	cb.setStartposition();
+//	trainingRun(-1, cb);
+//}
 
-void MainWindow::trainingStartWhite()
-{
-	ChessBoard cb;
-	cb.setStartposition();
-	trainingRun(WHITE, cb);
-}
+//void MainWindow::trainingStartWhite()
+//{
+//	ChessBoard cb;
+//	cb.setStartposition();
+//	trainingRun(WHITE, cb);
+//}
 
-void MainWindow::trainingStartBlack()
-{
-	ChessBoard cb;
-	cb.setStartposition();
-	trainingRun(BLACK, cb);
-}
+//void MainWindow::trainingStartBlack()
+//{
+//	ChessBoard cb;
+//	cb.setStartposition();
+//	trainingRun(BLACK, cb);
+//}
 
-void MainWindow::trainingStartPosBoth()
-{
-	trainingRun(-1, currentPath->getPosition());
-}
+//void MainWindow::trainingStartPosBoth()
+//{
+//	trainingRun(-1, currentPath->getPosition());
+//}
 
-void MainWindow::trainingStartPosWhite()
-{
-	trainingRun(WHITE, currentPath->getPosition());
-}
+//void MainWindow::trainingStartPosWhite()
+//{
+//	trainingRun(WHITE, currentPath->getPosition());
+//}
 
-void MainWindow::trainingStartPosBlack()
-{
-	trainingRun(BLACK, currentPath->getPosition());
-}
+//void MainWindow::trainingStartPosBlack()
+//{
+//	trainingRun(BLACK, currentPath->getPosition());
+//}
 
 
 void MainWindow::enginePV(ComputerDBEngine& ce, ChessBoard& cb)

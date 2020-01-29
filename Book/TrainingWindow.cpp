@@ -8,6 +8,8 @@
 TrainingWindow::TrainingWindow(QWidget* parent)
 	: QWidget(parent)
 {
+	running = false;
+
 	QPushButton* button;
 	QVBoxLayout* vbox;
 	QHBoxLayout* hbox;
@@ -89,14 +91,52 @@ void TrainingWindow::fontFromString(const QString& sFont)
 
 void TrainingWindow::next()
 {
-	ChessBoard cb;
+	if (running)
+		return;
+	running = false;
+
+	ChessBoard cb, b;
+	QVector<ChessMove> moves;
+	int i;
 	int color = colorBox->currentIndex()-1;
 	if (positionBox->isChecked())
 		cb = currentBoard;
 	else
 		cb.setStartposition();
-	emit trainingNext(cb, color);
+	if (!trainingDB->getNext(trainingLine, color, cb))
+	{
+		updateStat();
+		return;
+	}
 	updateStat();
+	emit trainingFlipBoard(trainingLine.color);
+	
+	// Go to startposition of this training line
+	trainingLine.current = 0;
+	b.setStartposition();
+	for (i = 0; i < trainingLine.moves.size(); i++)
+	{
+		if (cb == b)
+			break;
+		moves.push_back(trainingLine.moves[i].move);
+		b.doMove(trainingLine.moves[i].move,false);
+		++trainingLine.current;
+	}
+
+	// Startposition not found
+	if (i == trainingLine.moves.size())
+		return;
+
+	// If wrong color to move go one move forward
+	bool arrow=false;
+	if (b.toMove != trainingLine.color)
+	{
+		moves.push_back(trainingLine.currentMove());
+		++trainingLine.current;
+		arrow = true;
+	}
+	emit trainingAddMoves(moves, arrow);
+	running = true;
 }
 
 void TrainingWindow::setCurrentBoard(const ChessBoard& cb)
@@ -118,4 +158,13 @@ void TrainingWindow::updateStat()
 	qs = tr("Loaded: ");
 	QTextStream(&qs) << ts.inBase;
 	loaded->setText(qs);
+}
+
+bool TrainingWindow::moveEntered(ChessMove& move)
+{
+	if (trainingLine.isCorrect(move))
+	{
+
+	}
+	return false;
 }

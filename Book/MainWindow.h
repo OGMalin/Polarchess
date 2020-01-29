@@ -58,7 +58,8 @@ public slots:
 	void dgtStatus(int);
 	void dgtStatusClicked(bool);
 	void toolbarAction(QAction*);
-	void trainingNext(ChessBoard&, int color);
+	void trainingFlipBoard(int color);
+	void trainingAddMoves(QVector<ChessMove>&, bool);
 
 public:
 	Path* currentPath;
@@ -84,12 +85,6 @@ private:
 	QAction* clearTrainingAct;
 	QAction* createTrainingAct;
 	QAction* startTrainingAct;
-	//QAction* startTrainingBothAct;
-	//QAction* startTrainingWhiteAct;
-	//QAction* startTrainingBlackAct;
-	//QAction* startTrainingPosBothAct;
-	//QAction* startTrainingPosWhiteAct;
-	//QAction* startTrainingPosBlackAct;
 	QAction* stopTrainingAct;
 	QAction* setupDatabaseAct;
 	QAction* useDgtAct;
@@ -115,16 +110,10 @@ private:
 	StatisticsDBEntry sde;
 	ComputerDBEntry cde;
 	Training* trainingDB;
-	TrainingDBEntry trainingLine;
-//	TrainingStat trainingStat;
-	ChessBoard trainingBoard;
-	int trainingColor;
 	DgtBoard* dgt;
 	StatusWatch* statusWatch;
 	// You are in training mode;
 	bool inTraining;
-	// Training is running
-	bool trainingRunning;
 	// Which DB to write to when moving pieces on the chessboard. (-1=none)
 	int write;
 	void createMenu();
@@ -143,13 +132,13 @@ private:
 	void trainingStart();
 	void trainingClearData();
 	void trainingCreate();
-	void trainingRun(int color, ChessBoard& pos);
-	void trainingStartBoth();
-	void trainingStartWhite();
-	void trainingStartBlack();
-	void trainingStartPosBoth();
-	void trainingStartPosWhite();
-	void trainingStartPosBlack();
+	//void trainingRun(int color, ChessBoard& pos);
+	//void trainingStartBoth();
+	//void trainingStartWhite();
+	//void trainingStartBlack();
+	//void trainingStartPosBoth();
+	//void trainingStartPosWhite();
+	//void trainingStartPosBlack();
 
 	void setLanguage();
 	void loadLanguage();

@@ -19,8 +19,9 @@ public slots:
 	void next();
 
 signals:
-	void trainingNext(ChessBoard&, int color);
-
+//	void trainingNext(ChessBoard&, int color);
+	void trainingFlipBoard(int color);
+	void trainingAddMoves(QVector<ChessMove>&, bool);
 public:
 	Training* trainingDB;
 	TrainingWindow(QWidget* parent = 0);
@@ -30,6 +31,8 @@ public:
 	void setCurrentBoard(const ChessBoard&);
 	void setTrainingDB(Training* db);
 	void updateStat();
+	bool moveEntered(ChessMove&);
+	bool isRunning() { return running; };
 private:
 	StatusWatch* watch;
 	QComboBox* colorBox;
@@ -37,4 +40,6 @@ private:
 	QLabel* inBase;
 	QLabel* loaded;
 	ChessBoard currentBoard;
+	TrainingDBEntry trainingLine;
+	bool running;
 };

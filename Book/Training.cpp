@@ -33,6 +33,11 @@ ChessMove TrainingDBEntry::currentMove()
 	return moves[current].move;
 };
 
+int TrainingDBEntry::toMove()
+{
+	return (current % 2);
+}
+
 Training::Training()
 {
 	stat.inBase = 0;
