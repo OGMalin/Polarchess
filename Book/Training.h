@@ -57,13 +57,22 @@ struct TrainingDBEntry
 	void MovesFromString(const QString&);
 };
 
+struct TrainingStatistics
+{
+	int loaded;
+	int inBase;
+};
+
 class Training
 {
 private:
 	TrainingDBInfo tdi;
+	TrainingStatistics stat;
 	Database* Base[2];
 	QVector<TrainingDBEntry> list;
 	QVector<TrainingDBEntry> currentList;
+	ChessBoard currentBoard;
+	int currentColor;
 	void walkThrough(ChessBoard& cur, TrainingDBEntry& path, int ply, QVector<BookDBEntry>& pos, int color);
 //	void convertMovesFromString(const QString& smoves, TrainingDBEntry& tp);
 //	void convertMovesToString(QString& smoves, TrainingDBEntry& tp);
@@ -93,12 +102,11 @@ public:
 	// Get next training line
 	bool getNext(TrainingDBEntry& line, int color, ChessBoard& cb);
 
-	// Get all traininglines.
-	void getAll(QVector<TrainingDBEntry>& allTP, int color=-1);
-
 	// Update training score
 	void updateScore(int color, ChessBoard& cb, int rowid, int score);
 
 	// Get db path
 	QString getPath();
+
+	TrainingStatistics getStat();
 };

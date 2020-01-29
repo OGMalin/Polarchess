@@ -65,7 +65,7 @@ MainWindow::MainWindow(QWidget *parent)
 	trainingDB = new Training();
 	trainingDB->SetRepertoireDatabase(WHITE, Base[REPWHITE]);
 	trainingDB->SetRepertoireDatabase(BLACK, Base[REPBLACK]);
-	trainingwindow->trainingDB = trainingDB;
+	trainingwindow->setTrainingDB(trainingDB);
 	movewindow->computerDB = computerDB;
 	dgt = NULL;
 	readSettings();
@@ -635,6 +635,7 @@ void MainWindow::trainingStart()
 	//boardwindow->markArrow(5,34, goodColor, 8);
 	inTraining = true;
 	trainingwindow->setCurrentBoard(currentPath->getPosition());
+	trainingwindow->updateStat();
 	updateWindow();
 	updateMenu();
 }

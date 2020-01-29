@@ -3,6 +3,7 @@
 #include <QFontDialog>
 #include <QBoxLayout>
 #include <QPushButton>
+#include <QTextStream>
 
 TrainingWindow::TrainingWindow(QWidget* parent)
 	: QWidget(parent)
@@ -18,7 +19,11 @@ TrainingWindow::TrainingWindow(QWidget* parent)
 
 	hbox = new QHBoxLayout;
 	watch = new StatusWatch;
+	inBase = new QLabel(tr("In base: "));
+	loaded = new QLabel(tr("Loaded: "));
 	hbox->addWidget(watch);
+	hbox->addWidget(inBase);
+	hbox->addWidget(loaded);
 	vbox->addLayout(hbox);
 
 	hbox = new QHBoxLayout;
@@ -91,9 +96,26 @@ void TrainingWindow::next()
 	else
 		cb.setStartposition();
 	emit trainingNext(cb, color);
+	updateStat();
 }
 
 void TrainingWindow::setCurrentBoard(const ChessBoard& cb)
 {
 	currentBoard = cb;
+}
+
+void TrainingWindow::setTrainingDB(Training* db)
+{
+	trainingDB = db;
+}
+
+void TrainingWindow::updateStat()
+{
+	TrainingStatistics ts = trainingDB->getStat();
+	QString qs = tr("In base: ");
+	QTextStream(&qs) << ts.inBase;
+	inBase->setText(qs);
+	qs = tr("Loaded: ");
+	QTextStream(&qs) << ts.inBase;
+	loaded->setText(qs);
 }

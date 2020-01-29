@@ -35,6 +35,10 @@ ChessMove TrainingDBEntry::currentMove()
 
 Training::Training()
 {
+	stat.inBase = 0;
+	stat.loaded = 0;
+	currentBoard.clear();
+	currentColor = 0;
 	Base[0] = Base[1] = NULL;
 	opened = false;
 	if (!QSqlDatabase::isDriverAvailable("QSQLITE"))
@@ -263,7 +267,7 @@ void Training::createLines(QWidget* parent)
 		}
 		db.commit();
 	}
-
+	stat.inBase = list.size();
 	progress.setValue(steps);
 }
 
@@ -309,83 +313,75 @@ void Training::walkThrough(ChessBoard& cb, TrainingDBEntry& path, int ply, QVect
 
 bool Training::getNext(TrainingDBEntry& line, int color, ChessBoard& cb)
 {
-	if (currentList.size() == 0)
+	int i,j;
+	if ((currentList.size() == 0) || (currentColor != color) || (currentBoard != cb))
 	{
 		QSqlDatabase db = QSqlDatabase::database(TRAINING);
 		if (!db.open())
 			return false;
 		QSqlQuery query(db);
-		query.exec("SELECT * FROM training ORDER BY score;");
+		query.exec("SELECT rowid, * FROM training ORDER BY score;");
 		if (!query.next())
 		{
 			createLines(NULL);
-			query.exec("SELECT * FROM training ORDER BY score;");
+			query.exec("SELECT rowid, * FROM training ORDER BY score;");
 			if (!query.next())
 				return false;
 		}
+		list.clear();
 		while (1)
 		{
+			TrainingDBEntry tde;
+			tde.rowid = query.value("rowid").toInt();
+			tde.color = query.value("color").toInt();
+			tde.score = query.value("score").toInt();
+			tde.MovesFromString(query.value("moves").toString());
+			list.push_back(tde);
 			if (!query.next())
 				break;
 		}
+		stat.inBase = list.size();
+		if (color >= 0)
+		{
+			for (i = 0; i < list.size(); i++)
+			{
+				if (list[i].color == OTHERPLAYER(color))
+				{
+					list.remove(i);
+					--i;
+				}
+			}
+		}
+		currentColor = color;
+		currentBoard = cb;
+		if (!cb.isStartposition())
+		{
+			ChessBoard b;
+			for (i = 0; i < list.size(); i++)
+			{
+				b.setStartposition();
+				for (j = 0; j < list[i].moves.size(); j++)
+				{
+					if (b == cb)
+					{
+						currentList.push_back(list[i]);
+						break;
+					}
+					b.doMove(list[i].moves[j].move, false);
+				}
+
+			}
+		}
+		else
+		{
+			currentList = list;
+		}
 	}
-	//int i,j;
-	//bool found;
-	//ChessBoard b;
-	//QVector<TrainingDBEntry> tlines;
-
-	//getAll(tlines, color);
-	//if (!cb.isStartposition())
-	//{
-	//	for (i = 0; i < tlines.size(); i++)
-	//	{
-	//		found = false;
-	//		b.setStartposition();
-	//		for (j = 0; j < tlines[i].moves.size(); j++)
-	//		{
-	//			b.doMove(tlines[i].moves[j].move, false);
-	//			if (cb == b)
-	//			{
-	//				found = true;
-	//				break;
-	//			}
-	//		}
-	//		if (!found)
-	//			tlines.remove(i--);
-	//	}
-	//}
-
-	//std::sort(tlines.begin(), tlines.end());
-
-	//if (!tlines.size())
-	//	return false;
-	//line = tlines.first();
+	if (currentList.size() == 0)
+		return false;
+	line = currentList.front();
+	currentList.pop_front();
 	return true;
-}
-
-void Training::getAll(QVector<TrainingDBEntry>& allTP, int color)
-{
-	//int rep, i;
-	//QVector<TrainingLine> lines;
-	//TrainingPath tp;
-	//allTP.clear();
-	//for (rep = 0; rep < 2; rep++)
-	//{
-	//	if (!Base[rep])
-	//		continue;
-	//	if (color != -1)
-	//		if (color != rep)
-	//			continue;
-	//	Base[rep]->getTrainingLines(lines);
-	//	for (i = 0; i < lines.size(); i++)
-	//	{
-	//		tp.rowid = lines[i].rowid;
-	//		tp.score = lines[i].score;
-	//		tp.color = rep;
-	//		convertMoves(lines[i].moves, tp);
-	//		allTP.push_back(tp);
-	//	}
-	//}
 }
 
 void Training::updateScore(int color, ChessBoard& cb, int rowid, int score)
@@ -463,4 +459,10 @@ void Training::clearAll()
 	QSqlQuery query(db);
 	query.exec("DELETE FROM training;");
 	query.exec("VACUUM;");
+}
+
+TrainingStatistics Training::getStat()
+{
+	stat.loaded = currentList.size();
+	return stat;
 }

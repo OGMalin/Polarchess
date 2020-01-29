@@ -7,6 +7,7 @@
 #include <QString>
 #include <QComboBox>
 #include <QCheckBox>
+#include <QLabel>
 
 class TrainingWindow : public QWidget
 {
@@ -27,10 +28,13 @@ public:
 	QString fontToString();
 	void fontFromString(const QString&);
 	void setCurrentBoard(const ChessBoard&);
-
+	void setTrainingDB(Training* db);
+	void updateStat();
 private:
 	StatusWatch* watch;
 	QComboBox* colorBox;
 	QCheckBox* positionBox;
+	QLabel* inBase;
+	QLabel* loaded;
 	ChessBoard currentBoard;
 };
