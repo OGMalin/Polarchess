@@ -510,12 +510,15 @@ void MainWindow::moveEntered(ChessMove& move)
 		if (trainingwindow->isRunning())
 		{
 			if (!trainingwindow->moveEntered(move))
+			{
 				boardwindow->setPosition(board);
+				return;
+			}
 		}
 		else
 		{
 			boardwindow->setPosition(board);
-
+			return;
 		}
 //		int score=0;
 //		if (trainingLine.isCorrect(move))
