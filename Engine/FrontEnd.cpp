@@ -694,9 +694,9 @@ DWORD FrontEnd::movegenTest(int depth, bool init, int ply)
 	moveit=0;
 	while (moveit!=testList[ply].end())
 	{
-		testGen.doMove(b,testList[ply].list[moveit]);
+		testGen.doMove(b,testList[ply][moveit]);
 		movegenTest(depth-1,false,ply+1);
-		testGen.undoMove(b,testList[ply].list[moveit]);
+		testGen.undoMove(b,testList[ply][moveit]);
 		++moveit;
 	};
 	return testNodes;

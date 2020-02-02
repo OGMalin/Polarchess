@@ -34,6 +34,8 @@
 #include "../Common/ChessBoard.h"
 #include "Path.h"
 
+struct TrainingDBEntry;
+
 struct BookDBMove
 {
 	ChessMove move;
@@ -96,7 +98,7 @@ public:
 	//void addTrainingLines(QVector<TrainingLine>& tlines);
 	//void deleteTrainingLines();
 	//bool getTrainingLines(QVector<TrainingLine>& lines);
-	void updateTrainingScore(ChessBoard& cb, int attempt, int score);
+	void updateTrainingScore(TrainingDBEntry*);
 
 	// Get db path
 	QString getPath();

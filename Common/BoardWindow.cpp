@@ -169,6 +169,8 @@ void BoardWindow::drawMarkupArrow(QPaintEvent* event, QPainter& painter)
 		if (w < 2)
 			w = 2;
 		pen.setWidth(w);
+		pen.setCapStyle(Qt::RoundCap);
+		painter.setOpacity(0.5);
 		painter.setPen(pen);
 		painter.drawLine(from, to);
 	}

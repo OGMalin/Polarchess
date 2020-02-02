@@ -1,4 +1,5 @@
 #include "Database.h"
+#include "Training.h"
 #include "../Common/WinFile.h"
 #include <QCoreApplication>
 #include <QSqlQuery>
@@ -452,8 +453,10 @@ void Database::importBase(Database* iBase)
 //	return true;
 //}
 
-void Database::updateTrainingScore(ChessBoard& cb, int attempt, int score)
+void Database::updateTrainingScore(TrainingDBEntry* tde)
 {
+	int i;
+	ChessBoard cb;
 	char sz[16];
 	if (!opened)
 		return;
@@ -461,15 +464,16 @@ void Database::updateTrainingScore(ChessBoard& cb, int attempt, int score)
 	if (!db.open())
 		return;
 	QSqlQuery query(db);
-	query.prepare("UPDATE positions SET attempt = :attempt, score = :score WHERE fen = :fen;");
-	query.bindValue(":fen", cb.getFen(true).c_str());
-	query.bindValue(":attempt", itoa(attempt, sz, 10));
-	query.bindValue(":score", itoa(score, sz, 10));
-	query.exec();
-	//query.prepare("UPDATE training SET score = :score WHERE rowid = :rowid;");
-	//query.bindValue(":score", itoa(score, sz, 10));
-	//query.bindValue(":rowid", itoa(rowid, sz, 10));
-	//query.exec();
+	cb.setStartposition();
+	for (i = 0; i < tde->moves.size(); i++)
+	{
+		query.prepare("UPDATE positions SET attempt = attempt + :attempt, score = score + :score WHERE fen = :fen;");
+		query.bindValue(":fen", cb.getFen(true).c_str());
+		query.bindValue(":attempt", itoa(tde->moves[i].attempt, sz, 10));
+		query.bindValue(":score", itoa(tde->moves[i].score, sz, 10));
+		query.exec();
+		cb.doMove(tde->moves[i].move, false);
+	}
 }
 
 QString Database::getPath()

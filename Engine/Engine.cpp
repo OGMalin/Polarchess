@@ -185,19 +185,19 @@ void Engine::startSearch()
 	for (sq = 0; sq < 63; sq++)
 		++material[theBoard.board[SQUARE128(i)]];
 
-	if (searchmoves.size)
+	if (searchmoves.size())
 		ml[0] = searchmoves;
 	else
 		mgen.makeMoves(theBoard, ml[0]);
 
-	if (!ml[0].size)
+	if (!ml[0].size())
 	{
 		ei->sendInQue(ENG_info, string("string No legal moves, aborting search."));
 		return;
 	}
-	else if ((ml[0].size == 1) && (searchtype == NORMAL_SEARCH))
+	else if ((ml[0].size() == 1) && (searchtype == NORMAL_SEARCH))
 	{ // Only one legal move
-		bestMove = ml[0].list[0];
+		bestMove = ml[0][0];
 		sendBestMove();
 		return;
 	}
@@ -291,13 +291,13 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 	if (depth == 1)
 	{
 		orderRootMoves();
-		bestMove = ml[0].list[0];
+		bestMove = ml[0][0];
 	}
 	else
 	{
 		mit = ml[0].find(bestMove);
-		if (mit < ml[0].size)
-			ml[0].list[mit].score = 0x7fffffff;
+		if (mit < ml[0].size())
+			ml[0][mit].score = 0x7fffffff;
 		ml[0].sort();
 //		orderMoves(ml[0], bestMove.back());
 	}
@@ -309,42 +309,42 @@ int Engine::rootSearch(int depth, int alpha, int beta, bool inCheck, HASHKEY has
 	hashDrawTable.add(hashKey, 0);
 
 	bool sendinfo=true;
-	for (mit = 0; mit < ml[0].size; mit++)
+	for (mit = 0; mit < ml[0].size(); mit++)
 	{
 //		sendinfo = (watch.read(WatchPrecision::Millisecond) > 999) ? true : false;
 		// Send UCI info
 		if (debug || sendinfo)
 		{
-			sprintf_s(sz, 256, "currmove %s currmovenumber %i", theBoard.makeMoveText(ml[0].list[mit],UCI).c_str(), mit + 1);
+			sprintf_s(sz, 256, "currmove %s currmovenumber %i", theBoard.makeMoveText(ml[0][mit],UCI).c_str(), mit + 1);
 			ei->sendInQue(ENG_info, sz);
 		}
-		newkey = theBoard.newHashkey(ml[0].list[mit], hashKey);
-		mgen.doMove(theBoard, ml[0].list[mit]);
-		--material[ml[0].list[mit].capturedpiece];
+		newkey = theBoard.newHashkey(ml[0][mit], hashKey);
+		mgen.doMove(theBoard, ml[0][mit]);
+		--material[ml[0][mit].capturedpiece];
 
 		assert(theBoard.hashkey() == newkey);
 
 		inCheck = mgen.inCheck(theBoard, theBoard.toMove);
-		extention = moveExtention(inCheck, ml[0].list[mit], emptyMove, ml[0].size);
+		extention = moveExtention(inCheck, ml[0][mit], emptyMove, ml[0].size());
 		oldNodes = nodes;
-		score = -Search(depth - 1 + extention, -beta, -alpha, inCheck, newkey, 1,followPV, true, ml[0].list[mit]);
+		score = -Search(depth - 1 + extention, -beta, -alpha, inCheck, newkey, 1,followPV, true, ml[0][mit]);
 		if (score == -BREAKING)
 			return BREAKING;
-		mgen.undoMove(theBoard, ml[0].list[mit]);
-		++material[ml[0].list[mit].capturedpiece];
-		ml[0].list[mit].score = nodes - oldNodes;
+		mgen.undoMove(theBoard, ml[0][mit]);
+		++material[ml[0][mit].capturedpiece];
+		ml[0][mit].score = nodes - oldNodes;
 		if (score >= beta)
 			return beta;
 		if (score > alpha)
 		{
-			copyPV(pv[0], pv[1], ml[0].list[mit]);
+			copyPV(pv[0], pv[1], ml[0][mit]);
 #ifndef _DEBUG_SEARCH
 			if (debug || sendinfo)
 #endif
 				sendPV(pv[0], depth,score);
 			alpha = score;
 
-			bestMove = ml[0].list[mit];
+			bestMove = ml[0][mit];
 		}
 		if (inCheck)
 			--extention;
@@ -396,30 +396,30 @@ int Engine::Search(int depth, int alpha, int beta, bool inCheck, HASHKEY hashKey
 	mgen.makeMoves(theBoard, ml[ply]);
 	orderMoves(ml[ply], followPV?pv[ply].front():emptyMove);
 	int mit;
-	for (mit = 0; mit < ml[ply].size; mit++)
+	for (mit = 0; mit < ml[ply].size(); mit++)
 	{
-		newkey = theBoard.newHashkey(ml[ply].list[mit], hashKey);
-		mgen.doMove(theBoard, ml[ply].list[mit]);
-		--material[ml[ply].list[mit].capturedpiece];
+		newkey = theBoard.newHashkey(ml[ply][mit], hashKey);
+		mgen.doMove(theBoard, ml[ply][mit]);
+		--material[ml[ply][mit].capturedpiece];
 
 		assert(theBoard.hashkey() == newkey);
 
 		inCheck = mgen.inCheck(theBoard, theBoard.toMove);
-		extention = moveExtention(inCheck, ml[ply].list[mit], lastmove, ml[ply].size);
+		extention = moveExtention(inCheck, ml[ply][mit], lastmove, ml[ply].size());
 #ifdef _DEBUG_SEARCH
 		highestsearchply = __max(ply+1, highestsearchply);
 #endif
-		score = -Search(depth - 1 + extention, -beta, -alpha, inCheck, newkey, ply + 1, followPV,true, ml[ply].list[mit]);
+		score = -Search(depth - 1 + extention, -beta, -alpha, inCheck, newkey, ply + 1, followPV,true, ml[ply][mit]);
 		if (score == -BREAKING)
 			return BREAKING;
-		mgen.undoMove(theBoard, ml[ply].list[mit]);
-		++material[ml[ply].list[mit].capturedpiece];
+		mgen.undoMove(theBoard, ml[ply][mit]);
+		++material[ml[ply][mit].capturedpiece];
 		if (score >= beta)
 			return beta;
 		if (score > alpha)
 		{
 			alpha = score;
-			copyPV(pv[ply], pv[ply + 1], ml[ply].list[mit]);
+			copyPV(pv[ply], pv[ply + 1], ml[ply][mit]);
 		}
 		if (inCheck)
 			--extention;
@@ -458,22 +458,22 @@ int Engine::qSearch(int alpha, int beta, int ply)
 	mgen.makeCaptureMoves(theBoard, ml[ply]);
 	orderQMoves(ml[ply]);
 	int mit;
-	for (mit = 0; mit < ml[ply].size; mit++)
+	for (mit = 0; mit < ml[ply].size(); mit++)
 	{
-		mgen.doMove(theBoard, ml[ply].list[mit]);
+		mgen.doMove(theBoard, ml[ply][mit]);
 #ifdef _DEBUG_SEARCH
 		highestqsearchply = __max(ply+1, highestqsearchply);
 #endif
 		score = -qSearch(-beta, -alpha, ply + 1);
 		if (score == -BREAKING)
 			return BREAKING;
-		mgen.undoMove(theBoard, ml[ply].list[mit]);
+		mgen.undoMove(theBoard, ml[ply][mit]);
 		if (score >= beta)
 			return beta;
 		if (score > alpha)
 		{
 			alpha = score;
-			copyPV(pv[ply], pv[ply + 1], ml[ply].list[mit]);
+			copyPV(pv[ply], pv[ply + 1], ml[ply][mit]);
 		}
 	}
 	return alpha;
@@ -594,9 +594,9 @@ void Engine::sendPV(const MoveList& pvline, int depth, int score, int type)
 	double ts = t / 1000000.0;
 	tempBoard = theBoard;
 	ChessMove m;
-	while (i < pvline.size)
+	while (i < pvline.size())
 	{
-		m = pvline.list[i];
+		m = pvline[i];
 		s = tempBoard.makeMoveText(m,UCI);
 		if (!tempBoard.doMove(m, true))
 			break;
@@ -622,11 +622,11 @@ void Engine::sendPV(const MoveList& pvline, int depth, int score, int type)
 void Engine::orderRootMoves()
 {
 	int mit;
-	for (mit = 0; mit < ml[0].size; mit++)
+	for (mit = 0; mit < ml[0].size(); mit++)
 	{
-		mgen.doMove(theBoard, ml[0].list[mit]);
-		ml[0].list[mit].score = -eval.evaluate(theBoard, MATE, -MATE);
-		mgen.undoMove(theBoard, ml[0].list[mit]);
+		mgen.doMove(theBoard, ml[0][mit]);
+		ml[0][mit].score = -eval.evaluate(theBoard, MATE, -MATE);
+		mgen.undoMove(theBoard, ml[0][mit]);
 	}
 	ml[0].sort();
 
@@ -652,30 +652,30 @@ void Engine::orderMoves(MoveList& mlist, const ChessMove& first)
 	static int promotevalue[13] = { 0,0,1,1,5,30,0,0,1,1,5,30,0 };
 	int mit,score;
 
-	if (mlist.size < 2)
+	if (mlist.size() < 2)
 		return;
 	
-	for (mit = 0; mit < mlist.size; mit++)
+	for (mit = 0; mit < mlist.size(); mit++)
 	{
-		mlist.list[mit].score = 0;
-		if (mlist.list[mit].moveType & (CAPTURE | PROMOTE))
+		mlist[mit].score = 0;
+		if (mlist[mit].moveType & (CAPTURE | PROMOTE))
 		{
 			score = 0;
-			if (mlist.list[mit].moveType&CAPTURE)
-				score += seevalue[mlist.list[mit].capturedpiece][theBoard.board[mlist.list[mit].fromSquare]];
-			if (mlist.list[mit].moveType&PROMOTE)
-				score += promotevalue[mlist.list[mit].promotePiece];
-			mlist.list[mit].score = score;
+			if (mlist[mit].moveType&CAPTURE)
+				score += seevalue[mlist[mit].capturedpiece][theBoard.board[mlist[mit].fromSquare]];
+			if (mlist[mit].moveType&PROMOTE)
+				score += promotevalue[mlist[mit].promotePiece];
+			mlist[mit].score = score;
 		}
-		else if (mlist.list[mit].moveType & CASTLE)
+		else if (mlist[mit].moveType & CASTLE)
 		{
-			mlist.list[mit].score = 1;
+			mlist[mit].score = 1;
 		}
 	}
 
 	mit = mlist.find(first);
-	if (mit < mlist.size)
-		mlist.list[mit].score = 1000;
+	if (mit < mlist.size())
+		mlist[mit].score = 1000;
 	mlist.sort();
 }
 
@@ -699,18 +699,18 @@ void Engine::orderQMoves(MoveList& mlist)
 	static int promotevalue[13] = { 0,0,1,1,5,30,0,0,1,1,5,30,0 };
 	int mit, score;
 
-	if (mlist.size < 2)
+	if (mlist.size() < 2)
 		return;
 
-	for (mit = 0; mit < mlist.size; mit++)
+	for (mit = 0; mit < mlist.size(); mit++)
 	{
-		mlist.list[mit].score = 0;
+		mlist[mit].score = 0;
 		score = 0;
-		if (mlist.list[mit].moveType&CAPTURE)
-			score += seevalue[mlist.list[mit].capturedpiece][theBoard.board[mlist.list[mit].fromSquare]];
-		if (mlist.list[mit].moveType&PROMOTE)
-			score += promotevalue[mlist.list[mit].promotePiece];
-		mlist.list[mit].score = score;
+		if (mlist[mit].moveType&CAPTURE)
+			score += seevalue[mlist[mit].capturedpiece][theBoard.board[mlist[mit].fromSquare]];
+		if (mlist[mit].moveType&PROMOTE)
+			score += promotevalue[mlist[mit].promotePiece];
+		mlist[mit].score = score;
 	}
 
 	mlist.sort();
@@ -720,8 +720,8 @@ void Engine::copyPV(MoveList& m1, MoveList& m2, ChessMove& m)
 {
 	m1.clear();
 	m1.push_back(m);
-	for (int i = 0; i<m2.size; i++)
-		m1.push_back(m2.list[i]);
+	for (int i = 0; i<m2.size(); i++)
+		m1.push_back(m2[i]);
 };
 
 int Engine::moveExtention(bool inCheck, ChessMove& move, ChessMove& lastmove, int moves)

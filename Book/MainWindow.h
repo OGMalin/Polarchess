@@ -15,6 +15,7 @@
 #include "../Common/ChessMove.h"
 #include "../Common/BoardWindow.h"
 #include "../Common/DgtBoard.h"
+#include "../Common/MoveList.h"
 #include <QMainWindow>
 #include <QString>
 #include <QTranslator>
@@ -26,6 +27,7 @@
 #include <QSplitter>
 #include <QToolButton>
 #include <QColor>
+#include <QVector>
 
 enum {THEORY=0, REPWHITE, REPBLACK };
 
@@ -59,8 +61,8 @@ public slots:
 	void dgtStatusClicked(bool);
 	void toolbarAction(QAction*);
 	void trainingFlipBoard(int color);
-	void trainingAddMoves(QVector<ChessMove>&, bool);
-
+	void trainingAddMoves(MoveList&);
+	void trainingSetArrow(int fromSq, int toSq, bool wrong, int sec);
 public:
 	Path* currentPath;
 	MainWindow(QWidget *parent = Q_NULLPTR);

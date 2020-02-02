@@ -2,6 +2,7 @@
 #include "Database.h"
 #include "../Common/ChessBoard.h"
 #include "../Common/ChessMove.h"
+#include "../Common/MoveList.h"
 #include <QString>
 #include <QVector>
 #include <QWidget>
@@ -56,6 +57,12 @@ struct TrainingDBEntry
 	QString MovesToString();
 	void MovesFromString(const QString&);
 	int toMove();
+	void moveList(MoveList&);
+	void scoreLine();
+	void incAttempt() { if (!moves[current].attempt)++moves[current].attempt; };
+	void incScore() { if (!moves[current].score)++moves[current].score; };
+	void decScore() { if (!moves[current].score)--moves[current].score; };
+	void clearScore() { for (int i = 0; i < moves.size(); i++)moves[i].score = moves[i].attempt = 0; };
 };
 
 struct TrainingStatistics
@@ -71,9 +78,9 @@ private:
 	TrainingStatistics stat;
 	Database* Base[2];
 	QVector<TrainingDBEntry> list;
-	QVector<TrainingDBEntry> currentList;
-	ChessBoard currentBoard;
-	int currentColor;
+//	QVector<TrainingDBEntry> currentList;
+//	ChessBoard currentBoard;
+//	int currentColor;
 	void walkThrough(ChessBoard& cur, TrainingDBEntry& path, int ply, QVector<BookDBEntry>& pos, int color);
 //	void convertMovesFromString(const QString& smoves, TrainingDBEntry& tp);
 //	void convertMovesToString(QString& smoves, TrainingDBEntry& tp);
@@ -104,7 +111,7 @@ public:
 	bool getNext(TrainingDBEntry& line, int color, ChessBoard& cb);
 
 	// Update training score
-	void updateScore(int color, ChessBoard& cb, int rowid, int score);
+	void updateScore(TrainingDBEntry&);
 
 	// Get db path
 	QString getPath();

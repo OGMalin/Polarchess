@@ -85,8 +85,8 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(commentwindow, SIGNAL(commentChanged(QString&, int)), this, SLOT(commentChanged(QString&, int)));
 	connect(enginewindow, SIGNAL(enginePV(ComputerDBEngine&, ChessBoard&)), this, SLOT(enginePV(ComputerDBEngine&, ChessBoard&)));
 	connect(trainingwindow, SIGNAL(trainingFlipBoard(int)), this, SLOT(trainingFlipBoard(int)));
-	connect(trainingwindow, SIGNAL(trainingAddMoves(QVector<ChessMove>&, bool)), this, SLOT(trainingAddMoves(QVector<ChessMove>&, bool)));
-	//	connect(trainingwindow, SIGNAL(trainingNext(ChessBoard&, int)), this, SLOT(trainingNext(ChessBoard&, int)));
+	connect(trainingwindow, SIGNAL(trainingAddMoves(MoveList&)), this, SLOT(trainingAddMoves(MoveList&)));
+	connect(trainingwindow, SIGNAL(trainingSetArrow(int, int, bool, int)), this, SLOT(trainingSetArrow(int, int, bool, int)));
 
 	ChessBoard board = currentPath->getPosition();
 
@@ -495,80 +495,25 @@ void MainWindow::addMoveComment(int rep, int movenr, QString& comment)
 
 void MainWindow::moveEntered(ChessMove& move)
 {
-	ChessBoard board = currentPath->getPosition();
-	BookDBMove bm;
-	int i;
-
-	if (!board.isLegal(move))
+	if (!currentPath->getPosition().isLegal(move))
 	{
-		boardwindow->setPosition(board);
+		boardwindow->setPosition(currentPath->getPosition());
 		return;
 	}
 		
 	if (inTraining)
 	{
 		if (trainingwindow->isRunning())
-		{
-			if (!trainingwindow->moveEntered(move))
-			{
-				boardwindow->setPosition(board);
-				return;
-			}
-		}
+			trainingwindow->moveEntered(move);
 		else
-		{
-			boardwindow->setPosition(board);
-			return;
-		}
-//		int score=0;
-//		if (trainingLine.isCorrect(move))
-//		{
-//			statusBar()->showMessage(QString("correct move"), 5000);
-//			currentPath->add(move);
-//			boardwindow->setPosition(currentPath->getPosition());
-//			ChessMove nextMove;
-//			if (trainingLine.nextMove(nextMove))
-//			{
-//				currentPath->add(nextMove);
-//				board = currentPath->getPosition();
-//
-//				boardwindow->setPosition(board);
-//				enginewindow->setPosition(board, currentPath->current() / 2 + 1);
-//
-//				updateWindow();
-//				return;
-//			}
-//			else
-//			{
-//				currentPath->current(currentPath->current() - 1);
-//				if (!trainingStat.moveerror)
-//					score = 1;
-//				else
-//					score = -1;
-////				training->updateScore(trainingLine.color, currentPath->getPosition(), trainingLine.rowid, trainingLine.score + score);
-//				statusBar()->showMessage(QString("Next line"), 5000);
-//				trainingRun(trainingColor,trainingBoard);
-//				return;
-//			}
-//		}
-//		else
-//		{
-//			boardwindow->setPosition(currentPath->getPosition());
-//			++trainingStat.moveerror;
-//			statusBar()->showMessage(QString("Wrong move"), 5000);
-//
-//			ChessMove m=trainingLine.currentMove();
-//			boardwindow->markSquare(SQUARE64(m.fromSquare));
-//			updateWindow();
-//			return;
-//		}
-//
+			boardwindow->setPosition(currentPath->getPosition());
+		return;
 	}
 
 	// Do the move if it is legal
 	if (!currentPath->add(move))
 	{
-		boardwindow->setPosition(board);
+		boardwindow->setPosition(currentPath->getPosition());
 		return;
 	}
 
@@ -578,6 +523,7 @@ void MainWindow::moveEntered(ChessMove& move)
 		// Save the move if it doesn't exist
 		if (!bde[write].moveExist(move))
 		{
+			BookDBMove bm;
 			bm.clear();
 			bm.move = move;
 			bde[write].movelist.append(bm);
@@ -585,13 +531,10 @@ void MainWindow::moveEntered(ChessMove& move)
 		}
 	}
 
-	// Change to read from both db
-	board = currentPath->getPosition();
-
 	readDB();
 
-	boardwindow->setPosition(board);
-	enginewindow->setPosition(board,currentPath->current()/2+1);
+	boardwindow->setPosition(currentPath->getPosition());
+	enginewindow->setPosition(currentPath->getPosition(),currentPath->current()/2+1);
 
 	updateWindow();
 }
@@ -603,12 +546,10 @@ void MainWindow::pathSelected(int ply)
 
 	currentPath->current(ply);
 
-	ChessBoard board = currentPath->getPosition();
-
 	readDB();
 
-	boardwindow->setPosition(board);
-	enginewindow->setPosition(board, currentPath->current() / 2 + 1);
+	boardwindow->setPosition(currentPath->getPosition());
+	enginewindow->setPosition(currentPath->getPosition(), currentPath->current() / 2 + 1);
 	updateWindow();
 }
 
@@ -664,21 +605,21 @@ void MainWindow::trainingFlipBoard(int color)
 	boardwindow->flip(color == BLACK);
 }
 
-void MainWindow::trainingAddMoves(QVector<ChessMove>& moves, bool arrow)
+void MainWindow::trainingAddMoves(MoveList& ml)
 {
 	int i;
-	currentPath->getStartPosition();
-	for (i = 0; i < moves.size(); i++)
+	currentPath->clear();
+	for (i = 0; i < ml.size(); i++)
 	{
-		currentPath->add(moves[i]);
+		currentPath->add(ml[i]);
 	}
 	boardwindow->setPosition(currentPath->getPosition());
-	if (arrow && moves.size())
-	{
-		i = moves.size() - 1;
-		boardwindow->markArrow(moves[i].fromSquare, moves[i].toSquare, goodColor, 10);
-	}
 	updateWindow();
+}
+
+void MainWindow::trainingSetArrow(int fromSq, int toSq, bool wrong, int sek)
+{
+	boardwindow->markArrow(fromSq, toSq, (wrong ? badColor : goodColor), sek);
 }
 
 void MainWindow::trainingClearData()

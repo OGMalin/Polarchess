@@ -1,23 +1,25 @@
 #pragma once
 
-#include "ChessMove.h"
+#include "../Common/ChessMove.h"
 
 const int MOVELISTSIZE=1024;
 
 class MoveList
 {
+private:
+	int _size; // pointer to next avaiable element
+	ChessMove _list[MOVELISTSIZE];
 public:
   ChessMove nomove;
   static int compareMove(const void* m1, const void* m2);
   int compareMove(int m1, int m2);
-  ChessMove list[MOVELISTSIZE];
-  int size; // pointer to next avaiable element
   MoveList();
   virtual ~MoveList();
   void clear();
   int begin();
   int end();
   bool empty();
+  inline int size() const { return _size; };
   void copy(MoveList& ml);
   ChessMove& at(int n);
   void push_back(const ChessMove& m);
@@ -28,6 +30,8 @@ public:
   int find(const ChessMove& m);
   void erase(int n, int count = 1);
   MoveList& operator=(const MoveList& ml);
+  inline ChessMove& operator[](int i) { return _list[i]; };
+  inline const ChessMove& operator[](int i) const { return _list[i]; };
   void swap(int m1, int m2);
   void sort(int start = 0, int end = -1);
   void quicksort(int start, int end);

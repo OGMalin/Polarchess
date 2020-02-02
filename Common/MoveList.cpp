@@ -12,9 +12,9 @@ int MoveList::compareMove(const void* m1, const void* m2)
 
 int MoveList::compareMove(int m1, int m2)
 {
-	if (list[m1].score<list[m2].score)
+	if (_list[m1].score< _list[m2].score)
 		return 1;
-	if (list[m1].score>list[m2].score)
+	if (_list[m1].score> _list[m2].score)
 		return -1;
 	return 0;
 }
@@ -30,7 +30,7 @@ MoveList::~MoveList()
 
 void MoveList::clear()
 { 
-	size = 0; 
+	_size = 0; 
 }
 
 int MoveList::begin()
@@ -40,87 +40,87 @@ int MoveList::begin()
 
 int MoveList::end()
 { 
-	return size; 
+	return _size; 
 }
 
 bool MoveList::empty()
 { 
-	return (size == 0);
+	return (_size == 0);
 }
 
 void MoveList::copy(MoveList& ml)
 {
-	for (int i = 0; i<ml.size; i++)
-		list[i] = ml.list[i];
-	size = ml.size;
+	for (int i = 0; i<ml.size(); i++)
+		_list[i] = ml._list[i];
+	_size = ml.size();
 }
 
 ChessMove& MoveList::at(int n)
 {
-	if (n<size)
-		return list[n];
+	if (n<_size)
+		return _list[n];
 	return nomove;
 }
 
 void MoveList::push_back(const ChessMove& m)
 {
-	if (size<MOVELISTSIZE)
+	if (_size<MOVELISTSIZE)
 	{
-		list[size] = m;
-		size++;
+		_list[_size] = m;
+		++_size;
 	}
 }
 
 void MoveList::push_back(const ChessMove& m, int score)
 {
-	if (size<MOVELISTSIZE)
+	if (_size<MOVELISTSIZE)
 	{
-		list[size] = m;
-		list[size].score = score;
-		size++;
+		_list[_size] = m;
+		_list[_size].score = score;
+		++_size;
 	}
 }
 
 void MoveList::push_front(const ChessMove& m)
 {
-	int i = size;
+	int i = _size;
 	if (i >= MOVELISTSIZE)
 		i = MOVELISTSIZE - 1;
 	while (i>0)
 	{
-		list[i] = list[i - 1];
+		_list[i] = _list[i - 1];
 		--i;
 	}
-	list[0] = m;
-	size++;
-	if (size>MOVELISTSIZE)
-		size = MOVELISTSIZE;
+	_list[0] = m;
+	_size;
+	if (_size>MOVELISTSIZE)
+		_size = MOVELISTSIZE;
 };
 
 void MoveList::push_front(const ChessMove& m, int score)
 {
-	int i = size;
+	int i = _size;
 	if (i >= MOVELISTSIZE)
 		i = MOVELISTSIZE - 1;
 	while (i>0)
 	{
-		list[i] = list[i - 1];
+		_list[i] = _list[i - 1];
 		--i;
 	}
-	list[0] = m;
-	list[0].score = score;
-	size++;
-	if (size>MOVELISTSIZE)
-		size = MOVELISTSIZE;
+	_list[0] = m;
+	_list[0].score = score;
+	++_size;
+	if (_size>MOVELISTSIZE)
+		_size = MOVELISTSIZE;
 };
 
 int MoveList::find(const ChessMove& m)
 {
 	int i;
-	for (i = 0; i<size; i++)
-		if (list[i] == m)
+	for (i = 0; i<_size; i++)
+		if (_list[i] == m)
 			return i;
-	return size;
+	return _size;
 }
 
 	// Erase n'th element (n=0 is first element)
@@ -130,31 +130,32 @@ void MoveList::erase(int n, int count)
 {
 	if (n<0)
 		n = 0;
-	if (n >= size)
+	if (n >= _size)
 		return;
 	if (count<0)
 	{
-		size = n;
+		_size = n;
 		return;
 	}
 	int i = n;
-	while ((i + count)<size)
+	while ((i + count)<_size)
 	{
-		list[i] = list[i + count];
+		_list[i] = _list[i + count];
 		++i;
 	}
-	size -= count;
-	if (size<0)
-		size = 0;
+	_size -= count;
+	if (_size<0)
+		_size = 0;
 }
 
 	// Assignment
 MoveList& MoveList::operator=(const MoveList& ml)
 {
 	int i;
-	for (i = 0; i<ml.size; i++)
-		list[i] = ml.list[i];
-	size = ml.size;
+	int s = ml.size();
+	for (i = 0; i<ml.size(); i++)
+		_list[i] = ml._list[i];
+	_size = ml.size();
 	return *this;
 }
 
@@ -163,15 +164,15 @@ void MoveList::swap(int m1, int m2)
 	ChessMove m;
 	if (m1 == m2)
 		return;
-	m = list[m1];
-	list[m1] = list[m2];
-	list[m2] = m;
+	m = _list[m1];
+	_list[m1] = _list[m2];
+	_list[m2] = m;
 }
 
 void MoveList::sort(int start, int end)
 {
 	if (end < 0)
-		end = size - 1;
+		end = _size - 1;
 
 	bubblesort(start, end);
 }
@@ -182,7 +183,7 @@ void MoveList::bubblesort(int start, int end)
 	{
 		if (start >= end)
 			return;
-		if (list[end].score>list[start].score)
+		if (_list[end].score> _list[start].score)
 			swap(start, end);
 		return;
 	}
@@ -193,7 +194,7 @@ void MoveList::bubblesort(int start, int end)
 		unsorted = false;
 		for (i = start; i<last; i++)
 		{
-			if (list[i + 1].score>list[i].score)
+			if (_list[i + 1].score> _list[i].score)
 			{
 				swap(i, i + 1);
 				unsorted = true;
@@ -216,7 +217,7 @@ void MoveList::quicksort(int start, int end)
 	int last = end;
 
 	// Take a sample move from the midle
-	ChessMove m = list[(first + last) / 2];
+	ChessMove m = _list[(first + last) / 2];
 
 	// 5 1 6 6 3 5 7
 	//       m
@@ -227,48 +228,48 @@ void MoveList::quicksort(int start, int end)
 	while (first<last)
 	{
 		// Find the first move that should be sorted after the sample move
-		while ((compareMove(&list[first], &m)<1) && (first<last))
+		while ((compareMove(&_list[first], &m)<1) && (first<last))
 			first++;
 		// Find the last move that should be sorted before the sample move
-		while ((compareMove(&list[last], &m)>0) && (first<last))
+		while ((compareMove(&_list[last], &m)>0) && (first<last))
 			last--;
 		if (first<last)
 			swap(first, last);
 	}
-	list[end] = list[last];
-	list[last] = m;
+	_list[end] = _list[last];
+	_list[last] = m;
 	quicksort(start, first - 1);
 	quicksort(last + 1, end);
 }
 
 const ChessMove& MoveList::front()
 {
-	if (size)
-		return list[0];
+	if (_size)
+		return _list[0];
 	// No move where found
-	list[0].clear();
-	return list[0];
+	_list[0].clear();
+	return _list[0];
 }
 
 const ChessMove& MoveList::back()
 {
-	if (size)
-		return list[size-1];
+	if (_size)
+		return _list[_size-1];
 	// No move where found
-	list[0].clear();
-	return list[0];
+	_list[0].clear();
+	return _list[0];
 }
 
 	// Removes empty moves from the list
 void MoveList::trunc()
 {
 	int i = 0;
-	while (i<size)
+	while (i<_size)
 	{
-		if (list[i].empty())
+		if (_list[i].empty())
 		{
-			size--;
-			list[i] = list[size];
+			_size--;
+			_list[i] = _list[_size];
 		}
 		else
 		{
@@ -279,7 +280,7 @@ void MoveList::trunc()
 
 bool MoveList::exist(const ChessMove& m)
 {
-	if (find(m) == size)
+	if (find(m) == _size)
 		return false;
 	return true;
 }
@@ -287,13 +288,13 @@ bool MoveList::exist(const ChessMove& m)
 ChessMove& MoveList::next(int movenr)
 {
 	int i = movenr + 1;
-	while (i<size)
+	while (i<_size)
 	{
-		if (list[i].score>list[movenr].score)
+		if (_list[i].score> _list[movenr].score)
 			swap(movenr, i);
 		++i;
 	}
-	return list[movenr];
+	return _list[movenr];
 }
 
 

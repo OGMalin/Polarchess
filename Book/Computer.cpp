@@ -308,13 +308,13 @@ void ComputerDBEntry::convertFromEngineList(QString& data, ChessBoard& cb)
 		data += itoa(it->time, sz, 10);
 		data += "|";
 		b = cb;
-		for (mit = 0;mit<it->pv.size;mit)
+		for (mit = 0;mit<it->pv.size();mit)
 		{
-			s=b.makeMoveText(it->pv.list[mit], FIDE);
+			s=b.makeMoveText(it->pv[mit], FIDE);
 			if (mit>0)
 				data += " ";
 			data += s.c_str();
-			b.doMove(it->pv.list[mit], false);
+			b.doMove(it->pv[mit], false);
 			++mit;
 		}
 		++it;

@@ -475,10 +475,10 @@ void Evaluation::evalPawnstructure(ChessBoard& cb)
 void Evaluation::evalMobility(ChessBoard& cb)
 {
 	testGen.makeAllMoves(cb, testList);
-	mobility[cb.toMove] = testList.size;
+	mobility[cb.toMove] = testList.size();
 	testGen.doNullMove(cb, testMove);
 	testGen.makeAllMoves(cb, testList);
-	mobility[cb.toMove] = testList.size;
+	mobility[cb.toMove] = testList.size();
 	testGen.undoNullMove(cb, testMove);
 	position[WHITE] += mobility[WHITE]*mobilityScore;
 	position[BLACK] += mobility[BLACK]*mobilityScore;

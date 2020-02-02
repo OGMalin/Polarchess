@@ -417,9 +417,9 @@ const ChessMove ChessBoard::getMoveFromText(const std::string text)
 	mgen.makeMoves(*this, allmoves);
 	moveit = 0;
 	ml.clear();
-	while (moveit != allmoves.size)
+	while (moveit != allmoves.size())
 	{
-		m = (allmoves.list[moveit]);
+		m = (allmoves[moveit]);
 		if (piece == board[m.fromSquare])
 		{
 			if (fFile >= 0)
@@ -463,9 +463,9 @@ const ChessMove ChessBoard::getMoveFromText(const std::string text)
 		}
 		++moveit;
 	};
-	if (ml.size == 1)
+	if (ml.size() == 1)
 	{
-		m = (ml.list[ml.begin()]);
+		m = (ml[ml.begin()]);
 	}
 	else
 	{
@@ -839,21 +839,21 @@ char* ChessBoard::makeMoveText(const ChessMove& cm, char* buf, int bufsize, int 
 		}
 		mg.makeMoves(*this, ml1);
 		it = 0;
-		while (it<ml1.size)
+		while (it<ml1.size())
 		{
-			if ((ml1.list[it].toSquare == m.toSquare) && (PIECE(board[ml1.list[it].fromSquare]) == piece))
-				ml2.push_back(ml1.list[it]);
+			if ((ml1[it].toSquare == m.toSquare) && (PIECE(board[ml1[it].fromSquare]) == piece))
+				ml2.push_back(ml1[it]);
 			it++;
 		};
-		if (ml2.size>1)
+		if (ml2.size()>1)
 		{
 			f = FILE(m.fromSquare);
 			r = RANK(m.fromSquare);
 			it = 0;
 			cnt = 0;
-			while (it<ml2.size)
+			while (it<ml2.size())
 			{
-				if (FILE(ml2.list[it].fromSquare) == f)
+				if (FILE(ml2[it].fromSquare) == f)
 					cnt++;
 				it++;
 			};
@@ -903,7 +903,7 @@ char* ChessBoard::makeMoveText(const ChessMove& cm, char* buf, int bufsize, int 
 	if (mg.inCheck(*this, toMove))
 	{
 		mg.makeMoves(*this, ml1);
-		if (ml1.size == 0)
+		if (ml1.size() == 0)
 			buf[p++] = '#';
 		else
 			buf[p++] = '+';

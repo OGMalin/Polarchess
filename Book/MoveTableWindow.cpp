@@ -147,13 +147,13 @@ void MoveTableWindow::add(ComputerDBEntry& comp)
 		{
 			if (*eit == cit->engine)
 			{
-				if (cit->pv.size)
+				if (cit->pv.size())
 				{
-					index = existInTable(cit->pv.list[0]);
+					index = existInTable(cit->pv[0]);
 					if (index < 0)
 					{
 						mte.clear();
-						mte.move = cit->pv.list[0];
+						mte.move = cit->pv[0];
 						mte.cp = cit->cp;
 						QTextStream(&mte.engine) << cit->engine << endl << "Cp: " << float(cit->cp/100.0) << ", Depth: " << cit->depth << endl;
 						movetable.push_back(mte);

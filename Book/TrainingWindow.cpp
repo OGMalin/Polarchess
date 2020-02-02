@@ -21,8 +21,10 @@ TrainingWindow::TrainingWindow(QWidget* parent)
 
 	hbox = new QHBoxLayout;
 	watch = new StatusWatch;
+	lRunning = new QLabel(tr("Not running"));
 	inBase = new QLabel(tr("In base: "));
 	loaded = new QLabel(tr("Loaded: "));
+	hbox->addWidget(lRunning);
 	hbox->addWidget(watch);
 	hbox->addWidget(inBase);
 	hbox->addWidget(loaded);
@@ -94,9 +96,9 @@ void TrainingWindow::next()
 	if (running)
 		return;
 	running = false;
+	updateStat();
 
 	ChessBoard cb, b;
-	QVector<ChessMove> moves;
 	int i;
 	int color = colorBox->currentIndex()-1;
 	if (positionBox->isChecked())
@@ -108,7 +110,6 @@ void TrainingWindow::next()
 		updateStat();
 		return;
 	}
-	updateStat();
 	emit trainingFlipBoard(trainingLine.color);
 	
 	// Go to startposition of this training line
@@ -118,7 +119,6 @@ void TrainingWindow::next()
 	{
 		if (cb == b)
 			break;
-		moves.push_back(trainingLine.moves[i].move);
 		b.doMove(trainingLine.moves[i].move,false);
 		++trainingLine.current;
 	}
@@ -128,15 +128,17 @@ void TrainingWindow::next()
 		return;
 
 	// If wrong color to move go one move forward
-	bool arrow=false;
 	if (b.toMove != trainingLine.color)
 	{
-		moves.push_back(trainingLine.currentMove());
+		ChessMove move = trainingLine.currentMove();
+		emit trainingSetArrow(SQUARE64(move.fromSquare), SQUARE64(move.toSquare), false, 10);
 		++trainingLine.current;
-		arrow = true;
 	}
-	emit trainingAddMoves(moves, arrow);
+	MoveList ml;
+	trainingLine.moveList(ml);
+	emit trainingAddMoves(ml);
 	running = true;
+	updateStat();
 }
 
 void TrainingWindow::setCurrentBoard(const ChessBoard& cb)
@@ -158,13 +160,42 @@ void TrainingWindow::updateStat()
 	qs = tr("Loaded: ");
 	QTextStream(&qs) << ts.inBase;
 	loaded->setText(qs);
+	if (running)
+		lRunning->setText(tr("Running"));
+	else
+		lRunning->setText(tr("Not running"));
 }
 
-bool TrainingWindow::moveEntered(ChessMove& move)
+void TrainingWindow::moveEntered(ChessMove& move)
 {
+	MoveList ml;
+	ChessMove nextmove;
+	trainingLine.incAttempt();
 	if (trainingLine.isCorrect(move))
 	{
-
+		trainingLine.incScore();
+		if (trainingLine.nextMove(nextmove))
+		{
+			trainingLine.moveList(ml);
+			emit trainingAddMoves(ml);
+			emit trainingSetArrow(SQUARE64(nextmove.fromSquare), SQUARE64(nextmove.toSquare), false, 10);
+			updateStat();
+		}
+		else
+		{
+			trainingDB->updateScore(trainingLine);
+			running = false;
+			++trainingLine.current;
+			trainingLine.moveList(ml);
+			emit trainingAddMoves(ml);
+			updateStat();
+		}
+		return;
 	}
-	return false;
+	nextmove = trainingLine.currentMove();
+	trainingLine.moveList(ml);
+	emit trainingAddMoves(ml);
+	emit trainingSetArrow(SQUARE64(nextmove.fromSquare), SQUARE64(nextmove.toSquare), true, 10);
+	trainingLine.decScore();
+	updateStat();
 }

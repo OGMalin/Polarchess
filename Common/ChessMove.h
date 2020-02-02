@@ -5,13 +5,13 @@
 class ChessMove
 {
 public:
-  typeSquare fromSquare;
-  typeSquare toSquare;
+  int fromSquare;
+  int toSquare;
   unsigned char moveType;
-  typePiece promotePiece;
-  typePiece capturedpiece;
-  typeCastle oldCastle;
-  typeSquare oldEnPassant;
+  int promotePiece;
+  int capturedpiece;
+  int oldCastle;
+  int oldEnPassant;
   int oldMove50draw;
   int score;
   ChessMove();

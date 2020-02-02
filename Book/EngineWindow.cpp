@@ -226,7 +226,7 @@ void EngineWindow::slotEngineInfo(const EngineInfo& info)
 		else
 			nps->setText(itoa(info.nps / 1000000, sz, 10) + QString(" Mnps"));
 	}
-	if (info.pv.size)
+	if (info.pv.size())
 	{
 		QStandardItem* item;
 		QString qs;
@@ -243,7 +243,7 @@ void EngineWindow::slotEngineInfo(const EngineInfo& info)
 			b = currentBoard;
 			mn = movenr;
 		}
-		if (b.isLegal(ChessMove(info.pv.list[0])))
+		if (b.isLegal(ChessMove(info.pv[0])))
 		{
 			if (info.lowerbound)
 			{
@@ -274,9 +274,9 @@ void EngineWindow::slotEngineInfo(const EngineInfo& info)
 			item->setTextAlignment(Qt::AlignCenter);
 			model->setItem(line - 1, 2, item);
 			qs.clear();
-			for (int i = 0; i < info.pv.size; i++)
+			for (int i = 0; i < info.pv.size(); i++)
 			{
-				m = info.pv.list[i];
+				m = info.pv[i];
 				if (b.toMove == WHITE)
 				{
 					QTextStream(&qs) << (mn + i / 2) << ".";
@@ -287,7 +287,7 @@ void EngineWindow::slotEngineInfo(const EngineInfo& info)
 					++mn;
 				}
 				qs += b.makeMoveText(m, tr("NBRQK").toStdString()).c_str();
-				if (i < (info.pv.size - 1))
+				if (i < (info.pv.size() - 1))
 					qs += " ";
 				b.doMove(m, false);
 			}

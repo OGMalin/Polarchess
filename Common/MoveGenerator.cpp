@@ -115,20 +115,20 @@ void MoveGenerator::makeCaptureMoves(ChessBoard& b, MoveList& ml)
 
   int it=0;
   
-  while (it<ml.size)
+  while (it<ml.size())
   {
-    if (b.board[ml.list[it].fromSquare]==p)
-      nsq=ml.list[it].toSquare;
+    if (b.board[ml[it].fromSquare]==p)
+      nsq=ml[it].toSquare;
     else
       nsq=sq;
-    doMove(b,ml.list[it]);
+    doMove(b,ml[it]);
     if (squareAttacked(b,nsq,other))
     {
-      undoMove(b,ml.list[it]);
-      ml.list[it].clear();
+      undoMove(b,ml[it]);
+      ml[it].clear();
     }else
     {
-      undoMove(b,ml.list[it]);
+      undoMove(b,ml[it]);
     }
     ++it;
   };
@@ -206,35 +206,35 @@ void MoveGenerator::makeMoves(ChessBoard& b, MoveList& ml)
   }
 
   int it=0;
-  while (it<ml.size)
+  while (it<ml.size())
   {
-    if (ml.list[it].moveType&CASTLE)
+    if (ml[it].moveType&CASTLE)
     {
-      if (squareAttacked(b, ml.list[it].fromSquare,other))
+      if (squareAttacked(b, ml[it].fromSquare,other))
       {
-        ml.list[it].clear();
+        ml[it].clear();
         ++it;
         continue;
       }
-      if (squareAttacked(b, __max(ml.list[it].fromSquare,ml.list[it].toSquare)-1,other))
+      if (squareAttacked(b, __max(ml[it].fromSquare,ml[it].toSquare)-1,other))
       {
-        ml.list[it].clear();
+        ml[it].clear();
         ++it;
         continue;
       }
     }
-    if (b.board[ml.list[it].fromSquare]==p)
-      nsq=ml.list[it].toSquare;
+    if (b.board[ml[it].fromSquare]==p)
+      nsq=ml[it].toSquare;
     else
       nsq=sq;
-    doMove(b,ml.list[it]);
+    doMove(b,ml[it]);
     if (squareAttacked(b,nsq,other))
     {
-      undoMove(b,ml.list[it]);
-      ml.list[it].clear();
+      undoMove(b,ml[it]);
+      ml[it].clear();
     }else
     {
-      undoMove(b,ml.list[it]);
+      undoMove(b,ml[it]);
     }
     ++it;
   };
