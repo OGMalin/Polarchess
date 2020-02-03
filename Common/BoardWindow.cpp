@@ -34,10 +34,10 @@ void BoardWindow::paintEvent(QPaintEvent* event)
 	drawBorder(event, painter);
 	drawBoard(event, painter);
 	drawMarkupSquare(event, painter);
+	drawMarkupArrow(event, painter);
 	drawCoordinates(event, painter);
 	painter.setRenderHint(QPainter::SmoothPixmapTransform);
 	drawPieces(event, painter);
-	drawMarkupArrow(event, painter);
 	drawDragPiece(event, painter);
 }
 
@@ -140,12 +140,14 @@ void BoardWindow::drawMarkupSquare(QPaintEvent* event, QPainter& painter)
 {
 	QRect sqR;
 	int i;
+	painter.setOpacity(0.3);
 	for (i = 0; i < squareMarkup.size(); i++)
 	{
 		sqR = squareRect(squareMarkup[i].square);
 		if (event->rect().intersects(sqR))
 			painter.fillRect(sqR, squareMarkup[i].color);
 	}
+	painter.setOpacity(1.0);
 }
 
 void BoardWindow::drawMarkupArrow(QPaintEvent* event, QPainter& painter)
@@ -154,6 +156,7 @@ void BoardWindow::drawMarkupArrow(QPaintEvent* event, QPainter& painter)
 	QPoint from, to;
 	QPen pen;
 	int i,w;
+	painter.setOpacity(0.3);
 	pen = painter.pen();
 	pen.setStyle(Qt::SolidLine);
 	for (i = 0; i < arrowMarkup.size(); i++)
@@ -170,10 +173,10 @@ void BoardWindow::drawMarkupArrow(QPaintEvent* event, QPainter& painter)
 			w = 2;
 		pen.setWidth(w);
 		pen.setCapStyle(Qt::RoundCap);
-		painter.setOpacity(0.5);
 		painter.setPen(pen);
 		painter.drawLine(from, to);
 	}
+	painter.setOpacity(1.0);
 }
 
 void BoardWindow::drawDragPiece(QPaintEvent* event, QPainter& painter)

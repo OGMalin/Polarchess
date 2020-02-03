@@ -4,6 +4,7 @@
 #include <QBoxLayout>
 #include <QPushButton>
 #include <QTextStream>
+#include <QApplication>
 
 TrainingWindow::TrainingWindow(QWidget* parent)
 	: QWidget(parent)
@@ -183,11 +184,12 @@ void TrainingWindow::moveEntered(ChessMove& move)
 		}
 		else
 		{
-			trainingDB->updateScore(trainingLine);
 			running = false;
 			++trainingLine.current;
 			trainingLine.moveList(ml);
 			emit trainingAddMoves(ml);
+			QApplication::processEvents();
+			trainingDB->updateScore(trainingLine);
 			updateStat();
 		}
 		return;
