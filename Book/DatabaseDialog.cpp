@@ -1,5 +1,6 @@
 #include "DatabaseDialog.h"
 #include "ImportPgnDialog.h"
+#include "ExportPgnDialog.h"
 #include <QBoxLayout>
 #include <QDialogButtonBox>
 #include <QGroupBox>
@@ -53,6 +54,10 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	connect(button, SIGNAL(clicked()), this, SLOT(importPGNTheory()));
 	button->setToolTip(tr("Import pgn file into the theory."));
 	grid->addWidget(button, 1, 4);
+	button = new QPushButton(tr("Export Book"));
+	connect(button, SIGNAL(clicked()), this, SLOT(exportPGNTheory()));
+	button->setToolTip(tr("Export theory to pgn file."));
+	grid->addWidget(button, 1, 5);
 	grid->setAlignment(Qt::AlignLeft);
 	group->setLayout(grid);
 	vbox->addWidget(group);
@@ -79,6 +84,10 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	connect(button, SIGNAL(clicked()), this, SLOT(importPGNWhite()));
 	button->setToolTip(tr("Import pgn file into the White repertoire."));
 	grid->addWidget(button, 1, 4);
+	button = new QPushButton(tr("Export Book"));
+	connect(button, SIGNAL(clicked()), this, SLOT(exportPGNWhite()));
+	button->setToolTip(tr("Export White repertoire to pgn file."));
+	grid->addWidget(button, 1, 5);
 	grid->setAlignment(Qt::AlignLeft);
 	group->setLayout(grid);
 	vbox->addWidget(group);
@@ -105,6 +114,10 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	connect(button, SIGNAL(clicked()), this, SLOT(importPGNBlack()));
 	button->setToolTip(tr("Import pgn file into the Black repertoire."));
 	grid->addWidget(button, 1, 4);
+	button = new QPushButton(tr("Export Book"));
+	connect(button, SIGNAL(clicked()), this, SLOT(exportPGNBlack()));
+	button->setToolTip(tr("Export Black repertoire to pgn file."));
+	grid->addWidget(button, 1, 5);
 	grid->setAlignment(Qt::AlignLeft);
 	group->setLayout(grid);
 	vbox->addWidget(group);
@@ -484,6 +497,39 @@ void DatabaseDialog::importPGNBlack()
 		return;
 	dialog.getItems(path, nummoves, comment, variation);
 	dialog.importPgnFile(this, blackDB, path, nummoves, comment, variation);
+}
+
+void DatabaseDialog::exportPGNTheory()
+{
+	if (!theoryDB->isOpen())
+		return;
+	ExportPgnDialog dialog(this);
+	if (dialog.exec() == QDialog::Rejected)
+		return;
+
+	dialog.exportPgnFile(this, theoryDB);
+}
+
+void DatabaseDialog::exportPGNWhite()
+{
+	if (!whiteDB->isOpen())
+		return;
+	ExportPgnDialog dialog(this);
+	if (dialog.exec() == QDialog::Rejected)
+		return;
+
+	dialog.exportPgnFile(this, whiteDB);
+}
+
+void DatabaseDialog::exportPGNBlack()
+{
+	if (!blackDB->isOpen())
+		return;
+	ExportPgnDialog dialog(this);
+	if (dialog.exec() == QDialog::Rejected)
+		return;
+
+	dialog.exportPgnFile(this, blackDB);
 }
 
 void DatabaseDialog::importStatisticsDB()

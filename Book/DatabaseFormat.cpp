@@ -353,7 +353,7 @@ bool ComputerDBEntry::updateEngine(ComputerDBEngine& ce)
 	return true;
 }
 
-QByteArray CompressedBoard::compress(ChessBoard& cb) const
+QByteArray CompressedBoard::compress(ChessBoard& cb)
 {
 	QByteArray data;
 	unsigned long long occupied=0;
@@ -366,7 +366,9 @@ QByteArray CompressedBoard::compress(ChessBoard& cb) const
 	{
 		if (cb[i] != EMPTY)
 		{
-			occupied |= 1 << i;
+			occupied |= 1;
+			if (i < 63)
+				occupied = occupied << 1;
 			switch (cb[i])
 			{
 			case whitepawn:
@@ -383,7 +385,7 @@ QByteArray CompressedBoard::compress(ChessBoard& cb) const
 				pieces[next / 2] |= (next % 2 ? WhiteBishop << 4 : WhiteBishop);
 				break;
 			case whiterook:
-				if (cb.castle&&whitekingsidecastle && (i == A8))
+				if (((cb.castle&whitekingsidecastle) && (i == H1)) || ((cb.castle&whitequeensidecastle) && (i == A1)))
 					p = CastleRook;
 				else
 					p = WhiteRook;
@@ -413,7 +415,7 @@ QByteArray CompressedBoard::compress(ChessBoard& cb) const
 				pieces[next / 2] |= (next % 2 ? BlackBishop << 4 : BlackBishop);
 				break;
 			case blackrook:
-				if (cb.castle&&whitekingsidecastle && (i == A8))
+				if (((cb.castle&blackkingsidecastle) && (i == H8)) || ((cb.castle&blackqueensidecastle) && (i == A8)))
 					p = CastleRook;
 				else
 					p = BlackRook;
@@ -432,7 +434,12 @@ QByteArray CompressedBoard::compress(ChessBoard& cb) const
 			}
 			++next;
 		}
-		if (next > 32)
+		else
+		{
+			if (i < 63)
+				occupied = occupied << 1;
+		}
+		if (next >= 32)
 			break;
 	}
 	data.push_back(occupied&0xff);
@@ -456,41 +463,45 @@ QByteArray CompressedBoard::compress(ChessBoard& cb) const
 	return data;
 }
 
-ChessBoard CompressedBoard::decompress(QByteArray& data) const
+ChessBoard CompressedBoard::decompress(QByteArray& data)
 {
 	ChessBoard cb;
 	if (data.size() < 8)
 		return cb;
 	unsigned long long occupied;
 	int i;
-	occupied = data[7];
+	occupied = (unsigned char) data[7];
 	occupied = occupied << 8;
-	occupied += data[6];
+	occupied += (unsigned char) data[6];
 	occupied = occupied << 8;
-	occupied += data[5];
+	occupied += (unsigned char) data[5];
 	occupied = occupied << 8;
-	occupied += data[4];
+	occupied += (unsigned char )data[4];
 	occupied = occupied << 8;
-	occupied += data[3];
+	occupied += (unsigned char) data[3];
 	occupied = occupied << 8;
-	occupied += data[2];
+	occupied += (unsigned char) data[2];
 	occupied = occupied << 8;
-	occupied += data[1];
+	occupied += (unsigned char) data[1];
 	occupied = occupied << 8;
-	occupied += data[0];
+	occupied += (unsigned char) data[0];
 	int next = 0;
 	unsigned char p;
-	int wK, bK, mK = -1;
+	int o;
+	int wK, bK, mK;
+	wK = bK = mK = -1;
 	for (i = 0; i < 64; i++)
 	{
-		if (next >= data.size())
+		o = occupied & 0x01;
+		occupied = occupied >> 1;
+		if ((next / 2 + 8) >= data.size())
 			break;
-		if (occupied & (1 << i))
+		if (o)
 		{
 			if (next % 2)
-				p = data[next] >> 4;
+				p = (unsigned char) data[(next / 2) + 8] >> 4;
 			else
-				p = data[next] & 0x0f;
+				p = (unsigned char) data[(next / 2) + 8] & 0x0f;
 			switch (p)
 			{
 			case WhitePawn:
@@ -567,8 +578,7 @@ ChessBoard CompressedBoard::decompress(QByteArray& data) const
 				mK = i;
 				break;
 			}
-			if (next % 2)
-				++next;
+			++next;
 		}
 	}
 	if (mK < 0)

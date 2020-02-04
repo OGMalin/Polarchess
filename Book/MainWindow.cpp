@@ -19,6 +19,7 @@
 #include <QTextStream>
 #include <QList>
 #include <string>
+#include <QByteArray>
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
@@ -91,6 +92,10 @@ MainWindow::MainWindow(QWidget *parent)
 	ChessBoard board = currentPath->getPosition();
 
 	readDB();
+
+
+	QByteArray ba = CompressedBoard::compress(board);
+	board = CompressedBoard::decompress(ba);
 
 	boardwindow->setPosition(board);
 	enginewindow->setPosition(board, currentPath->current() / 2 + 1);

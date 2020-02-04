@@ -18,18 +18,21 @@ public slots:
 	void closeTheoryDB();
 	void importPGNTheory();
 	void importBookTheory();
+	void exportPGNTheory();
 
 	void openWhiteDB();
 	void newWhiteDB();
 	void closeWhiteDB();
 	void importPGNWhite();
 	void importBookWhite();
+	void exportPGNWhite();
 
 	void openBlackDB();
 	void newBlackDB();
 	void closeBlackDB();
 	void importPGNBlack();
 	void importBookBlack();
+	void exportPGNBlack();
 
 	void openTrainingDB();
 	void newTrainingDB();
@@ -48,8 +51,7 @@ public slots:
 	void compactStatisticsDB();
 public:
 	DatabaseDialog(QWidget *parent, Database* theory, Database* white, Database* black, Training*, Computer*, Statistics*);
-//	void getItems(QString& theory, QString& white, QString& black, QString& training, QString& computer, QString& statistics);
-//	void setItems(const QString& theorypath, const QString& whitepath, const QString& blackpath, const QString& trainingpath, const QString& computerpath, const QString& statisticspath);
+
 private:
 	QLineEdit* theoryFile;
 	QLineEdit* whiteFile;
@@ -63,9 +65,5 @@ private:
 	Database* blackDB;
 	Training* trainingDB;
 	Computer* computerDB;
-	//bool theoryChanged;
-	//bool whiteChanged;
-	//bool blackChanged;
-	//bool statisticChanged;
 };
 

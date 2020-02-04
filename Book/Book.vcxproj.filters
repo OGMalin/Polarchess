@@ -146,6 +146,9 @@
     <ClCompile Include="DatabaseFormat.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ExportPgnDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -195,6 +198,9 @@
     </QtMoc>
     <QtMoc Include="..\Common\DgtBoard.h">
       <Filter>Common</Filter>
+    </QtMoc>
+    <QtMoc Include="ExportPgnDialog.h">
+      <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

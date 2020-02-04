@@ -220,7 +220,7 @@ struct CompressedBoard
 	*/
 
 	enum { WhitePawn = 0, WhiteKnight, WhiteBishop, WhiteRook, WhiteQueen, WhiteKing, BlackPawn, BlackKnight, BlackBishop, BlackRook, BlackQueen, BlackKing, CastleRook, epPawn, tomoveKing };
-	QByteArray compress(ChessBoard&) const;
-	ChessBoard decompress(QByteArray&) const;
+	static QByteArray compress(ChessBoard&);
+	static ChessBoard decompress(QByteArray&);
 };
 

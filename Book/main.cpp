@@ -7,6 +7,7 @@ int main(int argc, char *argv[])
 	QCoreApplication::setOrganizationName("PolarChess");
 	QCoreApplication::setApplicationName("Book");
 	QCoreApplication::setApplicationVersion("0.1");
+//	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 	app.setApplicationDisplayName("PolarBook");
 
 	MainWindow w;
