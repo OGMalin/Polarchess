@@ -18,6 +18,8 @@ public:
 	ChessBoard(const ChessBoard& cb);
 	virtual ~ChessBoard();
 	ChessBoard& operator=(const ChessBoard& b);
+	inline typePiece& operator[](int i) { return board[SQUARE128(i)]; };
+	inline const typePiece& operator[](int i) const { return board[SQUARE128(i)]; };
 	void copy(const ChessBoard& b);
 	void clear();
 	// Comparing two boards

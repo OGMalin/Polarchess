@@ -9,46 +9,7 @@
 #include "../Common/ChessMove.h"
 #include "../Common/ChessBoard.h"
 #include "../Common/MoveList.h"
-
-/*
-	Database format
-
-	hash			text
-		position as hashkey.
-
-	enginelist	text
-		engine1|cp|depth|time|pv;engine2|cb|depth|time|pv
-*/
-
-struct ComputerDBEngine
-{
-	QString engine;
-	int cp;
-	int depth;
-	int time;
-	MoveList pv;
-	ComputerDBEngine() { clear(); };
-	void clear() { engine.clear(); cp = depth = 0; pv.clear(); };
-};
-
-struct ComputerDBEntry
-{
-	HASHKEY hash;
-	QVector<ComputerDBEngine> enginelist;
-	ComputerDBEntry() { clear(); };
-	void clear() { hash = 0; enginelist.clear(); };
-//	bool engineExist(QString& e);
-	bool updateEngine(ComputerDBEngine&);
-
-	void convertToEngineList(const QString&, ChessBoard&);
-	void convertFromEngineList(QString&, ChessBoard&);
-};
-
-struct ComputerDBInfo
-{
-	QString db;
-	QString version;
-};
+#include "DatabaseFormat.h"
 
 class Computer : public QObject
 {

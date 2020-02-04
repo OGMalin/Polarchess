@@ -11,59 +11,6 @@ const char* TRAINING = "Training";
 const char* TDBVERSION = "1.0";
 const char* TDBTYPE = "POLARTRAININGDB";
 
-bool TrainingDBEntry::isCorrect(ChessMove& move)
-{
-	if (moves[current].move == move)
-		return true;
-	return false;
-}
-
-bool TrainingDBEntry::nextMove(ChessMove& move)
-{
-	if ((current+2) >= moves.size())
-		return false;
-
-	move = moves[current + 1].move;
-	current+=2;
-	return true;
-}
-
-ChessMove TrainingDBEntry::currentMove()
-{
-	return moves[current].move;
-};
-
-int TrainingDBEntry::toMove()
-{
-	return (current % 2);
-}
-
-void TrainingDBEntry::moveList(MoveList& ml)
-{
-	int i;
-	for (i = 0; i < moves.size(); i++)
-	{
-		if (i >= current)
-			break;
-		ml.push_back(moves[i].move);
-	}
-}
-
-void TrainingDBEntry::scoreLine()
-{
-	int i, sc, at;
-	int start = 0;
-	sc = at = 999999;
-	if (color == BLACK)
-		start = 1;
-	for (i = start; i < moves.size(); i=i+2)
-	{
-		at = min(at, moves[i].attempt);
-		sc = min(sc, moves[i].score);
-	}
-	score = at + sc;
-}
-
 Training::Training()
 {
 	stat.inBase = 0;
@@ -439,7 +386,7 @@ void Training::updateScore(TrainingDBEntry& tde)
 	query.exec();
 
 	// Update Rep. database
-	Base[tde.color]->updateTrainingScore(&tde);
+	Base[tde.color]->updateTrainingScore(tde);
 }
 
 void TrainingDBEntry::MovesFromString(const QString& smoves)

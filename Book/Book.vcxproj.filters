@@ -143,6 +143,9 @@
     <ClCompile Include="..\Common\DgtBoard.cpp">
       <Filter>Common</Filter>
     </ClCompile>
+    <ClCompile Include="DatabaseFormat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -262,6 +265,9 @@
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DatabaseFormat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

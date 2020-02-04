@@ -453,7 +453,7 @@ void Database::importBase(Database* iBase)
 //	return true;
 //}
 
-void Database::updateTrainingScore(TrainingDBEntry* tde)
+void Database::updateTrainingScore(TrainingDBEntry& tde)
 {
 	int i;
 	ChessBoard cb;
@@ -465,14 +465,14 @@ void Database::updateTrainingScore(TrainingDBEntry* tde)
 		return;
 	QSqlQuery query(db);
 	cb.setStartposition();
-	for (i = 0; i < tde->moves.size(); i++)
+	for (i = 0; i < tde.moves.size(); i++)
 	{
 		query.prepare("UPDATE positions SET attempt = attempt + :attempt, score = score + :score WHERE fen = :fen;");
 		query.bindValue(":fen", cb.getFen(true).c_str());
-		query.bindValue(":attempt", itoa(tde->moves[i].attempt, sz, 10));
-		query.bindValue(":score", itoa(tde->moves[i].score, sz, 10));
+		query.bindValue(":attempt", itoa(tde.moves[i].attempt, sz, 10));
+		query.bindValue(":score", itoa(tde.moves[i].score, sz, 10));
 		query.exec();
-		cb.doMove(tde->moves[i].move, false);
+		cb.doMove(tde.moves[i].move, false);
 	}
 }
 
@@ -480,126 +480,5 @@ QString Database::getPath()
 {
 	QSqlDatabase db = QSqlDatabase::database(dbname);
 	return db.databaseName();
-}
-
-bool BookDBEntry::moveExist(const ChessMove& move)
-{
-	QVector<BookDBMove>::iterator it = movelist.begin();
-	while (it != movelist.end())
-	{
-		if (it->move == move)
-			return true;
-		++it;
-	}
-	return false;
-}
-
-void BookDBEntry::deleteMove(const ChessMove& move)
-{
-	int i;
-	for (i = 0; i < movelist.size(); i++)
-	{
-		if (movelist[i].move == move)
-		{
-			movelist.remove(i);
-			return;
-		}
-	}
-}
-
-void BookDBEntry::setFirst(const ChessMove& move)
-{
-	int i;
-	for (i = 0; i < movelist.size(); i++)
-		if (movelist[i].move == move)
-			break;
-	if (i == movelist.size()) // Not found
-		return;
-	if (i == 0) // Allready first
-		return;
-	BookDBMove bm = movelist[0];
-	movelist[0] = movelist[i];
-	movelist[i] = bm;
-}
-
-void BookDBEntry::convertToMoveList(QVector<BookDBMove>& movelist, const QString& data)
-{
-	BookDBMove bdm;
-	QStringList qmove;
-	QStringList qlist = data.split(';');
-
-	movelist.clear();
-	for (int i = 0; i < qlist.size(); i++)
-	{
-		qmove = qlist[i].split('|');
-		bdm.clear();
-		if (qmove.size() > 0)
-			bdm.move = board.getMoveFromText(qmove[0].toStdString());
-		if (qmove.size() > 1)
-			bdm.comment = qmove[1];
-		if (!bdm.move.empty())
-			movelist.append(bdm);
-	}
-}
-
-void BookDBEntry::convertFromMoveList(const QVector<BookDBMove>& movelist, QString& data)
-{
-	data.clear();
-	char sz[16];
-	bool first = true;
-	QVector<BookDBMove>::ConstIterator it = movelist.begin();
-	while (it != movelist.end())
-	{
-		if (board.isLegal(ChessMove(it->move)))
-		{
-			if (!first)
-				data += ";";
-			else
-				first = false;
-			data += board.makeMoveText(it->move, sz, 16, FIDE);
-			data += "|";
-			data += it->comment;
-		}
-		++it;
-	}
-}
-
-void BookDBEntry::updateMove(BookDBMove& bm, bool mergemove)
-{
-	for (int i = 0; i < movelist.size(); i++)
-	{
-		if (bm.move == movelist[i].move)
-		{
-			if (mergemove)
-			{
-				if (movelist[i].comment.isEmpty())
-					movelist[i].comment = bm.comment;
-				return;
-			}
-			movelist[i] = bm;
-			return;
-		}
-	}
-	movelist.append(bm);
-}
-
-void BookDBEntry::merge(BookDBEntry& bde)
-{
-	board = bde.board;
-	if (!eval)
-		eval = bde.eval;
-	if (!bde.comment.isEmpty())
-	{
-		if (comment != bde.comment)
-		{
-			if (!comment.isEmpty())
-				comment += "\n";
-			comment += bde.comment;
-		}
-	}
-	if (!score)
-		score = bde.score;
-	for (int i = 0; i < bde.movelist.size(); i++)
-		updateMove(bde.movelist[i], true);
 }
 
