@@ -7,6 +7,7 @@
 #include "Database.h"
 #include "Training.h"
 #include "Computer.h"
+#include "Openings.h"
 
 class DatabaseDialog : public QDialog
 {
@@ -50,7 +51,7 @@ public slots:
 	void importStatisticsDB();
 	void compactStatisticsDB();
 public:
-	DatabaseDialog(QWidget *parent, Database* theory, Database* white, Database* black, Training*, Computer*, Statistics*);
+	DatabaseDialog(QWidget *parent, Database* theory, Database* white, Database* black, Training*, Computer*, Statistics*, Openings*);
 
 private:
 	QLineEdit* theoryFile;
@@ -65,5 +66,6 @@ private:
 	Database* blackDB;
 	Training* trainingDB;
 	Computer* computerDB;
+	Openings* openingsDB;
 };
 

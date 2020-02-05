@@ -210,6 +210,21 @@ struct ComputerDBInfo
 	QString version;
 };
 
+struct OpeningsDBInfo
+{
+	QString db;
+	QString version;
+};
+
+struct OpeningsDBEntry
+{
+	QByteArray cBoard;
+	QString eco;
+	QString name;
+	QString variation;
+	QString subvariation;
+	void clear() { cBoard.clear(); eco.clear(); name.clear(); variation.clear(); subvariation.clear(); };
+};
 
 struct CompressedBoard
 {

@@ -106,6 +106,19 @@ void Path::getMoveList(QStringList& ml, const char* charset, int type)
 	}
 }
 
+void Path::getMoveList(MoveList& ml)
+{
+	ml.clear();
+	for (int i = 0; i < moves.size(); i++)
+	{
+		if (moves[i].move.empty())
+			break;
+		if (i >= _current)
+			break;
+		ml.push_back(moves[i].move);
+	}
+}
+
 void Path::current(int n)
 {
 	if (n >= moves.size())

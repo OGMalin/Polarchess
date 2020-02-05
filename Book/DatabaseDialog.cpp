@@ -11,7 +11,7 @@
 #include <QMessageBox>
 #include <QFile>
 
-DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* white, Database* black, Training* training, Computer* computer, Statistics* stat)
+DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* white, Database* black, Training* training, Computer* computer, Statistics* stat, Openings* opening)
 	:QDialog(parent)
 {
 	QSpacerItem* spacer;
@@ -21,6 +21,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	trainingDB = training;
 	computerDB = computer;
 	statDB = stat;
+	openingsDB = opening;
 	QVBoxLayout* vbox;
 	QGroupBox* group;
 	QPushButton* button;

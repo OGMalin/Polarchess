@@ -4,8 +4,7 @@
 #include <QStringList>
 #include "../Common/ChessMove.h"
 #include "../Common/ChessBoard.h"
-
-//extern const char* STARTFEN;
+#include "../Common/MoveList.h"
 
 struct PathEntry
 {
@@ -55,4 +54,5 @@ public:
 
 	// Get full movelist.
 	void getMoveList(QStringList& ml, const char* charset = NULL, int type = FIDE);
+	void getMoveList(MoveList& ml);
 };

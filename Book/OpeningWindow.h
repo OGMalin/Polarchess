@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Database.h"
 #include <QWidget>
-
-class QLineEdit;
+#include <QLineEdit>
+#include <QString>
+#include "Path.h"
+#include "Openings.h"
 
 class OpeningWindow : public QWidget
 {
@@ -11,8 +12,18 @@ class OpeningWindow : public QWidget
 public:
 	OpeningWindow(QWidget *parent=0);
 	~OpeningWindow();
-	void refresh(BookDBEntry& theory, BookDBEntry& rep);
+	void refresh(Path*);
+	void setOpeningsDB(Openings* db) { openingsDB = db; };
+	QString fontToString();
+	void fontFromString(const QString&);
+
+public slots:
+	void showContextMenu(const QPoint& pos);
+	void selectFont();
+	void editLine();
 
 private:
 	QLineEdit* openingline;
+	Openings* openingsDB;
+	OpeningsDBEntry ode;
 };

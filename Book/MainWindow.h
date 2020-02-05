@@ -4,6 +4,7 @@
 #include "Statistics.h"
 #include "Computer.h"
 #include "Training.h"
+#include "Openings.h"
 #include "StatusWatch.h"
 #include "MoveTableWindow.h"
 #include "OpeningWindow.h"
@@ -108,6 +109,7 @@ private:
 	Database* Base[3];
 	Statistics* statisticsDB;
 	Computer* computerDB;
+	Openings* openingsDB;
 	BookDBEntry bde[3];
 	StatisticsDBEntry sde;
 	ComputerDBEntry cde;

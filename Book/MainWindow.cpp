@@ -61,12 +61,14 @@ MainWindow::MainWindow(QWidget *parent)
 	Base[REPBLACK] = new Database("black");
 	statisticsDB = new Statistics();
 	computerDB = new Computer();
+	openingsDB = new Openings();
 	currentPath = new Path();
 	trainingDB = new Training();
 	trainingDB->SetRepertoireDatabase(WHITE, Base[REPWHITE]);
 	trainingDB->SetRepertoireDatabase(BLACK, Base[REPBLACK]);
 	trainingwindow->setTrainingDB(trainingDB);
 	movewindow->computerDB = computerDB;
+	openingwindow->setOpeningsDB(openingsDB);
 	dgt = NULL;
 	readSettings();
 
@@ -100,7 +102,6 @@ MainWindow::MainWindow(QWidget *parent)
 	boardwindow->setPosition(board);
 	enginewindow->setPosition(board, currentPath->current() / 2 + 1);
 
-	openingwindow->hide();
 	trainingwindow->hide();
 	updateMenu();
 	updateWindow();
@@ -256,16 +257,19 @@ void MainWindow::updateWindow()
 		movewindow->setVisible(false);
 		commentwindow->setVisible(false);
 		enginewindow->setVisible(false);
+		openingwindow->setVisible(false);
 		trainingwindow->setVisible(true);
 	}
 	else
 	{
 		movewindow->refresh(bde[THEORY], bde[REPWHITE], bde[REPBLACK], sde, cde, currentPath->getPosition(), currentPath->current() / 2 + 1);
 		commentwindow->refresh(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
+		openingwindow->refresh(currentPath);
 		trainingwindow->setVisible(false);
 		movewindow->setVisible(true);
 		commentwindow->setVisible(true);
 		enginewindow->setVisible(true);
+		openingwindow->setVisible(true);
 	}
 }
 
@@ -309,6 +313,7 @@ void MainWindow::writeSettings()
 	settings.setValue("dataStatistics", statisticsDB->getPath());
 	settings.setValue("dataComputer", computerDB->getPath());
 	settings.setValue("dataTraining", trainingDB->getPath());
+	settings.setValue("dataOpenings", openingsDB->getPath());
 	settings.setValue("language", locale);
 	settings.setValue("movewindowFont", movewindow->fontToString());
 	settings.setValue("enginewindowFont", enginewindow->fontToString());
@@ -329,6 +334,7 @@ void MainWindow::readSettings()
 	QString dataStatistics;
 	QString dataComputer;
 	QString dataTraining;
+	QString dataOpenings;
 
 	dataPath = QStandardPaths::locate(QStandardPaths::DocumentsLocation, QCoreApplication::organizationName(), QStandardPaths::LocateDirectory);
 	dataPath += "/" + QCoreApplication::applicationName();
@@ -353,6 +359,7 @@ void MainWindow::readSettings()
 	dataStatistics = settings.value("dataStatistics", dataPath + "/Statistics.pst").toString();
 	dataComputer = settings.value("dataComputer", dataPath + "/Computer.pcp").toString();
 	dataTraining = settings.value("dataTraining", dataPath + "/Training.ptr").toString();
+	dataOpenings = settings.value("dataOpenings", dataPath + "/Openings.pop").toString();
 	locale = settings.value("language", QString()).toString();
 	if (locale.isEmpty())
 	{
@@ -388,6 +395,9 @@ void MainWindow::readSettings()
 	if (!dataTraining.isEmpty())
 		if (!trainingDB->open(dataTraining))
 			trainingDB->create(dataTraining);
+	if (!dataOpenings.isEmpty())
+		if (!openingsDB->open(dataOpenings))
+			openingsDB->create(dataOpenings);
 
 	/*
 	QSettings settings;
@@ -848,7 +858,7 @@ void MainWindow::childNeedRefresh()
 
 void MainWindow::setupDatabase()
 {
-	DatabaseDialog dialog(this, Base[THEORY], Base[REPWHITE], Base[REPBLACK], trainingDB, computerDB, statisticsDB);
+	DatabaseDialog dialog(this, Base[THEORY], Base[REPWHITE], Base[REPBLACK], trainingDB, computerDB, statisticsDB, openingsDB);
 	dialog.exec();
 	write = -1;
 	readDB();
