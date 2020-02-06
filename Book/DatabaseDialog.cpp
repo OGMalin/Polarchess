@@ -137,12 +137,14 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	button = new QPushButton(tr("Close"));
 	connect(button, SIGNAL(clicked()), this, SLOT(closeTrainingDB()));
 	grid->addWidget(button, 1, 2);
-	button = new QPushButton(tr("Clear trainingdata"));
+	button = new QPushButton(tr("Clear"));
 	connect(button, SIGNAL(clicked()), this, SLOT(clearTrainingDB()));
 	grid->addWidget(button, 1, 3);
-	button = new QPushButton(tr("Create trainingdata"));
+	button = new QPushButton(tr("Create"));
 	connect(button, SIGNAL(clicked()), this, SLOT(createTrainingDB()));
 	grid->addWidget(button, 1, 4);
+	spacer = new QSpacerItem(spacersize.width(), spacersize.height());
+	grid->addItem(spacer, 1, 5);
 	grid->setAlignment(Qt::AlignLeft);
 	group->setLayout(grid);
 	vbox->addWidget(group);
@@ -165,6 +167,8 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	grid->addItem(spacer, 1, 3);
 	spacer = new QSpacerItem(spacersize.width(), spacersize.height());
 	grid->addItem(spacer, 1, 4);
+	spacer = new QSpacerItem(spacersize.width(), spacersize.height());
+	grid->addItem(spacer, 1, 5);
 	grid->setAlignment(Qt::AlignLeft);
 	group->setLayout(grid);
 	vbox->addWidget(group);
@@ -191,6 +195,32 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	connect(button, SIGNAL(clicked()), this, SLOT(compactStatisticsDB()));
 	button->setToolTip(tr("Remove positions with just a single game."));
 	grid->addWidget(button, 1, 4);
+	spacer = new QSpacerItem(spacersize.width(), spacersize.height());
+	grid->addItem(spacer, 1, 5);
+	grid->setAlignment(Qt::AlignLeft);
+	group->setLayout(grid);
+	vbox->addWidget(group);
+
+	group = new QGroupBox(tr("Openings"));
+	grid = new QGridLayout();
+	openingsFile = new QLineEdit(openingsDB->getPath());
+	openingsFile->setDisabled(true);
+	grid->addWidget(openingsFile, 0, 0, 1, -1);
+	button = new QPushButton(tr("Open"));
+	connect(button, SIGNAL(clicked()), this, SLOT(openOpeningsDB()));
+	grid->addWidget(button, 1, 0);
+	button = new QPushButton(tr("New"));
+	connect(button, SIGNAL(clicked()), this, SLOT(newOpeningsDB()));
+	grid->addWidget(button, 1, 1);
+	button = new QPushButton(tr("Close"));
+	connect(button, SIGNAL(clicked()), this, SLOT(closeOpeningsDB()));
+	grid->addWidget(button, 1, 2);
+	spacer = new QSpacerItem(spacersize.width(), spacersize.height());
+	grid->addItem(spacer, 1, 3);
+	spacer = new QSpacerItem(spacersize.width(), spacersize.height());
+	grid->addItem(spacer, 1, 4);
+	spacer = new QSpacerItem(spacersize.width(), spacersize.height());
+	grid->addItem(spacer, 1, 5);
 	grid->setAlignment(Qt::AlignLeft);
 	group->setLayout(grid);
 	vbox->addWidget(group);
@@ -390,6 +420,36 @@ void DatabaseDialog::closeStatisticDB()
 {
 	statisticFile->setText("");
 	statDB->close();
+}
+
+void DatabaseDialog::openOpeningsDB()
+{
+	QString path = QFileDialog::getOpenFileName(this, tr("Open openings book"), openingsFile->text(), tr("Openings files (*.pop)"));
+	if (!path.isEmpty())
+	{
+		openingsDB->close();
+		openingsFile->setText(path);
+		if (!openingsDB->open(path))
+			openingsDB->create(path);
+	}
+}
+
+void DatabaseDialog::newOpeningsDB()
+{
+	QString path = QFileDialog::getSaveFileName(this, tr("New openings book"), openingsFile->text(), tr("Openings files (*.pop)"));
+	if (!path.isEmpty())
+	{
+		openingsDB->close();
+		openingsFile->setText(path);
+		if (!openingsDB->open(path))
+			openingsDB->create(path);
+	}
+}
+
+void DatabaseDialog::closeOpeningsDB()
+{
+	openingsFile->setText("");
+	openingsDB->close();
 }
 
 void DatabaseDialog::importBookTheory()

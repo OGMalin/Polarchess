@@ -50,6 +50,11 @@ public slots:
 	void closeStatisticDB();
 	void importStatisticsDB();
 	void compactStatisticsDB();
+
+	void openOpeningsDB();
+	void newOpeningsDB();
+	void closeOpeningsDB();
+
 public:
 	DatabaseDialog(QWidget *parent, Database* theory, Database* white, Database* black, Training*, Computer*, Statistics*, Openings*);
 
@@ -60,12 +65,13 @@ private:
 	QLineEdit* trainingFile;
 	QLineEdit* computerFile;
 	QLineEdit* statisticFile;
-	Statistics* statDB;
+	QLineEdit* openingsFile;
 	Database* theoryDB;
 	Database* whiteDB;
 	Database* blackDB;
 	Training* trainingDB;
 	Computer* computerDB;
+	Statistics* statDB;
 	Openings* openingsDB;
 };
 

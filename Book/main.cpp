@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 	QCoreApplication::setApplicationVersion("0.1");
 	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 //#if QT_VERSION >= 0x051400
-//	QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
+	QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 //#endif
 	QApplication app(argc, argv);
 	app.setApplicationDisplayName("PolarBook");
