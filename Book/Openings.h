@@ -2,6 +2,7 @@
 
 #include "DatabaseFormat.h"
 #include <QString>
+#include <QWidget>
 
 class Openings
 {
@@ -26,6 +27,11 @@ public:
 
 	// Get db path
 	QString getPath();
+
+	// Import pgn-file
+	void importPgn(QWidget* parent);
+
+	void exportPgn(QWidget* parent);
 
 private:
 	bool _opened;

@@ -3,7 +3,12 @@
 #include <QSqlQuery>
 #include <QDebug>
 #include <QSqlError>
+#include <QFileDialog>
+#include <QProgressDialog>
+#include <QApplication>
 #include "../Common/WinFile.h"
+#include "../Common/Pgn.h"
+#include "../Common/ChessGame.h"
 
 const char* OPENINGS = "Openings";
 const char* ODBVERSION = "1.0";
@@ -169,4 +174,104 @@ void Openings::add(OpeningsDBEntry& ode, ChessBoard& cb)
 		qDebug() << "Driver error: " << error.driverText();
 	}
 	return;
+}
+
+void Openings::importPgn(QWidget* parent)
+{
+	OpeningsDBEntry ode;
+	ChessBoard cb;
+	Pgn pgn;
+	ChessGame game;
+
+	if (!_opened)
+		return;
+
+	// Get pgn filename
+	QString path = QFileDialog::getOpenFileName(parent, "Open pgnfile", QString(), "Pgn files (*.pgn)");
+	if (path.isEmpty())
+		return;
+	if (!pgn.open(path.toStdString(), true))
+		return;
+
+	// Open progress dialog
+	QProgressDialog progress("Importing Pgn file.", "Cancel", 0, pgn.file.size(), parent);
+	progress.setWindowModality(Qt::WindowModal);
+	progress.setMinimumDuration(0);
+	progress.show();
+
+	int next = 1;
+	while (pgn.read(game, next++, 20))
+	{
+		game.toEnd();
+		if (!game.getPosition(cb))
+			continue;
+		ode = find(cb);
+
+		if (game.info.ECO.size())
+			ode.eco = game.info.ECO.c_str();
+		if (game.info.Opening.size())
+			ode.name = game.info.Opening.c_str();
+		if (game.info.Variation.size())
+			ode.variation = game.info.Variation.c_str();
+		if (game.info.SubVariation.size())
+			ode.subvariation = game.info.SubVariation.c_str();
+		progress.setValue(pgn.file.dwFilepointer);
+		QApplication::processEvents();
+		if (progress.wasCanceled())
+			return;
+
+		add(ode, cb);
+	}
+	progress.setValue(pgn.file.size());
+}
+
+void Openings::exportPgn(QWidget* parent)
+{
+	OpeningsDBEntry ode;
+	ChessBoard cb;
+	Pgn pgn;
+	ChessGame game;
+
+	// Get pgn filename
+	QString path = QFileDialog::getSaveFileName(parent, "Save pgnfile", QString(), "Pgn files (*.pgn)");
+	if (path.isEmpty())
+		return;
+
+	QSqlDatabase db = QSqlDatabase::database(OPENINGS);
+	if (!_opened)
+		return;
+	if (!db.open())
+		return;
+
+
+	if (!pgn.open(path.toStdString(), false))
+		return;
+
+	// Open progress dialog
+	QProgressDialog progress("Export Pgn file.", "Cancel", 0, 100, parent);
+	progress.setWindowModality(Qt::WindowModal);
+	progress.setMinimumDuration(0);
+	progress.show();
+
+	QSqlQuery query(db);
+	QString qs;
+
+	query.exec("SELECT * FROM openings;");
+	progress.setMaximum(query.size());
+	int i = 0;
+	while (query.next())
+	{
+		progress.setValue(i++);
+		QApplication::processEvents();
+		if (progress.wasCanceled())
+			return;
+		game.clear();
+		game.setStartPosition(CompressedBoard::decompress(query.value("position").toByteArray()));
+		game.info.ECO = query.value("eco").toString().toStdString();
+		game.info.Opening = query.value("name").toString().toStdString();
+		game.info.Variation = query.value("variation").toString().toStdString();
+		game.info.SubVariation = query.value("subvariation").toString().toStdString();
+		pgn.appendGame(game);
+	}
+	progress.setValue(query.size());
 }

@@ -95,10 +95,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 	readDB();
 
-
-	QByteArray ba = CompressedBoard::compress(board);
-	board = CompressedBoard::decompress(ba);
-
 	boardwindow->setPosition(board);
 	enginewindow->setPosition(board, currentPath->current() / 2 + 1);
 
@@ -601,6 +597,11 @@ void MainWindow::commentChanged(QString& comment, int rep)
 
 void MainWindow::trainingStart()
 {
+	//ChessBoard cb = currentPath->getPosition();
+	//QByteArray ba= CompressedBoard::compress(cb);
+	//cb = CompressedBoard::decompress(ba);
+	//boardwindow->setPosition(cb);
+	//return;
 	inTraining = true;
 	trainingwindow->setCurrentBoard(currentPath->getPosition());
 	trainingwindow->updateStat();

@@ -54,6 +54,8 @@ public slots:
 	void openOpeningsDB();
 	void newOpeningsDB();
 	void closeOpeningsDB();
+	void importOpeningsDB();
+	void exportOpeningsDB();
 
 public:
 	DatabaseDialog(QWidget *parent, Database* theory, Database* white, Database* black, Training*, Computer*, Statistics*, Openings*);

@@ -362,13 +362,18 @@ QByteArray CompressedBoard::compress(ChessBoard& cb)
 	int p;
 	int next = 0;
 	memset(pieces, 0, 32);
+	for (i = 63; i > 0; i--)
+	{
+		if (cb[i] != EMPTY)
+			occupied |= 1;
+		occupied = occupied << 1;
+	}
+	if (cb[0] != EMPTY)
+		occupied |= 1;
 	for (i = 0; i < 64; i++)
 	{
 		if (cb[i] != EMPTY)
 		{
-			occupied |= 1;
-			if (i < 63)
-				occupied = occupied << 1;
 			switch (cb[i])
 			{
 			case whitepawn:
@@ -433,11 +438,6 @@ QByteArray CompressedBoard::compress(ChessBoard& cb)
 				break;
 			}
 			++next;
-		}
-		else
-		{
-			if (i < 63)
-				occupied = occupied << 1;
 		}
 		if (next >= 32)
 			break;

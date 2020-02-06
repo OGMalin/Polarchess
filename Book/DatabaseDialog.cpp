@@ -215,10 +215,12 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	button = new QPushButton(tr("Close"));
 	connect(button, SIGNAL(clicked()), this, SLOT(closeOpeningsDB()));
 	grid->addWidget(button, 1, 2);
-	spacer = new QSpacerItem(spacersize.width(), spacersize.height());
-	grid->addItem(spacer, 1, 3);
-	spacer = new QSpacerItem(spacersize.width(), spacersize.height());
-	grid->addItem(spacer, 1, 4);
+	button = new QPushButton(tr("Import"));
+	connect(button, SIGNAL(clicked()), this, SLOT(importOpeningsDB()));
+	grid->addWidget(button, 1, 3);
+	button = new QPushButton(tr("Export"));
+	connect(button, SIGNAL(clicked()), this, SLOT(exportOpeningsDB()));
+	grid->addWidget(button, 1, 4);
 	spacer = new QSpacerItem(spacersize.width(), spacersize.height());
 	grid->addItem(spacer, 1, 5);
 	grid->setAlignment(Qt::AlignLeft);
@@ -601,5 +603,15 @@ void DatabaseDialog::importStatisticsDB()
 void DatabaseDialog::compactStatisticsDB()
 {
 	statDB->removeSingleGame(this);
+}
+
+void DatabaseDialog::importOpeningsDB()
+{
+	openingsDB->importPgn(this);
+}
+
+void DatabaseDialog::exportOpeningsDB()
+{
+	openingsDB->exportPgn(this);
 }
 
