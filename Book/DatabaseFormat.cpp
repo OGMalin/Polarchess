@@ -378,63 +378,57 @@ QByteArray CompressedBoard::compress(ChessBoard& cb)
 			{
 			case whitepawn:
 				if (SQUARE64(cb.enPassant) == (i - 8))
-					p = epPawn;
+					pieces[next] = epPawn;
 				else
-					p = WhitePawn;
-				pieces[next / 2] |= (next % 2 ? p << 4 : p);
+					pieces[next] = WhitePawn;
 				break;
 			case whiteknight:
-				pieces[next / 2] |= (next % 2 ? WhiteKnight << 4 : WhiteKnight);
+				pieces[next] = WhiteKnight;
 				break;
 			case whitebishop:
-				pieces[next / 2] |= (next % 2 ? WhiteBishop << 4 : WhiteBishop);
+				pieces[next] = WhiteBishop;
 				break;
 			case whiterook:
 				if (((cb.castle&whitekingsidecastle) && (i == H1)) || ((cb.castle&whitequeensidecastle) && (i == A1)))
-					p = CastleRook;
+					pieces[next] = CastleRook;
 				else
-					p = WhiteRook;
-				pieces[next / 2] |= (next % 2 ? p << 4 : p);
+					pieces[next] = WhiteRook;
 				break;
 			case whitequeen:
-				pieces[next / 2] |= (next % 2 ? WhiteQueen << 4 : WhiteQueen);
+				pieces[next] = WhiteQueen;
 				break;
 			case whiteking:
 				if (cb.toMove == WHITE)
-					p = tomoveKing;
+					pieces[next] = tomoveKing;
 				else
-					p = WhiteKing;
-				pieces[next / 2] |= (next % 2 ? p << 4 : p);
+					pieces[next] = WhiteKing;
 				break;
 			case blackpawn:
-				if (SQUARE64(cb.enPassant) == (i - 8))
-					p = epPawn;
+				if (SQUARE64(cb.enPassant) == (i + 8))
+					pieces[next] = epPawn;
 				else
-					p = BlackPawn;
-				pieces[next / 2] |= (next % 2 ? p << 4 : p);
+					pieces[next] = BlackPawn;
 				break;
 			case blackknight:
-				pieces[next / 2] |= (next % 2 ? BlackKnight << 4 : BlackKnight);
+				pieces[next] = BlackKnight;
 				break;
 			case blackbishop:
-				pieces[next / 2] |= (next % 2 ? BlackBishop << 4 : BlackBishop);
+				pieces[next] = BlackBishop;
 				break;
 			case blackrook:
 				if (((cb.castle&blackkingsidecastle) && (i == H8)) || ((cb.castle&blackqueensidecastle) && (i == A8)))
-					p = CastleRook;
+					pieces[next] = CastleRook;
 				else
-					p = BlackRook;
-				pieces[next / 2] |= (next % 2 ? p << 4 : p);
+					pieces[next] = BlackRook;
 				break;
 			case blackqueen:
-				pieces[next / 2] |= (next % 2 ? BlackQueen << 4 : BlackQueen);
+				pieces[next] = BlackQueen;
 				break;
 			case blackking:
 				if (cb.toMove == BLACK)
-					p = tomoveKing;
+					pieces[next] = tomoveKing;
 				else
-					p = BlackKing;
-				pieces[next / 2] |= (next % 2 ? p << 4 : p);
+					pieces[next] = BlackKing;
 				break;
 			}
 			++next;
@@ -458,8 +452,24 @@ QByteArray CompressedBoard::compress(ChessBoard& cb)
 	occupied = occupied >> 8;
 	data.push_back(occupied & 0xff);
 	occupied = occupied >> 8;
-	for (i = 0; i < next / 2; i++)
-		data.push_back(pieces[i]);
+	unsigned char b;
+	bool low = true;
+	for (i = 0; i < next; i++)
+	{
+		if (low)
+		{
+			b = pieces[i];
+		}
+		else
+		{
+			b |= pieces[i] << 4;
+			data.push_back(b);
+			b = 0;
+		}
+		low = low ? false : true;
+	}
+	if (!low)
+		data.push_back(b);
 	return data;
 }
 
@@ -570,7 +580,7 @@ ChessBoard CompressedBoard::decompress(QByteArray& data)
 				}
 				else if ((i >= A5) && (i <= H5))
 				{
-					cb.enPassant = SQUARE128(i - 8);
+					cb.enPassant = SQUARE128(i + 8);
 					cb[i] = blackpawn;
 				}
 				break;

@@ -18,17 +18,17 @@ struct BOARDTHEMA
 
 struct BoardWindowMarkupArrow
 {
-	int fromSquare;
-	int toSquare;
+	int fromSquare=0;
+	int toSquare=0;
 	QColor color;
-	int timeout;
+	int timeout=0;
 };
 
 struct BoardWindowMarkupSquare
 {
-	int square;
+	int square=0;
 	QColor color;
-	int timeout;
+	int timeout=0;
 };
 
 class BoardWindow :public QWidget

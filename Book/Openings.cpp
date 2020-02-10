@@ -9,6 +9,7 @@
 #include "../Common/WinFile.h"
 #include "../Common/Pgn.h"
 #include "../Common/ChessGame.h"
+#include <QDebug>
 
 const char* OPENINGS = "Openings";
 const char* ODBVERSION = "1.0";
@@ -205,6 +206,16 @@ void Openings::importPgn(QWidget* parent)
 		game.toEnd();
 		if (!game.getPosition(cb))
 			continue;
+#ifdef _DEBUG
+		QByteArray dba = CompressedBoard::compress(cb);
+		ChessBoard dcb = CompressedBoard::decompress(dba);
+		if (cb != dcb)
+		{
+			qDebug("Compressing error:");
+			qDebug(cb.getFen(true).c_str());
+			qDebug(dcb.getFen(true).c_str());
+		}
+#endif
 		ode = find(cb);
 
 		if (game.info.ECO.size())

@@ -9,6 +9,8 @@
 BoardWindow::BoardWindow(QWidget* parent)
 	:QWidget(parent)
 {
+	dragFromSquare = 0;
+	squareSize = 50;
 	whiteAtBottom = true;
 	dragPiece = EMPTY;
 	autoQueen = true;
