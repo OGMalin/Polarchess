@@ -36,6 +36,7 @@ public:
 	void updateStat();
 	void moveEntered(ChessMove& move);
 	bool isRunning() { return running; };
+	void stopRunning();
 private:
 	StatusWatch* watch;
 	QComboBox* colorBox;

@@ -597,11 +597,11 @@ void MainWindow::commentChanged(QString& comment, int rep)
 
 void MainWindow::trainingStart()
 {
-	ChessBoard cb = currentPath->getPosition();
-	QByteArray ba= CompressedBoard::compress(cb);
-	cb = CompressedBoard::decompress(ba);
-	boardwindow->setPosition(cb);
-	return;
+	//ChessBoard cb = currentPath->getPosition();
+	//QByteArray ba= CompressedBoard::compress(cb);
+	//cb = CompressedBoard::decompress(ba);
+	//boardwindow->setPosition(cb);
+	//return;
 	inTraining = true;
 	trainingwindow->setCurrentBoard(currentPath->getPosition());
 	trainingwindow->updateStat();
@@ -612,6 +612,8 @@ void MainWindow::trainingStart()
 void MainWindow::trainingStop()
 {
 	inTraining = false;
+	if (trainingwindow->isRunning())
+		trainingwindow->stopRunning();
 	updateWindow();
 	updateMenu();
 }

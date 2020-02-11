@@ -201,3 +201,8 @@ void TrainingWindow::moveEntered(ChessMove& move)
 	trainingLine.decScore();
 	updateStat();
 }
+
+void TrainingWindow::stopRunning()
+{
+	running = false;
+}
