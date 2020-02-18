@@ -319,8 +319,8 @@ bool ChessBoard::isLegal(ChessMove& m)
 const ChessMove ChessBoard::getMoveFromText(const std::string text)
 {
 	int moveit;
-	MoveList ml;
-	MoveList allmoves;
+	MoveList* ml = new MoveList;
+	MoveList* allmoves = new MoveList;
 	MoveGenerator mgen;
 	ChessMove m;
 	typePiece piece, ppiece = EMPTY;
@@ -347,6 +347,8 @@ const ChessMove ChessBoard::getMoveFromText(const std::string text)
 	if (len<2)
 	{
 		m.score = 1;
+		delete ml;
+		delete allmoves;
 		return m; // Move is an empty move by default.
 	}
 	// Castle
@@ -414,12 +416,12 @@ const ChessMove ChessBoard::getMoveFromText(const std::string text)
 
 	piece = PIECE(piece);
 	piece = (toMove == WHITE) ? piece : piece + 6;
-	mgen.makeMoves(*this, allmoves);
+	mgen.makeMoves(*this, *allmoves);
 	moveit = 0;
-	ml.clear();
-	while (moveit != allmoves.size())
+	ml->clear();
+	while (moveit != allmoves->size())
 	{
-		m = (allmoves[moveit]);
+		m = allmoves->at(moveit);
 		if (piece == board[m.fromSquare])
 		{
 			if (fFile >= 0)
@@ -459,19 +461,21 @@ const ChessMove ChessBoard::getMoveFromText(const std::string text)
 				++moveit;
 				continue;
 			}
-			ml.push_back(m);
+			ml->push_back(m);
 		}
 		++moveit;
 	};
-	if (ml.size() == 1)
+	if (ml->size() == 1)
 	{
-		m = (ml[ml.begin()]);
+		m = (ml->at(ml->begin()));
 	}
 	else
 	{
 		m.clear();
 		m.score = 2;
 	}
+	delete ml;
+	delete allmoves;
 	return m;
 }
 
@@ -811,8 +815,12 @@ char* ChessBoard::makeMoveText(const ChessMove& cm, char* buf, int bufsize, int 
 	}
 	m.score = cm.score;
 
-	MoveList ml1, ml2;
+	MoveList* ml1 = new MoveList;
+	MoveList* ml2 = new MoveList;
+//	MoveList ml1;
+//	MoveList ml2;
 	MoveGenerator mg;
+
 	piece = PIECE(board[m.fromSquare]);
 	switch (piece)
 	{
@@ -837,23 +845,23 @@ char* ChessBoard::makeMoveText(const ChessMove& cm, char* buf, int bufsize, int 
 			buf[p++] = '1' + RANK(m.fromSquare);
 			break;
 		}
-		mg.makeMoves(*this, ml1);
+		mg.makeMoves(*this, *ml1);
 		it = 0;
-		while (it<ml1.size())
+		while (it<ml1->size())
 		{
-			if ((ml1[it].toSquare == m.toSquare) && (PIECE(board[ml1[it].fromSquare]) == piece))
-				ml2.push_back(ml1[it]);
+			if ((ml1->at(it).toSquare == m.toSquare) && (PIECE(board[ml1->at(it).fromSquare]) == piece))
+				ml2->push_back(ml1->at(it));
 			it++;
 		};
-		if (ml2.size()>1)
+		if (ml2->size()>1)
 		{
 			f = FILE(m.fromSquare);
 			r = RANK(m.fromSquare);
 			it = 0;
 			cnt = 0;
-			while (it<ml2.size())
+			while (it<ml2->size())
 			{
-				if (FILE(ml2[it].fromSquare) == f)
+				if (FILE(ml2->at(it).fromSquare) == f)
 					cnt++;
 				it++;
 			};
@@ -902,8 +910,8 @@ char* ChessBoard::makeMoveText(const ChessMove& cm, char* buf, int bufsize, int 
 	mg.doMove(*this, m);
 	if (mg.inCheck(*this, toMove))
 	{
-		mg.makeMoves(*this, ml1);
-		if (ml1.size() == 0)
+		mg.makeMoves(*this, *ml1);
+		if (ml1->size() == 0)
 			buf[p++] = '#';
 		else
 			buf[p++] = '+';
@@ -918,6 +926,8 @@ char* ChessBoard::makeMoveText(const ChessMove& cm, char* buf, int bufsize, int 
 		buf[p++] = '.';
 	}
 	buf[p++] = '\0';
+	delete ml1;
+	delete ml2;
 	return buf;
 }
 

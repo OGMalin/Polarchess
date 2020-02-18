@@ -52,17 +52,19 @@ bool Engine::load(QString& enginefile)
 		uci ? uci->init(keys[i], settings.value(keys[i]).toString()):xboard->init(keys[i], settings.value(keys[i]).toString());
 	settings.endGroup();
 
+	QMetaObject::Connection con;
+
 	if (uci)
 	{
-		connect(uci, SIGNAL(engineStarted()), SLOT(slotEngineStarted()));
-		connect(uci, SIGNAL(engineStoped()), SLOT(slotEngineStoped()));
-		connect(uci, SIGNAL(engineInfo(const EngineInfo&)), SLOT(slotEngineInfo(const EngineInfo&)));
+		con = connect(uci, SIGNAL(engineStarted()), SLOT(slotEngineStarted()));
+		con = connect(uci, SIGNAL(engineStoped()), SLOT(slotEngineStoped()));
+		con = connect(uci, SIGNAL(engineInfo(const EngineInfo&)), SLOT(slotEngineInfo(const EngineInfo&)));
 		return uci->load(enginepath);
 	}
 	
-	connect(xboard, SIGNAL(engineStarted()), SLOT(slotEngineStarted()));
-	connect(xboard, SIGNAL(engineStoped()), SLOT(slotEngineStoped()));
-	connect(xboard, SIGNAL(engineInfo(const EngineInfo&)), SLOT(slotEngineInfo(const EngineInfo&)));
+	con = connect(xboard, SIGNAL(engineStarted()), SLOT(slotEngineStarted()));
+	con = connect(xboard, SIGNAL(engineStoped()), SLOT(slotEngineStoped()));
+	con = connect(xboard, SIGNAL(engineInfo(const EngineInfo&)), SLOT(slotEngineInfo(const EngineInfo&)));
 	return xboard->load(enginepath);
 }
 

@@ -79,12 +79,12 @@ bool Openings::create(const QString& path)
 	query.bindValue(":version", ODBVERSION);
 	query.exec();
 	query.exec("CREATE TABLE openings ( "
-		"position BLOB,"
-		"eco	TEXT,"
-		"name	TEXT,"
-		"variation	TEXT,"
+		"position BLOB, "
+		"eco	TEXT, "
+		"name	TEXT, "
+		"variation	TEXT, "
 		"subvariation	TEXT"
-		"); ");
+		" ); ");
 	query.exec("CREATE INDEX position on training (position);");
 	odi.db = ODBTYPE;
 	odi.version = ODBVERSION;

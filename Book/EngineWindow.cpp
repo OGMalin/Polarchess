@@ -296,13 +296,14 @@ void EngineWindow::slotEngineInfo(const EngineInfo& info)
 			model->setItem(line - 1, 3, item);
 			if ((info.time >= timeLimit) && (line==1) && !info.lowerbound && !info.upperbound)
 			{
-				ComputerDBEngine ce;
-				ce.engine = engineName;
-				ce.cp = info.cp;
-				ce.depth = info.depth;
-				ce.time = info.time;
-				ce.pv = info.pv;
-				emit enginePV(ce, freezing?freezeBoard:currentBoard);
+				ComputerDBEngine* ce=new ComputerDBEngine;
+				ce->engine = engineName;
+				ce->cp = info.cp;
+				ce->depth = info.depth;
+				ce->time = info.time;
+				ce->pv = info.pv;
+				emit enginePV(*ce, freezing?freezeBoard:currentBoard);
+				delete ce;
 			}
 		}
 	}

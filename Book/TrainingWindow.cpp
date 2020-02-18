@@ -135,11 +135,12 @@ void TrainingWindow::next()
 		emit trainingSetArrow(SQUARE64(move.fromSquare), SQUARE64(move.toSquare), false, 10);
 		++trainingLine.current;
 	}
-	MoveList ml;
-	trainingLine.moveList(ml);
-	emit trainingAddMoves(ml);
+	MoveList* ml = new MoveList;
+	trainingLine.moveList(*ml);
+	emit trainingAddMoves(*ml);
 	running = true;
 	updateStat();
+	delete ml;
 }
 
 void TrainingWindow::setCurrentBoard(const ChessBoard& cb)
@@ -169,7 +170,7 @@ void TrainingWindow::updateStat()
 
 void TrainingWindow::moveEntered(ChessMove& move)
 {
-	MoveList ml;
+	MoveList* ml= new MoveList;
 	ChessMove nextmove;
 	trainingLine.incAttempt();
 	if (trainingLine.isCorrect(move))
@@ -177,8 +178,8 @@ void TrainingWindow::moveEntered(ChessMove& move)
 		trainingLine.incScore();
 		if (trainingLine.nextMove(nextmove))
 		{
-			trainingLine.moveList(ml);
-			emit trainingAddMoves(ml);
+			trainingLine.moveList(*ml);
+			emit trainingAddMoves(*ml);
 			emit trainingSetArrow(SQUARE64(nextmove.fromSquare), SQUARE64(nextmove.toSquare), false, 10);
 			updateStat();
 		}
@@ -186,8 +187,8 @@ void TrainingWindow::moveEntered(ChessMove& move)
 		{
 			running = false;
 			++trainingLine.current;
-			trainingLine.moveList(ml);
-			emit trainingAddMoves(ml);
+			trainingLine.moveList(*ml);
+			emit trainingAddMoves(*ml);
 			QApplication::processEvents();
 			trainingDB->updateScore(trainingLine);
 			updateStat();
@@ -195,11 +196,12 @@ void TrainingWindow::moveEntered(ChessMove& move)
 		return;
 	}
 	nextmove = trainingLine.currentMove();
-	trainingLine.moveList(ml);
-	emit trainingAddMoves(ml);
+	trainingLine.moveList(*ml);
+	emit trainingAddMoves(*ml);
 	emit trainingSetArrow(SQUARE64(nextmove.fromSquare), SQUARE64(nextmove.toSquare), true, 10);
 	trainingLine.decScore();
 	updateStat();
+	delete ml;
 }
 
 void TrainingWindow::stopRunning()

@@ -258,7 +258,7 @@ void ComputerDBEntry::convertToEngineList(const QString& data, ChessBoard& cb)
 	QStringList qlist = data.split(';');
 	QStringList entry;
 	QStringList smoves;
-	ComputerDBEngine ce;
+	ComputerDBEngine* ce=new ComputerDBEngine;
 	ChessBoard b;
 	ChessMove m;
 	QStringList::iterator mit;
@@ -267,16 +267,16 @@ void ComputerDBEntry::convertToEngineList(const QString& data, ChessBoard& cb)
 	QStringList::iterator it = qlist.begin();
 	while (it != qlist.end())
 	{
-		ce.clear();
+		ce->clear();
 		entry = it->split('|');
 		if (entry.size() > 0)
-			ce.engine = entry[0];
+			ce->engine = entry[0];
 		if (entry.size() > 1)
-			ce.cp = entry[1].toInt();
+			ce->cp = entry[1].toInt();
 		if (entry.size() > 2)
-			ce.depth = entry[2].toInt();
+			ce->depth = entry[2].toInt();
 		if (entry.size() > 3)
-			ce.time = entry[3].toInt();
+			ce->time = entry[3].toInt();
 		if (entry.size() > 4)
 		{
 			smoves = entry[4].split(' ');
@@ -285,14 +285,15 @@ void ComputerDBEntry::convertToEngineList(const QString& data, ChessBoard& cb)
 			while (mit != smoves.end())
 			{
 				m = b.getMoveFromText(mit->toStdString());
-				ce.pv.push_back(m);
+				ce->pv.push_back(m);
 				b.doMove(m, false);
 				++mit;
 			}
 		}
-		enginelist.push_back(ce);
+		enginelist.push_back(*ce);
 		++it;
 	}
+	delete ce;
 }
 
 void ComputerDBEntry::convertFromEngineList(QString& data, ChessBoard& cb)

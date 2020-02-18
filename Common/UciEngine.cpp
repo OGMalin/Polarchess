@@ -135,7 +135,7 @@ void UciEngine::fromEngine(std::string& input)
 	}
 	else if (cmd == "info")
 	{
-		EngineInfo ei;
+		EngineInfo* ei = new EngineInfo;
 		int index = 2;
 		string info = getWord(input, index);
 		++index;
@@ -143,19 +143,19 @@ void UciEngine::fromEngine(std::string& input)
 		{
 			if (info == "depth")
 			{
-				ei.depth = stoi(getWord(input, index));
+				ei->depth = stoi(getWord(input, index));
 			}
 			else if (info == "seldepth")
 			{
-				ei.seldepth = stoi(getWord(input, index));
+				ei->seldepth = stoi(getWord(input, index));
 			}
 			else if (info == "time")
 			{
-				ei.time = stoi(getWord(input, index));
+				ei->time = stoi(getWord(input, index));
 			}
 			else if (info == "nodes")
 			{
-				ei.nodes = strtoul(getWord(input, index).c_str(), NULL, 0);
+				ei->nodes = strtoul(getWord(input, index).c_str(), NULL, 0);
 			}
 			else if (info == "pv")
 			{
@@ -163,7 +163,7 @@ void UciEngine::fromEngine(std::string& input)
 				ChessMove m = b.getMoveFromText(getWord(input, index));
 				while (!m.empty())
 				{
-					ei.pv.push_back(m);
+					ei->pv.push_back(m);
 					b.doMove(m, false);
 					++index;
 					m = b.getMoveFromText(getWord(input, index));
@@ -172,7 +172,7 @@ void UciEngine::fromEngine(std::string& input)
 			}
 			else if (info == "multipv")
 			{
-				ei.multipv = stoi(getWord(input, index));
+				ei->multipv = stoi(getWord(input, index));
 			}
 			else if (info == "score")
 			{
@@ -180,54 +180,54 @@ void UciEngine::fromEngine(std::string& input)
 				++index;
 				if (info == "cp")
 				{
-					ei.cp = stoi(getWord(input, index));
+					ei->cp = stoi(getWord(input, index));
 					if (currentBoard.toMove == BLACK)
-						ei.cp *= -1;
+						ei->cp *= -1;
 				}
 				else if (info == "mate")
 				{
-					ei.mate = stoi(getWord(input, index));
+					ei->mate = stoi(getWord(input, index));
 					if (currentBoard.toMove == BLACK)
-						ei.mate *= -1;
+						ei->mate *= -1;
 				}
 			}
 			else if (info == "currmove")
 			{
-				ei.currmove = currentBoard.getMoveFromText(getWord(input, index));
+				ei->currmove = currentBoard.getMoveFromText(getWord(input, index));
 			}
 			else if (info == "currmovenumber")
 			{
-				ei.currmovenumber = stoi(getWord(input, index));
+				ei->currmovenumber = stoi(getWord(input, index));
 			}
 			else if (info == "hashfull")
 			{
-				ei.hashfull = stoi(getWord(input, index));
+				ei->hashfull = stoi(getWord(input, index));
 			}
 			else if (info == "nps")
 			{
-				ei.nps = strtoul(getWord(input, index).c_str(), NULL, 0);
+				ei->nps = strtoul(getWord(input, index).c_str(), NULL, 0);
 			}
 			else if (info == "tbhits")
 			{
-				ei.tbhits = strtoul(getWord(input, index).c_str(), NULL, 0);
+				ei->tbhits = strtoul(getWord(input, index).c_str(), NULL, 0);
 			}
 			else if (info == "sbhits")
 			{
-				ei.sbhits = strtoul(getWord(input, index).c_str(), NULL, 0);
+				ei->sbhits = strtoul(getWord(input, index).c_str(), NULL, 0);
 			}
 			else if (info == "cpuload")
 			{
-				ei.cpuload = stoi(getWord(input, index));
+				ei->cpuload = stoi(getWord(input, index));
 			}
 			else if (info == "string")
 			{
-				ei.string = getWord(input, index).c_str();
+				ei->string = getWord(input, index).c_str();
 				++index;
 				string s = getWord(input, index);
 				while (s.length())
 				{
-					ei.string += " ";
-					ei.string += s.c_str();
+					ei->string += " ";
+					ei->string += s.c_str();
 					++index;
 					s = getWord(input, index);
 				}
@@ -240,7 +240,7 @@ void UciEngine::fromEngine(std::string& input)
 				ChessMove m = b.getMoveFromText(getWord(input, index));
 				while (!m.empty())
 				{
-					ei.refutation.push_back(m);
+					ei->refutation.push_back(m);
 					b.doMove(m, false);
 					++index;
 					m = b.getMoveFromText(getWord(input, index));
@@ -252,14 +252,14 @@ void UciEngine::fromEngine(std::string& input)
 				string s = getWord(input, index).c_str();
 				if (isNumber(s))
 				{
-					ei.cpunr = stoi(s);
+					ei->cpunr = stoi(s);
 					++index;
 				}
 				ChessBoard b = currentBoard;
 				ChessMove m = b.getMoveFromText(s);
 				while (!m.empty())
 				{
-					ei.refutation.push_back(m);
+					ei->refutation.push_back(m);
 					b.doMove(m, false);
 					++index;
 					m = b.getMoveFromText(getWord(input, index));
@@ -270,7 +270,8 @@ void UciEngine::fromEngine(std::string& input)
 			info = getWord(input, index);
 			++index;
 		}
-		emit engineInfo(ei);
+		emit engineInfo(*ei);
+		delete ei;
 	}
 }
 

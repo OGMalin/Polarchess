@@ -105,10 +105,10 @@ bool Database::create(const QString& path, int dbtype)
 		"fen	TEXT,"
 		"comment	TEXT,"
 		"eval	TEXT,"
-		"attempt	TEXT"
+		"attempt	TEXT,"
 		"score	TEXT,"
-		"movelist	TEXT,"
-		"PRIMARY KEY(fen)"
+		"movelist	TEXT, "
+		"PRIMARY KEY (fen)"
 		"); ");
 	error = query.lastError();
 	if (error.isValid())

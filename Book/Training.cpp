@@ -83,7 +83,7 @@ bool Training::create(const QString& path)
 		"color TEXT,"
 		"score	TEXT,"
 		"moves	TEXT"
-		"); ");
+		" ); ");
 	query.exec("CREATE INDEX score on training (score);");
 	query.exec("CREATE INDEX color on training (color);");
 

@@ -75,10 +75,10 @@ bool Statistics::create(const QString& path)
 	query.bindValue(":version", SDBVERSION);
 	query.exec();
 	query.exec("CREATE TABLE positions ( "
-		"hash	TEXT,"
-		"movelist	TEXT,"
-		"PRIMARY KEY(hash)"
-		"); ");
+		"hash	TEXT, "
+		"movelist	TEXT, "
+		"PRIMARY KEY (hash)"
+		" ); ");
 	sdi.db = SDBTYPE;
 	sdi.version = SDBVERSION;
 	opened = true;

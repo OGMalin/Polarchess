@@ -165,7 +165,7 @@ void DgtBoard::readFromDGT()
 	BYTE code;
 	int index, i, msglen, j;
 	QByteArray data;
-	BYTE d[0x4000];
+	BYTE d[0x3000];
 	index = 0;
 	while (1)
 	{
@@ -224,7 +224,7 @@ void DgtBoard::readFromDGT()
 
 void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 {
-	MoveList ml;
+	MoveList* ml = new MoveList;
 	ChessBoard bS;
 	ChessBoard bL;
 	int i,j;
@@ -248,7 +248,7 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 		convertBoard(bL, lastBoard);
 		findPossibleMoves(ml, bS, bL);
 		memcpy(stableBoard,lastBoard, 64);
-		emit newPosition(bS, ml);
+		emit newPosition(bS, *ml);
 		break;
 	case DGT_MSG_BWTIME:
 		memset(&clock.leftFlag,data[0],1);
@@ -290,6 +290,7 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 	default:
 		break;
 	}
+	delete ml;
 }
 
 void DgtBoard::write(BYTE command)
@@ -363,7 +364,7 @@ void DgtBoard::convertBoard(ChessBoard& cb, BYTE* b)
 	}
 }
 
-void DgtBoard::findPossibleMoves(MoveList&, ChessBoard& start, ChessBoard& end)
+void DgtBoard::findPossibleMoves(MoveList*, ChessBoard& start, ChessBoard& end)
 {
 
 }

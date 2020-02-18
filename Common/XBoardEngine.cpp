@@ -86,21 +86,21 @@ void XBoardEngine::fromEngine(std::string& input)
 	}
 	else if (isNumber(cmd)) // Check if it is a pv line
 	{
-		EngineInfo ei;
+		EngineInfo* ei = new EngineInfo;
 		i = 1;
-		ei.depth = atoi(cmd.c_str());
+		ei->depth = atoi(cmd.c_str());
 		cmd = getWord(input, ++i);
 		if (isNumber(cmd))
 		{
-			ei.cp = atoi(cmd.c_str());
+			ei->cp = atoi(cmd.c_str());
 			cmd = getWord(input, ++i);
 			if (isNumber(cmd))
 			{
-				ei.time = strtoul(cmd.c_str(), NULL, 0) * 10;
+				ei->time = strtoul(cmd.c_str(), NULL, 0) * 10;
 				cmd = getWord(input, ++i);
 				if (isNumber(cmd))
 				{
-					ei.nodes = strtoul(cmd.c_str(), NULL, 0);
+					ei->nodes = strtoul(cmd.c_str(), NULL, 0);
 
 					// Read pv
 					ChessBoard cb = currentBoard;
@@ -110,9 +110,10 @@ void XBoardEngine::fromEngine(std::string& input)
 						m = cb.getMoveFromText(cmd);
 						if (!m.empty())
 							if (cb.doMove(m, true))
-								ei.pv.push_back(m);
+								ei->pv.push_back(m);
 					}
-					emit engineInfo(ei);
+					emit engineInfo(*ei);
+					delete ei;
 				}
 			}
 		}

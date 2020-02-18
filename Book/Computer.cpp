@@ -77,9 +77,9 @@ bool Computer::create(const QString& path)
 	query.exec("CREATE TABLE engines ( engine TEXT);");
 	query.exec("CREATE TABLE positions ( "
 		"hash	TEXT,"
-		"enginelist	TEXT,"
-		"PRIMARY KEY(hash)"
-		"); ");
+		"enginelist	TEXT, "
+		"PRIMARY KEY (hash)"
+		" ); ");
 	cdi.db = CDBTYPE;
 	cdi.version = CDBVERSION;
 	lastSearch.clear();

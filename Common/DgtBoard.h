@@ -56,5 +56,5 @@ private:
 	bool equalBoard(BYTE*, BYTE*);
 	void convertBoard(ChessBoard&, BYTE*);
 	// Search to find the moves between the two board
-	void findPossibleMoves(MoveList&, ChessBoard& start, ChessBoard& end);
+	void findPossibleMoves(MoveList*, ChessBoard& start, ChessBoard& end);
 };
