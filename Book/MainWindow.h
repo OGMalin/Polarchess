@@ -64,6 +64,9 @@ public slots:
 	void trainingFlipBoard(int color);
 	void trainingAddMoves(MoveList&);
 	void trainingSetArrow(int fromSq, int toSq, bool wrong, int sec);
+#ifdef _DEBUG
+	void test();
+#endif
 public:
 	Path* currentPath;
 	MainWindow(QWidget *parent = Q_NULLPTR);

@@ -20,6 +20,7 @@
 #include <QList>
 #include <string>
 #include <QByteArray>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
@@ -145,7 +146,9 @@ void MainWindow::createMenu()
 	connect(langGroup, SIGNAL(triggered(QAction *)), this, SLOT(slotLanguageChanged(QAction *)));
 	langGroup->addAction(engAct);
 	langGroup->addAction(norAct);
-
+#ifdef _DEBUG
+	menuBar()->addAction("Test", this, &MainWindow::test);
+#endif
 	// Setting up the toolbar
 	toolbar = addToolBar("Toolbar");
 	toolbar->setObjectName("MainToolbar");
@@ -597,11 +600,6 @@ void MainWindow::commentChanged(QString& comment, int rep)
 
 void MainWindow::trainingStart()
 {
-	//ChessBoard cb = currentPath->getPosition();
-	//QByteArray ba= CompressedBoard::compress(cb);
-	//cb = CompressedBoard::decompress(ba);
-	//boardwindow->setPosition(cb);
-	//return;
 	inTraining = true;
 	trainingwindow->setCurrentBoard(currentPath->getPosition());
 	trainingwindow->updateStat();
@@ -930,3 +928,31 @@ void MainWindow::useDgt()
 		}
 	}
 }
+
+#ifdef _DEBUG
+void MainWindow::test()
+{
+	Pgn pgn;
+	ChessGame game;
+	ChessBoard cb;
+	QByteArray ba;
+	pgn.open("c:/temp/test.pgn", true);
+	int index = 1;
+	int posindex;
+	while (pgn.read(game, index))
+	{
+		for (posindex=0;posindex<game.position.size();posindex++)
+		{
+			ba = CompressedBoard::compress(game.position[posindex].board);
+			cb = CompressedBoard::decompress(ba);
+			if (cb != game.position[posindex].board)
+			{
+				qDebug() << "Error in game " << index << ", position " << posindex;
+				qDebug() << game.position[posindex].board.getFen().c_str();
+				qDebug() << cb.getFen().c_str();
+			}
+		}
+		++index;
+	}
+}
+#endif
