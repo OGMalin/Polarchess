@@ -287,6 +287,8 @@ bool Training::getNext(TrainingDBEntry& line, int color, ChessBoard& cb)
 	if (!db.open())
 		return false;
 	QSqlQuery query(db);
+	
+	// Get all traininglines from training db. If none are found try to create new lines from repertoire db.
 	query.exec("SELECT rowid, * FROM training ORDER BY score;");
 	if (!query.next())
 	{
@@ -308,6 +310,8 @@ bool Training::getNext(TrainingDBEntry& line, int color, ChessBoard& cb)
 			break;
 	}
 	stat.inBase = list.size();
+
+	// If training from one color, remove the lines with color not in use.
 	if (color >= 0)
 	{
 		for (i = 0; i < list.size(); i++)
@@ -319,6 +323,8 @@ bool Training::getNext(TrainingDBEntry& line, int color, ChessBoard& cb)
 			}
 		}
 	}
+
+	// If training from a position, remove thelines wich don't include this position
 	if (!cb.isStartposition())
 	{
 		bool found;
@@ -343,11 +349,19 @@ bool Training::getNext(TrainingDBEntry& line, int color, ChessBoard& cb)
 			}
 		}
 	}
-
 	stat.loaded = list.size();
+
 	if (!list.size())
 		return false;
-	line = list.front();
+
+	// Select a random line from the lines with lowest score
+	for (i = 1; i < list.size(); i++)
+		if (list[i].score > list[0].score)
+			break;
+	srand(time(NULL));
+	j = rand() % i;
+
+	line = list[j];
 	line.clearScore();
 	return true;
 }
