@@ -2,8 +2,6 @@
 
 #include "FrontEnd.h"
 
-using namespace std;
-
 int main(int argc, char* argv[])
 {
 	// Create the main interface.

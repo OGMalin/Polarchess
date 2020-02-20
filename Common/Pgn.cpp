@@ -3,8 +3,10 @@
 #include "Utility.h"
 #include "Pgn.h"
 #include <iostream>
-#include "MoveList.h"
-#include "MoveGenerator.h"
+#include <algorithm>
+#include "../Common/MoveList.h"
+#include "../Common/MoveGenerator.h"
+#include "../Common/NagValues.h"
 
 using namespace std;
 
@@ -898,13 +900,25 @@ void Pgn::getMovetext(std::string& movetext, ChessGame& g, int mn)
   ChessMove  cm;
   int move;
   string s;
-
+  size_t start;
   // Add comment for this position;
   g.getComment(s);
   if (s.length())
   {
     movetext+="{ ";
-    movetext+=s;
+	start = 0;
+	while ((start = s.find("\n", start)) != std::string::npos)
+	{
+		s.replace(start, 1, "^010");
+		start += 3;
+	}
+	start = 0;
+	while ((start = s.find("\r", start)) != std::string::npos)
+	{
+		s.replace(start, 1, "^013");
+		start += 3;
+	}
+	movetext+=s;
     movetext+=" } ";
   }
 

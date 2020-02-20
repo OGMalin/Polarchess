@@ -2,8 +2,8 @@
 
 #include <windows.h>
 #include <string>
-#include "WinFile.h"
-#include "ChessGame.h"
+#include "../Common/WinFile.h"
+#include "../Common/ChessGame.h"
 
 class Pgn
 {
