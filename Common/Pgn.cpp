@@ -487,7 +487,9 @@ int Pgn::nextToken(std::string& s, std::string& value, int& index)
     switch (c)
     {
       case '{' :                      // Comment
-        getValue(s,value,'{','}',index);
+		string::size_type f;
+		getValue(s,value,'{','}',index);
+		convertControlCharacter(value, false);
         return PGN_comment;
       case '<':                       // Bracket
         getValue(s,value,'<','>',index);
@@ -900,24 +902,12 @@ void Pgn::getMovetext(std::string& movetext, ChessGame& g, int mn)
   ChessMove  cm;
   int move;
   string s;
-  size_t start;
   // Add comment for this position;
   g.getComment(s);
   if (s.length())
   {
     movetext+="{ ";
-	start = 0;
-	while ((start = s.find("\n", start)) != std::string::npos)
-	{
-		s.replace(start, 1, "^010");
-		start += 3;
-	}
-	start = 0;
-	while ((start = s.find("\r", start)) != std::string::npos)
-	{
-		s.replace(start, 1, "^013");
-		start += 3;
-	}
+	convertControlCharacter(s, true);
 	movetext+=s;
     movetext+=" } ";
   }
@@ -1165,4 +1155,46 @@ bool Pgn::appendGame(ChessGame& game)
   file.write(s.c_str(),s.length());
   
   return true;
+}
+
+void Pgn::convertControlCharacter(std::string& s, bool from)
+{
+	string::size_type f;
+	string c;
+	int i;
+	if (from)
+	{
+		while ((f = s.find("\n")) != string::npos)
+			s.replace(f, 1, "^010 ");
+		while ((f = s.find("\r")) != string::npos)
+			s.replace(f, 1, "^013 ");
+		while ((f = s.find("\t")) != string::npos)
+			s.replace(f, 1, "^009 ");
+	}
+	else
+	{
+		f = 0;
+		while ((f = s.find("^",f)) != string::npos)
+		{
+			if ((s.size() > f + i) && (isNumber(s.substr(f + 1, 1), 10)))
+			{
+				i = stoi(s.substr(f + 1, 3));
+				c = (char)i;
+				i = 2;
+				if ((s.size() > f + i) && (isNumber(s.substr(f + 2, 1), 10)))
+				{
+					++i;
+					if (isNumber(s.substr(f + 3, 1), 10))
+						++i;
+				}
+				if ((s.size() > f + i) && (s.at(f + i) == ' '))
+					++i;
+				s.replace(f, i, c);
+			}
+			else
+			{
+				++f;
+			}
+		}
+	}
 }

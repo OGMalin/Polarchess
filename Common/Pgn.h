@@ -56,6 +56,12 @@ protected:
   int  convertNag(std::string& s);
   void expandNags(std::string& s);
   DWORD nextGame;
+  // Convert control characters (\n, \r, \t).
+  // From = true:
+  // \x -> ^0xx
+  // From = false
+  // ^0xx -> \x
+  void convertControlCharacter(std::string&, bool from);
 public:
   WinFile file;
   Pgn();

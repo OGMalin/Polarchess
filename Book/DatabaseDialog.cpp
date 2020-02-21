@@ -517,10 +517,10 @@ void DatabaseDialog::importPGNTheory()
 	dialog.setItems(nummoves, comment, variation);
 	if (dialog.exec() == QDialog::Rejected)
 		return;
+	dialog.getItems(path, nummoves, comment, variation);
 	QFile file(path);
 	if (!file.exists())
 		return;
-	dialog.getItems(path, nummoves, comment, variation);
 	dialog.importPgnFile(this, theoryDB, path, nummoves, comment, variation);
 }
 
@@ -536,10 +536,10 @@ void DatabaseDialog::importPGNWhite()
 	dialog.setItems(nummoves, comment, variation);
 	if (dialog.exec() == QDialog::Rejected)
 		return;
+	dialog.getItems(path, nummoves, comment, variation);
 	QFile file(path);
 	if (!file.exists())
 		return;
-	dialog.getItems(path, nummoves, comment, variation);
 	dialog.importPgnFile(this, whiteDB, path, nummoves, comment, variation);
 }
 
@@ -555,10 +555,10 @@ void DatabaseDialog::importPGNBlack()
 	dialog.setItems(nummoves, comment, variation);
 	if (dialog.exec() == QDialog::Rejected)
 		return;
+	dialog.getItems(path, nummoves, comment, variation);
 	QFile file(path);
 	if (!file.exists())
 		return;
-	dialog.getItems(path, nummoves, comment, variation);
 	dialog.importPgnFile(this, blackDB, path, nummoves, comment, variation);
 }
 
