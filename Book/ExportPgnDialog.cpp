@@ -87,15 +87,15 @@ void ExportPgnDialog::walkThrough(ChessBoard& cb, int ply, QVector<BookDBEntry>&
 		game.setStartPosition(b);
 		for (int i = 0; i < moves.size(); i++)
 		{
-			game.addBoardComment(moves[i].comment.toStdString());
+			game.addBoardComment(moves[i].comment.toLatin1());
 			game.addMove(moves[i].move);
-			game.addMoveComment(moves[i].moveComment.toStdString());
+			game.addMoveComment(moves[i].moveComment.toLatin1());
 			moves[i].comment.clear();
 			moves[i].moveComment.clear();
 		}
 		// Add comment for end position
 		if (!bid->dirty && (bid->board == cb))
-			game.addBoardComment(bid->comment.toStdString());
+			game.addBoardComment(bid->comment.toLatin1());
 		pgn.appendGame(game);
 		return;
 	}

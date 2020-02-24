@@ -1176,15 +1176,15 @@ void Pgn::convertControlCharacter(std::string& s, bool from)
 		f = 0;
 		while ((f = s.find("^",f)) != string::npos)
 		{
-			if ((s.size() > f + i) && (isNumber(s.substr(f + 1, 1), 10)))
+			if ((s.size() > f + 1) && (isNumber(s.substr(f + 1, 1), 10)))
 			{
 				i = stoi(s.substr(f + 1, 3));
 				c = (char)i;
 				i = 2;
-				if ((s.size() > f + i) && (isNumber(s.substr(f + 2, 1), 10)))
+				if ((s.size() > f + i) && (isNumber(s.substr(f + i, 1), 10)))
 				{
 					++i;
-					if (isNumber(s.substr(f + 3, 1), 10))
+					if (isNumber(s.substr(f + i, 1), 10))
 						++i;
 				}
 				if ((s.size() > f + i) && (s.at(f + i) == ' '))
@@ -1194,6 +1194,8 @@ void Pgn::convertControlCharacter(std::string& s, bool from)
 			else
 			{
 				++f;
+				if (f >= s.size())
+					break;
 			}
 		}
 	}
