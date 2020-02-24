@@ -199,7 +199,7 @@ void TrainingWindow::moveEntered(ChessMove& move)
 	trainingLine.moveList(*ml);
 	emit trainingAddMoves(*ml);
 	emit trainingSetArrow(SQUARE64(nextmove.fromSquare), SQUARE64(nextmove.toSquare), true, 10);
-	trainingLine.decScore();
+//	trainingLine.decScore();
 	updateStat();
 	delete ml;
 }

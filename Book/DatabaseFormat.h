@@ -31,7 +31,7 @@ struct TrainingDBMove
 	ChessMove move;
 	int attempt;
 	int score;
-	void clear() { move.clear(); score = 0; };
+	void clear() { move.clear(); score = 0; atempt = 0; };
 };
 
 struct TrainingDBEntry
@@ -54,7 +54,6 @@ struct TrainingDBEntry
 	void scoreLine();
 	void incAttempt() { if (!moves[current].attempt)++moves[current].attempt; };
 	void incScore() { if (!moves[current].score)++moves[current].score; };
-	void decScore() { if (!moves[current].score)--moves[current].score; };
 	void clearScore() { for (int i = 0; i < moves.size(); i++)moves[i].score = moves[i].attempt = 0; };
 };
 
