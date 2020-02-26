@@ -76,9 +76,9 @@ bool Computer::create(const QString& path)
 	query.exec();
 	query.exec("CREATE TABLE engines ( engine TEXT);");
 	query.exec("CREATE TABLE positions ( "
-		"hash	TEXT,"
+		"cboard	BLOB, "
 		"enginelist	TEXT, "
-		"PRIMARY KEY (hash)"
+		"PRIMARY KEY (cboard)"
 		" ); ");
 	cdi.db = CDBTYPE;
 	cdi.version = CDBVERSION;
@@ -101,8 +101,8 @@ QString Computer::getPath()
 
 ComputerDBEntry Computer::find(ChessBoard& cb)
 {
-	HASHKEY hash = cb.hashkey();
-	if (lastSearch.hash == hash)
+	QByteArray cboard = CompressedBoard::compress(cb);
+	if (lastSearch.cboard == cboard)
 		return lastSearch;
 
 	lastSearch.clear();
@@ -115,12 +115,12 @@ ComputerDBEntry Computer::find(ChessBoard& cb)
 		return lastSearch;
 
 	QSqlQuery query(db);
-	query.prepare("SELECT * FROM positions WHERE hash = :hash;");
-	query.bindValue(":hash", hash);
+	query.prepare("SELECT * FROM positions WHERE cboard = :cboard;");
+	query.bindValue(":cboard", cboard);
 	if (query.exec() && query.next())
 	{
 		lastSearch.convertToEngineList(query.value("enginelist").toString(), cb);
-		lastSearch.hash = hash;
+		lastSearch.cboard = cboard;
 	}
 	else
 	{
@@ -132,7 +132,7 @@ ComputerDBEntry Computer::find(ChessBoard& cb)
 void Computer::add(ComputerDBEngine& ce, ChessBoard& cb)
 {
 	bool needUpdate;
-	HASHKEY hash;
+	QByteArray cboard;
 	char sz[16];
 	QSqlError error;
 
@@ -168,15 +168,15 @@ void Computer::add(ComputerDBEngine& ce, ChessBoard& cb)
 		}
 	}
 
-	hash = cb.hashkey();
-	if (lastSearch.hash != hash)
+	cboard = CompressedBoard::compress(cb);
+	if (lastSearch.cboard != cboard)
 	{
 		query.prepare("SELECT * FROM positions WHERE hash = :hash;");
-		query.bindValue(":hash", hash);
+		query.bindValue(":cboard", cboard);
 		if (query.exec() && query.next())
 		{
 			lastSearch.convertToEngineList(query.value("enginelist").toString(), cb);
-			lastSearch.hash = hash;
+			lastSearch.cboard = cboard;
 		}
 		else
 		{
@@ -189,22 +189,22 @@ void Computer::add(ComputerDBEngine& ce, ChessBoard& cb)
 
 	if (needUpdate)
 	{
-		if (lastSearch.hash != hash)
+		if (lastSearch.cboard != cboard)
 		{
 			query.prepare("INSERT INTO positions ( "
-				"hash, enginelist"
+				"cboard, enginelist"
 				") VALUES ( "
-				":hash, :enginelist );");
-			lastSearch.hash = hash;
+				":cboard, :enginelist );");
+			lastSearch.cboard = cboard;
 		}
 		else
 		{
 			query.prepare("UPDATE positions SET "
 				"enginelist = :enginelist "
-				"WHERE hash = :hash;");
+				"WHERE cboard = :cboard;");
 		}
 	}
-	query.bindValue(":hash", lastSearch.hash);
+	query.bindValue(":cboard", lastSearch.cboard);
 	QString qs;
 	lastSearch.convertFromEngineList(qs, cb);
 	query.bindValue(":enginelist", qs);

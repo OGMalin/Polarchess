@@ -75,9 +75,9 @@ bool Statistics::create(const QString& path)
 	query.bindValue(":version", SDBVERSION);
 	query.exec();
 	query.exec("CREATE TABLE positions ( "
-		"hash	TEXT, "
+		"cboard	BLOB, "
 		"movelist	TEXT, "
-		"PRIMARY KEY (hash)"
+		"PRIMARY KEY (cboard)"
 		" ); ");
 	sdi.db = SDBTYPE;
 	sdi.version = SDBVERSION;
@@ -102,13 +102,13 @@ StatisticsDBEntry Statistics::find(ChessBoard& cb)
 		return sde;
 
 	QSqlQuery query(db);
-	HASHKEY hash = cb.hashkey();
-	query.prepare("SELECT * FROM positions WHERE hash = :hash;");
-	query.bindValue(":hash", hash);
+	QByteArray cboard = CompressedBoard::compress(cb);
+	query.prepare("SELECT * FROM positions WHERE cboard = :cboard;");
+	query.bindValue(":cboard", cboard);
 	if (query.exec() && query.next())
 	{
 		sde.convertToMoveList(sde.movelist, query.value("movelist").toString(), cb);
-		sde.hash = hash;
+		sde.cboard = cboard;
 	}
 	return sde;
 }
@@ -169,7 +169,7 @@ void Statistics::importGames(QWidget* parent)
 	std::string ss;
 	Pgn pgn;
 	ChessGame game;
-	HASHKEY hash;
+	QByteArray cboard;
 	int i;
 	QSqlDatabase db = QSqlDatabase::database(STATISTICS);
 	if (!opened)
@@ -232,8 +232,8 @@ void Statistics::importGames(QWidget* parent)
 		while (game.getMove(sdm.move, ss, 0))
 		{
 			sde.clear();
-			sde.hash = cb.hashkey();
-			query.bindValue(":hash", sde.hash);
+			sde.cboard = CompressedBoard::compress(cb);
+			query.bindValue(":cboard", sde.cboard);
 			if (query.exec() && query.next())
 			{
 				sde.convertToMoveList(sde.movelist, query.value("movelist").toString(), cb);
@@ -249,9 +249,9 @@ void Statistics::importGames(QWidget* parent)
 		db.transaction();
 		while (game.getMove(sdm.move, ss, 0))
 		{
-			sde.hash = cb.hashkey();
+			sde.cboard = CompressedBoard::compress(cb);
 			for (i = 0; i < sdes.size(); i++)
-				if (sdes[i].hash == sde.hash)
+				if (sdes[i].cboard == sde.cboard)
 					break;
 			// New record
 			if (i >= sdes.size())
@@ -259,12 +259,12 @@ void Statistics::importGames(QWidget* parent)
 				sde.movelist.clear();
 				sde.movelist.push_back(sdm);
 				query.prepare("INSERT INTO positions ( "
-					"hash, movelist"
+					"cboard, movelist"
 					") VALUES ( "
-					":hash, :movelist );");
+					":cboard, :movelist );");
 				sde.convertFromMoveList(sde.movelist, qs, cb);
 				query.bindValue(":movelist", qs);
-				query.bindValue(":hash", sde.hash);
+				query.bindValue(":cboard", sde.cboard);
 			}
 			// Update old record
 			else
@@ -272,10 +272,10 @@ void Statistics::importGames(QWidget* parent)
 				sdes[i].updateMove(sdm);
 				query.prepare("UPDATE positions SET "
 					"movelist = :movelist "
-					"WHERE hash = :hash;");
+					"WHERE cboard = :cboard;");
 				sdes[i].convertFromMoveList(sdes[i].movelist, qs, cb);
 				query.bindValue(":movelist", qs);
-				query.bindValue(":hash", sde.hash);
+				query.bindValue(":cboard", sde.cboard);
 			}
 			query.exec();
 
@@ -296,8 +296,8 @@ void Statistics::removeSingleGame(QWidget* parent)
 		return;
 	QSqlQuery query(db);
 
-	QVariantList hashlist;
-	HASHKEY hash;
+	QVariantList cboardlist;
+	QByteArray cboard;
 
 	// Open progress dialog
 	QProgressDialog progress("Searching for single games in statistics.", "Cancel", 0, 100, parent);
@@ -311,7 +311,7 @@ void Statistics::removeSingleGame(QWidget* parent)
 	{
 		if (haveSingleMove(query.value("movelist").toString()))
 		{
-			hashlist.push_back(query.value("hash"));
+			cboardlist.push_back(query.value("cboard"));
 		}
 	}
 	progress.setLabelText("Removing single games in statistics.");
@@ -323,16 +323,16 @@ void Statistics::removeSingleGame(QWidget* parent)
 	}
 	int next = 0;
 	int i;
-	progress.setMaximum(hashlist.size());
-	while (next < hashlist.size())
+	progress.setMaximum(cboardlist.size());
+	while (next < cboardlist.size())
 	{
 		db.transaction();
 		for (i = 0; i < 100; i++)
 		{
-			if (next>=hashlist.size())
+			if (next>= cboardlist.size())
 				break;
 			query.prepare("DELETE FROM positions WHERE hash=:hash;");
-			query.bindValue(":hash", hashlist[next]);
+			query.bindValue(":cboard", cboardlist[next]);
 			query.exec();
 			++next;
 		}

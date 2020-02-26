@@ -31,7 +31,7 @@ struct TrainingDBMove
 	ChessMove move;
 	int attempt;
 	int score;
-	void clear() { move.clear(); score = 0; atempt = 0; };
+	void clear() { move.clear(); score = 0; attempt = 0; };
 };
 
 struct TrainingDBEntry
@@ -132,7 +132,7 @@ struct BookDBInfo
 /*
 	Database format
 
-	hash			text
+	cboard			blob
 		position as hashkey.
 
 	movelist	text
@@ -152,10 +152,10 @@ struct StatisticsDBMove
 
 struct StatisticsDBEntry
 {
-	HASHKEY hash;
+	QByteArray cboard;
 	QVector<StatisticsDBMove> movelist;
 	StatisticsDBEntry() { clear(); };
-	void clear() { hash = 0; movelist.clear(); };
+	void clear() { cboard.clear(); movelist.clear(); };
 	//	bool moveExist(ChessMove& move);
 	void updateMove(StatisticsDBMove&bm);
 
@@ -170,10 +170,9 @@ struct StatisticsDBInfo
 };
 
 /*
-	Database format
 
-	hash			text
-		position as hashkey.
+	cboard		blob
+		position as compressed board.
 
 	enginelist	text
 		engine1|cp|depth|time|pv;engine2|cb|depth|time|pv
@@ -192,10 +191,10 @@ struct ComputerDBEngine
 
 struct ComputerDBEntry
 {
-	HASHKEY hash;
+	QByteArray cboard;
 	QVector<ComputerDBEngine> enginelist;
 	ComputerDBEntry() { clear(); };
-	void clear() { hash = 0; enginelist.clear(); };
+	void clear() { cboard.clear(); enginelist.clear(); };
 	//	bool engineExist(QString& e);
 	bool updateEngine(ComputerDBEngine&);
 

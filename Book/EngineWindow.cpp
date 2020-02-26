@@ -16,7 +16,7 @@ EngineWindow::EngineWindow(QWidget *parent)
 	: QWidget(parent)
 {
 	char sz[16];
-	timeLimit = 59999;
+	timeLimit = 29999;
 	engineReady = false;
 	multipv = 1;
 	movenr = 1;
