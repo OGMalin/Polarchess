@@ -228,7 +228,7 @@ void Statistics::importGames(QWidget* parent)
 		game.toStart();
 		// Collect all positions from db
 		sdes.clear();
-		query.prepare("SELECT * FROM positions WHERE hash = :hash;");
+		query.prepare("SELECT * FROM positions WHERE cboard = :cboard;");
 		while (game.getMove(sdm.move, ss, 0))
 		{
 			sde.clear();
@@ -331,7 +331,7 @@ void Statistics::removeSingleGame(QWidget* parent)
 		{
 			if (next>= cboardlist.size())
 				break;
-			query.prepare("DELETE FROM positions WHERE hash=:hash;");
+			query.prepare("DELETE FROM positions WHERE cboard=:cboard;");
 			query.bindValue(":cboard", cboardlist[next]);
 			query.exec();
 			++next;

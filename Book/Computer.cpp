@@ -171,7 +171,7 @@ void Computer::add(ComputerDBEngine& ce, ChessBoard& cb)
 	cboard = CompressedBoard::compress(cb);
 	if (lastSearch.cboard != cboard)
 	{
-		query.prepare("SELECT * FROM positions WHERE hash = :hash;");
+		query.prepare("SELECT * FROM positions WHERE cboard = :cboard;");
 		query.bindValue(":cboard", cboard);
 		if (query.exec() && query.next())
 		{
