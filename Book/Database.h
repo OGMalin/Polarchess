@@ -37,6 +37,11 @@ public:
 
 	// Get db path
 	QString getPath();
+
+#ifdef _DEBUG
+	void convertBase();
+#endif
+
 private:
 	bool opened;
 //	QSqlDatabase bookdb;

@@ -67,7 +67,7 @@ struct TrainingStatistics
 /*
 	Database format
 
-	fen			text
+	cboard		blob
 		position as fenstring rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR W kqKQ -
 
 	comment		text

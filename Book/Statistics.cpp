@@ -192,7 +192,7 @@ void Statistics::importGames(QWidget* parent)
 
 	QSqlQuery query(db);
 	QString qs;
-
+	int wElo = 0, bElo = 0;
 	int next = 1;
 	while (pgn.read(game, next++, 20))
 	{
@@ -205,16 +205,11 @@ void Statistics::importGames(QWidget* parent)
 			sdm.draw = 1;
 		else
 			continue;
-		if (cb.toMove == WHITE)
-		{
-			if (game.info.WhiteElo.size())
-				sdm.elo = stoi(game.info.WhiteElo);
-		}
-		else
-		{
-			if (game.info.BlackElo.size())
-				sdm.elo = stoi(game.info.BlackElo);
-		}
+		wElo = bElo = 0;
+		if (game.info.WhiteElo.size())
+			wElo = stoi(game.info.WhiteElo);
+		if (game.info.BlackElo.size())
+			bElo = stoi(game.info.BlackElo);
 		game.getDate(st);
 		sdm.year = st.wYear;
 		progress.setValue(pgn.file.dwFilepointer);
@@ -249,6 +244,11 @@ void Statistics::importGames(QWidget* parent)
 		db.transaction();
 		while (game.getMove(sdm.move, ss, 0))
 		{
+			if (cb.toMove == WHITE)
+				sdm.elo = wElo;
+			else
+				sdm.elo = bElo;
+
 			sde.cboard = CompressedBoard::compress(cb);
 			for (i = 0; i < sdes.size(); i++)
 				if (sdes[i].cboard == sde.cboard)

@@ -1,5 +1,5 @@
-#include "WinFile.h"
-#include "Utility.h"
+#include "../Common/WinFile.h"
+#include "../Common/Utility.h"
 
 using namespace std;
 

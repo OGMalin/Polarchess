@@ -102,13 +102,13 @@ bool Database::create(const QString& path, int dbtype)
 	}
 
 	query.exec("CREATE TABLE positions ( "
-		"fen	TEXT,"
-		"comment	TEXT,"
-		"eval	TEXT,"
-		"attempt	TEXT,"
-		"score	TEXT,"
+		"cboard	BLOB, "
+		"comment	TEXT, "
+		"eval	TEXT, "
+		"attempt	TEXT, "
+		"score	TEXT, "
 		"movelist	TEXT, "
-		"PRIMARY KEY (fen)"
+		"PRIMARY KEY (cboard) "
 		"); ");
 	error = query.lastError();
 	if (error.isValid())
@@ -152,16 +152,16 @@ bool Database::add(BookDBEntry& bde)
 			"attempt = :attempt"
 			"score = :score,"
 			"movelist = :movelist "
-			"WHERE fen = :fen;");
+			"WHERE cboard = :cboard;");
 	}
 	else
 	{
 		query.prepare("INSERT INTO positions ( "
-			"fen, comment, eval, attempt, score, movelist"
+			"cboard, comment, eval, attempt, score, movelist"
 			") VALUES ( "
-			":fen, :comment, :eval, :attempt, :score, :movelist );");
+			":cboard, :comment, :eval, :attempt, :score, :movelist );");
 	}
-	query.bindValue(":fen", bde.board.getFen(true).c_str());
+	query.bindValue(":cboard", CompressedBoard::compress(bde.board));
 	query.bindValue(":comment", bde.comment);
 	query.bindValue(":eval", itoa(bde.eval, sz, 10));
 	query.bindValue(":attempt", itoa(bde.attempt, sz, 10));
@@ -193,8 +193,8 @@ BookDBEntry Database::find(ChessBoard& board)
 	if (!db.open())
 		return bde;
 	QSqlQuery query(db);
-	query.prepare("SELECT * FROM positions WHERE fen = :fen;");
-	query.bindValue(":fen", board.getFen(true).c_str());
+	query.prepare("SELECT * FROM positions WHERE cboard = :cboard;");
+	query.bindValue(":cboard", CompressedBoard::compress(board));
 	if (query.exec() && query.next())
 	{
 		bde.comment = query.value("comment").toString();
@@ -217,8 +217,8 @@ bool Database::exist(ChessBoard& board)
 {
 	QSqlDatabase db = QSqlDatabase::database(dbname);
 	QSqlQuery query(db);
-	query.prepare("SELECT fen FROM positionS WHERE fen = :fen;");
-	query.bindValue(":fen", board.getFen(true).c_str());
+	query.prepare("SELECT cboard FROM positionS WHERE cboard = :cboard;");
+	query.bindValue(":cboard", CompressedBoard::compress(board));
 	if (query.exec() && query.next())
 		return true;
 	QSqlError error = query.lastError();
@@ -253,7 +253,7 @@ void Database::getTrainingPosition(QVector<BookDBEntry>& pos)
 	if (!db.open())
 		return;
 	QSqlQuery query(db);
-	query.prepare("SELECT fen, comment, attempt, score, movelist FROM positions;");
+	query.prepare("SELECT cboard, comment, attempt, score, movelist FROM positions;");
 	query.exec();
 	QSqlError error = query.lastError();
 	if (error.isValid())
@@ -263,7 +263,7 @@ void Database::getTrainingPosition(QVector<BookDBEntry>& pos)
 	}
 	while (query.next())
 	{
-		bde.board.setFen(query.value("fen").toString().toStdString().c_str());
+		bde.board = CompressedBoard::decompress(query.value("cboard").toByteArray());
 		bde.comment = query.value("comment").toString();
 		bde.attempt = query.value("attempt").toInt();
 		bde.score = query.value("score").toInt();
@@ -317,7 +317,7 @@ void Database::importBase(Database* iBase)
 	while (query2.next())
 	{
 
-		bde2.board.setFen(query2.value("fen").toString().toStdString().c_str());
+		bde2.board = CompressedBoard::decompress(query2.value("cboard").toByteArray());
 		bde2.comment = query2.value("comment").toString();
 		bde2.eval = query2.value("eval").toInt();
 		bde2.attempt = query2.value("attempt").toInt();
@@ -325,8 +325,8 @@ void Database::importBase(Database* iBase)
 		bde2.convertToMoveList(bde2.movelist, query2.value("movelist").toString());
 		bde1.clear();
 		bde1.board = bde2.board;
-		query1.prepare("SELECT * FROM positions WHERE fen = :fen;");
-		query1.bindValue(":fen", bde1.board.getFen(true).c_str());
+		query1.prepare("SELECT * FROM positions WHERE cboard = :cboard;");
+		query1.bindValue(":cboard", CompressedBoard::compress(bde1.board));
 		if (query1.exec() && query1.next())
 		{
 			bde1.comment = query1.value("comment").toString();
@@ -340,17 +340,17 @@ void Database::importBase(Database* iBase)
 				"attempt = :attempt,"
 				"score = :score,"
 				"movelist = :movelist "
-				"WHERE fen = :fen;");
+				"WHERE cboard = :cboard;");
 		}
 		else
 		{
 			query1.prepare("INSERT INTO positions ( "
-				"fen, comment, eval, attempt, score, movelist"
+				"cboard, comment, eval, attempt, score, movelist"
 				") VALUES ( "
-				":fen, :comment, :eval, :attempt, :score, :movelist );");
+				":cboard, :comment, :eval, :attempt, :score, :movelist );");
 		}
 		bde1.merge(bde2);
-		query1.bindValue(":fen", bde1.board.getFen(true).c_str());
+		query1.bindValue(":cboard", CompressedBoard::compress(bde1.board));
 		query1.bindValue(":comment", bde1.comment);
 		query1.bindValue(":eval", itoa(bde1.eval, sz, 10));
 		query1.bindValue(":attempt", itoa(bde1.attempt, sz, 10));
@@ -468,8 +468,8 @@ void Database::updateTrainingScore(TrainingDBEntry& tde)
 	cb.setStartposition();
 	for (i = 0; i < tde.moves.size(); i++)
 	{
-		query.prepare("UPDATE positions SET attempt = attempt + :attempt, score = score + :score WHERE fen = :fen;");
-		query.bindValue(":fen", cb.getFen(true).c_str());
+		query.prepare("UPDATE positions SET attempt = attempt + :attempt, score = score + :score WHERE cboard = :cboard;");
+		query.bindValue(":cboard", CompressedBoard::compress(cb));
 		query.bindValue(":attempt", itoa(tde.moves[i].attempt, sz, 10));
 		query.bindValue(":score", itoa(tde.moves[i].score, sz, 10));
 		query.exec();
@@ -483,3 +483,54 @@ QString Database::getPath()
 	return db.databaseName();
 }
 
+#ifdef _DEBUG
+void Database::convertBase()
+{
+	struct DBRec
+	{
+		int rowid;
+		ChessBoard board;
+	};
+	QVector<DBRec> rec;
+	QSqlDatabase db = QSqlDatabase::database(dbname);
+	if (!db.open())
+		return;
+	QSqlQuery query(db);
+
+	// Rename coulumn
+	db.transaction();
+	query.exec("CREATE TABLE temppos ( "
+		"cboard	BLOB, "
+		"comment	TEXT, "
+		"eval	TEXT, "
+		"attempt	TEXT, "
+		"score	TEXT, "
+		"movelist	TEXT, "
+		"PRIMARY KEY (cboard) "
+		"); ");
+	
+	query.exec("INSERT INTO temppos (cboard, comment, eval, attempt, score, movelist) SELECT fen, comment, eval, attempt, score, movelist FROM positions;");
+	query.exec("DROP TABLE positions;");
+	query.exec("ALTER TABLE temppos RENAME TO positions;");
+	db.commit();
+
+	query.exec("SELECT rowid, cboard FROM positions;");
+	DBRec r;
+	while (query.next())
+	{
+		r.rowid = query.value("rowid").toInt();
+		r.board.setFen(query.value("cboard").toString().toStdString().c_str());
+		rec.push_back(r);
+	}
+	db.transaction();
+	for (int i = 0; i < rec.size(); i++)
+	{
+		query.prepare("UPDATE positions SET cboard = :cboard WHERE rowid = :rowid;");
+		query.bindValue(":cboard", CompressedBoard::compress(rec[i].board));
+		query.bindValue(":rowid", rec[i].rowid);
+		query.exec();
+	}
+	db.commit();
+	query.exec("VACUUM;");
+}
+#endif

@@ -932,27 +932,33 @@ void MainWindow::useDgt()
 #ifdef _DEBUG
 void MainWindow::test()
 {
-	Pgn pgn;
-	ChessGame game;
-	ChessBoard cb;
-	QByteArray ba;
-	pgn.open("c:/temp/test.pgn", true);
-	int index = 1;
-	int posindex;
-	while (pgn.read(game, index))
-	{
-		for (posindex=0;posindex<game.position.size();posindex++)
-		{
-			ba = CompressedBoard::compress(game.position[posindex].board);
-			cb = CompressedBoard::decompress(ba);
-			if (cb != game.position[posindex].board)
-			{
-				qDebug() << "Error in game " << index << ", position " << posindex;
-				qDebug() << game.position[posindex].board.getFen().c_str();
-				qDebug() << cb.getFen().c_str();
-			}
-		}
-		++index;
-	}
+	// ** Test av CompressedBoard
+	//Pgn pgn;
+	//ChessGame game;
+	//ChessBoard cb;
+	//QByteArray ba;
+	//pgn.open("c:/temp/test.pgn", true);
+	//int index = 1;
+	//int posindex;
+	//while (pgn.read(game, index))
+	//{
+	//	for (posindex=0;posindex<game.position.size();posindex++)
+	//	{
+	//		ba = CompressedBoard::compress(game.position[posindex].board);
+	//		cb = CompressedBoard::decompress(ba);
+	//		if (cb != game.position[posindex].board)
+	//		{
+	//			qDebug() << "Error in game " << index << ", position " << posindex;
+	//			qDebug() << game.position[posindex].board.getFen().c_str();
+	//			qDebug() << cb.getFen().c_str();
+	//		}
+	//	}
+	//	++index;
+	//}
+
+	//** Converting database
+	Base[0]->convertBase();
+	Base[1]->convertBase();
+	Base[2]->convertBase();
 }
 #endif
