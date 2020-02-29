@@ -40,19 +40,41 @@ void TrainingDBEntry::moveList(MoveList& ml)
 	}
 }
 
+// Policy to select line.
 void TrainingDBEntry::scoreLine()
 {
-	int i, sc, at;
+	int i, sc;
 	int start = 0;
-	sc = at = 999999;
+	score = 100;
 	if (color == BLACK)
 		start = 1;
 	for (i = start; i < moves.size(); i = i + 2)
 	{
-		at = __min(at, moves[i].attempt);
-		sc = __min(sc, moves[i].score);
+		sc = 0;
+		if (moves[i].attempt > 0)
+		{
+			sc = 0.5 + (float)((100 * moves[i].score) / moves[i].attempt);
+			if (moves[i].attempt < 10)
+				sc -= (10 - moves[i].attempt);
+			if (sc < 0)
+				sc = 0;
+		}
+		score = __min(sc, score);
 	}
-	score = at + sc;
+}
+
+ChessBoard TrainingDBEntry::currentPosition()
+{
+	ChessBoard cb;
+	int i;
+	cb.setStartposition();
+	for (i = 0; i < moves.size(); i++)
+	{
+		if (i >= current)
+			break;
+		cb.doMove(moves[i].move, false);
+	}
+	return cb;
 }
 
 bool BookDBEntry::moveExist(const ChessMove& move)

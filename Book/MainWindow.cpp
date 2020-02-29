@@ -68,6 +68,7 @@ MainWindow::MainWindow(QWidget *parent)
 	trainingDB->SetRepertoireDatabase(WHITE, Base[REPWHITE]);
 	trainingDB->SetRepertoireDatabase(BLACK, Base[REPBLACK]);
 	trainingwindow->setTrainingDB(trainingDB);
+	trainingwindow->setDatabase(Base[THEORY], Base[REPWHITE], Base[REPBLACK]);
 	movewindow->computerDB = computerDB;
 	openingwindow->setOpeningsDB(openingsDB);
 	dgt = NULL;
@@ -301,11 +302,19 @@ void MainWindow::writeSettings()
 	settings.setValue("v2State", v2Splitter->saveState());
 	settings.setValue("hState", hSplitter->saveState());
 	settings.setValue("pathwindowGeometry", pathwindow->saveGeometry());
-	settings.setValue("movewindowGeometry", movewindow->saveGeometry());
-	settings.setValue("commentwindowGeometry", commentwindow->saveGeometry());
-	settings.setValue("boardwindowGeometry", boardwindow->saveGeometry());
-	settings.setValue("enginewindowGeometry", enginewindow->saveGeometry());
-	settings.setValue("trainingwindowGeometry", trainingwindow->saveGeometry());
+	if (inTraining)
+	{
+		settings.setValue("boardwindowGeometry", boardwindow->saveGeometry());
+		settings.setValue("trainingwindowGeometry", trainingwindow->saveGeometry());
+	}
+	else
+	{
+		settings.setValue("openingwindowGeometry", openingwindow->saveGeometry());
+		settings.setValue("movewindowGeometry", movewindow->saveGeometry());
+		settings.setValue("commentwindowGeometry", commentwindow->saveGeometry());
+		settings.setValue("boardwindowGeometry", boardwindow->saveGeometry());
+		settings.setValue("enginewindowGeometry", enginewindow->saveGeometry());
+	}
 	settings.setValue("dataTheory", Base[THEORY]->getPath());
 	settings.setValue("dataWhite", Base[REPWHITE]->getPath());
 	settings.setValue("dataBlack", Base[REPBLACK]->getPath());
@@ -347,6 +356,7 @@ void MainWindow::readSettings()
 	pathwindow->restoreGeometry(settings.value("pathwindowGeometry").toByteArray());
 	movewindow->restoreGeometry(settings.value("movewindowGeometry").toByteArray());
 	commentwindow->restoreGeometry(settings.value("commentwindowGeometry").toByteArray());
+	openingwindow->restoreGeometry(settings.value("openingwindowGeometry").toByteArray());
 	boardwindow->restoreGeometry(settings.value("boardwindowGeometry").toByteArray());
 	enginewindow->restoreGeometry(settings.value("enginewindowGeometry").toByteArray());
 	trainingwindow->restoreGeometry(settings.value("trainingwindowGeometry").toByteArray());
@@ -600,20 +610,38 @@ void MainWindow::commentChanged(QString& comment, int rep)
 
 void MainWindow::trainingStart()
 {
+	QSettings settings;
 	inTraining = true;
+	settings.setValue("pathwindowGeometry", pathwindow->saveGeometry());
+	settings.setValue("openingwindowGeometry", openingwindow->saveGeometry());
+	settings.setValue("movewindowGeometry", movewindow->saveGeometry());
+	settings.setValue("commentwindowGeometry", commentwindow->saveGeometry());
+	settings.setValue("enginewindowGeometry", enginewindow->saveGeometry());
+
 	trainingwindow->setCurrentBoard(currentPath->getPosition());
 	trainingwindow->updateStat();
 	updateWindow();
 	updateMenu();
+
+	pathwindow->restoreGeometry(settings.value("pathwindowGeometry").toByteArray());
+	trainingwindow->restoreGeometry(settings.value("trainingwindowGeometry").toByteArray());
 }
 
 void MainWindow::trainingStop()
 {
+	QSettings settings;
 	inTraining = false;
+	settings.setValue("pathwindowGeometry", pathwindow->saveGeometry());
+	settings.setValue("trainingwindowGeometry", trainingwindow->saveGeometry());
 	if (trainingwindow->isRunning())
 		trainingwindow->stopRunning();
 	updateWindow();
 	updateMenu();
+	pathwindow->restoreGeometry(settings.value("pathwindowGeometry").toByteArray());
+	movewindow->restoreGeometry(settings.value("movewindowGeometry").toByteArray());
+	commentwindow->restoreGeometry(settings.value("commentwindowGeometry").toByteArray());
+	openingwindow->restoreGeometry(settings.value("openingwindowGeometry").toByteArray());
+	enginewindow->restoreGeometry(settings.value("enginewindowGeometry").toByteArray());
 }
 
 void MainWindow::trainingFlipBoard(int color)
@@ -957,8 +985,8 @@ void MainWindow::test()
 	//}
 
 	//** Converting database
-	Base[0]->convertBase();
-	Base[1]->convertBase();
-	Base[2]->convertBase();
+	//Base[0]->convertBase();
+	//Base[1]->convertBase();
+	//Base[2]->convertBase();
 }
 #endif

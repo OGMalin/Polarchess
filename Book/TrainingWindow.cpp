@@ -10,6 +10,9 @@ TrainingWindow::TrainingWindow(QWidget* parent)
 	: QWidget(parent)
 {
 	running = false;
+	Base[0] = Base[1] = Base[2] = NULL;
+	theoryColor.setRgb(0, 0, 128);
+	repColor.setRgb(0, 128, 0);
 
 	QPushButton* button;
 	QVBoxLayout* vbox;
@@ -22,13 +25,23 @@ TrainingWindow::TrainingWindow(QWidget* parent)
 
 	hbox = new QHBoxLayout;
 	watch = new StatusWatch;
+	rowid = new QLabel(tr("Id: "));
 	lRunning = new QLabel(tr("Not running"));
 	inBase = new QLabel(tr("In base: "));
 	loaded = new QLabel(tr("Loaded: "));
+	score = new QLabel(tr("Score: "));
+	hbox->addWidget(rowid);
 	hbox->addWidget(lRunning);
 	hbox->addWidget(watch);
 	hbox->addWidget(inBase);
 	hbox->addWidget(loaded);
+	hbox->addWidget(score);
+	vbox->addLayout(hbox);
+
+	hbox = new QHBoxLayout;
+	comment = new QTextEdit;
+	comment->setDisabled(true);
+	hbox->addWidget(comment);
 	vbox->addLayout(hbox);
 
 	hbox = new QHBoxLayout;
@@ -98,7 +111,7 @@ void TrainingWindow::next()
 		return;
 	running = false;
 	updateStat();
-
+	updateComment(false);
 	ChessBoard cb, b;
 	int i;
 	int color = colorBox->currentIndex()-1;
@@ -159,9 +172,15 @@ void TrainingWindow::updateStat()
 	QString qs = tr("In base: ");
 	QTextStream(&qs) << ts.inBase;
 	inBase->setText(qs);
+	qs = tr("Id: ");
+	QTextStream(&qs) << trainingLine.rowid;
+	rowid->setText(qs);
 	qs = tr("Loaded: ");
 	QTextStream(&qs) << ts.inBase;
 	loaded->setText(qs);
+	qs = tr("Score: ");
+	QTextStream(&qs) << trainingLine.score;
+	score->setText(qs);
 	if (running)
 		lRunning->setText(tr("Running"));
 	else
@@ -172,12 +191,15 @@ void TrainingWindow::moveEntered(ChessMove& move)
 {
 	MoveList* ml= new MoveList;
 	ChessMove nextmove;
+	int attempt = trainingLine.attempt();
 	trainingLine.incAttempt();
 	if (trainingLine.isCorrect(move))
 	{
-		trainingLine.incScore();
+		if (!attempt)
+			trainingLine.incScore();
 		if (trainingLine.nextMove(nextmove))
 		{
+			updateComment(false);
 			trainingLine.moveList(*ml);
 			emit trainingAddMoves(*ml);
 			emit trainingSetArrow(SQUARE64(nextmove.fromSquare), SQUARE64(nextmove.toSquare), false, 10);
@@ -191,10 +213,12 @@ void TrainingWindow::moveEntered(ChessMove& move)
 			emit trainingAddMoves(*ml);
 			QApplication::processEvents();
 			trainingDB->updateScore(trainingLine);
+			updateComment(true);
 			updateStat();
 		}
 		return;
 	}
+	updateComment(true);
 	nextmove = trainingLine.currentMove();
 	trainingLine.moveList(*ml);
 	emit trainingAddMoves(*ml);
@@ -207,4 +231,42 @@ void TrainingWindow::moveEntered(ChessMove& move)
 void TrainingWindow::stopRunning()
 {
 	running = false;
+}
+
+void TrainingWindow::setDatabase(Database* t, Database* w, Database* b)
+{
+	Base[0] = t;
+	Base[1] = w;
+	Base[2] = b;
+}
+
+void TrainingWindow::updateComment(bool visible)
+{
+	BookDBEntry dbe;
+	ChessBoard cb=trainingLine.currentPosition();
+	if (!visible)
+	{
+		comment->hide();
+		return;
+	}
+	comment->show();
+	comment->clear();
+	dbe = Base[0]->find(cb);
+	if (!dbe.comment.isEmpty())
+	{
+		comment->setTextColor(theoryColor);
+		comment->append(dbe.comment);
+	}
+	dbe = Base[1]->find(cb);
+	if (!dbe.comment.isEmpty())
+	{
+		comment->setTextColor(repColor);
+		comment->append(dbe.comment);
+	}
+	dbe = Base[2]->find(cb);
+	if (!dbe.comment.isEmpty())
+	{
+		comment->setTextColor(repColor);
+		comment->append(dbe.comment);
+	}
 }

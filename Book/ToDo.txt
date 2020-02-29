@@ -2,13 +2,9 @@ ToDo List
 
 ?Delete variation and not only moves in movewindow.
 *Training:
-	*Train White/Black repertoire from start.
-	*Mix both repertoire from start.
-	*Train from a given startposition. Either White or Black selected automatic.
 	=Create statistics. Right/Wrong, moves per day etc.
 	*Create new training lines automatic when a reportoire are changed. (Ask before training start).
 ?Number of variation in rep. base.
-=Opening names (ECO code). (Own database)
 *Dgt support
 
 ? Maybe

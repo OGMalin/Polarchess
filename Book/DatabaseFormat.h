@@ -41,7 +41,6 @@ struct TrainingDBEntry
 	int score; // Score for this line made by calculating score and attempt for each move.
 	int color;
 	int current;
-	//	ChessBoard endposition;
 	void clear() { moves.clear(); score = 0; color = 0; current = 0; rowid = 0;/* endposition.clear(); */ };
 	friend bool operator<(const TrainingDBEntry& t1, const TrainingDBEntry& t2) { return t1.score < t2.score; };
 	bool isCorrect(ChessMove& move);
@@ -52,9 +51,11 @@ struct TrainingDBEntry
 	int toMove();
 	void moveList(MoveList&);
 	void scoreLine();
-	void incAttempt() { if (!moves[current].attempt)++moves[current].attempt; };
-	void incScore() { if (!moves[current].score)++moves[current].score; };
+	int attempt() { return moves[current].attempt; };
+	void incAttempt() { moves[current].attempt = 1; };
+	void incScore() { moves[current].score = 1; };
 	void clearScore() { for (int i = 0; i < moves.size(); i++)moves[i].score = moves[i].attempt = 0; };
+	ChessBoard currentPosition();
 };
 
 struct TrainingStatistics

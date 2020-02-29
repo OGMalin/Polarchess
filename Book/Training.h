@@ -14,7 +14,6 @@ class Training
 private:
 	TrainingDBInfo tdi;
 	TrainingStatistics stat;
-	Database* Base[2];
 	QVector<TrainingDBEntry> list;
 //	QVector<TrainingDBEntry> currentList;
 //	ChessBoard currentBoard;
@@ -24,6 +23,8 @@ private:
 //	void convertMovesToString(QString& smoves, TrainingDBEntry& tp);
 	bool opened;
 public:
+	Database* Base[2];
+
 	Training();
 	~Training();
 
