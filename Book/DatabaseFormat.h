@@ -56,6 +56,8 @@ struct TrainingDBEntry
 	void incScore() { moves[current].score = 1; };
 	void clearScore() { for (int i = 0; i < moves.size(); i++)moves[i].score = moves[i].attempt = 0; };
 	ChessBoard currentPosition();
+	ChessBoard endPosition();
+	bool positionExist(ChessBoard& cb);
 };
 
 struct TrainingStatistics

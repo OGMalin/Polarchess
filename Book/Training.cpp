@@ -167,7 +167,7 @@ void Training::createLines(QWidget* parent)
 	QApplication::processEvents();
 	if (progress.wasCanceled())
 		return;
-
+	
 	// Remove last move if it not a repertoire move
 	for (i = 0; i < list.size(); i++)
 	{
@@ -252,7 +252,8 @@ void Training::walkThrough(ChessBoard& cb, TrainingDBEntry& path, int ply, QVect
 	bid = std::lower_bound(pos.begin(), pos.end(), bde);
 
 	// The position don't exist or no moves or repeating move
-	if ((bid->board != cb) || (bid->movelist.size() == 0) || (bid->dirty))
+	//if ((bid->board != cb) || (bid->movelist.size() == 0) || (bid->dirty))
+	if ((bid->board != cb) || (bid->movelist.size() == 0) || path.positionExist(cb))
 	{
 		path.color = color;
 		list.push_back(path);
@@ -282,51 +283,100 @@ void Training::walkThrough(ChessBoard& cb, TrainingDBEntry& path, int ply, QVect
 
 bool Training::getNext(TrainingDBEntry& line, int color, ChessBoard& cb)
 {
-	int i,j;
+	int i,j,score;
+	TrainingDBEntry tde;
 	QSqlDatabase db = QSqlDatabase::database(TRAINING);
 	if (!db.open())
 		return false;
 	QSqlQuery query(db);
 	
-	// Get all traininglines from training db. If none are found try to create new lines from repertoire db.
-	query.exec("SELECT rowid, * FROM training ORDER BY score;");
-	if (!query.next())
-	{
-		createLines(NULL);
-		query.exec("SELECT rowid, * FROM training ORDER BY score;");
-		if (!query.next())
-			return false;
-	}
 	list.clear();
-	TrainingDBEntry tde;
-	while (1)
+	// Get all traininglines from training db. If none are found try to create new lines from repertoire db.
+	if (cb.isStartposition())
 	{
-		tde.rowid = query.value("rowid").toInt();
-		tde.color = query.value("color").toInt();
-		tde.score = query.value("score").toInt();
-		tde.MovesFromString(query.value("moves").toString());
-		list.push_back(tde);
-		if (!query.next())
-			break;
-	}
-	stat.inBase = list.size();
-
-	// If training from one color, remove the lines with color not in use.
-	if (color >= 0)
-	{
-		for (i = 0; i < list.size(); i++)
+		if (color >= 0)
 		{
-			if (list[i].color == OTHERPLAYER(color))
+			query.prepare("SELECT rowid, * FROM training WHERE color=:color ORDER BY score");
+			query.bindValue(":color", color);
+			query.exec();
+			if (!query.next())
 			{
-				list.remove(i);
-				--i;
+				createLines(NULL);
+				query.prepare("SELECT rowid, * FROM training WHERE color=:color ORDER BY score");
+				query.bindValue(":color", color);
+				query.exec();
+				if (!query.next())
+					return false;
 			}
 		}
+		else
+		{
+			query.exec("SELECT rowid, * FROM training ORDER BY score;");
+			if (!query.next())
+			{
+				createLines(NULL);
+				query.exec("SELECT rowid, * FROM training ORDER BY score;");
+				if (!query.next())
+					return false;
+			}
+		}
+		
+		bool first = true;
+		while (1)
+		{
+			tde.rowid = query.value("rowid").toInt();
+			tde.color = query.value("color").toInt();
+			tde.score = query.value("score").toInt();
+			tde.MovesFromString(query.value("moves").toString());
+			if (first)
+				score = tde.score;
+			else if (tde.score > score)
+				break;
+			list.push_back(tde);
+			if (!query.next())
+				break;
+			first = false;
+		}
 	}
-
-	// If training from a position, remove thelines wich don't include this position
-	if (!cb.isStartposition())
+	else
 	{
+		if (color >= 0)
+		{
+			query.prepare("SELECT rowid, * FROM training WHERE color=:color ORDER BY score");
+			query.bindValue(":color", color);
+			query.exec();
+			if (!query.next())
+			{
+				createLines(NULL);
+				query.prepare("SELECT rowid, * FROM training WHERE color=:color ORDER BY score");
+				query.bindValue(":color", color);
+				query.exec();
+				if (!query.next())
+					return false;
+			}
+		}
+		else
+		{
+			// Have to search all positions here
+			query.exec("SELECT rowid, * FROM training ORDER BY score;");
+			if (!query.next())
+			{
+				createLines(NULL);
+				query.exec("SELECT rowid, * FROM training ORDER BY score;");
+				if (!query.next())
+					return false;
+			}
+		}
+		while (1)
+		{
+			tde.rowid = query.value("rowid").toInt();
+			tde.color = query.value("color").toInt();
+			tde.score = query.value("score").toInt();
+			tde.MovesFromString(query.value("moves").toString());
+			list.push_back(tde);
+			if (!query.next())
+				break;
+		}
 		bool found;
 		ChessBoard b;
 		for (i = 0; i < list.size(); i++)
@@ -348,20 +398,29 @@ bool Training::getNext(TrainingDBEntry& line, int color, ChessBoard& cb)
 				--i;
 			}
 		}
+		if (!list.size())
+			return false;
+		score = list[0].score;
+		for (i = 1; i < list.size(); i++)
+		{
+			if (list[i].score > score)
+			{
+				list.remove(i, list.size() - i);
+				break;
+			}
+		}
 	}
+	stat.inBase = list.size();
 	stat.loaded = list.size();
 
 	if (!list.size())
 		return false;
 
 	// Select a random line from the lines with lowest score
-	for (i = 1; i < list.size(); i++)
-		if (list[i].score > list[0].score)
-			break;
 	srand(time(NULL));
-	j = rand() % i;
+	i = rand() % list.size();
 
-	line = list[j];
+	line = list[i];
 	line.clearScore();
 	return true;
 }
@@ -402,56 +461,6 @@ void Training::updateScore(TrainingDBEntry& tde)
 	// Update Rep. database
 	Base[tde.color]->updateTrainingScore(tde);
 }
-
-void TrainingDBEntry::MovesFromString(const QString& smoves)
-{
-	ChessBoard cb;
-	TrainingDBMove tdm;
-	QStringList slist = smoves.split(";");
-	QStringList mlist;
-	cb.setStartposition();
-	moves.clear();
-	for (int i = 0; i < slist.size(); i++)
-	{
-		tdm.clear();
-		mlist = slist[i].split("|");
-		if (mlist.size() < 3)
-			return;
-		tdm.move = cb.getMoveFromText(mlist[0].toStdString());
-		tdm.attempt = mlist[1].toInt();
-		tdm.score = mlist[2].toInt();
-		moves.push_back(tdm);
-		cb.doMove(tdm.move, false);
-	}
-}
-
-QString TrainingDBEntry::MovesToString()
-{
-	char sz[16];
-	QString qs;
-	ChessBoard cb;
-	cb.setStartposition();
-	for (int i = 0; i < moves.size(); i++)
-	{
-		if (cb.isLegal(moves[i].move))
-		{
-			if (i > 0)
-				qs += ";";
-			qs += cb.makeMoveText(moves[i].move, sz, 16, SAN);
-			qs += "|";
-			qs += itoa(moves[i].attempt, sz,10);
-			qs += "|";
-			qs += itoa(moves[i].score, sz, 10);
-			cb.doMove(moves[i].move, false);
-		}
-		else
-		{
-			return qs;
-		}
-	}
-	return qs;
-}
-
 
 QString Training::getPath()
 {

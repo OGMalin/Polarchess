@@ -77,6 +77,79 @@ ChessBoard TrainingDBEntry::currentPosition()
 	return cb;
 }
 
+ChessBoard TrainingDBEntry::endPosition()
+{
+	ChessBoard cb;
+	int i;
+	cb.setStartposition();
+	for (i = 0; i < moves.size(); i++)
+		cb.doMove(moves[i].move, false);
+	return cb;
+}
+
+bool TrainingDBEntry::positionExist(ChessBoard& cb)
+{
+	ChessBoard b;
+	int i;
+	b.setStartposition();
+	for (i = 0; i < (moves.size()-1); i++)
+	{
+		b.doMove(moves[i].move, false);
+		if (cb == b)
+			return true;
+	}
+	return false;
+}
+
+void TrainingDBEntry::MovesFromString(const QString& smoves)
+{
+	ChessBoard cb;
+	TrainingDBMove tdm;
+	QStringList slist = smoves.split(";");
+	QStringList mlist;
+	cb.setStartposition();
+	moves.clear();
+	for (int i = 0; i < slist.size(); i++)
+	{
+		tdm.clear();
+		mlist = slist[i].split("|");
+		if (mlist.size() < 3)
+			return;
+		tdm.move = cb.getMoveFromText(mlist[0].toStdString());
+		tdm.attempt = mlist[1].toInt();
+		tdm.score = mlist[2].toInt();
+		moves.push_back(tdm);
+		cb.doMove(tdm.move, false);
+	}
+}
+
+QString TrainingDBEntry::MovesToString()
+{
+	char sz[16];
+	QString qs;
+	ChessBoard cb;
+	cb.setStartposition();
+	for (int i = 0; i < moves.size(); i++)
+	{
+		if (cb.isLegal(moves[i].move))
+		{
+			if (i > 0)
+				qs += ";";
+			qs += cb.makeMoveText(moves[i].move, sz, 16, SAN);
+			qs += "|";
+			qs += itoa(moves[i].attempt, sz, 10);
+			qs += "|";
+			qs += itoa(moves[i].score, sz, 10);
+			cb.doMove(moves[i].move, false);
+		}
+		else
+		{
+			return qs;
+		}
+	}
+	return qs;
+}
+
 bool BookDBEntry::moveExist(const ChessMove& move)
 {
 	QVector<BookDBMove>::iterator it = movelist.begin();
