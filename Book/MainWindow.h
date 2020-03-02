@@ -64,6 +64,7 @@ public slots:
 	void trainingFlipBoard(int color);
 	void trainingAddMoves(MoveList&);
 	void trainingSetArrow(int fromSq, int toSq, bool wrong, int sec);
+	void trainingStop();
 #ifdef _DEBUG
 	void test();
 #endif
@@ -135,7 +136,6 @@ private:
 	void bookWriteWhite() { bookWrite(REPWHITE); };
 	void bookWriteBlack() { bookWrite(REPBLACK); };
 	void bookWrite(int);
-	void trainingStop();
 	void trainingStart();
 	void trainingClearData();
 	void trainingCreate();

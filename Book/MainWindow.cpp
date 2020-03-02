@@ -92,6 +92,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(trainingwindow, SIGNAL(trainingFlipBoard(int)), this, SLOT(trainingFlipBoard(int)));
 	connect(trainingwindow, SIGNAL(trainingAddMoves(MoveList&)), this, SLOT(trainingAddMoves(MoveList&)));
 	connect(trainingwindow, SIGNAL(trainingSetArrow(int, int, bool, int)), this, SLOT(trainingSetArrow(int, int, bool, int)));
+	connect(trainingwindow, SIGNAL(trainingStop()), this, SLOT(trainingStop()));
 
 	ChessBoard board = currentPath->getPosition();
 
@@ -635,6 +636,8 @@ void MainWindow::trainingStop()
 	settings.setValue("trainingwindowGeometry", trainingwindow->saveGeometry());
 	if (trainingwindow->isRunning())
 		trainingwindow->stopRunning();
+	toolbarTrainingAct->setChecked(false);
+	readDB();
 	updateWindow();
 	updateMenu();
 	pathwindow->restoreGeometry(settings.value("pathwindowGeometry").toByteArray());

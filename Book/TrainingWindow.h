@@ -28,6 +28,8 @@ signals:
 	void trainingFlipBoard(int color);
 	void trainingAddMoves(MoveList&);
 	void trainingSetArrow(int fromSq, int toSq, bool wrong, int sek);
+	void nextResponse();
+	void trainingStop();
 public:
 	Training* trainingDB;
 	TrainingWindow(QWidget* parent = 0);

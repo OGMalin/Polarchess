@@ -57,11 +57,7 @@ TrainingWindow::TrainingWindow(QWidget* parent)
 	vbox->addLayout(hbox);
 
 	hbox = new QHBoxLayout;
-	button = new QPushButton(tr("Stop training"));
-	connect(button, SIGNAL(clicked()), this, SLOT(next()));
-	button->setFixedWidth(button->minimumSizeHint().width());
-	hbox->addWidget(button);
-	button = new QPushButton(tr("Next"));
+	button = new QPushButton(tr("Start"));
 	connect(button, SIGNAL(clicked()), this, SLOT(next()));
 	button->setFixedWidth(button->minimumSizeHint().width());
 	hbox->addWidget(button);
@@ -69,6 +65,8 @@ TrainingWindow::TrainingWindow(QWidget* parent)
 	vbox->addLayout(hbox);
 	vbox->setAlignment(Qt::AlignRight);
 	setLayout(vbox);
+
+	connect(this, SIGNAL(nextResponse()), this, SLOT(next()));
 }
 
 TrainingWindow::~TrainingWindow()
@@ -219,11 +217,13 @@ void TrainingWindow::moveEntered(ChessMove& move)
 			TrainingDialog dialog(this, QString(), QString(), QString());
 			switch (dialog.exec())
 			{
-			case 1:
+			case 1: // Next
+				emit nextResponse();
 				break;
-			case 2:
+			case 2: // Stop
 				break;
-			case 3:
+			case 3: // Analyze
+				emit trainingStop();
 				break;
 			}
 		}
