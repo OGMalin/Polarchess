@@ -152,6 +152,9 @@
     <ClCompile Include="Openings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TrainingDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -203,6 +206,9 @@
       <Filter>Common</Filter>
     </QtMoc>
     <QtMoc Include="ExportPgnDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="TrainingDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

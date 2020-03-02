@@ -1,4 +1,5 @@
 #include "TrainingWindow.h"
+#include "TrainingDialog.h"
 #include <QMenu>
 #include <QFontDialog>
 #include <QBoxLayout>
@@ -215,6 +216,16 @@ void TrainingWindow::moveEntered(ChessMove& move)
 			trainingDB->updateScore(trainingLine);
 			updateComment(true);
 			updateStat();
+			TrainingDialog dialog(this, QString(), QString(), QString());
+			switch (dialog.exec())
+			{
+			case 1:
+				break;
+			case 2:
+				break;
+			case 3:
+				break;
+			}
 		}
 		return;
 	}
