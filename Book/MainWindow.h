@@ -88,6 +88,7 @@ private:
 	QMenu* langMenu;
 	QToolBar* toolbar;
 	QAction* writeAct[3];
+	QAction* bookAnalyzeAct;
 	QAction* exitAct;
 	QAction* clearTrainingAct;
 	QAction* createTrainingAct;
@@ -132,6 +133,7 @@ private:
 	void writeSettings();
 	void readSettings();
 	void flipBoard();
+	void bookAnalyze();
 	void bookWriteTheory() { bookWrite(THEORY); };
 	void bookWriteWhite() { bookWrite(REPWHITE); };
 	void bookWriteBlack() { bookWrite(REPBLACK); };

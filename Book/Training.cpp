@@ -14,7 +14,7 @@ const char* TDBTYPE = "POLARTRAININGDB";
 Training::Training()
 {
 	stat.inBase = 0;
-	stat.loaded = 0;
+	stat.current = 0;
 	//currentBoard.clear();
 	//currentColor = 0;
 	Base[0] = Base[1] = NULL;
@@ -410,8 +410,7 @@ bool Training::getNext(TrainingDBEntry& line, int color, ChessBoard& cb)
 			}
 		}
 	}
-	stat.inBase = list.size();
-	stat.loaded = list.size();
+	stat.current = list.size();
 
 	if (!list.size())
 		return false;
@@ -486,5 +485,11 @@ void Training::clearAll()
 
 TrainingStatistics Training::getStat()
 {
+	QSqlDatabase db = QSqlDatabase::database(TRAINING);
+	if (!db.open())
+		return stat;
+	QSqlQuery query(db);
+	if (query.exec("SELECT COUNT() FROM training;") && query.next())
+		stat.inBase = query.value(0).toInt();
 	return stat;
 }

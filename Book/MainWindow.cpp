@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "AboutDialog.h"
 #include "DatabaseDialog.h"
+#include "AnalyzeDialog.h"
 #include "../Common/Pgn.h"
 #include "../Common/ChessGame.h"
 #include <QMenuBar>
@@ -119,11 +120,12 @@ void MainWindow::createMenu()
 	exitAct = fileMenu->addAction("*", this, &QWidget::close);
 
 	bookMenu = menuBar()->addMenu("Book");
+	bookAnalyzeAct = bookMenu->addAction("*", this, &MainWindow::bookAnalyze);
+	bookMenu->addSeparator();
 	bookWriteMenu = bookMenu->addMenu("Write enable");
 	writeAct[THEORY] = bookWriteMenu->addAction("Write to theory book", this, &MainWindow::bookWriteTheory);
 	writeAct[REPWHITE] = bookWriteMenu->addAction("Write to White repertoire book", this, &MainWindow::bookWriteWhite);
 	writeAct[REPBLACK] = bookWriteMenu->addAction("Write to Black repertoire book", this, &MainWindow::bookWriteBlack);
-	bookMenu->addSeparator();
 
 	trainingMenu = menuBar()->addMenu("*");
 	startTrainingAct = trainingMenu->addAction("*", this, &MainWindow::trainingStart);
@@ -171,6 +173,7 @@ void MainWindow::retranslateUi()
 	fileMenu->setTitle(tr("File"));
 	exitAct->setText(tr("Exit"));
 
+	bookAnalyzeAct->setText(tr("Annalyze book"));
 	trainingMenu->setTitle(tr("Training"));
 	startTrainingAct->setText(tr("Start training"));
 	stopTrainingAct->setText(tr("Stop training"));
@@ -435,6 +438,14 @@ void MainWindow::closeEvent(QCloseEvent* event)
 //	event->accept();
 }
 
+void MainWindow::bookAnalyze()
+{
+	disconnect(enginewindow, nullptr, nullptr, nullptr);
+	AnalyzeDialog dialog(this, computerDB, Base[THEORY], Base[REPWHITE], Base[REPBLACK], enginewindow, currentPath);
+	dialog.exec();
+	connect(enginewindow, SIGNAL(enginePV(ComputerDBEngine&, ChessBoard&)), this, SLOT(enginePV(ComputerDBEngine&, ChessBoard&)));
+}
+
 void MainWindow::bookWrite(int type)
 {
 	if (write == type)
@@ -683,89 +694,6 @@ void MainWindow::trainingCreate()
 {
 	trainingDB->createLines(this);
 }
-
-//void MainWindow::trainingNext(ChessBoard& cb, int color)
-//{
-//	trainingDB->getNext(trainingLine, color, cb);
-//}
-
-//void MainWindow::trainingRun(int color, ChessBoard& board)
-//{
-	//int i;
-	//trainingStat.clear();
-	//trainingColor = color;
-	//trainingBoard = board;
-	//training->get(trainingLine, color, trainingBoard);
-	//if (trainingLine.moves.size() == 0)
-	//	return;
-	//boardwindow->flip(trainingLine.color == BLACK);
-	//ChessBoard cb;
-	//cb.setStartposition();
-	//currentPath->clear();
-	//trainingLine.current = 0;
-	//// Go to startposition of this training line
-	//for (i = 0; i < trainingLine.moves.size(); i++)
-	//{
-	//	if (cb == trainingBoard)
-	//		break;
-	//	currentPath->add(trainingLine.moves[i].move);
-	//	cb.doMove(trainingLine.moves[i].move,false);
-	//	++trainingLine.current;
-	//}
-
-	//// Startposition not found
-	//if (i == trainingLine.moves.size())
-	//	return;
-	//
-	//// If wrong color to move go one move forward
-	//if (currentPath->getPosition().toMove != trainingLine.color)
-	//{
-	//	currentPath->add(trainingLine.moves[i].move);
-	//	cb.doMove(trainingLine.moves[i].move, false);
-	//	++trainingLine.current;
-	//}
-	//trainingRunning = true;
-	//write = -1;
-	//boardwindow->setPosition(cb);
-	//updateWindow();
-//}
-
-//void MainWindow::trainingStartBoth()
-//{
-//	ChessBoard cb;
-//	cb.setStartposition();
-//	trainingRun(-1, cb);
-//}
-
-//void MainWindow::trainingStartWhite()
-//{
-//	ChessBoard cb;
-//	cb.setStartposition();
-//	trainingRun(WHITE, cb);
-//}
-
-//void MainWindow::trainingStartBlack()
-//{
-//	ChessBoard cb;
-//	cb.setStartposition();
-//	trainingRun(BLACK, cb);
-//}
-
-//void MainWindow::trainingStartPosBoth()
-//{
-//	trainingRun(-1, currentPath->getPosition());
-//}
-
-//void MainWindow::trainingStartPosWhite()
-//{
-//	trainingRun(WHITE, currentPath->getPosition());
-//}
-
-//void MainWindow::trainingStartPosBlack()
-//{
-//	trainingRun(BLACK, currentPath->getPosition());
-//}
-
 
 void MainWindow::enginePV(ComputerDBEngine& ce, ChessBoard& cb)
 {

@@ -50,7 +50,7 @@ void TrainingDBEntry::scoreLine()
 		start = 1;
 	for (i = start; i < moves.size(); i = i + 2)
 	{
-		sc = 0;
+		sc = -1;
 		if (moves[i].attempt > 0)
 		{
 			sc = 0.5 + (float)((100 * moves[i].score) / moves[i].attempt);

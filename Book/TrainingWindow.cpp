@@ -14,7 +14,7 @@ TrainingWindow::TrainingWindow(QWidget* parent)
 	Base[0] = Base[1] = Base[2] = NULL;
 	theoryColor.setRgb(0, 0, 128);
 	repColor.setRgb(0, 128, 0);
-
+	trainingLine.clear();
 	QPushButton* button;
 	QVBoxLayout* vbox;
 	QHBoxLayout* hbox;
@@ -175,7 +175,7 @@ void TrainingWindow::updateStat()
 	QTextStream(&qs) << trainingLine.rowid;
 	rowid->setText(qs);
 	qs = tr("Loaded: ");
-	QTextStream(&qs) << ts.inBase;
+	QTextStream(&qs) << ts.current;
 	loaded->setText(qs);
 	qs = tr("Score: ");
 	QTextStream(&qs) << trainingLine.score;

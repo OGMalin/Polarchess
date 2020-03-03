@@ -41,7 +41,7 @@ struct TrainingDBEntry
 	int score; // Score for this line made by calculating score and attempt for each move.
 	int color;
 	int current;
-	void clear() { moves.clear(); score = 0; color = 0; current = 0; rowid = 0;/* endposition.clear(); */ };
+	void clear() { moves.clear(); score = 0; color = 0; current = 0; rowid = 0; };
 	friend bool operator<(const TrainingDBEntry& t1, const TrainingDBEntry& t2) { return t1.score < t2.score; };
 	bool isCorrect(ChessMove& move);
 	bool nextMove(ChessMove& move);
@@ -62,7 +62,7 @@ struct TrainingDBEntry
 
 struct TrainingStatistics
 {
-	int loaded;
+	int current;
 	int inBase;
 };
 
