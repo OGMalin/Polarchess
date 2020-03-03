@@ -157,13 +157,21 @@ struct StatisticsDBEntry
 {
 	QByteArray cboard;
 	QVector<StatisticsDBMove> movelist;
+	unsigned int rowid;
 	StatisticsDBEntry() { clear(); };
-	void clear() { cboard.clear(); movelist.clear(); };
+	void clear() { cboard.clear(); rowid = 0; movelist.clear(); };
 	//	bool moveExist(ChessMove& move);
 	void updateMove(StatisticsDBMove&bm);
 
 	void convertToMoveList(QVector<StatisticsDBMove>&, const QString&, ChessBoard&);
 	void convertFromMoveList(const QVector<StatisticsDBMove>&, QString&, ChessBoard&);
+	void convertToMoveList(QVector<StatisticsDBMove>&, const QString&, QByteArray&);
+	void convertFromMoveList(const QVector<StatisticsDBMove>&, QString&, QByteArray&);
+
+	// Used for sorting and searching
+	friend bool operator<(const StatisticsDBEntry& e1, const StatisticsDBEntry& e2) { return (e1.cboard < e2.cboard); };
+	friend bool operator==(const StatisticsDBEntry& e1, const StatisticsDBEntry& e2) { return (e1.cboard == e2.cboard); };
+	friend bool operator!=(const StatisticsDBEntry& e1, const StatisticsDBEntry& e2) { return (e1.cboard != e2.cboard); };
 };
 
 struct StatisticsDBInfo

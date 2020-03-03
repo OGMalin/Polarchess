@@ -7,6 +7,7 @@
 #include <QSqlDatabase>
 #include "../Common/ChessMove.h"
 #include "../Common/ChessBoard.h"
+#include "../Common/Pgn.h"
 #include "DatabaseFormat.h"
 
 class Statistics : public QObject
@@ -33,6 +34,7 @@ public:
 
 	// Import pgn-file
 	void importGames(QWidget* parent);
+	void importGames2(QWidget* parent);
 
 	// Remove positions with only one game
 	void removeSingleGame(QWidget* parent);
@@ -45,4 +47,5 @@ public:
 private:
 	bool opened;
 	bool haveSingleMove(QString&);
+	bool readGames(QVector<StatisticsDBEntry>&, Pgn&, int&);
 };

@@ -611,40 +611,45 @@ void MainWindow::commentChanged(QString& comment, int rep)
 
 void MainWindow::trainingStart()
 {
-	QSettings settings;
+//	QSettings settings;
 	inTraining = true;
-	settings.setValue("pathwindowGeometry", pathwindow->saveGeometry());
-	settings.setValue("openingwindowGeometry", openingwindow->saveGeometry());
-	settings.setValue("movewindowGeometry", movewindow->saveGeometry());
-	settings.setValue("commentwindowGeometry", commentwindow->saveGeometry());
-	settings.setValue("enginewindowGeometry", enginewindow->saveGeometry());
-
+	//settings.setValue("pathwindowGeometry", pathwindow->saveGeometry());
+	//settings.setValue("openingwindowGeometry", openingwindow->saveGeometry());
+	//settings.setValue("movewindowGeometry", movewindow->saveGeometry());
+	//settings.setValue("commentwindowGeometry", commentwindow->saveGeometry());
+	//settings.setValue("enginewindowGeometry", enginewindow->saveGeometry());
+//	QSize size = pathwindow->size();
 	trainingwindow->setCurrentBoard(currentPath->getPosition());
 	trainingwindow->updateStat();
 	updateWindow();
 	updateMenu();
-
-	pathwindow->restoreGeometry(settings.value("pathwindowGeometry").toByteArray());
-	trainingwindow->restoreGeometry(settings.value("trainingwindowGeometry").toByteArray());
+	trainingwindow->setMinimumHeight(200);
+//	pathwindow->resize(size);
+//	pathwindow->updateGeometry();
+	//pathwindow->restoreGeometry(settings.value("pathwindowGeometry").toByteArray());
+	//trainingwindow->restoreGeometry(settings.value("trainingwindowGeometry").toByteArray());
 }
 
 void MainWindow::trainingStop()
 {
-	QSettings settings;
+//	QSettings settings;
 	inTraining = false;
-	settings.setValue("pathwindowGeometry", pathwindow->saveGeometry());
-	settings.setValue("trainingwindowGeometry", trainingwindow->saveGeometry());
+	//settings.setValue("pathwindowGeometry", pathwindow->saveGeometry());
+	//settings.setValue("trainingwindowGeometry", trainingwindow->saveGeometry());
 	if (trainingwindow->isRunning())
 		trainingwindow->stopRunning();
 	toolbarTrainingAct->setChecked(false);
 	readDB();
+//	QSize size = pathwindow->size();
 	updateWindow();
 	updateMenu();
-	pathwindow->restoreGeometry(settings.value("pathwindowGeometry").toByteArray());
-	movewindow->restoreGeometry(settings.value("movewindowGeometry").toByteArray());
-	commentwindow->restoreGeometry(settings.value("commentwindowGeometry").toByteArray());
-	openingwindow->restoreGeometry(settings.value("openingwindowGeometry").toByteArray());
-	enginewindow->restoreGeometry(settings.value("enginewindowGeometry").toByteArray());
+//	pathwindow->resize(size);
+//	pathwindow->updateGeometry();
+	//pathwindow->restoreGeometry(settings.value("pathwindowGeometry").toByteArray());
+	//movewindow->restoreGeometry(settings.value("movewindowGeometry").toByteArray());
+	//commentwindow->restoreGeometry(settings.value("commentwindowGeometry").toByteArray());
+	//openingwindow->restoreGeometry(settings.value("openingwindowGeometry").toByteArray());
+	//enginewindow->restoreGeometry(settings.value("enginewindowGeometry").toByteArray());
 }
 
 void MainWindow::trainingFlipBoard(int color)

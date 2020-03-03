@@ -298,6 +298,11 @@ void StatisticsDBEntry::convertToMoveList(QVector<StatisticsDBMove>& movelist, c
 			movelist.append(sdm);
 	}
 }
+void StatisticsDBEntry::convertToMoveList(QVector<StatisticsDBMove>& movelist, const QString& data, QByteArray& ba)
+{
+	ChessBoard cb = CompressedBoard::decompress(ba);
+	convertToMoveList(movelist, data, cb);
+}
 
 void StatisticsDBEntry::convertFromMoveList(const QVector<StatisticsDBMove>& movelist, QString& data, ChessBoard& cb)
 {
@@ -328,6 +333,13 @@ void StatisticsDBEntry::convertFromMoveList(const QVector<StatisticsDBMove>& mov
 		++it;
 	}
 }
+
+void StatisticsDBEntry::convertFromMoveList(const QVector<StatisticsDBMove>& movelist, QString& data, QByteArray& ba)
+{
+	ChessBoard cb = CompressedBoard::decompress(ba);
+	convertFromMoveList(movelist, data, cb);
+}
+
 
 void StatisticsDBEntry::updateMove(StatisticsDBMove& bm)
 {

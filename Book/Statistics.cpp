@@ -6,6 +6,7 @@
 #include <QProgressDialog>
 #include <QApplication>
 #include <QVariantList>
+#include <QtAlgorithms>
 #include "../Common/Pgn.h"
 
 using namespace std;
@@ -158,8 +159,178 @@ StatisticsDBEntry Statistics::find(ChessBoard& cb)
 //	return;
 //}
 
-// Doing this in at bit strange way to try to speed up the database handling., insert on a SqlLight db are very slow.
 void Statistics::importGames(QWidget* parent)
+{
+	Pgn pgn;
+	int gameindex, i, j;
+	QVector<StatisticsDBEntry> list;
+	QVector<StatisticsDBEntry> dblist;
+	StatisticsDBEntry sde;
+	QString qs;
+	QSqlDatabase db = QSqlDatabase::database(STATISTICS);
+	if (!opened)
+		return;
+	if (!db.open())
+		return;
+	QSqlQuery query(db);
+	// Get pgn filename
+	QString path = QFileDialog::getOpenFileName(parent, "Open pgnfile", QString(), "Pgn files (*.pgn)");
+	if (path.isEmpty())
+		return;
+	if (!pgn.open(path.toStdString(), true))
+		return;
+	// Open progress dialog
+	QProgressDialog progress("Importing Pgn file.", "Cancel", 0, pgn.file.size(), parent);
+	progress.setWindowModality(Qt::WindowModal);
+	progress.setMinimumDuration(0);
+	progress.show();
+	progress.setLabelText("Reading games");
+	QApplication::processEvents();
+
+	gameindex = 1;
+	while (readGames(list, pgn, gameindex))
+	{
+		progress.setLabelText("Reading statistics");
+		QApplication::processEvents();
+		if (progress.wasCanceled())
+		{
+			pgn.close();
+			return;
+		}
+		dblist.clear();
+		query.prepare("SELECT rowid, movelist FROM positions WHERE cboard = :cboard;");
+		for (i = 0; i < list.size(); i++)
+		{
+			query.bindValue(":cboard", list[i].cboard);
+			if (query.exec() && query.next())
+			{
+				sde.convertToMoveList(sde.movelist, query.value("movelist").toString(), list[i].cboard);
+				sde.cboard = list[i].cboard;
+				sde.rowid = query.value("rowid").toUInt();
+				for (j = 0; j < list[i].movelist.size(); j++)
+					sde.updateMove(list[i].movelist[j]);
+				dblist.push_back(sde);
+				list[i].rowid = -1; // Mark as finnish
+			}
+
+		}
+
+		progress.setLabelText("Saving to statistics");
+		QApplication::processEvents();
+		if (progress.wasCanceled())
+		{
+			pgn.close();
+			return;
+		}
+
+		db.transaction();
+		query.prepare("UPDATE positions SET "
+			"movelist = :movelist "
+			"WHERE rowid = :rowid;");
+		for (i = 0; i < dblist.size(); i++)
+		{
+			dblist[i].convertFromMoveList(dblist[i].movelist, qs, dblist[i].cboard);
+			query.bindValue(":movelist", qs);
+			query.bindValue(":rowid", sde.rowid);
+			query.exec();
+		}
+//		db.commit();
+
+//		db.transaction();
+		query.prepare("INSERT INTO positions ( "
+			"cboard, movelist"
+			") VALUES ( "
+			":cboard, :movelist );");
+		for (i = 0; i < list.size(); i++)
+		{
+			if (list[i].rowid != -1)
+			{
+				list[i].convertFromMoveList(list[i].movelist, qs, list[i].cboard);
+				query.bindValue(":movelist", qs);
+				query.bindValue(":cboard", list[i].cboard);
+				query.exec();
+			}
+		}
+		db.commit();
+
+		progress.setLabelText("Reading games");
+		progress.setValue(pgn.file.dwFilepointer);
+		QApplication::processEvents();
+		if (progress.wasCanceled())
+		{
+			pgn.close();
+			return;
+		}
+	}
+	progress.setValue(pgn.file.size());
+	pgn.close();
+}
+
+bool Statistics::readGames(QVector<StatisticsDBEntry>& list, Pgn& pgn, int& index)
+{
+	SYSTEMTIME st;
+	int i,wElo,bElo;
+	ChessGame game;
+	ChessBoard cb;
+	StatisticsDBMove sdm;
+	StatisticsDBEntry sde;
+	QVector<StatisticsDBEntry>::iterator lit;
+	std::string ss;
+
+	list.clear();
+
+	for (i = 0; i < 1000; i++)
+	{
+		if (!pgn.read(game, index++, 20))
+			break;
+		sdm.clear();
+		if (game.info.Result == "1-0")
+			sdm.whitewin = 1;
+		else if (game.info.Result == "0-1")
+			sdm.blackwin = 1;
+		else if (game.info.Result.substr(0, 3) == "1/2")
+			sdm.draw = 1;
+		else
+			continue;
+		wElo = bElo = 0;
+		if (game.info.WhiteElo.size())
+			wElo = stoi(game.info.WhiteElo);
+		if (game.info.BlackElo.size())
+			bElo = stoi(game.info.BlackElo);
+		game.getDate(st);
+		sdm.year = st.wYear;
+		game.getStartPosition(cb);
+		game.toStart();
+		while (game.getMove(sdm.move, ss, 0))
+		{
+			if (cb.toMove == WHITE)
+				sdm.elo = wElo;
+			else
+				sdm.elo = bElo;
+
+			sde.clear();
+			sde.cboard = CompressedBoard::compress(cb);
+			lit = qBinaryFind(list.begin(), list.end(), sde);
+			if (lit == list.end())
+			{
+				sde.movelist.push_back(sdm);
+				lit = qLowerBound(list.begin(), list.end(), sde);
+				list.insert(lit, sde);
+			}
+			else
+			{
+				lit->updateMove(sdm);
+			}
+			game.doMove(0);
+			game.getPosition(cb);
+		}
+	}
+	if (!list.size())
+		return false;
+	return true;
+}
+// Doing this in at bit strange way to try to speed up the database handling., insert on a SqlLight db are very slow.
+void Statistics::importGames2(QWidget* parent)
 {
 	SYSTEMTIME st;
 	StatisticsDBMove sdm;

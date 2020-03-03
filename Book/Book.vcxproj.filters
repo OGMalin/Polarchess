@@ -155,6 +155,9 @@
     <ClCompile Include="TrainingDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AnalyzeDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -209,6 +212,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="TrainingDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="AnalyzeDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -273,9 +279,6 @@
     <ClInclude Include="WDLBar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ListOrderDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Common\DgtProtocol.h">
       <Filter>Common</Filter>
     </ClInclude>
@@ -286,6 +289,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Openings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ListOrderDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
