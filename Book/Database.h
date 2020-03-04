@@ -30,13 +30,13 @@ public:
 	void getTrainingPosition(QVector<BookDBEntry>&);
 	void clearAllTrainingData();
 	void importBase(Database* iBase);
-	//void addTrainingLines(QVector<TrainingLine>& tlines);
-	//void deleteTrainingLines();
-	//bool getTrainingLines(QVector<TrainingLine>& lines);
 	void updateTrainingScore(TrainingDBEntry&);
-
+	
 	// Get db path
 	QString getPath();
+
+	void getAllPositions(QVector<ChessBoard>&);
+	void getEndPositions(QVector<ChessBoard>&);
 
 #ifdef _DEBUG
 	void convertBase();

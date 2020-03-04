@@ -372,3 +372,13 @@ void EngineWindow::fontFromString(const QString& sFont)
 	f.fromString(sFont);
 	setFont(f);
 }
+
+void EngineWindow::stopAutomated()
+{
+
+}
+
+void EngineWindow::startAutomated(ChessBoard& cb, QString& eng, int sec)
+{
+
+}

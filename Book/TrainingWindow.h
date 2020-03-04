@@ -9,6 +9,7 @@
 #include <QString>
 #include <QComboBox>
 #include <QCheckBox>
+#include <QPushButton>
 #include <QLabel>
 #include <QVector>
 #include <QTextEdit>
@@ -48,6 +49,7 @@ private:
 	StatusWatch* watch;
 	QComboBox* colorBox;
 	QCheckBox* positionBox;
+	QPushButton* startButton;
 	QLabel*  lRunning;
 	QLabel* inBase;
 	QLabel* loaded;

@@ -4,6 +4,10 @@
 #include <QComboBox>
 #include <QSpinBox>
 #include <QCheckBox>
+#include <QPushButton>
+#include <QVector>
+#include <QLabel>
+#include "../Common/BoardWindow.h"
 #include "Computer.h"
 #include "Database.h"
 #include "EngineWindow.h"
@@ -15,22 +19,34 @@ class AnalyzeDialog: public QDialog
 
 public slots:
 	void startAnalyze();
+	void stopAnalyze();
 	void closeAnalyze();
+	void pathChanged(int);
 	void enginePV(ComputerDBEngine&, ChessBoard&);
 
 public:
-	AnalyzeDialog(QWidget* parent, Computer*, Database*, Database*, Database*, EngineWindow*, Path*);
+	AnalyzeDialog(QWidget* parent, Computer*, Database*, Database*, Database*, EngineWindow*, BoardWindow*, Path*);
 
 private:
+	void collectPositions();
+	void updateAnalyzed();
 	QComboBox* dbList;
 	QComboBox* engineList;
 	QSpinBox* timeToUse;
 	QCheckBox* endPosition;
 	QCheckBox* currentPath;
+	QPushButton* startButton;
+	QPushButton* stopButton;
+	QPushButton* closeButton;
+	QLabel* posLabel;
 	Computer* compDB;
 	Database* theoryDB;
 	Database* whiteDB;
 	Database* blackDB;
 	EngineWindow* enginewindow;
+	BoardWindow* boardwindow;
+	QVector<ChessBoard> positions;
 	Path* path;
+	bool running;
+	int currentPosition;
 };

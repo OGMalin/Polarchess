@@ -3,7 +3,6 @@
 #include <QMenu>
 #include <QFontDialog>
 #include <QBoxLayout>
-#include <QPushButton>
 #include <QTextStream>
 #include <QApplication>
 
@@ -15,7 +14,6 @@ TrainingWindow::TrainingWindow(QWidget* parent)
 	theoryColor.setRgb(0, 0, 128);
 	repColor.setRgb(0, 128, 0);
 	trainingLine.clear();
-	QPushButton* button;
 	QVBoxLayout* vbox;
 	QHBoxLayout* hbox;
 
@@ -57,10 +55,10 @@ TrainingWindow::TrainingWindow(QWidget* parent)
 	vbox->addLayout(hbox);
 
 	hbox = new QHBoxLayout;
-	button = new QPushButton(tr("Start"));
-	connect(button, SIGNAL(clicked()), this, SLOT(next()));
-	button->setFixedWidth(button->minimumSizeHint().width());
-	hbox->addWidget(button);
+	startButton = new QPushButton(tr("Start"));
+	connect(startButton, SIGNAL(clicked()), this, SLOT(next()));
+	startButton->setFixedWidth(startButton->minimumSizeHint().width());
+	hbox->addWidget(startButton);
 
 	vbox->addLayout(hbox);
 	vbox->setAlignment(Qt::AlignRight);
@@ -181,9 +179,20 @@ void TrainingWindow::updateStat()
 	QTextStream(&qs) << trainingLine.score;
 	score->setText(qs);
 	if (running)
+	{
 		lRunning->setText(tr("Running"));
+		colorBox->setDisabled(true);
+		positionBox->setDisabled(true);
+		startButton->setDisabled(true);
+	}
 	else
+	{
 		lRunning->setText(tr("Not running"));
+		lRunning->setText(tr("Running"));
+		colorBox->setDisabled(false);
+		positionBox->setDisabled(false);
+		startButton->setDisabled(false);
+	}
 }
 
 void TrainingWindow::moveEntered(ChessMove& move)

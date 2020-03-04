@@ -23,6 +23,8 @@ public:
 	void setPosition(ChessBoard& cb, int movenr=1);
 	QString fontToString();
 	void fontFromString(const QString&);
+	void stopAutomated();
+	void startAutomated(ChessBoard&, QString& eng, int sec);
 
 public slots:
 	void slotAnalyzeClicked(bool);

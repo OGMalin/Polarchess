@@ -368,92 +368,6 @@ void Database::importBase(Database* iBase)
 	}
 }
 
-//void Database::addTrainingLines(QVector<TrainingLine>& tlines)
-//{
-//	char sz[16];
-//	if (!opened)
-//		return;
-//	QSqlDatabase db = QSqlDatabase::database(dbname);
-//	if (!db.open())
-//		return;
-//	QSqlQuery query(db);
-//	QVariantList score, moves;
-//	for (int i = 0; i < tlines.size();i++)
-//	{
-//		score.push_back(itoa(tlines[i].score, sz, 10));
-//		moves.push_back(tlines[i].moves);
-//	}
-//	if (score.size() != moves.size())
-//	{
-//		qDebug() << "Score and moves missmatch";
-//		return;
-//	}
-//	int next = 0;
-//	int i;
-//	while (next < score.size())
-//	{
-//		db.transaction();
-//		for (i = 0; i < 100; i++)
-//		{
-//			if (next >= score.size())
-//				break;
-//			query.prepare("INSERT INTO training ( score, moves ) VALUES ( :score, :moves );");
-//			query.bindValue(":score", score[next]);
-//			query.bindValue(":moves", moves[next]);
-//			query.exec();
-//			++next;
-//		}
-//		db.commit();
-//	}
-//}
-
-//void Database::deleteTrainingLines()
-//{
-//	if (!opened)
-//		return;
-//	QSqlDatabase db = QSqlDatabase::database(dbname);
-//	if (!db.open())
-//		return;
-//	QSqlQuery query(db);
-//	query.exec("DELETE FROM training;");
-//	QSqlError error = query.lastError();
-//	if (error.isValid())
-//	{
-//		qDebug() << "Database error: " << error.databaseText();
-//		qDebug() << "Driver error: " << error.driverText();
-//	}
-//}
-
-//bool Database::getTrainingLines(QVector<TrainingLine>& lines)
-//{
-//	TrainingLine tl;
-//	lines.clear();
-//	if (!opened)
-//		return false;
-//	QSqlDatabase db = QSqlDatabase::database(dbname);
-//	if (!db.open())
-//		return false;
-//	QSqlQuery query(db);
-//	query.prepare("SELECT rowid, * FROM training;");
-//	query.exec();
-//	while (query.next())
-//	{
-//		tl.rowid = query.value("rowid").toInt();
-//		tl.score = query.value("score").toInt();
-//		tl.moves = query.value("moves").toString();
-//		lines.push_back(tl);
-//	}
-//	QSqlError error = query.lastError();
-//	if (error.isValid())
-//	{
-//		qDebug() << "Database error: " << error.databaseText();
-//		qDebug() << "Driver error: " << error.driverText();
-//	}
-//	if (lines.isEmpty())
-//		return false;
-//	return true;
-//}
-
 void Database::updateTrainingScore(TrainingDBEntry& tde)
 {
 	int i;
@@ -481,6 +395,33 @@ QString Database::getPath()
 {
 	QSqlDatabase db = QSqlDatabase::database(dbname);
 	return db.databaseName();
+}
+
+void Database::getAllPositions(QVector<ChessBoard>& pos)
+{
+	if (!opened)
+		return;
+	QSqlDatabase db = QSqlDatabase::database(dbname);
+	if (!db.open())
+		return;
+	QSqlQuery query(db);
+	query.exec("SELECT cboard FROM positions;");
+	while (query.next())
+		pos.push_back(CompressedBoard::decompress(query.value("cboard").toByteArray()));
+}
+
+void Database::getEndPositions(QVector<ChessBoard>& pos)
+{
+	if (!opened)
+		return;
+	QSqlDatabase db = QSqlDatabase::database(dbname);
+	if (!db.open())
+		return;
+	QSqlQuery query(db);
+	query.prepare("SELECT cboard FROM positions WHERE movelist IS NULL OR movelist = '';");
+	query.exec();
+	while (query.next())
+		pos.push_back(CompressedBoard::decompress(query.value("cboard").toByteArray()));
 }
 
 #ifdef _DEBUG

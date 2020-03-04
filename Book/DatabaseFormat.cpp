@@ -461,6 +461,14 @@ bool ComputerDBEntry::updateEngine(ComputerDBEngine& ce)
 	return true;
 }
 
+bool ComputerDBEntry::exist(QString& eng)
+{
+	for (int i = 0; i < enginelist.size(); i++)
+		if (enginelist[i].engine == eng)
+			return true;
+	return false;
+}
+
 QByteArray CompressedBoard::compress(ChessBoard& cb)
 {
 	QByteArray data;
