@@ -69,7 +69,7 @@ MainWindow::MainWindow(QWidget *parent)
 	trainingDB->SetRepertoireDatabase(WHITE, Base[REPWHITE]);
 	trainingDB->SetRepertoireDatabase(BLACK, Base[REPBLACK]);
 	trainingwindow->setTrainingDB(trainingDB);
-	trainingwindow->setDatabase(Base[THEORY], Base[REPWHITE], Base[REPBLACK]);
+	trainingwindow->setDatabase(Base[THEORY], Base[REPWHITE], Base[REPBLACK], computerDB);
 	movewindow->computerDB = computerDB;
 	openingwindow->setOpeningsDB(openingsDB);
 	dgt = NULL;
@@ -441,7 +441,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::bookAnalyze()
 {
 	disconnect(enginewindow, nullptr, nullptr, nullptr);
-	AnalyzeDialog dialog(this, computerDB, Base[THEORY], Base[REPWHITE], Base[REPBLACK], enginewindow, boardwindow, currentPath);
+	AnalyzeDialog dialog(this, computerDB, Base[THEORY], Base[REPWHITE], Base[REPBLACK], enginewindow, boardwindow, currentPath, trainingDB);
 	dialog.exec();
 	connect(enginewindow, SIGNAL(enginePV(ComputerDBEngine&, ChessBoard&)), this, SLOT(enginePV(ComputerDBEngine&, ChessBoard&)));
 }

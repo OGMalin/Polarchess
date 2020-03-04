@@ -296,13 +296,13 @@ bool Training::getNext(TrainingDBEntry& line, int color, ChessBoard& cb)
 	{
 		if (color >= 0)
 		{
-			query.prepare("SELECT rowid, * FROM training WHERE color=:color ORDER BY score");
+			query.prepare("SELECT rowid, * FROM training WHERE color=:color ORDER BY score;");
 			query.bindValue(":color", color);
 			query.exec();
 			if (!query.next())
 			{
 				createLines(NULL);
-				query.prepare("SELECT rowid, * FROM training WHERE color=:color ORDER BY score");
+				query.prepare("SELECT rowid, * FROM training WHERE color=:color ORDER BY score;");
 				query.bindValue(":color", color);
 				query.exec();
 				if (!query.next())
@@ -342,13 +342,13 @@ bool Training::getNext(TrainingDBEntry& line, int color, ChessBoard& cb)
 	{
 		if (color >= 0)
 		{
-			query.prepare("SELECT rowid, * FROM training WHERE color=:color ORDER BY score");
+			query.prepare("SELECT rowid, * FROM training WHERE color=:color ORDER BY score;");
 			query.bindValue(":color", color);
 			query.exec();
 			if (!query.next())
 			{
 				createLines(NULL);
-				query.prepare("SELECT rowid, * FROM training WHERE color=:color ORDER BY score");
+				query.prepare("SELECT rowid, * FROM training WHERE color=:color ORDER BY score;");
 				query.bindValue(":color", color);
 				query.exec();
 				if (!query.next())
@@ -492,4 +492,45 @@ TrainingStatistics Training::getStat()
 	if (query.exec("SELECT COUNT() FROM training;") && query.next())
 		stat.inBase = query.value(0).toInt();
 	return stat;
+}
+
+void Training::getEndpositions(QVector<ChessBoard>& pos, int color)
+{
+	ChessBoard cb;
+	TrainingDBEntry tde;
+	int i, j;
+	QSqlDatabase db = QSqlDatabase::database(TRAINING);
+	if (!db.open())
+		return;
+	QSqlQuery query(db);
+
+	query.prepare("SELECT moves FROM training WHERE color=:color;");
+	query.bindValue(":color", color);
+	query.exec();
+	if (!query.next())
+	{
+		createLines(NULL);
+		query.prepare("SELECT moves FROM training WHERE color=:color;");
+		query.bindValue(":color", color);
+		query.exec();
+		if (!query.next())
+			return;
+	}
+
+	while (1)
+	{
+		tde.MovesFromString(query.value("moves").toString());
+		pos.push_back(tde.endPosition());
+		if (!query.next())
+			break;
+	}
+	// Remove doubles
+	for (i = 0; i < (pos.size()-1); i++)
+	{
+		for (j = (i + 1); j < pos.size(); j++)
+		{
+			if (pos[i] == pos[j])
+				pos.remove(j);
+		}
+	}
 }

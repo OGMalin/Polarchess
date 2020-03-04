@@ -11,6 +11,7 @@ TrainingWindow::TrainingWindow(QWidget* parent)
 {
 	running = false;
 	Base[0] = Base[1] = Base[2] = NULL;
+	compDB = NULL;
 	theoryColor.setRgb(0, 0, 128);
 	repColor.setRgb(0, 128, 0);
 	trainingLine.clear();
@@ -41,6 +42,11 @@ TrainingWindow::TrainingWindow(QWidget* parent)
 	comment = new QTextEdit;
 	comment->setDisabled(true);
 	hbox->addWidget(comment);
+	vbox->addLayout(hbox);
+
+	hbox = new QHBoxLayout;
+	computerScore = new QLabel(tr("Computer score: "));
+	hbox->addWidget(computerScore);
 	vbox->addLayout(hbox);
 
 	hbox = new QHBoxLayout;
@@ -253,16 +259,21 @@ void TrainingWindow::stopRunning()
 	running = false;
 }
 
-void TrainingWindow::setDatabase(Database* t, Database* w, Database* b)
+void TrainingWindow::setDatabase(Database* t, Database* w, Database* b, Computer* c)
 {
 	Base[0] = t;
 	Base[1] = w;
 	Base[2] = b;
+	compDB = c;
 }
 
 void TrainingWindow::updateComment(bool visible)
 {
-	BookDBEntry dbe;
+	BookDBEntry bde;
+	ComputerDBEntry cde;
+	int score;
+	int i, j;
+	QString qs;
 	ChessBoard cb=trainingLine.currentPosition();
 	if (!visible)
 	{
@@ -271,22 +282,48 @@ void TrainingWindow::updateComment(bool visible)
 	}
 	comment->show();
 	comment->clear();
-	dbe = Base[0]->find(cb);
-	if (!dbe.comment.isEmpty())
+	bde = Base[0]->find(cb);
+	if (!bde.comment.isEmpty())
 	{
 		comment->setTextColor(theoryColor);
-		comment->append(dbe.comment);
+		comment->append(bde.comment);
 	}
-	dbe = Base[1]->find(cb);
-	if (!dbe.comment.isEmpty())
+	bde = Base[1]->find(cb);
+	if (!bde.comment.isEmpty())
 	{
 		comment->setTextColor(repColor);
-		comment->append(dbe.comment);
+		comment->append(bde.comment);
 	}
-	dbe = Base[2]->find(cb);
-	if (!dbe.comment.isEmpty())
+	bde = Base[2]->find(cb);
+	if (!bde.comment.isEmpty())
 	{
 		comment->setTextColor(repColor);
-		comment->append(dbe.comment);
+		comment->append(bde.comment);
 	}
+	cde = compDB->find(cb);
+	qs = tr("Computer score: ");
+	bool found = false;
+	score = 0;
+	if (!cde.cboard.isEmpty())
+	{
+		for (i = 0; i < compDB->enginelist.size(); i++)
+		{
+			for (j = 0; j < cde.enginelist.size(); j++)
+			{
+				if (compDB->enginelist[i] == cde.enginelist[j].engine)
+				{
+					score = cde.enginelist[j].cp;
+					found = true;
+					break;
+				}
+			}
+			if (found)
+				break;
+		}
+
+		QTextStream(&qs) << (float)(score/100);
+
+	}
+	if (!found)
+		computerScore->setText(qs);
 }

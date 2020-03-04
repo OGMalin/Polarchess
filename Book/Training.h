@@ -56,4 +56,6 @@ public:
 	QString getPath();
 
 	TrainingStatistics getStat();
+
+	void getEndpositions(QVector<ChessBoard>&, int color);
 };

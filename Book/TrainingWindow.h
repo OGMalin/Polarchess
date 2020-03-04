@@ -3,6 +3,7 @@
 #include "Training.h"
 #include "StatusWatch.h"
 #include "Database.h"
+#include "Computer.h"
 #include "../Common/ChessBoard.h"
 #include "../Common/MoveList.h"
 #include <QWidget>
@@ -43,9 +44,10 @@ public:
 	void moveEntered(ChessMove& move);
 	bool isRunning() { return running; };
 	void stopRunning();
-	void setDatabase(Database* t, Database* w, Database* b);
+	void setDatabase(Database* t, Database* w, Database* b, Computer* c);
 private:
 	Database* Base[3];
+	Computer* compDB;
 	StatusWatch* watch;
 	QComboBox* colorBox;
 	QCheckBox* positionBox;
@@ -55,6 +57,7 @@ private:
 	QLabel* loaded;
 	QLabel* rowid;
 	QLabel* score;
+	QLabel* computerScore;
 	QTextEdit* comment;
 	ChessBoard currentBoard;
 	TrainingDBEntry trainingLine;

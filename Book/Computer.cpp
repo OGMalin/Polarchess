@@ -241,4 +241,3 @@ void Computer::saveEngineList()
 	}
 	db.commit();
 }
-

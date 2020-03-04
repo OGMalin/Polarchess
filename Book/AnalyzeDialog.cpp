@@ -5,7 +5,7 @@
 #include <QDir>
 #include <QTextStream>
 
-AnalyzeDialog::AnalyzeDialog(QWidget* parent, Computer* c, Database* t, Database* w, Database* b, EngineWindow* e, BoardWindow* bw, Path* p)
+AnalyzeDialog::AnalyzeDialog(QWidget* parent, Computer* c, Database* t, Database* w, Database* b, EngineWindow* e, BoardWindow* bw, Path* p, Training* tdb)
 	:QDialog(parent)
 {
 	QHBoxLayout* hbox;
@@ -15,7 +15,9 @@ AnalyzeDialog::AnalyzeDialog(QWidget* parent, Computer* c, Database* t, Database
 	theoryDB = t;
 	whiteDB = w;
 	blackDB = b;
+	trainingDB = tdb;
 	enginewindow = e;
+	boardwindow = bw;
 	path = p;
 	running = false;
 	currentPosition = 0;
@@ -77,6 +79,7 @@ AnalyzeDialog::AnalyzeDialog(QWidget* parent, Computer* c, Database* t, Database
 	vbox->addLayout(hbox);
 
 	setLayout(vbox);
+
 }
 
 void AnalyzeDialog::startAnalyze()
@@ -92,7 +95,8 @@ void AnalyzeDialog::startAnalyze()
 	updateAnalyzed();
 	if (!positions.size())
 		return;
-
+	boardwindow->setPosition(positions[currentPosition]);
+	emit setPosition(positions[currentPosition]);
 	connect(enginewindow, SIGNAL(enginePV(ComputerDBEngine&, ChessBoard&)), this, SLOT(enginePV(ComputerDBEngine&, ChessBoard&)));
 	enginewindow->startAutomated(positions[currentPosition], eng, timeToUse->value());
 	running = true;
@@ -123,13 +127,11 @@ void AnalyzeDialog::enginePV(ComputerDBEngine& ce, ChessBoard& cb)
 	updateAnalyzed();
 	if (currentPosition >= positions.size())
 	{
-		disconnect(enginewindow, nullptr, nullptr, nullptr);
-		running = false;
-		stopButton->setDisabled(true);
-		startButton->setDisabled(false);
+		stopAnalyze();
 		return;
 	}
 	QString eng = engineList->currentText();
+	boardwindow->setPosition(positions[currentPosition]);
 	enginewindow->startAutomated(positions[currentPosition], eng, timeToUse->value());
 }
 
@@ -165,9 +167,24 @@ void AnalyzeDialog::collectPositions()
 		return;
 	}
 	if (endPosition->isChecked())
-		db->getEndPositions(positions);
+	{
+		if (db == theoryDB)
+		{
+			db->getEndPositions(positions);
+		}
+		else
+		{
+			// There isn't any endposition saved in a repertoire database, use the trainingdatabase instead.
+			if (db == whiteDB)
+				trainingDB->getEndpositions(positions, 0);
+			else
+				trainingDB->getEndpositions(positions, 1);
+		}
+	}
 	else
+	{
 		db->getAllPositions(positions);
+	}
 	ComputerDBEntry cde;
 	QString qs = engineList->currentText();
 	for (i = 0; i < positions.size(); i++)

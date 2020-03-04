@@ -1,5 +1,6 @@
 #include "EngineWindow.h"
 #include <QCoreApplication>
+#include <QApplication>
 #include <QStandardPaths>
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -375,10 +376,48 @@ void EngineWindow::fontFromString(const QString& sFont)
 
 void EngineWindow::stopAutomated()
 {
+	if (analyzing)
+	{
+		analyze->click();
+		QApplication::processEvents();
+		_sleep(1000);
+		QApplication::processEvents();
+	}
+	QApplication::processEvents();
 
 }
 
 void EngineWindow::startAutomated(ChessBoard& cb, QString& eng, int sec)
 {
+	timeLimit = sec * 1000;
+	if (freezing)
+	{
+		freeze->click();
+		QApplication::processEvents();
+		_sleep(1000);
+		QApplication::processEvents();
+	}
+	if (analyzing)
+	{
+		analyze->click();
+		QApplication::processEvents();
+		_sleep(1000);
+		QApplication::processEvents();
+	}
+	while (multipv > 1)
+	{
+		decline->click();
+		QApplication::processEvents();
+		_sleep(200);
+		QApplication::processEvents();
+	}
 
+	selengine->setCurrentText(eng);
+	QApplication::processEvents();
+	slotSelectEngine(eng);
+	QApplication::processEvents();
+	setPosition(cb, 1);
+	QApplication::processEvents();
+	analyze->animateClick();
+	QApplication::processEvents();
 }

@@ -10,6 +10,7 @@
 #include "../Common/BoardWindow.h"
 #include "Computer.h"
 #include "Database.h"
+#include "Training.h"
 #include "EngineWindow.h"
 #include "Path.h"
 
@@ -24,8 +25,11 @@ public slots:
 	void pathChanged(int);
 	void enginePV(ComputerDBEngine&, ChessBoard&);
 
+signals:
+	void setPosition(const ChessBoard&);
+
 public:
-	AnalyzeDialog(QWidget* parent, Computer*, Database*, Database*, Database*, EngineWindow*, BoardWindow*, Path*);
+	AnalyzeDialog(QWidget* parent, Computer*, Database*, Database*, Database*, EngineWindow*, BoardWindow*, Path*, Training*);
 
 private:
 	void collectPositions();
@@ -43,6 +47,7 @@ private:
 	Database* theoryDB;
 	Database* whiteDB;
 	Database* blackDB;
+	Training* trainingDB;
 	EngineWindow* enginewindow;
 	BoardWindow* boardwindow;
 	QVector<ChessBoard> positions;
