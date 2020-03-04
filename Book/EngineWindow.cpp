@@ -98,7 +98,8 @@ EngineWindow::EngineWindow(QWidget *parent)
 	connect(incline, SIGNAL(clicked(bool)), this, SLOT(slotInclineClicked(bool)));
 	connect(freeze, SIGNAL(clicked(bool)), this, SLOT(slotFreezeClicked(bool)));
 	connect(analyze, SIGNAL(clicked(bool)), this, SLOT(slotAnalyzeClicked(bool)));
-	connect(selengine, SIGNAL(activated(const QString&)), this, SLOT(slotSelectEngine(const QString&)));
+//	connect(selengine, SIGNAL(activated(const QString&)), this, SLOT(slotSelectEngine(const QString&)));
+	connect(selengine, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(slotSelectEngine(const QString&)));
 	connect(engine, SIGNAL(engineInfo(const EngineInfo&)), this, SLOT(slotEngineInfo(const EngineInfo&)));
 	connect(engine, SIGNAL(engineStarted()), this, SLOT(slotEngineStarted()));
 	connect(engine, SIGNAL(engineStoped()), this, SLOT(slotEngineStoped()));
@@ -389,19 +390,20 @@ void EngineWindow::stopAutomated()
 
 void EngineWindow::startAutomated(ChessBoard& cb, QString& eng, int sec)
 {
+	int i;
 	timeLimit = sec * 1000;
 	if (freezing)
 	{
 		freeze->click();
 		QApplication::processEvents();
-		_sleep(1000);
+		_sleep(200);
 		QApplication::processEvents();
 	}
 	if (analyzing)
 	{
 		analyze->click();
 		QApplication::processEvents();
-		_sleep(1000);
+		_sleep(200);
 		QApplication::processEvents();
 	}
 	while (multipv > 1)
@@ -413,9 +415,15 @@ void EngineWindow::startAutomated(ChessBoard& cb, QString& eng, int sec)
 	}
 
 	selengine->setCurrentText(eng);
-	QApplication::processEvents();
-	slotSelectEngine(eng);
-	QApplication::processEvents();
+	for (i = 0; i < 20; i++)
+	{
+		QApplication::processEvents();
+		if (analyze->isEnabled())
+			break;
+		_sleep(200);
+	}
+//	slotSelectEngine(eng);
+//	QApplication::processEvents();
 	setPosition(cb, 1);
 	QApplication::processEvents();
 	analyze->animateClick();
