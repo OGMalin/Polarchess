@@ -51,6 +51,12 @@ bool Statistics::open(const QString& path)
 			sdi.db = query.value("db").toString();
 			sdi.version = query.value("version").toString();
 		}
+		QSqlError error = query.lastError();
+		if (error.isValid())
+		{
+			qDebug() << "Database error: " << error.databaseText();
+			qDebug() << "Driver error: " << error.driverText();
+		}
 	}
 
 	return opened;
@@ -80,6 +86,12 @@ bool Statistics::create(const QString& path)
 		"movelist	TEXT, "
 		"PRIMARY KEY (cboard)"
 		" ); ");
+	QSqlError error = query.lastError();
+	if (error.isValid())
+	{
+		qDebug() << "Database error: " << error.databaseText();
+		qDebug() << "Driver error: " << error.driverText();
+	}
 	sdi.db = SDBTYPE;
 	sdi.version = SDBVERSION;
 	opened = true;
@@ -110,6 +122,12 @@ StatisticsDBEntry Statistics::find(ChessBoard& cb)
 	{
 		sde.convertToMoveList(sde.movelist, query.value("movelist").toString(), cb);
 		sde.cboard = cboard;
+	}
+	QSqlError error = query.lastError();
+	if (error.isValid())
+	{
+		qDebug() << "Database error: " << error.databaseText();
+		qDebug() << "Driver error: " << error.driverText();
 	}
 	return sde;
 }
@@ -161,6 +179,9 @@ StatisticsDBEntry Statistics::find(ChessBoard& cb)
 
 void Statistics::importGames(QWidget* parent)
 {
+#ifdef _DEBUG
+	QSqlError error;
+#endif
 	Pgn pgn;
 	int gameindex, i, j;
 	QVector<StatisticsDBEntry> list;
@@ -197,6 +218,8 @@ void Statistics::importGames(QWidget* parent)
 			pgn.close();
 			return;
 		}
+
+		// Check the database if a position allready exist
 		dblist.clear();
 		query.prepare("SELECT rowid, movelist FROM positions WHERE cboard = :cboard;");
 		for (i = 0; i < list.size(); i++)
@@ -210,11 +233,20 @@ void Statistics::importGames(QWidget* parent)
 				for (j = 0; j < list[i].movelist.size(); j++)
 					sde.updateMove(list[i].movelist[j]);
 				dblist.push_back(sde);
-				list[i].rowid = -1; // Mark as finnish
+				list[i].rowid = -1; // Mark as found and updated
 			}
-
+#ifdef _DEBUG
+			else
+			{
+				error = query.lastError();
+				if (error.isValid())
+				{
+					qDebug() << "Database error: " << error.databaseText();
+					qDebug() << "Driver error: " << error.driverText();
+				}
+			}
+#endif
 		}
-
 		progress.setLabelText("Saving to statistics");
 		QApplication::processEvents();
 		if (progress.wasCanceled())
@@ -231,8 +263,16 @@ void Statistics::importGames(QWidget* parent)
 		{
 			dblist[i].convertFromMoveList(dblist[i].movelist, qs, dblist[i].cboard);
 			query.bindValue(":movelist", qs);
-			query.bindValue(":rowid", sde.rowid);
+			query.bindValue(":rowid", dblist[i].rowid);
 			query.exec();
+#ifdef _DEBUG
+			error = query.lastError();
+			if (error.isValid())
+			{
+				qDebug() << "Database error: " << error.databaseText();
+				qDebug() << "Driver error: " << error.driverText();
+			}
+#endif
 		}
 //		db.commit();
 
@@ -249,6 +289,14 @@ void Statistics::importGames(QWidget* parent)
 				query.bindValue(":movelist", qs);
 				query.bindValue(":cboard", list[i].cboard);
 				query.exec();
+#ifdef _DEBUG
+				error = query.lastError();
+				if (error.isValid())
+				{
+					qDebug() << "Database error: " << error.databaseText();
+					qDebug() << "Driver error: " << error.driverText();
+				}
+#endif
 			}
 		}
 		db.commit();
@@ -266,6 +314,7 @@ void Statistics::importGames(QWidget* parent)
 	pgn.close();
 }
 
+// Read the 20 first moves from 1000 games and put each position into list
 bool Statistics::readGames(QVector<StatisticsDBEntry>& list, Pgn& pgn, int& index)
 {
 	SYSTEMTIME st;
@@ -460,6 +509,7 @@ void Statistics::importGames2(QWidget* parent)
 
 void Statistics::removeSingleGame(QWidget* parent)
 {
+	QSqlError error;
 	QSqlDatabase db = QSqlDatabase::database(STATISTICS);
 	if (!opened)
 		return;
@@ -506,6 +556,14 @@ void Statistics::removeSingleGame(QWidget* parent)
 			query.bindValue(":cboard", cboardlist[next]);
 			query.exec();
 			++next;
+#ifdef _DEBUG
+			error = query.lastError();
+			if (error.isValid())
+			{
+				qDebug() << "Database error: " << error.databaseText();
+				qDebug() << "Driver error: " << error.driverText();
+			}
+#endif
 		}
 		db.commit();
 		progress.setValue(next);
@@ -523,9 +581,9 @@ void Statistics::removeSingleGame(QWidget* parent)
 	}
 	if (!query.exec("VACUUM;"))
 	{
-		QSqlError error = query.lastError();
-			qDebug() << "Database error: " << error.databaseText();
-			qDebug() << "Driver error: " << error.driverText();
+		error = query.lastError();
+		qDebug() << "Database error: " << error.databaseText();
+		qDebug() << "Driver error: " << error.driverText();
 	}
 }
 
