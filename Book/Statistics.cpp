@@ -517,8 +517,7 @@ void Statistics::removeSingleGame(QWidget* parent)
 		return;
 	QSqlQuery query(db);
 
-	QVariantList cboardlist;
-	QByteArray cboard;
+	QVector<unsigned int> rowidlist;
 
 	// Open progress dialog
 	QProgressDialog progress("Searching for single games in statistics.", "Cancel", 0, 100, parent);
@@ -527,14 +526,11 @@ void Statistics::removeSingleGame(QWidget* parent)
 	progress.show();
 
 	QApplication::processEvents();
-	query.exec("SELECT * FROM positions;");
+	query.exec("SELECT rowid, movelist FROM positions;");
 	while (query.next())
-	{
 		if (haveSingleMove(query.value("movelist").toString()))
-		{
-			cboardlist.push_back(query.value("cboard"));
-		}
-	}
+			rowidlist.push_back(query.value("rowid").toUInt());
+
 	progress.setLabelText("Removing single games in statistics.");
 
 	QApplication::processEvents();
@@ -544,16 +540,16 @@ void Statistics::removeSingleGame(QWidget* parent)
 	}
 	int next = 0;
 	int i;
-	progress.setMaximum(cboardlist.size());
-	while (next < cboardlist.size())
+	progress.setMaximum(rowidlist.size());
+	while (next < rowidlist.size())
 	{
 		db.transaction();
-		for (i = 0; i < 100; i++)
+		for (i = 0; i < 1000; i++)
 		{
-			if (next>= cboardlist.size())
+			if (next>= rowidlist.size())
 				break;
-			query.prepare("DELETE FROM positions WHERE cboard=:cboard;");
-			query.bindValue(":cboard", cboardlist[next]);
+			query.prepare("DELETE FROM positions WHERE rowid=:rowid;");
+			query.bindValue(":rowid", rowidlist[next]);
 			query.exec();
 			++next;
 #ifdef _DEBUG
