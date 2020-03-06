@@ -261,5 +261,5 @@ paket-files/
 __pycache__/
 *.pyc
 
-Installer/packages/com.polarchess.polarbook/data
 *.exe
+!Installer/packages/com.polarchess.polarbook/meta
