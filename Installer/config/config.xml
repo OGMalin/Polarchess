@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Installer>
-    <Name>PolarChess</Name>
-    <Version>0.0.1</Version>
-    <Title>PolarChess Installer</Title>
-    <Publisher>PolarChess</Publisher>
-    <StartMenuDir>PolarChess</StartMenuDir>
-    <TargetDir>@ApplicationsDir@/PolarChess</TargetDir>
-</Installer>

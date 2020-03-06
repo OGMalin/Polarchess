@@ -17,25 +17,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Installer", "Installer", "{BB58CFDD-C978-4FA9-949C-C27537769223}"
-	ProjectSection(SolutionItems) = preProject
-		Installer\Create PolarBook.cmd = Installer\Create PolarBook.cmd
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "config", "config", "{43FA5259-B08A-4239-AF09-F3962BB2E009}"
-	ProjectSection(SolutionItems) = preProject
-		Installer\config\config.xml = Installer\config\config.xml
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "packages", "packages", "{20BA3ACB-A877-4DEE-B666-DFEDBBCA347D}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "com.polarchess.polarbook", "com.polarchess.polarbook", "{F36BDFD3-0CA0-45D1-AF8F-FFECB4B524EF}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "meta", "meta", "{A3C5B82A-D3CB-42C6-9927-61223F704ED4}"
-	ProjectSection(SolutionItems) = preProject
-		Installer\packages\com.polarchess.polarbook\meta\package.xml = Installer\packages\com.polarchess.polarbook\meta\package.xml
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -73,12 +54,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{43FA5259-B08A-4239-AF09-F3962BB2E009} = {BB58CFDD-C978-4FA9-949C-C27537769223}
-		{20BA3ACB-A877-4DEE-B666-DFEDBBCA347D} = {BB58CFDD-C978-4FA9-949C-C27537769223}
-		{F36BDFD3-0CA0-45D1-AF8F-FFECB4B524EF} = {20BA3ACB-A877-4DEE-B666-DFEDBBCA347D}
-		{A3C5B82A-D3CB-42C6-9927-61223F704ED4} = {F36BDFD3-0CA0-45D1-AF8F-FFECB4B524EF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B07C50AF-8089-4C3C-8CA0-6E6CFA6A7B30}
