@@ -47,6 +47,7 @@ public:
 	typePiece pieceAt(int file, int row);
 	typePiece getPieceFromChar(char c);
 	char getCharFromPiece(typePiece p);
+	int legalMoves();
 	HASHKEY hashkey();
 	HASHKEY newHashkey(const ChessMove& m, HASHKEY oldkey);
 

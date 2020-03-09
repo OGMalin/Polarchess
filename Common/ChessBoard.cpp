@@ -309,11 +309,21 @@ bool ChessBoard::doMove(ChessMove& m, bool legalcheck)
 
 bool ChessBoard::isLegal(ChessMove& m)
 {
-	MoveGenerator gen;
+//	MoveGenerator gen;
 	ChessMove mm;
 	string sm=makeMoveText(m,UCI);
 	mm=getMoveFromText(sm);
 	return (mm.score == 0) ? true : false;
+}
+
+int ChessBoard::legalMoves()
+{
+	MoveGenerator gen;
+	MoveList* ml = new MoveList;
+	gen.makeMoves(*this, *ml);
+	int n = ml->size();
+	delete ml;
+	return n;
 }
 
 const ChessMove ChessBoard::getMoveFromText(const std::string text)

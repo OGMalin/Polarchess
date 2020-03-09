@@ -147,6 +147,9 @@ void AnalyzeDialog::collectPositions()
 		{
 			path->current(j);
 			cb = path->getPosition();
+			// Don't keep mate and stalemate
+			if (cb.legalMoves() == 0)
+				continue;
 			positions.push_back(cb);
 		}
 		return;
@@ -185,10 +188,22 @@ void AnalyzeDialog::collectPositions()
 	{
 		db->getAllPositions(positions);
 	}
+
+	// Remove mate and stalemate
+	for (i = 0; i < positions.size(); i++)
+	{
+		if (positions[i].legalMoves() == 0)
+		{
+			positions.remove(i);
+			--i;
+		}
+	}
 	ComputerDBEntry cde;
 	QString qs = engineList->currentText();
 	for (i = 0; i < positions.size(); i++)
 	{
+		if (positions[i].legalMoves() == 0)
+			continue;
 		cde = compDB->find(positions[i]);
 		if (!cde.cboard.isEmpty())
 		{
