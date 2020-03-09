@@ -162,6 +162,52 @@ void Openings::add(OpeningsDBEntry& ode, ChessBoard& cb)
 			"subvariation = :subvariation "
 			"WHERE position = :position;");
 	}
+
+	query.bindValue(":eco", ode.eco);
+	query.bindValue(":name", ode.name);
+	query.bindValue(":variation", ode.variation);
+	query.bindValue(":subvariation", ode.subvariation);
+	query.bindValue(":position", ode.cBoard);
+	query.exec();
+	error = query.lastError();
+	if (error.isValid())
+	{
+		qDebug() << "Database error: " << error.databaseText();
+		qDebug() << "Driver error: " << error.driverText();
+	}
+	return;
+}
+
+void Openings::update(OpeningsDBEntry& ode)
+{
+	QSqlError error;
+
+	if (!_opened)
+		return;
+
+	QSqlDatabase db = QSqlDatabase::database(OPENINGS);
+	if (!db.open())
+		return;
+	QSqlQuery query(db);
+
+	if (ode.cBoard.size() == 0)
+		return;
+
+	ChessBoard cb = CompressedBoard::decompress(ode.cBoard);
+	OpeningsDBEntry oe = find(cb);
+
+	if (oe.cBoard.size() == 0)
+	{
+		add(ode, cb);
+		return;
+	}
+	query.prepare("UPDATE openings SET "
+		"eco = :eco, "
+		"name = :name, "
+		"variation = :variation, "
+		"subvariation = :subvariation "
+		"WHERE position = :position;");
+
 	query.bindValue(":eco", ode.eco);
 	query.bindValue(":name", ode.name);
 	query.bindValue(":variation", ode.variation);
@@ -206,16 +252,6 @@ void Openings::importPgn(QWidget* parent)
 		game.toEnd();
 		if (!game.getPosition(cb))
 			continue;
-#ifdef _DEBUG
-		QByteArray dba = CompressedBoard::compress(cb);
-		ChessBoard dcb = CompressedBoard::decompress(dba);
-		if (cb != dcb)
-		{
-			qDebug("Compressing error:");
-			qDebug(cb.getFen(true).c_str());
-			qDebug(dcb.getFen(true).c_str());
-		}
-#endif
 		ode = find(cb);
 
 		if (game.info.ECO.size())
@@ -285,4 +321,22 @@ void Openings::exportPgn(QWidget* parent)
 		pgn.appendGame(game);
 	}
 	progress.setValue(query.size());
+}
+
+void Openings::remove(QByteArray& cboard)
+{
+	if (!_opened)
+		return;
+	if (cboard.isEmpty())
+		return;
+
+	QSqlDatabase db = QSqlDatabase::database(OPENINGS);
+	if (!db.open())
+		return;
+	QSqlQuery query(db);
+
+
+	query.prepare("DELETE FROM openings WHERE position = :position;");
+	query.bindValue(":position", cboard);
+	query.exec();
 }

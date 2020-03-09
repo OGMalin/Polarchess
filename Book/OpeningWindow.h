@@ -21,9 +21,11 @@ public slots:
 	void showContextMenu(const QPoint& pos);
 	void selectFont();
 	void editLine();
+	void deleteLine();
 
 private:
 	QLineEdit* openingline;
 	Openings* openingsDB;
 	OpeningsDBEntry ode;
+	QByteArray currentPosition;
 };

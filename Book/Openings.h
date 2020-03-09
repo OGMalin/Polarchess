@@ -25,6 +25,10 @@ public:
 	// Add an engine analyze to a position
 	void add(OpeningsDBEntry&, ChessBoard&);
 
+	void update(OpeningsDBEntry&);
+
+	void remove(QByteArray&);
+
 	// Get db path
 	QString getPath();
 

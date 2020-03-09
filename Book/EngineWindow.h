@@ -9,6 +9,7 @@
 #include <QComboBox>
 #include <QTableView>
 #include "Computer.h"
+#include "Watch.h"
 
 class QPushButton;
 class QLabel;
@@ -52,7 +53,7 @@ private:
 	QLabel* lines;		// Show number of multipv
 	QLabel* nodes;
 	QLabel* nps;
-	QLabel* time;
+	Watch* watch;
 	QComboBox* selengine;
 	QStandardItemModel* model;
 	QTableView* table;

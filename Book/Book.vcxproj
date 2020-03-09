@@ -150,11 +150,12 @@
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="MoveTableWindow.cpp" />
     <ClCompile Include="Openings.cpp" />
+    <ClCompile Include="OpeningsDialog.cpp" />
     <ClCompile Include="OpeningWindow.cpp" />
     <ClCompile Include="Path.cpp" />
     <ClCompile Include="PathWindow.cpp" />
     <ClCompile Include="Statistics.cpp" />
-    <ClCompile Include="StatusWatch.cpp" />
+    <ClCompile Include="Watch.cpp" />
     <ClCompile Include="Training.cpp" />
     <ClCompile Include="TrainingDialog.cpp" />
     <ClCompile Include="TrainingWindow.cpp" />
@@ -226,6 +227,7 @@
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
     </QtMoc>
     <ClInclude Include="Openings.h" />
+    <ClInclude Include="OpeningsDialog.h" />
     <ClInclude Include="resource.h" />
     <QtMoc Include="TrainingDialog.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql;$(QTDIR)\include\QtSerialPort</IncludePath>
@@ -244,9 +246,9 @@
     <ClInclude Include="..\Common\ChessMove.h" />
     <ClInclude Include="..\Common\defs.h" />
     <ClInclude Include="..\Common\Epd.h" />
-    <QtMoc Include="StatusWatch.h">
-      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
-      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
+    <QtMoc Include="Watch.h">
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql;$(QTDIR)\include\QtSerialPort;$(QTDIR)\include\QtNetwork</IncludePath>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql;$(QTDIR)\include\QtSerialPort;$(QTDIR)\include\QtNetwork</IncludePath>
     </QtMoc>
     <ClInclude Include="..\Common\UciEngine.h" />
     <ClInclude Include="..\Common\XBoardEngine.h" />

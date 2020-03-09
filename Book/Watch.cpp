@@ -1,23 +1,25 @@
-#include "StatusWatch.h"
+#include "Watch.h"
 #include <QHBoxLayout>
 #include <QMenu>
 #include <QAction>
 
-StatusWatch::StatusWatch(QWidget* parent)
+Watch::Watch(QWidget* parent, bool enableContextMenu)
 	:QWidget(parent)
 {
 	QHBoxLayout* hbox = new QHBoxLayout;
 	text = new QLabel("00:00:00");
-	setContextMenuPolicy(Qt::CustomContextMenu);
+	if (enableContextMenu)
+		setContextMenuPolicy(Qt::CustomContextMenu);
 	hbox->addWidget(text);
 	setLayout(hbox);
 	running = 0;
 	time = 0;
 	connect(&timer, SIGNAL(timeout()), this, SLOT(updateTime()));
-	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+	if (enableContextMenu)
+		connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 }
 
-void StatusWatch::updateTime()
+void Watch::updateTime()
 {
 	++time;
 	char sz[16];
@@ -29,7 +31,7 @@ void StatusWatch::updateTime()
 	text->setText(sz);
 }
 
-void StatusWatch::start()
+void Watch::start()
 {
 	if (running == 0)
 		time = 0;
@@ -37,22 +39,31 @@ void StatusWatch::start()
 	running = 2;
 }
 
-void StatusWatch::stop()
+void Watch::stop()
 {
 	timer.stop();
 	running = 0;
 	text->setText("00:00:00");
 }
 
-void StatusWatch::pause()
+void Watch::pause(bool mark)
 {
 	timer.stop();
 	running = 1;
+	if (!mark)
+		return;
 	QString qs = "* " + text->text();
 	text->setText(qs);
 }
 
-void StatusWatch::showContextMenu(const QPoint& pos)
+void Watch::restart()
+{
+	time = 0;
+	timer.start(1000);
+	running = 2;
+}
+
+void Watch::showContextMenu(const QPoint& pos)
 {
 	QMenu* contextMenu = new QMenu(this);
 	QAction* startAct = contextMenu->addAction(QString("Start"), this, SLOT(start()));

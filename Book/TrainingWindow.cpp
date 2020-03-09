@@ -24,7 +24,7 @@ TrainingWindow::TrainingWindow(QWidget* parent)
 	vbox = new QVBoxLayout;
 
 	hbox = new QHBoxLayout;
-	watch = new StatusWatch;
+	watch = new Watch(NULL,true);
 	rowid = new QLabel(tr("Id: "));
 	lRunning = new QLabel(tr("Not running"));
 	inBase = new QLabel(tr("In base: "));

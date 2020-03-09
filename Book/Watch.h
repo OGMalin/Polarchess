@@ -4,7 +4,7 @@
 #include <QTimer>
 #include <QLabel>
 
-class StatusWatch :public QWidget
+class Watch :public QWidget
 {
 	Q_OBJECT
 
@@ -16,10 +16,11 @@ private:
 public slots:
 	void updateTime();
 	void showContextMenu(const QPoint& pos);
-	void pause();
+	void pause(bool mark=true);
 	void start();
 	void stop();
+	void restart();
 
 public:
-	StatusWatch(QWidget* parent = 0);
+	Watch(QWidget* parent, bool enableContextMenu);
 };

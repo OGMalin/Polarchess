@@ -53,8 +53,7 @@ EngineWindow::EngineWindow(QWidget *parent)
 	nodes->setAlignment(Qt::AlignCenter);
 	nps = new QLabel;
 	nps->setAlignment(Qt::AlignCenter);
-	time = new QLabel;
-	time->setAlignment(Qt::AlignCenter);
+	watch = new Watch(NULL, false);
 	selengine = new QComboBox;
 	hbox->addWidget(decline);
 	hbox->addWidget(lines);
@@ -63,7 +62,7 @@ EngineWindow::EngineWindow(QWidget *parent)
 	hbox->addWidget(freeze);
 	hbox->addWidget(nodes);
 	hbox->addWidget(nps);
-	hbox->addWidget(time);
+	hbox->addWidget(watch);
 	hbox->addWidget(selengine);
 	grid->addLayout(hbox, 0, 0);
 
@@ -124,6 +123,7 @@ void EngineWindow::setPosition(ChessBoard& cb, int mn)
 			if (engine->needRestart())
 				return;
 			engine->analyze(currentBoard);
+			watch->restart();
 		}
 }
 
@@ -140,6 +140,7 @@ void EngineWindow::slotAnalyzeClicked(bool)
 			analyze->setChecked(false);
 			return;
 		}
+		watch->restart();
 		analyzing = true;
 		if (engine->needRestart())
 			return;
@@ -153,6 +154,7 @@ void EngineWindow::slotAnalyzeClicked(bool)
 		{
 			engine->stop();
 			analyzing = false;
+			watch->pause(false);
 		}
 	}
 }
@@ -168,6 +170,7 @@ void EngineWindow::slotFreezeClicked(bool)
 	else
 	{
 		freezing = false;
+		watch->pause(false);
 		if (analyzing)
 			engine->stop();
 	}

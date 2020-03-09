@@ -293,7 +293,7 @@ void MainWindow::readDB()
 
 void MainWindow::createStatusbar()
 {
-	statusWatch = new StatusWatch();
+	statusWatch = new Watch(NULL, true);
 	statusBar()->addPermanentWidget(statusWatch);
 }
 

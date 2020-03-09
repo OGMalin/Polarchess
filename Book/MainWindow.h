@@ -5,7 +5,7 @@
 #include "Computer.h"
 #include "Training.h"
 #include "Openings.h"
-#include "StatusWatch.h"
+#include "Watch.h"
 #include "MoveTableWindow.h"
 #include "OpeningWindow.h"
 #include "CommentWindow.h"
@@ -120,7 +120,7 @@ private:
 	ComputerDBEntry cde;
 	Training* trainingDB;
 	DgtBoard* dgt;
-	StatusWatch* statusWatch;
+	Watch* statusWatch;
 	// You are in training mode;
 	bool inTraining;
 	// Which DB to write to when moving pieces on the chessboard. (-1=none)

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Training.h"
-#include "StatusWatch.h"
+#include "Watch.h"
 #include "Database.h"
 #include "Computer.h"
 #include "../Common/ChessBoard.h"
@@ -48,7 +48,7 @@ public:
 private:
 	Database* Base[3];
 	Computer* compDB;
-	StatusWatch* watch;
+	Watch* watch;
 	QComboBox* colorBox;
 	QCheckBox* positionBox;
 	QPushButton* startButton;

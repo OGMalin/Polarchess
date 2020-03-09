@@ -110,9 +110,6 @@
     <ClCompile Include="..\Common\Epd.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="StatusWatch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\Common\UciEngine.cpp">
       <Filter>Common</Filter>
     </ClCompile>
@@ -158,6 +155,12 @@
     <ClCompile Include="AnalyzeDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="OpeningsDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Watch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -190,9 +193,6 @@
     <QtMoc Include="ImportPgnDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="StatusWatch.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="..\Common\BaseEngine.h">
       <Filter>Common</Filter>
     </QtMoc>
@@ -215,6 +215,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="AnalyzeDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Watch.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -292,6 +295,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ListOrderDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OpeningsDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
