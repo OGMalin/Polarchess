@@ -299,7 +299,7 @@ void EngineWindow::slotEngineInfo(const EngineInfo& info)
 			item = new QStandardItem(qs);
 			item->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
 			model->setItem(line - 1, 3, item);
-			if ((info.time >= timeLimit) && (line==1) && !info.lowerbound && !info.upperbound)
+			if (((info.time >= timeLimit) || info.mate) && (line==1) && !info.lowerbound && !info.upperbound)
 			{
 				ComputerDBEngine* ce=new ComputerDBEngine;
 				ce->engine = engineName;
