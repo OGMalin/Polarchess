@@ -320,10 +320,9 @@ void TrainingWindow::updateComment(bool visible)
 			if (found)
 				break;
 		}
-
-		QTextStream(&qs) << (float)(score/100);
+		if (found)
+			QTextStream(&qs) << ((score > 0) ? "+" : "") << (float)(score / 100.0);  // Add + signe for white advantage
 
 	}
-	if (!found)
-		computerScore->setText(qs);
+	computerScore->setText(qs);
 }
