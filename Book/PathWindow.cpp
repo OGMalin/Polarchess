@@ -115,3 +115,4 @@ void PathWindow::fontFromString(const QString& sFont)
 	setFont(f);
 	//	table->resizeColumnsToContents();
 }
+

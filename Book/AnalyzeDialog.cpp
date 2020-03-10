@@ -137,7 +137,12 @@ void AnalyzeDialog::enginePV(ComputerDBEngine& ce, ChessBoard& cb)
 
 void AnalyzeDialog::collectPositions()
 {
+	ComputerDBEntry cde;
+	QString qs;
+	ComputerDBEngine* ce;
+	Database* db;
 	int i, j;
+	int t = timeToUse->value() * 1000;
 	ChessBoard cb;
 	positions.clear();
 	if (currentPath->isChecked())
@@ -147,46 +152,44 @@ void AnalyzeDialog::collectPositions()
 		{
 			path->current(j);
 			cb = path->getPosition();
-			// Don't keep mate and stalemate
-			if (cb.legalMoves() == 0)
-				continue;
 			positions.push_back(cb);
-		}
-		return;
-	}
-	Database* db;
-	switch (dbList->currentIndex())
-	{
-	case 0:
-		db = theoryDB;
-		break;
-	case 1:
-		db = whiteDB;
-		break;
-	case 2:
-		db = blackDB;
-		break;
-	default:
-		return;
-	}
-	if (endPosition->isChecked())
-	{
-		if (db == theoryDB)
-		{
-			db->getEndPositions(positions);
-		}
-		else
-		{
-			// There isn't any endposition saved in a repertoire database, use the trainingdatabase instead.
-			if (db == whiteDB)
-				trainingDB->getEndpositions(positions, 0);
-			else
-				trainingDB->getEndpositions(positions, 1);
 		}
 	}
 	else
 	{
-		db->getAllPositions(positions);
+		switch (dbList->currentIndex())
+		{
+		case 0:
+			db = theoryDB;
+			break;
+		case 1:
+			db = whiteDB;
+			break;
+		case 2:
+			db = blackDB;
+			break;
+		default:
+			return;
+		}
+		if (endPosition->isChecked())
+		{
+			if (db == theoryDB)
+			{
+				db->getEndPositions(positions);
+			}
+			else
+			{
+				// There isn't any endposition saved in a repertoire database, use the trainingdatabase instead.
+				if (db == whiteDB)
+					trainingDB->getEndpositions(positions, 0);
+				else
+					trainingDB->getEndpositions(positions, 1);
+			}
+		}
+		else
+		{
+			db->getAllPositions(positions);
+		}
 	}
 
 	// Remove mate and stalemate
@@ -198,21 +201,20 @@ void AnalyzeDialog::collectPositions()
 			--i;
 		}
 	}
-	ComputerDBEntry cde;
-	QString qs = engineList->currentText();
+	qs = engineList->currentText();
 	for (i = 0; i < positions.size(); i++)
 	{
-		if (positions[i].legalMoves() == 0)
-			continue;
 		cde = compDB->find(positions[i]);
 		if (!cde.cboard.isEmpty())
 		{
-			if (cde.exist(qs))
+			if (cde.exist(qs, ce))
 			{
-				positions.remove(i);
-				--i;
+				if (ce->time >= t)
+				{
+					positions.remove(i);
+					--i;
+				}
 			}
-
 		}
 	}
 }

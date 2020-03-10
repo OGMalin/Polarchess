@@ -123,6 +123,8 @@ void Path::current(int n)
 {
 	if (n >= moves.size())
 		n = moves.size() - 1;
+	if (n < 0)
+		n = 0;
 	_current = n;
 }
 

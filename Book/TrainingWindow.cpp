@@ -40,7 +40,7 @@ TrainingWindow::TrainingWindow(QWidget* parent)
 
 	hbox = new QHBoxLayout;
 	comment = new QTextEdit;
-	comment->setDisabled(true);
+	comment->setReadOnly(true);
 	hbox->addWidget(comment);
 	vbox->addLayout(hbox);
 
@@ -277,10 +277,11 @@ void TrainingWindow::updateComment(bool visible)
 	ChessBoard cb=trainingLine.currentPosition();
 	if (!visible)
 	{
-		comment->hide();
+		comment->clear();
+		qs = tr("Computer score: ");
+		computerScore->setText(qs);
 		return;
 	}
-	comment->show();
 	comment->clear();
 	bde = Base[0]->find(cb);
 	if (!bde.comment.isEmpty())

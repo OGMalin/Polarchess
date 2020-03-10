@@ -14,15 +14,15 @@ CommentWindow::CommentWindow(QWidget *parent)
 	cBlack.clear();
 	QVBoxLayout* vbox = new QVBoxLayout;
 	comment = new QTextEdit;
-	comment->setDisabled(true);
+	comment->setReadOnly(true);
 	vbox->setMargin(0);
 	vbox->addWidget(comment);
 	setLayout(vbox);
 	theoryColor.setRgb(0, 0, 128);
 	repColor.setRgb(0, 128, 0);
 
-	setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+	comment->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(comment, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 }
 
 CommentWindow::~CommentWindow()

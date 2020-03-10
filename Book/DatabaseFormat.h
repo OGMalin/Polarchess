@@ -211,8 +211,7 @@ struct ComputerDBEntry
 
 	void convertToEngineList(const QString&, ChessBoard&);
 	void convertFromEngineList(QString&, ChessBoard&);
-
-	bool exist(QString& eng);
+	bool exist(QString& eng, ComputerDBEngine*);
 };
 
 struct ComputerDBInfo

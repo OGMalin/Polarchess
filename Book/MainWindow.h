@@ -72,7 +72,6 @@ public:
 	Path* currentPath;
 	MainWindow(QWidget *parent = Q_NULLPTR);
 	virtual ~MainWindow();
-
 private:
 	QVector<StatisticsDBMove> statList;
 	QVector<ComputerDBEngine> compList;
