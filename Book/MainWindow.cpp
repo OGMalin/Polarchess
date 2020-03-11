@@ -2,6 +2,7 @@
 #include "AboutDialog.h"
 #include "DatabaseDialog.h"
 #include "AnalyzeDialog.h"
+#include "CreateEngine.h"
 #include "../Common/Pgn.h"
 #include "../Common/ChessGame.h"
 #include <QMenuBar>
@@ -22,10 +23,16 @@
 #include <string>
 #include <QByteArray>
 #include <QDebug>
+#include <QMetaType>
+
+Q_DECLARE_METATYPE(QList<int>)
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
+	// QList<int> must be registred before used as a QVariant for saving to the register (QSettings).
+	qRegisterMetaTypeStreamOperators<QList<int> >("QList<int>");
+
 	write = -1;
 	inTraining = false;
 
@@ -45,9 +52,11 @@ MainWindow::MainWindow(QWidget *parent)
 	enginewindow = new EngineWindow;
 	movewindow = new MoveTableWindow;
 	trainingwindow = new TrainingWindow;
+	
 	v1Splitter->addWidget(openingwindow);
 	v1Splitter->addWidget(boardwindow);
 	v1Splitter->addWidget(enginewindow);
+	
 	v2Splitter->addWidget(pathwindow);
 	v2Splitter->addWidget(movewindow);
 	v2Splitter->addWidget(commentwindow);
@@ -136,6 +145,7 @@ void MainWindow::createMenu()
 
 	settingsMenu = menuBar()->addMenu("*");
 	setupDatabaseAct = settingsMenu->addAction("*", this, &MainWindow::setupDatabase);
+	createEngineAct = settingsMenu->addAction("*", this, &MainWindow::createEngine);
 	useDgtAct = settingsMenu->addAction("*", this, &MainWindow::useDgt);
 	useDgtAct->setCheckable(true);
 	settingsMenu->addSeparator();
@@ -190,6 +200,7 @@ void MainWindow::retranslateUi()
 
 	settingsMenu->setTitle(tr("Settings"));
 	setupDatabaseAct->setText(tr("Setup database"));
+	createEngineAct->setText(tr("Create engine"));
 	useDgtAct->setText(tr("Use DGT Electronic board"));
 	langMenu->setTitle(tr("Language"));
 	if (locale == "nb")
@@ -306,20 +317,14 @@ void MainWindow::writeSettings()
 	settings.setValue("v2State", v2Splitter->saveState());
 	settings.setValue("hState", hSplitter->saveState());
 	if (inTraining)
-	{
-		settings.setValue("pathTwindowGeometry", pathwindow->saveGeometry());
-		settings.setValue("boardwindowGeometry", boardwindow->saveGeometry());
-		settings.setValue("trainingwindowGeometry", trainingwindow->saveGeometry());
-	}
+		trainingSplitterSize = v2Splitter->sizes();
 	else
-	{
-		settings.setValue("pathwindowGeometry", pathwindow->saveGeometry());
-		settings.setValue("openingwindowGeometry", openingwindow->saveGeometry());
-		settings.setValue("movewindowGeometry", movewindow->saveGeometry());
-		settings.setValue("commentwindowGeometry", commentwindow->saveGeometry());
-		settings.setValue("boardwindowGeometry", boardwindow->saveGeometry());
-		settings.setValue("enginewindowGeometry", enginewindow->saveGeometry());
-	}
+		mainSplitterSize = v2Splitter->sizes();
+	if (mainSplitterSize.size())
+		settings.setValue("mainSplitterSize", QVariant::fromValue(mainSplitterSize));
+	if (trainingSplitterSize.size())
+		settings.setValue("trainingSplitterSize", QVariant::fromValue(trainingSplitterSize));
+
 	settings.setValue("dataTheory", Base[THEORY]->getPath());
 	settings.setValue("dataWhite", Base[REPWHITE]->getPath());
 	settings.setValue("dataBlack", Base[REPBLACK]->getPath());
@@ -349,24 +354,26 @@ void MainWindow::readSettings()
 	QString dataTraining;
 	QString dataOpenings;
 
-	dataPath = QStandardPaths::locate(QStandardPaths::DocumentsLocation, QCoreApplication::organizationName(), QStandardPaths::LocateDirectory);
-	dataPath += "/" + QCoreApplication::applicationName();
-
 	restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
 	restoreState(settings.value("mainWindowState").toByteArray());
 	v1Splitter->restoreState(settings.value("v1State").toByteArray());
 	v2Splitter->restoreState(settings.value("v2State").toByteArray());
 	hSplitter->restoreState(settings.value("hState").toByteArray());
 
-	pathwindow->restoreGeometry(settings.value("pathwindowGeometry").toByteArray());
-	movewindow->restoreGeometry(settings.value("movewindowGeometry").toByteArray());
-	commentwindow->restoreGeometry(settings.value("commentwindowGeometry").toByteArray());
-	openingwindow->restoreGeometry(settings.value("openingwindowGeometry").toByteArray());
-	boardwindow->restoreGeometry(settings.value("boardwindowGeometry").toByteArray());
-	enginewindow->restoreGeometry(settings.value("enginewindowGeometry").toByteArray());
-	trainingwindow->restoreGeometry(settings.value("trainingwindowGeometry").toByteArray());
+	mainSplitterSize = settings.value("mainSplitterSize").value<QList<int> >();
+	trainingSplitterSize = settings.value("trainingSplitterSize").value<QList<int> >();
+	if (mainSplitterSize.size())
+		v2Splitter->setSizes(mainSplitterSize);
 
-	dataPath = settings.value("dataPath",dataPath).toString();
+
+	dataPath = settings.value("dataPath",QString()).toString();
+	// Set default datapath
+	if (dataPath.isEmpty())
+	{
+		dataPath = QStandardPaths::locate(QStandardPaths::DocumentsLocation, QCoreApplication::organizationName(), QStandardPaths::LocateDirectory);
+		dataPath += "/" + QCoreApplication::applicationName();
+		settings.setValue("dataPath", dataPath);
+	}
 	dataTheory = settings.value("dataTheory", dataPath + "/Theory.pbk").toString();
 	dataWhite = settings.value("dataWhite", dataPath + "/White.pbk").toString();
 	dataBlack = settings.value("dataBlack", dataPath + "/Black.pbk").toString();
@@ -625,46 +632,30 @@ void MainWindow::trainingStart()
 {
 	QSettings settings;
 	inTraining = true;
-	settings.setValue("pathwindowGeometry", pathwindow->saveGeometry());
-	settings.setValue("openingwindowGeometry", openingwindow->saveGeometry());
-	settings.setValue("movewindowGeometry", movewindow->saveGeometry());
-	settings.setValue("commentwindowGeometry", commentwindow->saveGeometry());
-	settings.setValue("enginewindowGeometry", enginewindow->saveGeometry());
-	trainingwindow->restoreGeometry(settings.value("pathTwindowGeometry").toByteArray());
-	trainingwindow->restoreGeometry(settings.value("trainingwindowGeometry").toByteArray());
-//	QSize size = pathwindow->size();
+	mainSplitterSize = v2Splitter->sizes();
 	trainingwindow->setCurrentBoard(currentPath->getPosition());
 	trainingwindow->updateStat();
 	updateWindow();
 	updateMenu();
-//	trainingwindow->setMinimumHeight(200);
-//	pathwindow->resize(size);
-//	pathwindow->updateGeometry();
-	//pathwindow->restoreGeometry(settings.value("pathwindowGeometry").toByteArray());
+	if (trainingSplitterSize.size())
+		v2Splitter->setSizes(trainingSplitterSize);
 }
 
 void MainWindow::trainingStop()
 {
 	QSettings settings;
 	inTraining = false;
-	//settings.setValue("pathwindowGeometry", pathwindow->saveGeometry());
 	if (trainingwindow->isRunning())
 		trainingwindow->stopRunning();
 	toolbarTrainingAct->setChecked(false);
+	trainingSplitterSize = v2Splitter->sizes();
+
 	readDB();
-//	QSize size = pathwindow->size();
-	settings.setValue("pathTwindowGeometry", pathwindow->saveGeometry());
-	settings.setValue("trainingwindowGeometry", trainingwindow->saveGeometry());
-	trainingwindow->restoreGeometry(settings.value("pathwindowGeometry").toByteArray());
-	movewindow->restoreGeometry(settings.value("movewindowGeometry").toByteArray());
-	commentwindow->restoreGeometry(settings.value("commentwindowGeometry").toByteArray());
-	openingwindow->restoreGeometry(settings.value("openingwindowGeometry").toByteArray());
-	enginewindow->restoreGeometry(settings.value("enginewindowGeometry").toByteArray());
+
 	updateWindow();
 	updateMenu();
-//	pathwindow->resize(size);
-//	pathwindow->updateGeometry();
-	//pathwindow->restoreGeometry(settings.value("pathwindowGeometry").toByteArray());
+	if (mainSplitterSize.size())
+		v2Splitter->setSizes(mainSplitterSize);
 }
 
 void MainWindow::trainingFlipBoard(int color)
@@ -895,6 +886,12 @@ void MainWindow::useDgt()
 			dgt = NULL;
 		}
 	}
+}
+
+void MainWindow::createEngine()
+{
+	CreateEngine dialog(this);
+	dialog.exec();
 }
 
 #ifdef _DEBUG

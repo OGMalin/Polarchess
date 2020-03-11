@@ -29,6 +29,7 @@
 #include <QToolButton>
 #include <QColor>
 #include <QVector>
+#include <QList>
 
 enum {THEORY=0, REPWHITE, REPBLACK };
 
@@ -73,6 +74,8 @@ public:
 	MainWindow(QWidget *parent = Q_NULLPTR);
 	virtual ~MainWindow();
 private:
+	QList<int> mainSplitterSize;
+	QList<int> trainingSplitterSize;
 	QVector<StatisticsDBMove> statList;
 	QVector<ComputerDBEngine> compList;
 	QTranslator translator;
@@ -97,6 +100,7 @@ private:
 	QAction* useDgtAct;
 	QAction* engAct;
 	QAction* norAct;
+	QAction* createEngineAct;
 	QActionGroup * langGroup;
 	QAction* toolbarTrainingAct;
 	QToolButton* dgtIcon;
@@ -140,17 +144,11 @@ private:
 	void trainingStart();
 	void trainingClearData();
 	void trainingCreate();
-	//void trainingRun(int color, ChessBoard& pos);
-	//void trainingStartBoth();
-	//void trainingStartWhite();
-	//void trainingStartBlack();
-	//void trainingStartPosBoth();
-	//void trainingStartPosWhite();
-	//void trainingStartPosBlack();
 
 	void setLanguage();
 	void loadLanguage();
 	void retranslateUi();
 	void setupDatabase();
 	void useDgt();
+	void createEngine();
 };

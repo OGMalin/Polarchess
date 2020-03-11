@@ -1,7 +1,5 @@
 #include "EngineWindow.h"
-#include <QCoreApplication>
 #include <QApplication>
-#include <QStandardPaths>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -12,6 +10,7 @@
 #include <QTime>
 #include <QTextStream>
 #include <QHeaderView>
+#include <QSettings>
 
 EngineWindow::EngineWindow(QWidget *parent)
 	: QWidget(parent)
@@ -26,9 +25,10 @@ EngineWindow::EngineWindow(QWidget *parent)
 	freezing = false;
 	engine = new Engine;
 	currentBoard.setStartposition();
-	engineName.clear(); 
-	iniPath = QStandardPaths::locate(QStandardPaths::DocumentsLocation, QCoreApplication::organizationName(), QStandardPaths::LocateDirectory);
-	iniPath += "/" + QCoreApplication::applicationName() + "/Engines";
+	engineName.clear();
+	QSettings settings;
+	iniPath = settings.value("dataPath", QString()).toString();
+	iniPath += "/Engines";
 
 	QGridLayout* grid = new QGridLayout;
 

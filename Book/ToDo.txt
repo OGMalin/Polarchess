@@ -6,6 +6,8 @@ ToDo List
 	*Create new training lines automatic when a reportoire are changed. (Ask before training start).
 ?Number of variation in rep. base.
 *Dgt support
+*Import engine dialog
+*Settings dialog
 
 ? Maybe
 * Needed

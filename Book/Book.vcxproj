@@ -139,6 +139,7 @@
     <ClCompile Include="AnalyzeDialog.cpp" />
     <ClCompile Include="CommentWindow.cpp" />
     <ClCompile Include="Computer.cpp" />
+    <ClCompile Include="CreateEngine.cpp" />
     <ClCompile Include="Database.cpp" />
     <ClCompile Include="DatabaseDialog.cpp" />
     <ClCompile Include="DatabaseFormat.cpp" />
@@ -213,6 +214,7 @@
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql;$(QTDIR)\include\QtSerialPort;$(QTDIR)\include\QtNetwork</IncludePath>
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql;$(QTDIR)\include\QtSerialPort;$(QTDIR)\include\QtNetwork</IncludePath>
     </QtMoc>
+    <ClInclude Include="CreateEngine.h" />
     <ClInclude Include="DatabaseFormat.h" />
     <QtMoc Include="ExportPgnDialog.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql;$(QTDIR)\include\QtSerialPort</IncludePath>
