@@ -4,17 +4,9 @@
 #include <QPixmap>
 #include <QPoint>
 #include <QColor>
-#include "ChessBoard.h"
-#include "ChessMove.h"
-
-struct BOARDTHEMA
-{
-	QBrush lightBrush;
-	QBrush darkBrush;
-	QBrush borderBrush;
-	QFont  coordinateFont;
-	QColor coordinateFontColor;
-};
+#include "../Common/ChessBoard.h"
+#include "../Common/ChessMove.h"
+#include "../Common/BoardOption.h"
 
 struct BoardWindowMarkupArrow
 {
@@ -42,11 +34,14 @@ public:
 	void setPosition(const ChessBoard& cb);
 	void markSquare(int sq, QColor color, int timeout);
 	void markArrow(int from, int to, QColor color, int timeout);
+	void setTheme(BOARDTHEMA& t);
+	BOARDTHEMA getTheme();
 
 public slots:
 	void showContextMenu(const QPoint& pos);
 	void flip();
 	void timeout();
+	void setBoardOptions();
 
 signals:
 	void moveEntered(ChessMove&);
@@ -79,7 +74,7 @@ private:
 	void drawDragPiece(QPaintEvent* event, QPainter& painter);
 	void drawSquare(QPaintEvent* event, QPainter& painter, int sq, bool clear = false);
 	int findSquare(const QPoint& point);
-	void setBoardTheme();
+	void setDefaultBoardTheme();
 	void calculateBoard();
 	QRect squareRect(int sq);
 

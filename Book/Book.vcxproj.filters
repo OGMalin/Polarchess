@@ -226,6 +226,9 @@
     <QtMoc Include="Watch.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="..\Common\BoardOption.h">
+      <Filter>Common</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Common\defs.h">
@@ -308,9 +311,6 @@
     </ClInclude>
     <ClInclude Include="CreateEngine.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\BoardOption.h">
-      <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

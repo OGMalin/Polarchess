@@ -1,5 +1,5 @@
-#include "ChessGame.h"
-#include "Relations.h"
+#include "../Common/ChessGame.h"
+#include "../Common/Relations.h"
 #include <iostream>
 #include <vector>
 #include "Utility.h"

@@ -1,6 +1,6 @@
 #include <cstdlib>
-#include "MoveGenerator.h"
-#include "Relations.h"
+#include "../Common/MoveGenerator.h"
+#include "../Common/Relations.h"
 
 static bool initMoveGen=0;
 

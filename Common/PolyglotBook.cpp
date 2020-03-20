@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PolyglotBook.h"
+#include "../Common/PolyglotBook.h"
 
 
 Polyglot::Polyglot()

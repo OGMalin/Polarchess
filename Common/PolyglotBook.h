@@ -2,8 +2,8 @@
 
 #include <QString>
 #include <QVector>
-#include "ChessMove.h"
-#include "ChessBoard.h"
+#include "../Common/ChessMove.h"
+#include "../Common/ChessBoard.h"
 
 struct PolyglotEntry
 {

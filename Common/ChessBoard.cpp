@@ -3,10 +3,10 @@
 #include <memory.h>
 #include <string.h>
 #include <ctype.h>
-#include "ChessBoard.h"
-#include "MoveGenerator.h"
-#include "defs.h"
-#include "Utility.h"
+#include "../Common/ChessBoard.h"
+#include "../Common/MoveGenerator.h"
+#include "../Common/defs.h"
+#include "../Common/Utility.h"
 
 using namespace std;
 

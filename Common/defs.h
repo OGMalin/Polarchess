@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Relations.h"
+#include "../Common/Relations.h"
 
 typedef int typeCastle;
 typedef int typeColor;

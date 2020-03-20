@@ -1,7 +1,7 @@
 //
 #include <math.h>
-#include "Utility.h"
-#include "Pgn.h"
+#include "../Common/Utility.h"
+#include "../Common/Pgn.h"
 #include <iostream>
 #include <algorithm>
 #include "../Common/MoveList.h"

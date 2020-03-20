@@ -1,5 +1,5 @@
 #include <memory.h>
-#include "ChessMove.h"
+#include "../Common/ChessMove.h"
 
 
 ChessMove::ChessMove()

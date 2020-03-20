@@ -1,4 +1,4 @@
-#include "BoardWindow.h"
+#include "../Common/BoardWindow.h"
 #include <QPaintEvent>
 #include <QResizeEvent>
 #include <QPainter>
@@ -15,7 +15,7 @@ BoardWindow::BoardWindow(QWidget* parent)
 	dragPiece = EMPTY;
 	autoQueen = true;
 	currentBoard.setStartposition();
-	setBoardTheme();
+	setDefaultBoardTheme();
 	setMinimumSize(200, 200);
 	readImgPieces();
 	QTimer* timer = new QTimer();
@@ -43,7 +43,7 @@ void BoardWindow::paintEvent(QPaintEvent* event)
 	drawDragPiece(event, painter);
 }
 
-void BoardWindow::setBoardTheme()
+void BoardWindow::setDefaultBoardTheme()
 {
 	theme.lightBrush.setColor(QColor(255,255,191,255));
 	theme.lightBrush.setStyle(Qt::SolidPattern);
@@ -388,7 +388,8 @@ void BoardWindow::setPosition(const ChessBoard& cb)
 void BoardWindow::showContextMenu(const QPoint& pos)
 {
 	QMenu* contextMenu = new QMenu(this);
-	contextMenu->addAction(QString("Flip"), this, SLOT(flip()));
+	contextMenu->addAction(tr("Flip"), this, SLOT(flip()));
+	contextMenu->addAction(tr("Board options"), this, SLOT(setBoardOptions()));
 	contextMenu->exec(mapToGlobal(pos));
 }
 
@@ -445,4 +446,25 @@ void BoardWindow::timeout()
 	}
 	if (updateNow)
 		update();
+}
+
+void BoardWindow::setBoardOptions()
+{
+	BoardOption dialog(this, theme);
+	if (dialog.exec() == QDialog::Accepted)
+	{
+		theme=dialog.getThema();
+		update();
+	}
+}
+
+void BoardWindow::setTheme(BOARDTHEMA& t)
+{
+	theme = t;
+	update();
+}
+
+BOARDTHEMA BoardWindow::getTheme()
+{
+	return theme;
 }

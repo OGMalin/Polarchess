@@ -1,5 +1,5 @@
 #include <cstdlib>
-#include "MoveList.h"
+#include "../Common/MoveList.h"
 
 int MoveList::compareMove(const void* m1, const void* m2)
 {

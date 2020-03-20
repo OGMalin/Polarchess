@@ -1,8 +1,8 @@
 #pragma once
 
 #include <string>
-#include "defs.h"
-#include "ChessMove.h"
+#include "../Common/defs.h"
+#include "../Common/ChessMove.h"
 
 enum { FIDE, SAN, LAN, COOR, UCI };
 

@@ -139,7 +139,7 @@ void AnalyzeDialog::collectPositions()
 {
 	ComputerDBEntry cde;
 	QString qs;
-	ComputerDBEngine* ce;
+	ComputerDBEngine ce;
 	Database* db;
 	int i, j;
 	int t = timeToUse->value() * 1000;
@@ -209,7 +209,7 @@ void AnalyzeDialog::collectPositions()
 		{
 			if (cde.exist(qs, ce))
 			{
-				if (ce->time >= t)
+				if (ce.time >= t)
 				{
 					positions.remove(i);
 					--i;

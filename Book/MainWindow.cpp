@@ -340,6 +340,12 @@ void MainWindow::writeSettings()
 	settings.setValue("trainingwindowFont", trainingwindow->fontToString());
 	settings.setValue("goodColor", goodColor.name());
 	settings.setValue("badColor", badColor.name());
+
+	BOARDTHEMA t=boardwindow->getTheme();
+	settings.setValue("lightSquare", t.lightBrush.color().name());
+	settings.setValue("darkSquare", t.darkBrush.color().name());
+	settings.setValue("borderColor", t.borderBrush.color().name());
+	settings.setValue("coordinateColor", t.coordinateFontColor.name());
 }
 
 void MainWindow::readSettings()
@@ -396,6 +402,13 @@ void MainWindow::readSettings()
 
 	goodColor.setNamedColor(settings.value("goodColor", "#00CC00").toString());
 	badColor.setNamedColor(settings.value("badColor", "#CC0000").toString());
+
+	BOARDTHEMA t = boardwindow->getTheme();
+	t.lightBrush.setColor(QColor(settings.value("lightSquare", t.lightBrush.color().name()).toString()));
+	t.darkBrush.setColor(QColor(settings.value("darkSquare", t.darkBrush.color().name()).toString()));
+	t.borderBrush.setColor(QColor(settings.value("borderColor", t.borderBrush.color().name()).toString()));
+	t.coordinateFontColor.setNamedColor(settings.value("coordinateColor", t.coordinateFontColor.name()).toString());
+	boardwindow->setTheme(t);
 
 	// Open default databases
 	if (!dataTheory.isEmpty())

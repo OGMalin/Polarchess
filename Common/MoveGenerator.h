@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../Common/ChessBoard.h"
-#include "ChessMove.h"
-#include "MoveList.h"
+#include "../Common/ChessMove.h"
+#include "../Common/MoveList.h"
 
 // There is two method to find the knight square
 // Both makeKnightMoves and makeNoSlideMoves. Therefore

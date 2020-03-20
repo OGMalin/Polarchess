@@ -461,13 +461,13 @@ bool ComputerDBEntry::updateEngine(ComputerDBEngine& ce)
 	return true;
 }
 
-bool ComputerDBEntry::exist(QString& eng, ComputerDBEngine* ce)
+bool ComputerDBEntry::exist(QString& eng, ComputerDBEngine& ce)
 {
 	for (int i = 0; i < enginelist.size(); i++)
 	{
 		if (enginelist[i].engine == eng)
 		{
-			ce = &enginelist[i];
+			ce = enginelist[i];
 			return true;
 		}
 	}
