@@ -146,17 +146,22 @@ void DgtBoard::connectDgt()
 		write(DGT_SEND_UPDATE_BRD);
 		_sleep(200);
 		QApplication::processEvents();
+		_status = 1;
 	}
 	else
 	{
 		statusLine->setText("Disconnected");
+		_status = 0;
 	}
+	emit dgtStatus(_status);
 }
 
 void DgtBoard::disconnectDgt()
 {
 	if (port->isOpen())
 		port->close();
+	_status = 0;
+	emit dgtStatus(_status);
 	statusLine->setText("Disconnected");
 }
 
@@ -232,22 +237,21 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 	switch (code)
 	{
 	case DGT_MSG_BOARD_DUMP:
-		if (isVisible())
-		{
-			memcpy(board, data, 64);
-			updateDialog();
-		}
 		if (equalBoard(stableBoard, data))
 			break;
 		if (!equalBoard(lastBoard, data))
 		{
 			memcpy(lastBoard, data, 64);
+			if (isVisible())
+				updateDialog();
 			break;
 		}
+		if (isVisible())
+			updateDialog();
+		memcpy(stableBoard, lastBoard, 64);
 		convertBoard(bS, stableBoard);
 		convertBoard(bL, lastBoard);
 		findPossibleMoves(ml, bS, bL);
-		memcpy(stableBoard,lastBoard, 64);
 		emit newPosition(bS, *ml);
 		break;
 	case DGT_MSG_BWTIME:
@@ -262,9 +266,9 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 	case DGT_MSG_FIELD_UPDATE:
 		field.field = data[0];
 		field.piece = data[1];
-		if (field.field<64)
-			board[field.field] = field.piece;
-		updateDialog();
+//		if (field.field<64)
+//			lastBoard[field.field] = field.piece;
+//		updateDialog();
 		break;
 	case DGT_MSG_BUSADRES:
 		busadres = (data[0] & (BYTE)0x7f) << 7;
@@ -317,7 +321,7 @@ void DgtBoard::write(BYTE command)
 void DgtBoard::updateDialog()
 {
 	ChessBoard cb;
-	convertBoard(cb, board);
+	convertBoard(cb, lastBoard);
 	boardwindow->setPosition(cb);
 }
 
@@ -347,6 +351,11 @@ bool DgtBoard::equalBoard(BYTE*b1, BYTE*b2)
 	return true;
 }
 
+bool DgtBoard::equalBoard(ChessBoard& cb, BYTE* b)
+{
+	return false;
+}
+
 void DgtBoard::convertBoard(ChessBoard& cb, BYTE* b)
 {
 	int dgtpiece[13] = { 0,1,4,2,3,6,5,7,10,8,9,12,11 };
@@ -357,8 +366,8 @@ void DgtBoard::convertBoard(ChessBoard& cb, BYTE* b)
 	{
 		for (f = 0; f < 8; f++)
 		{
-			if (board[i] < 13)
-				cb.board[SQUARE(f, r)] = dgtpiece[board[i]];
+			if (b[i] < 13)
+				cb.board[SQUARE(f, r)] = dgtpiece[b[i]];
 			++i;
 		}
 	}
@@ -367,4 +376,17 @@ void DgtBoard::convertBoard(ChessBoard& cb, BYTE* b)
 void DgtBoard::findPossibleMoves(MoveList*, ChessBoard& start, ChessBoard& end)
 {
 
+}
+
+void DgtBoard::setBoard(ChessBoard& cb)
+{
+	guiBoard = cb;
+	if (_status)
+	{
+		if (equalBoard(cb,stableBoard))
+			_status=2;
+		else
+			_status=1;
+	}
+	emit dgtStatus(_status);
 }

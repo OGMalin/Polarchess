@@ -23,7 +23,7 @@ class TrainingWindow : public QWidget
 public slots:
 	void showContextMenu(const QPoint& pos);
 	void selectFont();
-	void next();
+	void start();
 
 signals:
 //	void trainingNext(ChessBoard&, int color);

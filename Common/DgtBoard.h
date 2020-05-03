@@ -29,14 +29,17 @@ signals:
 	// 2 = Connected and in sync
 	void dgtStatus(int);
 	void newPosition(ChessBoard&, MoveList&);
+	void newMove(ChessMove&);
 public:
 	DgtBoard(QWidget* parent = 0);
 	~DgtBoard();
+	// Return values: 0=Not connected, 1=Connected out of sync, 2=Connected in sync
 	int status();
+	void setBoard(ChessBoard&);
 private:
 	DGT_MSG_VERSION_STRUCT version;
-	BYTE board[64]; // Board used for dialog board
-	BYTE stableBoard[64]; // Last sendt board
+	ChessBoard guiBoard; // Gui board
+	BYTE stableBoard[64]; // Last stable board
 	BYTE lastBoard[64]; // Last received board from the DGT board
 	DGT_MSG_BWTIME_STRUCT clock;
 	DGT_MSG_FIELD_UPDATE_STRUCT field;
@@ -54,6 +57,7 @@ private:
 	void write(BYTE command);
 	void updateDialog();
 	bool equalBoard(BYTE*, BYTE*);
+	bool equalBoard(ChessBoard&, BYTE*);
 	void convertBoard(ChessBoard&, BYTE*);
 	// Search to find the moves between the two board
 	void findPossibleMoves(MoveList*, ChessBoard& start, ChessBoard& end);

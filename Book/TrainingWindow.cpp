@@ -62,7 +62,7 @@ TrainingWindow::TrainingWindow(QWidget* parent)
 
 	hbox = new QHBoxLayout;
 	startButton = new QPushButton(tr("Start"));
-	connect(startButton, SIGNAL(clicked()), this, SLOT(next()));
+	connect(startButton, SIGNAL(clicked()), this, SLOT(start()));
 	startButton->setFixedWidth(startButton->minimumSizeHint().width());
 	hbox->addWidget(startButton);
 
@@ -108,7 +108,7 @@ void TrainingWindow::fontFromString(const QString& sFont)
 	setFont(f);
 }
 
-void TrainingWindow::next()
+void TrainingWindow::start()
 {
 	if (running)
 		return;
