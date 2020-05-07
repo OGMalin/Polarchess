@@ -9,9 +9,22 @@
 #include <QWidget>
 #include <QSqlDatabase>
 
+struct TrainingMove
+{
+	ChessMove move;
+	int attempt;
+	int score;
+};
+
+struct TrainingLine
+{
+	QVector<TrainingMove> moves;
+};
+
 class Training
 {
 private:
+	QVector<TrainingLine> lines;
 	TrainingDBInfo tdi;
 	TrainingStatistics stat;
 	QVector<TrainingDBEntry> list;
@@ -48,6 +61,10 @@ public:
 
 	// Get next training line
 	bool getNext(TrainingDBEntry& line, int color, ChessBoard& cb);
+
+	// Get next trainingline
+	bool getNextLine(TrainingLine& line);
+	bool createLines(QWidget* parent, int color, ChessBoard& cb);
 
 	// Update training score
 	void updateScore(TrainingDBEntry&);

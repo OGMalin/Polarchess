@@ -534,3 +534,13 @@ void Training::getEndpositions(QVector<ChessBoard>& pos, int color)
 		}
 	}
 }
+
+bool Training::getNextLine(TrainingLine& line)
+{
+	return false;
+}
+
+bool Training::createLines(QWidget* parent, int color, ChessBoard& cb)
+{
+	return false;
+}
