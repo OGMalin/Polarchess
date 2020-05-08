@@ -19,6 +19,7 @@ struct TrainingMove
 struct TrainingLine
 {
 	QVector<TrainingMove> moves;
+	bool positionExist(ChessBoard& cb);
 };
 
 class Training
@@ -32,7 +33,8 @@ private:
 //	ChessBoard currentBoard;
 //	int currentColor;
 	void walkThrough(ChessBoard& cur, TrainingDBEntry& path, int ply, QVector<BookDBEntry>& pos, int color);
-//	void convertMovesFromString(const QString& smoves, TrainingDBEntry& tp);
+	void walkThrough(ChessBoard& cur, TrainingLine& line, int ply, QVector<BookDBEntry>& pos, int color);
+	//	void convertMovesFromString(const QString& smoves, TrainingDBEntry& tp);
 //	void convertMovesToString(QString& smoves, TrainingDBEntry& tp);
 	bool opened;
 public:
