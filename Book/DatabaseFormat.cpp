@@ -2,153 +2,154 @@
 #include <QStringList>
 #include <string>
 
-bool TrainingDBEntry::isCorrect(ChessMove& move)
-{
-	if (moves[current].move == move)
-		return true;
-	return false;
-}
-
-bool TrainingDBEntry::nextMove(ChessMove& move)
-{
-	if ((current + 2) >= moves.size())
-		return false;
-
-	move = moves[current + 1].move;
-	current += 2;
-	return true;
-}
-
-ChessMove TrainingDBEntry::currentMove()
+ChessMove TrainingLine::currentMove()
 {
 	return moves[current].move;
 };
 
-int TrainingDBEntry::toMove()
-{
-	return (current % 2);
-}
-
-void TrainingDBEntry::moveList(MoveList& ml)
-{
-	int i;
-	for (i = 0; i < moves.size(); i++)
-	{
-		if (i >= current)
-			break;
-		ml.push_back(moves[i].move);
-	}
-}
-
-// Policy to select line.
-void TrainingDBEntry::scoreLine()
-{
-	int i, sc;
-	int start = 0;
-	score = 100;
-	if (color == BLACK)
-		start = 1;
-	for (i = start; i < moves.size(); i = i + 2)
-	{
-		sc = -1;
-		if (moves[i].attempt > 0)
-		{
-			sc = 0.5 + (float)((100 * moves[i].score) / moves[i].attempt);
-			if (moves[i].attempt < 10)
-				sc -= (10 - moves[i].attempt);
-			if (sc < 0)
-				sc = 0;
-		}
-		score = __min(sc, score);
-	}
-}
-
-ChessBoard TrainingDBEntry::currentPosition()
-{
-	ChessBoard cb;
-	int i;
-	cb.setStartposition();
-	for (i = 0; i < moves.size(); i++)
-	{
-		if (i >= current)
-			break;
-		cb.doMove(moves[i].move, false);
-	}
-	return cb;
-}
-
-ChessBoard TrainingDBEntry::endPosition()
-{
-	ChessBoard cb;
-	int i;
-	cb.setStartposition();
-	for (i = 0; i < moves.size(); i++)
-		cb.doMove(moves[i].move, false);
-	return cb;
-}
-
-bool TrainingDBEntry::positionExist(ChessBoard& cb)
-{
-	ChessBoard b;
-	int i;
-	b.setStartposition();
-	for (i = 0; i < (moves.size()-1); i++)
-	{
-		b.doMove(moves[i].move, false);
-		if (cb == b)
-			return true;
-	}
-	return false;
-}
-
-void TrainingDBEntry::MovesFromString(const QString& smoves)
-{
-	ChessBoard cb;
-	TrainingDBMove tdm;
-	QStringList slist = smoves.split(";");
-	QStringList mlist;
-	cb.setStartposition();
-	moves.clear();
-	for (int i = 0; i < slist.size(); i++)
-	{
-		tdm.clear();
-		mlist = slist[i].split("|");
-		if (mlist.size() < 3)
-			return;
-		tdm.move = cb.getMoveFromText(mlist[0].toStdString());
-		tdm.attempt = mlist[1].toInt();
-		tdm.score = mlist[2].toInt();
-		moves.push_back(tdm);
-		cb.doMove(tdm.move, false);
-	}
-}
-
-QString TrainingDBEntry::MovesToString()
-{
-	char sz[16];
-	QString qs;
-	ChessBoard cb;
-	cb.setStartposition();
-	for (int i = 0; i < moves.size(); i++)
-	{
-		if (cb.isLegal(moves[i].move))
-		{
-			if (i > 0)
-				qs += ";";
-			qs += cb.makeMoveText(moves[i].move, sz, 16, SAN);
-			qs += "|";
-			qs += itoa(moves[i].attempt, sz, 10);
-			qs += "|";
-			qs += itoa(moves[i].score, sz, 10);
-			cb.doMove(moves[i].move, false);
-		}
-		else
-		{
-			return qs;
-		}
-	}
-	return qs;
-}
+//bool TrainingDBEntry::isCorrect(ChessMove& move)
+//{
+//	if (moves[current].move == move)
+//		return true;
+//	return false;
+//}
+//
+//bool TrainingDBEntry::nextMove(ChessMove& move)
+//{
+//	if ((current + 2) >= moves.size())
+//		return false;
+//
+//	move = moves[current + 1].move;
+//	current += 2;
+//	return true;
+//}
+//
+//
+//int TrainingDBEntry::toMove()
+//{
+//	return (current % 2);
+//}
+//
+//void TrainingDBEntry::moveList(MoveList& ml)
+//{
+//	int i;
+//	for (i = 0; i < moves.size(); i++)
+//	{
+//		if (i >= current)
+//			break;
+//		ml.push_back(moves[i].move);
+//	}
+//}
+//
+//// Policy to select line.
+//void TrainingDBEntry::scoreLine()
+//{
+//	int i, sc;
+//	int start = 0;
+//	score = 100;
+//	if (color == BLACK)
+//		start = 1;
+//	for (i = start; i < moves.size(); i = i + 2)
+//	{
+//		sc = -1;
+//		if (moves[i].attempt > 0)
+//		{
+//			sc = 0.5 + (float)((100 * moves[i].score) / moves[i].attempt);
+//			if (moves[i].attempt < 10)
+//				sc -= (10 - moves[i].attempt);
+//			if (sc < 0)
+//				sc = 0;
+//		}
+//		score = __min(sc, score);
+//	}
+//}
+//
+//ChessBoard TrainingDBEntry::currentPosition()
+//{
+//	ChessBoard cb;
+//	int i;
+//	cb.setStartposition();
+//	for (i = 0; i < moves.size(); i++)
+//	{
+//		if (i >= current)
+//			break;
+//		cb.doMove(moves[i].move, false);
+//	}
+//	return cb;
+//}
+//
+//ChessBoard TrainingDBEntry::endPosition()
+//{
+//	ChessBoard cb;
+//	int i;
+//	cb.setStartposition();
+//	for (i = 0; i < moves.size(); i++)
+//		cb.doMove(moves[i].move, false);
+//	return cb;
+//}
+//
+//bool TrainingDBEntry::positionExist(ChessBoard& cb)
+//{
+//	ChessBoard b;
+//	int i;
+//	b.setStartposition();
+//	for (i = 0; i < (moves.size()-1); i++)
+//	{
+//		b.doMove(moves[i].move, false);
+//		if (cb == b)
+//			return true;
+//	}
+//	return false;
+//}
+//
+//void TrainingDBEntry::MovesFromString(const QString& smoves)
+//{
+//	ChessBoard cb;
+//	TrainingDBMove tdm;
+//	QStringList slist = smoves.split(";");
+//	QStringList mlist;
+//	cb.setStartposition();
+//	moves.clear();
+//	for (int i = 0; i < slist.size(); i++)
+//	{
+//		tdm.clear();
+//		mlist = slist[i].split("|");
+//		if (mlist.size() < 3)
+//			return;
+//		tdm.move = cb.getMoveFromText(mlist[0].toStdString());
+//		tdm.attempt = mlist[1].toInt();
+//		tdm.score = mlist[2].toInt();
+//		moves.push_back(tdm);
+//		cb.doMove(tdm.move, false);
+//	}
+//}
+//
+//QString TrainingDBEntry::MovesToString()
+//{
+//	char sz[16];
+//	QString qs;
+//	ChessBoard cb;
+//	cb.setStartposition();
+//	for (int i = 0; i < moves.size(); i++)
+//	{
+//		if (cb.isLegal(moves[i].move))
+//		{
+//			if (i > 0)
+//				qs += ";";
+//			qs += cb.makeMoveText(moves[i].move, sz, 16, SAN);
+//			qs += "|";
+//			qs += itoa(moves[i].attempt, sz, 10);
+//			qs += "|";
+//			qs += itoa(moves[i].score, sz, 10);
+//			cb.doMove(moves[i].move, false);
+//		}
+//		else
+//		{
+//			return qs;
+//		}
+//	}
+//	return qs;
+//}
 
 bool BookDBEntry::moveExist(const ChessMove& move)
 {

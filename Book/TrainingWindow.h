@@ -33,13 +33,13 @@ signals:
 	void nextResponse();
 	void trainingStop();
 public:
-	Training* trainingDB;
+	Training* training;
 	TrainingWindow(QWidget* parent = 0);
 	~TrainingWindow();
 	QString fontToString();
 	void fontFromString(const QString&);
 	void setCurrentBoard(const ChessBoard&);
-	void setTrainingDB(Training* db);
+	void setTraining(Training* t);
 	void updateStat();
 	void moveEntered(ChessMove& move);
 	bool isRunning() { return running; };
@@ -60,7 +60,7 @@ private:
 	QLabel* computerScore;
 	QTextEdit* comment;
 	ChessBoard currentBoard;
-	TrainingDBEntry trainingLine;
+	TrainingLine trainingLine;
 	bool running;
 	QColor theoryColor;
 	QColor repColor;

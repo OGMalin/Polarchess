@@ -121,7 +121,7 @@ private:
 	BookDBEntry bde[3];
 	StatisticsDBEntry sde;
 	ComputerDBEntry cde;
-	Training* trainingDB;
+	Training* training;
 	DgtBoard* dgt;
 	Watch* statusWatch;
 	// You are in training mode;

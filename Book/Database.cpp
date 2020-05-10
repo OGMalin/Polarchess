@@ -368,7 +368,7 @@ void Database::importBase(Database* iBase)
 	}
 }
 
-void Database::updateTrainingScore(TrainingDBEntry& tde)
+void Database::updateTrainingScore(TrainingLine& tl)
 {
 	int i;
 	ChessBoard cb;
@@ -380,14 +380,17 @@ void Database::updateTrainingScore(TrainingDBEntry& tde)
 		return;
 	QSqlQuery query(db);
 	cb.setStartposition();
-	for (i = 0; i < tde.moves.size(); i++)
+	for (i = 0; i < tl.moves.size(); i++)
 	{
-		query.prepare("UPDATE positions SET attempt = attempt + :attempt, score = score + :score WHERE cboard = :cboard;");
-		query.bindValue(":cboard", CompressedBoard::compress(cb));
-		query.bindValue(":attempt", itoa(tde.moves[i].attempt, sz, 10));
-		query.bindValue(":score", itoa(tde.moves[i].score, sz, 10));
-		query.exec();
-		cb.doMove(tde.moves[i].move, false);
+		if (tl.moves[i].attempt || tl.moves[i].score)
+		{
+			query.prepare("UPDATE positions SET attempt = attempt + :attempt, score = score + :score WHERE cboard = :cboard;");
+			query.bindValue(":cboard", CompressedBoard::compress(cb));
+			query.bindValue(":attempt", itoa(tl.moves[i].attempt, sz, 10));
+			query.bindValue(":score", itoa(tl.moves[i].score, sz, 10));
+			query.exec();
+		}
+		cb.doMove(tl.moves[i].move, false);
 	}
 }
 

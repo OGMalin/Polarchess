@@ -74,10 +74,10 @@ MainWindow::MainWindow(QWidget *parent)
 	computerDB = new Computer();
 	openingsDB = new Openings();
 	currentPath = new Path();
-	trainingDB = new Training();
-	trainingDB->SetRepertoireDatabase(WHITE, Base[REPWHITE]);
-	trainingDB->SetRepertoireDatabase(BLACK, Base[REPBLACK]);
-	trainingwindow->setTrainingDB(trainingDB);
+	training = new Training();
+	training->SetRepertoireDatabase(WHITE, Base[REPWHITE]);
+	training->SetRepertoireDatabase(BLACK, Base[REPBLACK]);
+	trainingwindow->setTraining(training);
 	trainingwindow->setDatabase(Base[THEORY], Base[REPWHITE], Base[REPBLACK], computerDB);
 	movewindow->computerDB = computerDB;
 	openingwindow->setOpeningsDB(openingsDB);
@@ -330,7 +330,7 @@ void MainWindow::writeSettings()
 	settings.setValue("dataBlack", Base[REPBLACK]->getPath());
 	settings.setValue("dataStatistics", statisticsDB->getPath());
 	settings.setValue("dataComputer", computerDB->getPath());
-	settings.setValue("dataTraining", trainingDB->getPath());
+//	settings.setValue("dataTraining", trainingDB->getPath());
 	settings.setValue("dataOpenings", openingsDB->getPath());
 	settings.setValue("language", locale);
 	settings.setValue("movewindowFont", movewindow->fontToString());
@@ -385,7 +385,7 @@ void MainWindow::readSettings()
 	dataBlack = settings.value("dataBlack", dataPath + "/Black.pbk").toString();
 	dataStatistics = settings.value("dataStatistics", dataPath + "/Statistics.pst").toString();
 	dataComputer = settings.value("dataComputer", dataPath + "/Computer.pcp").toString();
-	dataTraining = settings.value("dataTraining", dataPath + "/Training.ptr").toString();
+//	dataTraining = settings.value("dataTraining", dataPath + "/Training.ptr").toString();
 	dataOpenings = settings.value("dataOpenings", dataPath + "/Openings.pop").toString();
 	locale = settings.value("language", QString()).toString();
 	if (locale.isEmpty())
@@ -426,9 +426,9 @@ void MainWindow::readSettings()
 	if (!dataComputer.isEmpty())
 		if (!computerDB->open(dataComputer))
 			computerDB->create(dataComputer);
-	if (!dataTraining.isEmpty())
-		if (!trainingDB->open(dataTraining))
-			trainingDB->create(dataTraining);
+	//if (!dataTraining.isEmpty())
+	//	if (!trainingDB->open(dataTraining))
+	//		trainingDB->create(dataTraining);
 	if (!dataOpenings.isEmpty())
 		if (!openingsDB->open(dataOpenings))
 			openingsDB->create(dataOpenings);

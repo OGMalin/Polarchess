@@ -5,7 +5,7 @@
 #include <QString>
 #include "Statistics.h"
 #include "Database.h"
-#include "Training.h"
+//#include "Training.h"
 #include "Computer.h"
 #include "Openings.h"
 
@@ -35,11 +35,11 @@ public slots:
 	void importBookBlack();
 	void exportPGNBlack();
 
-	void openTrainingDB();
-	void newTrainingDB();
-	void closeTrainingDB();
-	void clearTrainingDB();
-	void createTrainingDB();
+	//void openTrainingDB();
+	//void newTrainingDB();
+	//void closeTrainingDB();
+	//void clearTrainingDB();
+	//void createTrainingDB();
 
 	void openComputerDB();
 	void newComputerDB();
@@ -58,20 +58,20 @@ public slots:
 	void exportOpeningsDB();
 
 public:
-	DatabaseDialog(QWidget *parent, Database* theory, Database* white, Database* black, Training*, Computer*, Statistics*, Openings*);
+	DatabaseDialog(QWidget *parent, Database* theory, Database* white, Database* black, /* Training* ,*/ Computer*, Statistics*, Openings*);
 
 private:
 	QLineEdit* theoryFile;
 	QLineEdit* whiteFile;
 	QLineEdit* blackFile;
-	QLineEdit* trainingFile;
+//	QLineEdit* trainingFile;
 	QLineEdit* computerFile;
 	QLineEdit* statisticFile;
 	QLineEdit* openingsFile;
 	Database* theoryDB;
 	Database* whiteDB;
 	Database* blackDB;
-	Training* trainingDB;
+//	Training* trainingDB;
 	Computer* computerDB;
 	Statistics* statDB;
 	Openings* openingsDB;

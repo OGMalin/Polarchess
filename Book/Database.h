@@ -30,8 +30,9 @@ public:
 	void getTrainingPosition(QVector<BookDBEntry>&);
 	void clearAllTrainingData();
 	void importBase(Database* iBase);
-	void updateTrainingScore(TrainingDBEntry&);
-	
+//	void updateTrainingScore(TrainingDBEntry&);
+	void updateTrainingScore(TrainingLine&);
+
 	// Get db path
 	QString getPath();
 

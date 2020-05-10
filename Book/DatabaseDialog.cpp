@@ -11,14 +11,14 @@
 #include <QMessageBox>
 #include <QFile>
 
-DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* white, Database* black, Training* training, Computer* computer, Statistics* stat, Openings* opening)
+DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* white, Database* black, /*Training* training,*/ Computer* computer, Statistics* stat, Openings* opening)
 	:QDialog(parent)
 {
 	QSpacerItem* spacer;
 	theoryDB = theory;
 	whiteDB = white;
 	blackDB = black;
-	trainingDB = training;
+//	trainingDB = training;
 	computerDB = computer;
 	statDB = stat;
 	openingsDB = opening;
@@ -123,31 +123,31 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	group->setLayout(grid);
 	vbox->addWidget(group);
 
-	group = new QGroupBox(tr("Training statistics"));
-	grid = new QGridLayout();
-	trainingFile = new QLineEdit(trainingDB->getPath());
-	trainingFile->setDisabled(true);
-	grid->addWidget(trainingFile, 0, 0, 1, -1);
-	button = new QPushButton(tr("Open"));
-	connect(button, SIGNAL(clicked()), this, SLOT(openTrainingDB()));
-	grid->addWidget(button, 1, 0);
-	button = new QPushButton(tr("New"));
-	connect(button, SIGNAL(clicked()), this, SLOT(newTrainingDB()));
-	grid->addWidget(button, 1, 1);
-	button = new QPushButton(tr("Close"));
-	connect(button, SIGNAL(clicked()), this, SLOT(closeTrainingDB()));
-	grid->addWidget(button, 1, 2);
-	button = new QPushButton(tr("Clear"));
-	connect(button, SIGNAL(clicked()), this, SLOT(clearTrainingDB()));
-	grid->addWidget(button, 1, 3);
-	button = new QPushButton(tr("Create"));
-	connect(button, SIGNAL(clicked()), this, SLOT(createTrainingDB()));
-	grid->addWidget(button, 1, 4);
-	spacer = new QSpacerItem(spacersize.width(), spacersize.height());
-	grid->addItem(spacer, 1, 5);
-	grid->setAlignment(Qt::AlignLeft);
-	group->setLayout(grid);
-	vbox->addWidget(group);
+	//group = new QGroupBox(tr("Training statistics"));
+	//grid = new QGridLayout();
+	//trainingFile = new QLineEdit(trainingDB->getPath());
+	//trainingFile->setDisabled(true);
+	//grid->addWidget(trainingFile, 0, 0, 1, -1);
+	//button = new QPushButton(tr("Open"));
+	//connect(button, SIGNAL(clicked()), this, SLOT(openTrainingDB()));
+	//grid->addWidget(button, 1, 0);
+	//button = new QPushButton(tr("New"));
+	//connect(button, SIGNAL(clicked()), this, SLOT(newTrainingDB()));
+	//grid->addWidget(button, 1, 1);
+	//button = new QPushButton(tr("Close"));
+	//connect(button, SIGNAL(clicked()), this, SLOT(closeTrainingDB()));
+	//grid->addWidget(button, 1, 2);
+	//button = new QPushButton(tr("Clear"));
+	//connect(button, SIGNAL(clicked()), this, SLOT(clearTrainingDB()));
+	//grid->addWidget(button, 1, 3);
+	//button = new QPushButton(tr("Create"));
+	//connect(button, SIGNAL(clicked()), this, SLOT(createTrainingDB()));
+	//grid->addWidget(button, 1, 4);
+	//spacer = new QSpacerItem(spacersize.width(), spacersize.height());
+	//grid->addItem(spacer, 1, 5);
+	//grid->setAlignment(Qt::AlignLeft);
+	//group->setLayout(grid);
+	//vbox->addWidget(group);
 
 	group = new QGroupBox(tr("Computer evaluation"));
 	grid = new QGridLayout();
@@ -325,45 +325,45 @@ void DatabaseDialog::closeBlackDB()
 	blackDB->close();
 }
 
-void DatabaseDialog::openTrainingDB()
-{
-	QString path = QFileDialog::getOpenFileName(this, tr("Open training book"), trainingFile->text(), tr("Training files (*.ptr)"));
-	if (!path.isEmpty())
-	{
-		trainingDB->close();
-		trainingFile->setText(path);
-		if (!trainingDB->open(path))
-			trainingDB->create(path);
-	}
-}
-
-void DatabaseDialog::newTrainingDB()
-{
-	QString path = QFileDialog::getSaveFileName(this, tr("New training book"), trainingFile->text(), tr("Training files (*.ptr)"));
-	if (!path.isEmpty())
-	{
-		trainingDB->close();
-		trainingFile->setText(path);
-		if (!trainingDB->open(path))
-			trainingDB->create(path);
-	}
-}
-
-void DatabaseDialog::closeTrainingDB()
-{
-	trainingFile->setText("");
-	trainingDB->close();
-}
-
-void DatabaseDialog::clearTrainingDB()
-{
-	trainingDB->clearAll();
-}
-
-void DatabaseDialog::createTrainingDB()
-{
-	trainingDB->createLines(this);
-}
+//void DatabaseDialog::openTrainingDB()
+//{
+//	QString path = QFileDialog::getOpenFileName(this, tr("Open training book"), trainingFile->text(), tr("Training files (*.ptr)"));
+//	if (!path.isEmpty())
+//	{
+//		trainingDB->close();
+//		trainingFile->setText(path);
+//		if (!trainingDB->open(path))
+//			trainingDB->create(path);
+//	}
+//}
+//
+//void DatabaseDialog::newTrainingDB()
+//{
+//	QString path = QFileDialog::getSaveFileName(this, tr("New training book"), trainingFile->text(), tr("Training files (*.ptr)"));
+//	if (!path.isEmpty())
+//	{
+//		trainingDB->close();
+//		trainingFile->setText(path);
+//		if (!trainingDB->open(path))
+//			trainingDB->create(path);
+//	}
+//}
+//
+//void DatabaseDialog::closeTrainingDB()
+//{
+//	trainingFile->setText("");
+//	trainingDB->close();
+//}
+//
+//void DatabaseDialog::clearTrainingDB()
+//{
+//	trainingDB->clearAll();
+//}
+//
+//void DatabaseDialog::createTrainingDB()
+//{
+//	trainingDB->createLines(this);
+//}
 
 void DatabaseDialog::openComputerDB()
 {

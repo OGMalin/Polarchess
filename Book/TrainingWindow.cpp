@@ -122,11 +122,18 @@ void TrainingWindow::start()
 		cb = currentBoard;
 	else
 		cb.setStartposition();
-	if (!trainingDB->getNext(trainingLine, color, cb))
+	if (!training->createLines(this, color, cb))
 	{
 		updateStat();
 		return;
 	}
+
+	if (!training->getNextLine(trainingLine))
+	{
+		updateStat();
+		return;
+	}
+
 	emit trainingFlipBoard(trainingLine.color);
 	
 	// Go to startposition of this training line
@@ -164,26 +171,26 @@ void TrainingWindow::setCurrentBoard(const ChessBoard& cb)
 	currentBoard = cb;
 }
 
-void TrainingWindow::setTrainingDB(Training* db)
+void TrainingWindow::setTraining(Training* t)
 {
-	trainingDB = db;
+	training = t;
 }
 
 void TrainingWindow::updateStat()
 {
-	TrainingStatistics ts = trainingDB->getStat();
-	QString qs = tr("In base: ");
-	QTextStream(&qs) << ts.inBase;
-	inBase->setText(qs);
-	qs = tr("Id: ");
-	QTextStream(&qs) << trainingLine.rowid;
-	rowid->setText(qs);
-	qs = tr("Loaded: ");
-	QTextStream(&qs) << ts.current;
-	loaded->setText(qs);
-	qs = tr("Score: ");
-	QTextStream(&qs) << trainingLine.score;
-	score->setText(qs);
+	//TrainingStatistics ts = trainingDB->getStat();
+	//QString qs = tr("In base: ");
+	//QTextStream(&qs) << ts.inBase;
+	//inBase->setText(qs);
+	//qs = tr("Id: ");
+	//QTextStream(&qs) << trainingLine.rowid;
+	//rowid->setText(qs);
+	//qs = tr("Loaded: ");
+	//QTextStream(&qs) << ts.current;
+	//loaded->setText(qs);
+	//qs = tr("Score: ");
+	//QTextStream(&qs) << trainingLine.score;
+	//score->setText(qs);
 	if (running)
 	{
 		lRunning->setText(tr("Running"));
