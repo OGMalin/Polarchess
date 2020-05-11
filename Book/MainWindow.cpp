@@ -119,7 +119,7 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
 	delete currentPath;
-	delete trainingDB;
+	delete training;
 }
 
 void MainWindow::createMenu()
@@ -462,7 +462,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::bookAnalyze()
 {
 	disconnect(enginewindow, nullptr, nullptr, nullptr);
-	AnalyzeDialog dialog(this, computerDB, Base[THEORY], Base[REPWHITE], Base[REPBLACK], enginewindow, boardwindow, currentPath, trainingDB);
+	AnalyzeDialog dialog(this, computerDB, Base[THEORY], Base[REPWHITE], Base[REPBLACK], enginewindow, boardwindow, currentPath, training);
 	dialog.exec();
 	connect(enginewindow, SIGNAL(enginePV(ComputerDBEngine&, ChessBoard&)), this, SLOT(enginePV(ComputerDBEngine&, ChessBoard&)));
 }
@@ -695,12 +695,12 @@ void MainWindow::trainingSetArrow(int fromSq, int toSq, bool wrong, int sek)
 
 void MainWindow::trainingClearData()
 {
-	trainingDB->clearAll();
+//	training->clearAll();
 }
 
 void MainWindow::trainingCreate()
 {
-	trainingDB->createLines(this);
+//	training->createLines(this);
 }
 
 void MainWindow::enginePV(ComputerDBEngine& ce, ChessBoard& cb)
@@ -831,7 +831,7 @@ void MainWindow::childNeedRefresh()
 
 void MainWindow::setupDatabase()
 {
-	DatabaseDialog dialog(this, Base[THEORY], Base[REPWHITE], Base[REPBLACK], trainingDB, computerDB, statisticsDB, openingsDB);
+	DatabaseDialog dialog(this, Base[THEORY], Base[REPWHITE], Base[REPBLACK], computerDB, statisticsDB, openingsDB);
 	dialog.exec();
 	write = -1;
 	readDB();

@@ -7,6 +7,57 @@ ChessMove TrainingLine::currentMove()
 	return moves[current].move;
 };
 
+ChessBoard TrainingLine::currentPosition()
+{
+	ChessBoard cb;
+	int i;
+	cb.setStartposition();
+	for (i = 0; i < moves.size(); i++)
+	{
+		if (i >= current)
+			break;
+		cb.doMove(moves[i].move, false);
+	}
+	return cb;
+}
+
+bool TrainingLine::positionExist(ChessBoard& cb)
+{
+	ChessBoard b;
+	int i;
+	b.setStartposition();
+	for (i = 0; i < (moves.size()-1); i++)
+	{
+		b.doMove(moves[i].move, false);
+		if (cb == b)
+			return true;
+	}
+	return false;
+}
+
+// Policy to select line.
+void TrainingLine::scoreLine()
+{
+	int i, sc;
+	int start = 0;
+	score = 100;
+	if (color == BLACK)
+		start = 1;
+	for (i = start; i < moves.size(); i = i + 2)
+	{
+		sc = -1;
+		if (moves[i].attempt > 0)
+		{
+			sc = 0.5 + (float)((100 * moves[i].score) / moves[i].attempt);
+			if (moves[i].attempt < 10)
+				sc -= (10 - moves[i].attempt);
+			if (sc < 0)
+				sc = 0;
+		}
+		score = __min(sc, score);
+	}
+}
+
 //bool TrainingDBEntry::isCorrect(ChessMove& move)
 //{
 //	if (moves[current].move == move)
@@ -41,42 +92,7 @@ ChessMove TrainingLine::currentMove()
 //	}
 //}
 //
-//// Policy to select line.
-//void TrainingDBEntry::scoreLine()
-//{
-//	int i, sc;
-//	int start = 0;
-//	score = 100;
-//	if (color == BLACK)
-//		start = 1;
-//	for (i = start; i < moves.size(); i = i + 2)
-//	{
-//		sc = -1;
-//		if (moves[i].attempt > 0)
-//		{
-//			sc = 0.5 + (float)((100 * moves[i].score) / moves[i].attempt);
-//			if (moves[i].attempt < 10)
-//				sc -= (10 - moves[i].attempt);
-//			if (sc < 0)
-//				sc = 0;
-//		}
-//		score = __min(sc, score);
-//	}
-//}
 //
-//ChessBoard TrainingDBEntry::currentPosition()
-//{
-//	ChessBoard cb;
-//	int i;
-//	cb.setStartposition();
-//	for (i = 0; i < moves.size(); i++)
-//	{
-//		if (i >= current)
-//			break;
-//		cb.doMove(moves[i].move, false);
-//	}
-//	return cb;
-//}
 //
 //ChessBoard TrainingDBEntry::endPosition()
 //{
@@ -88,19 +104,6 @@ ChessMove TrainingLine::currentMove()
 //	return cb;
 //}
 //
-//bool TrainingDBEntry::positionExist(ChessBoard& cb)
-//{
-//	ChessBoard b;
-//	int i;
-//	b.setStartposition();
-//	for (i = 0; i < (moves.size()-1); i++)
-//	{
-//		b.doMove(moves[i].move, false);
-//		if (cb == b)
-//			return true;
-//	}
-//	return false;
-//}
 //
 //void TrainingDBEntry::MovesFromString(const QString& smoves)
 //{

@@ -24,6 +24,7 @@ public slots:
 	void showContextMenu(const QPoint& pos);
 	void selectFont();
 	void start();
+	void next();
 
 signals:
 //	void trainingNext(ChessBoard&, int color);
