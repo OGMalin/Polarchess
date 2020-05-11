@@ -41,16 +41,16 @@ struct TrainingLine
 	int attempt() { return moves[current].attempt; };
 	void scoreLine();
 	friend bool operator<(const TrainingLine& t1, const TrainingLine& t2) { return t1.score < t2.score; };
+	void moveList(MoveList&);
 
-	//bool iscorrect(chessmove& move);
-	//bool nextmove(chessmove& move);
+	bool isCorrect(ChessMove& move);
+	bool nextMove(ChessMove& move);
 	//qstring movestostring();
 	//void movesfromstring(const qstring&);
-	//int tomove();
-	//void movelist(movelist&);
-	//void incattempt() { moves[current].attempt = 1; };
-	//void incscore() { moves[current].score = 1; };
-	//void clearscore() { for (int i = 0; i < moves.size(); i++)moves[i].score = moves[i].attempt = 0; };
+	int toMove();
+	void incAttempt() { moves[current].attempt = 1; };
+	void incScore() { moves[current].score = 1; };
+	void clearScore() { for (int i = 0; i < moves.size(); i++)moves[i].score = moves[i].attempt = 0; };
 	//chessboard endposition();
 };
 

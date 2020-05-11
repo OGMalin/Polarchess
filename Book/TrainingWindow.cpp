@@ -25,12 +25,12 @@ TrainingWindow::TrainingWindow(QWidget* parent)
 
 	hbox = new QHBoxLayout;
 	watch = new Watch(NULL,true);
-	rowid = new QLabel(tr("Id: "));
+//	rowid = new QLabel(tr("Id: "));
 	lRunning = new QLabel(tr("Not running"));
 	inBase = new QLabel(tr("In base: "));
 	loaded = new QLabel(tr("Loaded: "));
 	score = new QLabel(tr("Score: "));
-	hbox->addWidget(rowid);
+//	hbox->addWidget(rowid);
 	hbox->addWidget(lRunning);
 	hbox->addWidget(watch);
 	hbox->addWidget(inBase);
@@ -128,47 +128,56 @@ void TrainingWindow::start()
 		return;
 	}
 
-//	if (!training->getNextLine(trainingLine))
-//	{
-//		updateStat();
-//		return;
-//	}
-//
-//	emit trainingFlipBoard(trainingLine.color);
-//	
-//	// Go to startposition of this training line
-//	trainingLine.current = 0;
-//	b.setStartposition();
-//	for (i = 0; i < trainingLine.moves.size(); i++)
-//	{
-//		if (cb == b)
-//			break;
-//		b.doMove(trainingLine.moves[i].move,false);
-//		++trainingLine.current;
-//	}
-//
-//	// Startposition not found
-//	if (i == trainingLine.moves.size())
-//		return;
-//
-//	// If wrong color to move go one move forward
-//	if (b.toMove != trainingLine.color)
-//	{
-//		ChessMove move = trainingLine.currentMove();
-//		emit trainingSetArrow(SQUARE64(move.fromSquare), SQUARE64(move.toSquare), false, 10);
-//		++trainingLine.current;
-//	}
-//	//MoveList* ml = new MoveList;
-//	//trainingLine.moveList(*ml);
-//	//emit trainingAddMoves(*ml);
-//	running = true;
-//	updateStat();
-////	delete ml;
+	next();
 }
 
 void TrainingWindow::next()
 {
+	ChessBoard cb;
+	int i;
+	updateStat();
+	if (!training->getNextLine(trainingLine))
+	{
+		running = false;
+		updateStat();
+		return;
+	}
 
+	running = true;
+
+	emit trainingFlipBoard(trainingLine.color);
+		
+	// Go to startposition of this training line
+	trainingLine.current = 0;
+	cb.setStartposition();
+	for (i = 0; i < trainingLine.moves.size(); i++)
+	{
+		if (currentBoard == cb)
+			break;
+		cb.doMove(trainingLine.moves[i].move,false);
+		++trainingLine.current;
+	}
+	
+	// Startposition not found
+	if (i == trainingLine.moves.size())
+	{
+		running = false;
+		updateStat();
+		return;
+	}
+	
+	// If wrong color to move go one move forward
+	if (cb.toMove != trainingLine.color)
+	{
+		ChessMove move = trainingLine.currentMove();
+		emit trainingSetArrow(SQUARE64(move.fromSquare), SQUARE64(move.toSquare), false, 10);
+		++trainingLine.current;
+	}
+	
+	MoveList* ml = new MoveList;
+	trainingLine.moveList(*ml);
+	emit trainingAddMoves(*ml);
+	delete ml;
 }
 
 void TrainingWindow::setCurrentBoard(const ChessBoard& cb)
@@ -183,19 +192,16 @@ void TrainingWindow::setTraining(Training* t)
 
 void TrainingWindow::updateStat()
 {
-	//TrainingStatistics ts = trainingDB->getStat();
-	//QString qs = tr("In base: ");
-	//QTextStream(&qs) << ts.inBase;
-	//inBase->setText(qs);
-	//qs = tr("Id: ");
-	//QTextStream(&qs) << trainingLine.rowid;
-	//rowid->setText(qs);
-	//qs = tr("Loaded: ");
-	//QTextStream(&qs) << ts.current;
-	//loaded->setText(qs);
-	//qs = tr("Score: ");
-	//QTextStream(&qs) << trainingLine.score;
-	//score->setText(qs);
+	TrainingStatistics ts = training->getStat();
+	QString qs = tr("In base: ");
+	QTextStream(&qs) << ts.inBase;
+	inBase->setText(qs);
+	qs = tr("Loaded: ");
+	QTextStream(&qs) << ts.current;
+	loaded->setText(qs);
+	qs = tr("Score: ");
+	QTextStream(&qs) << trainingLine.score;
+	score->setText(qs);
 	if (running)
 	{
 		lRunning->setText(tr("Running"));
@@ -215,55 +221,55 @@ void TrainingWindow::updateStat()
 
 void TrainingWindow::moveEntered(ChessMove& move)
 {
-//	MoveList* ml= new MoveList;
-//	ChessMove nextmove;
-//	int attempt = trainingLine.attempt();
-//	trainingLine.incAttempt();
-//	if (trainingLine.isCorrect(move))
-//	{
-//		if (!attempt)
-//			trainingLine.incScore();
-//		if (trainingLine.nextMove(nextmove))
-//		{
-//			updateComment(false);
-//			trainingLine.moveList(*ml);
-//			emit trainingAddMoves(*ml);
-//			emit trainingSetArrow(SQUARE64(nextmove.fromSquare), SQUARE64(nextmove.toSquare), false, 10);
-//			updateStat();
-//		}
-//		else
-//		{
-//			running = false;
-//			++trainingLine.current;
-//			trainingLine.moveList(*ml);
-//			emit trainingAddMoves(*ml);
-//			QApplication::processEvents();
-//			trainingDB->updateScore(trainingLine);
-//			updateComment(true);
-//			updateStat();
-//			TrainingDialog dialog(this, QString(), QString(), QString());
-//			switch (dialog.exec())
-//			{
-//			case 1: // Next
-//				emit nextResponse();
-//				break;
-//			case 2: // Stop
-//				break;
-//			case 3: // Analyze
-//				emit trainingStop();
-//				break;
-//			}
-//		}
-//		return;
-//	}
-//	updateComment(true);
-//	nextmove = trainingLine.currentMove();
-//	trainingLine.moveList(*ml);
-//	emit trainingAddMoves(*ml);
-//	emit trainingSetArrow(SQUARE64(nextmove.fromSquare), SQUARE64(nextmove.toSquare), true, 10);
-////	trainingLine.decScore();
-//	updateStat();
-//	delete ml;
+	MoveList* ml= new MoveList;
+	ChessMove nextmove;
+	int attempt = trainingLine.attempt();
+	trainingLine.incAttempt();
+	if (trainingLine.isCorrect(move))
+	{
+		if (!attempt)
+			trainingLine.incScore();
+		if (trainingLine.nextMove(nextmove))
+		{
+			updateComment(false);
+			trainingLine.moveList(*ml);
+			emit trainingAddMoves(*ml);
+			emit trainingSetArrow(SQUARE64(nextmove.fromSquare), SQUARE64(nextmove.toSquare), false, 10);
+			updateStat();
+		}
+		else
+		{
+			running = false;
+			++trainingLine.current;
+			trainingLine.moveList(*ml);
+			emit trainingAddMoves(*ml);
+			QApplication::processEvents();
+			training->updateScore(trainingLine);
+			updateComment(true);
+			updateStat();
+			TrainingDialog dialog(this, QString(), QString(), QString());
+			switch (dialog.exec())
+			{
+			case 1: // Next
+				emit nextResponse();
+				break;
+			case 2: // Stop
+				break;
+			case 3: // Analyze
+				emit trainingStop();
+				break;
+			}
+		}
+		return;
+	}
+	updateComment(true);
+	nextmove = trainingLine.currentMove();
+	trainingLine.moveList(*ml);
+	emit trainingAddMoves(*ml);
+	emit trainingSetArrow(SQUARE64(nextmove.fromSquare), SQUARE64(nextmove.toSquare), true, 10);
+//	trainingLine.decScore();
+	updateStat();
+	delete ml;
 }
 
 void TrainingWindow::stopRunning()

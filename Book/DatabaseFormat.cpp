@@ -58,40 +58,39 @@ void TrainingLine::scoreLine()
 	}
 }
 
-//bool TrainingDBEntry::isCorrect(ChessMove& move)
-//{
-//	if (moves[current].move == move)
-//		return true;
-//	return false;
-//}
-//
-//bool TrainingDBEntry::nextMove(ChessMove& move)
-//{
-//	if ((current + 2) >= moves.size())
-//		return false;
-//
-//	move = moves[current + 1].move;
-//	current += 2;
-//	return true;
-//}
-//
-//
-//int TrainingDBEntry::toMove()
-//{
-//	return (current % 2);
-//}
-//
-//void TrainingDBEntry::moveList(MoveList& ml)
-//{
-//	int i;
-//	for (i = 0; i < moves.size(); i++)
-//	{
-//		if (i >= current)
-//			break;
-//		ml.push_back(moves[i].move);
-//	}
-//}
-//
+bool TrainingLine::isCorrect(ChessMove& move)
+{
+	if (moves[current].move == move)
+		return true;
+	return false;
+}
+
+bool TrainingLine::nextMove(ChessMove& move)
+{
+	if ((current + 2) >= moves.size())
+		return false;
+
+	move = moves[current + 1].move;
+	current += 2;
+	return true;
+}
+
+int TrainingLine::toMove()
+{
+	return (current % 2);
+}
+
+void TrainingLine::moveList(MoveList& ml)
+{
+	int i;
+	for (i = 0; i < moves.size(); i++)
+	{
+		if (i >= current)
+			break;
+		ml.push_back(moves[i].move);
+	}
+}
+
 //
 //
 //ChessBoard TrainingDBEntry::endPosition()

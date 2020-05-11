@@ -56,7 +56,7 @@ private:
 	QLabel*  lRunning;
 	QLabel* inBase;
 	QLabel* loaded;
-	QLabel* rowid;
+//	QLabel* rowid;
 	QLabel* score;
 	QLabel* computerScore;
 	QTextEdit* comment;

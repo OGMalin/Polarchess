@@ -7,10 +7,6 @@
 #include <QDebug>
 #include "../Common/WinFile.h"
 
-//const char* TRAINING = "Training";
-//const char* TDBVERSION = "1.0";
-//const char* TDBTYPE = "POLARTRAININGDB";
-
 Training::Training()
 {
 	stat.inBase = 0;
@@ -20,268 +16,16 @@ Training::Training()
 	//currentBoard.clear();
 	//currentColor = 0;
 	Base[0] = Base[1] = NULL;
-	//opened = false;
-	//if (!QSqlDatabase::isDriverAvailable("QSQLITE"))
-	//{
-	//	qWarning("No SQLITE driver available.");
-	//	return;
-	//}
-	//QSqlDatabase::addDatabase("QSQLITE", TRAINING);
 }
 
 Training::~Training()
 {
-//	close();
 }
-
-//bool Training::open(const QString& path)
-//{
-//	if (!WinFile::exist(path.toStdString()))
-//		return false;
-//
-//	QSqlDatabase db = QSqlDatabase::database(TRAINING);
-//	db.setDatabaseName(path);
-//
-//	if (!db.open())
-//	{
-//		opened = false;
-//	}
-//	else
-//	{
-//		opened = true;
-//		QSqlQuery query(db);
-//
-//		query.exec("SELECT * FROM info;");
-//		if (query.next())
-//		{
-//			tdi.db = query.value("db").toString();
-//			tdi.version = query.value("version").toString();
-//		}
-//
-//	}
-//	return opened;
-//}
-
-//bool Training::create(const QString& path)
-//{
-//	QSqlDatabase db = QSqlDatabase::database(TRAINING);
-//	char sz[16];
-//
-//	db.setDatabaseName(path);
-//
-//	if (!db.open())
-//	{
-//		qDebug() << "Create database error. Database: " << db.lastError().databaseText() << "Driver: " << db.lastError().driverText();
-//		opened = false;
-//		return false;
-//	}
-//	QSqlQuery query(db);
-//	query.exec("CREATE TABLE info ( db TEXT, version TEXT);");
-//	query.prepare("INSERT INTO info (db, version) VALUES ( :db, :version);");
-//	query.bindValue(":db", TDBTYPE);
-//	query.bindValue(":version", TDBVERSION);
-//	query.exec();
-//	query.exec("CREATE TABLE training ( "
-//		"color TEXT,"
-//		"score	TEXT,"
-//		"moves	TEXT"
-//		" ); ");
-//	query.exec("CREATE INDEX score on training (score);");
-//	query.exec("CREATE INDEX color on training (color);");
-//
-//	//query.exec("CREATE TABLE traininngstat ( "
-//	//	"); ");
-//	tdi.db = TDBTYPE;
-//	tdi.version = TDBVERSION;
-//	opened = true;
-//	return true;
-//}
-//
-//void Training::close()
-//{
-//	opened = false;
-//}
 
 void Training::SetRepertoireDatabase(int color, Database* base)
 {
 	Base[color] = base;
 }
-
-//void Training::createLines(QWidget* parent)
-//{
-//	QVector<BookDBEntry> pos;
-//	ChessBoard cb;
-//	TrainingDBEntry path;
-//	//TrainingLine tline;
-//	//QVector<TrainingLine> tlines;
-//	int i, j, rep;
-//
-//	if (!opened)
-//		return;
-//	QSqlDatabase db = QSqlDatabase::database(TRAINING);
-//	if (!db.open())
-//		return;
-//
-//	int steps=19, step;
-//	QProgressDialog progress("Creating trainingdata...", "Abort", 0, steps, parent);
-//	progress.setWindowModality(Qt::WindowModal);
-//	progress.show();
-//	QApplication::processEvents();
-//	step = 0;
-//	
-//	list.clear();
-//	for (rep = 0; rep < 2; rep++)
-//	{
-//		progress.setLabelText("Reading positions from database ...");
-//		progress.setValue(++step);
-//		QApplication::processEvents();
-//		if (progress.wasCanceled())
-//			break;
-//
-//		// Should it be done for this base?
-//		if (!Base[rep])
-//			continue;
-//
-//		// Collect all lines
-//		Base[rep]->getTrainingPosition(pos);
-//
-//		QApplication::processEvents();
-//		if (progress.wasCanceled())
-//			break;
-//		progress.setLabelText("Sorting positions...");
-//		progress.setValue(++step);
-//		if (pos.size() > 0)
-//		{
-//			QApplication::processEvents();
-//			std::sort(pos.begin(), pos.end());
-//			progress.setLabelText("Creating lines ...");
-//			progress.setValue(++step);
-//			QApplication::processEvents();
-//			if (progress.wasCanceled())
-//				break;
-//			cb.setStartposition();
-//			walkThrough(cb, path, 0, pos, rep);
-//		}
-//	}
-//
-//	progress.setLabelText("Tuning lines ...");
-//	progress.setValue(++step);
-//	QApplication::processEvents();
-//	if (progress.wasCanceled())
-//		return;
-//	
-//	// Remove last move if it not a repertoire move
-//	for (i = 0; i < list.size(); i++)
-//	{
-//		j = list[i].moves.size() % 2;
-//		if ((list[i].color == WHITE) && (j == 0))
-//			list[i].moves.pop_back();
-//		else if ((list[i].color == BLACK) && (j == 1))
-//			list[i].moves.pop_back();
-//	}
-//
-//	progress.setLabelText("Update score ...");
-//	progress.setValue(++step);
-//	QApplication::processEvents();
-//	if (progress.wasCanceled())
-//		return;
-//
-//	// Update score
-//	for (i = 0; i < list.size(); i++)
-//		list[i].scoreLine();
-//
-//	progress.setLabelText("Sorting lines ...");
-//	progress.setValue(++step);
-//	QApplication::processEvents();
-//	if (progress.wasCanceled())
-//		return;
-//	// Sort list based on score;
-//	std::sort(list.begin(), list.end());
-//
-//	progress.setLabelText("Preparing for saving to database ...");
-//	progress.setValue(++step);
-//	QApplication::processEvents();
-//	if (progress.wasCanceled())
-//		return;
-//	// Save the list to db;
-//
-//	QSqlQuery query(db);
-////	QVariantList colors, scores, moves;
-//
-//	progress.setLabelText("Deleting old lines ...");
-//	progress.setValue(++step);
-//	QApplication::processEvents();
-//	if (progress.wasCanceled())
-//		return;
-//	query.exec("DELETE FROM training;");
-//
-//	progress.setLabelText("Saving to database ...");
-//	progress.setValue(++step);
-//	QApplication::processEvents();
-//	if (progress.wasCanceled())
-//		return;
-//	i = 0;
-//	while (i < list.size())
-//	{
-//		// Save 100 entries to the database each time
-//		db.transaction();
-//		for (j = 0; j < 100; j++)
-//		{
-//			if (i>=list.size())
-//				break;
-//			query.prepare("INSERT INTO training ( color, score, moves ) VALUES ( :color, :score, :moves );");
-//			query.bindValue(":color", list[i].color);
-//			query.bindValue(":score", list[i].score);
-//			query.bindValue(":moves", list[i].MovesToString());
-//			query.exec();
-//			++i;
-//		}
-//		db.commit();
-//	}
-//	stat.inBase = list.size();
-//	progress.setValue(steps);
-//}
-//
-//void Training::walkThrough(ChessBoard& cb, TrainingDBEntry& path, int ply, QVector<BookDBEntry>& pos, int color)
-//{
-//	int  curmove = 0;
-//	BookDBEntry bde;
-//	QVector<BookDBEntry>::iterator bid;
-//	TrainingDBMove tpe;
-//
-//	// Get position 
-//	bde.board = cb;
-//	bid = std::lower_bound(pos.begin(), pos.end(), bde);
-//
-//	// The position don't exist or no moves or repeating move
-//	//if ((bid->board != cb) || (bid->movelist.size() == 0) || (bid->dirty))
-//	if ((bid->board != cb) || (bid->movelist.size() == 0) || path.positionExist(cb))
-//	{
-//		path.color = color;
-//		list.push_back(path);
-//		return;
-//	}
-//	
-//	bid->dirty = true;
-//
-//	while (1)
-//	{
-//		tpe.move = bid->movelist[curmove].move;
-//		tpe.score = bid->score;
-//		tpe.attempt = bid->attempt;
-//		path.moves.push_back(tpe);
-//		cb.doMove(tpe.move, false);
-//		walkThrough(cb, path, ply + 1, pos, color);
-//		path.moves.pop_back();
-//		// Only first move for repertoire
-//		if (bde.board.toMove == color)
-//			break;
-//		++curmove;
-//		if (curmove >= bid->movelist.size())
-//			break;
-//		cb = bde.board;
-//	}
-//}
 
 void Training::walkThrough(ChessBoard& cb, TrainingLine& line, int ply, QVector<BookDBEntry>& pos, int color)
 {
@@ -468,46 +212,19 @@ void Training::walkThrough(ChessBoard& cb, TrainingLine& line, int ply, QVector<
 
 void Training::updateScore(TrainingLine& tl)
 {
-	//char sz[16];
-	//int i;
-	//tde.scoreLine();
-	//QSqlDatabase db = QSqlDatabase::database(TRAINING);
-	//if (!db.open())
-	//	return;
-	//QSqlQuery query(db);
-	//query.prepare("SELECT moves FROM training WHERE rowid = :rowid;");
-	//query.bindValue(":rowid", itoa(tde.rowid, sz, 10));
-	//query.exec();
-	//if (!query.next())
-	//	return;
-	//TrainingDBEntry tdes;
-	//tdes.MovesFromString(query.value("moves").toString());
-	//if (tde.moves.size() != tdes.moves.size())
-	//	return;
-	//tdes.color = tde.color;
+	int i;
+	ChessBoard cb;
 
-	//for (i = 0; i < tde.moves.size(); i++)
-	//{
-	//	tdes.moves[i].score += tde.moves[i].score;
-	//	tdes.moves[i].attempt += tde.moves[i].attempt;
-	//}
-	//tdes.scoreLine();
-
-	//query.prepare("UPDATE training SET score = :score, moves = :moves WHERE rowid = :rowid;");
-	//query.bindValue(":rowid", itoa(tde.rowid, sz, 10));
-	//query.bindValue(":score", itoa(tdes.score, sz, 10));
-	//query.bindValue(":moves", tdes.MovesToString());
-	//query.exec();
-
-	//// Update Rep. database
-	//Base[tde.color]->updateTrainingScore(tde);
+	// Don't save score/attempt in position before start of training position.
+	for (i = 0; i < tl.moves.size(); i++)
+	{
+		if (cb == startBoard)
+			break;
+		tl.moves[i].score = 0;
+		tl.moves[i].attempt = 0;
+	}
+	Base[tl.color]->updateTrainingScore(tl);
 }
-
-//QString Training::getPath()
-//{
-//	QSqlDatabase db = QSqlDatabase::database(TRAINING);
-//	return db.databaseName();
-//}
 
 void Training::clearAll()
 {
@@ -515,14 +232,7 @@ void Training::clearAll()
 	for (i = 0; i < 2; i++)
 		Base[i]->clearAllTrainingData();
 
-	//if (!opened)
-	//	return;
-	//QSqlDatabase db = QSqlDatabase::database(TRAINING);
-	//if (!db.open())
-	//	return;
-	//QSqlQuery query(db);
-	//query.exec("DELETE FROM training;");
-	//query.exec("VACUUM;");
+	currentLines.clear();
 }
 
 TrainingStatistics Training::getStat()
@@ -574,7 +284,18 @@ void Training::getEndpositions(QVector<ChessBoard>& pos, int color)
 
 bool Training::getNextLine(TrainingLine& line)
 {
-	return false;
+	if (currentLines.size() < 1)
+		return false;
+
+	// Select a random line from the lines with lowest score
+	srand(time(NULL));
+	int i = rand() % currentLines.size();
+	
+	line = currentLines[i];
+	line.clearScore();
+
+	currentLines.remove(i);
+	return true;
 }
 
 bool Training::createLines(QWidget* parent, int color, ChessBoard& scb)
@@ -583,59 +304,82 @@ bool Training::createLines(QWidget* parent, int color, ChessBoard& scb)
 	ChessBoard cb;
 	TrainingLine line;
 
-	int i, j, rep;
+	int i, j, rep, score;
 
-	//int steps = 19, step;
-	//QProgressDialog progress("Creating trainingdata...", "Abort", 0, steps, parent);
-	//progress.setWindowModality(Qt::WindowModal);
-	//progress.show();
-	//QApplication::processEvents();
-	//step = 0;
+	int steps = 19, step;
+	
+	QProgressDialog progress("Creating trainingdata...", "Abort", 0, steps, parent);
+	progress.setWindowModality(Qt::WindowModal);
+	progress.show();
+	QApplication::processEvents();
+	step = 0;
 
 	currentLines.clear();
 	for (rep = 0; rep < 2; rep++)
 	{
-	//	progress.setLabelText("Reading positions from database ...");
-	//	progress.setValue(++step);
-	//	QApplication::processEvents();
-	//	if (progress.wasCanceled())
-	//		break;
-
+		progress.setLabelText("Reading positions from database ...");
+		progress.setValue(++step);
+		QApplication::processEvents();
+		if (progress.wasCanceled())
+		{
+			progress.setValue(steps);
+			return false;
+		}
 		if (color != -1)
+		{
 			if (color != rep)
+			{
+				step += 2;
 				continue;
+			}
+		}
 
 		// Is the base in use
 		if (!Base[rep])
+		{
+			step += 2;
 			continue;
-
+		}
 		// Collect all lines
 		Base[rep]->getTrainingPosition(pos);
 
-	//	QApplication::processEvents();
-	//	if (progress.wasCanceled())
-	//		break;
-	//	progress.setLabelText("Sorting positions...");
-	//	progress.setValue(++step);
+		QApplication::processEvents();
+		if (progress.wasCanceled())
+		{
+			progress.setValue(steps);
+			return false;
+		}
+		progress.setLabelText("Sorting positions...");
+		progress.setValue(++step);
 		if (pos.size() > 0)
 		{
-	//		QApplication::processEvents();
+			QApplication::processEvents();
 			std::sort(pos.begin(), pos.end());
-	//		progress.setLabelText("Creating lines ...");
-	//		progress.setValue(++step);
-	//		QApplication::processEvents();
-	//		if (progress.wasCanceled())
-	//			break;
+			progress.setLabelText("Creating lines ...");
+			progress.setValue(++step);
+			QApplication::processEvents();
+			if (progress.wasCanceled())
+			{
+				progress.setValue(steps);
+				return false;
+			}
 			cb.setStartposition();
 			walkThrough(cb, line, 0, pos, rep);
 		}
+		else
+		{
+			++step;
+		}
 	}
-
-	//progress.setLabelText("Tuning lines ...");
-	//progress.setValue(++step);
-	//QApplication::processEvents();
-	//if (progress.wasCanceled())
-	//	return;
+	// Step=6
+	progress.setLabelText("Tuning lines ...");
+	progress.setValue(++step);
+	QApplication::processEvents();
+	if (progress.wasCanceled())
+	{
+		progress.setValue(steps);
+		return false;
+	}
 
 	// Remove last move if it not a repertoire move
 	for (i = 0; i < currentLines.size(); i++)
@@ -676,35 +420,55 @@ bool Training::createLines(QWidget* parent, int color, ChessBoard& scb)
 
 	if (!currentLines.size())
 	{
+		progress.setValue(steps);
 		return false;
 	}
 
-	//progress.setLabelText("Update score ...");
-	//progress.setValue(++step);
-	//QApplication::processEvents();
-	//if (progress.wasCanceled())
-	//	return;
+	progress.setLabelText("Update score ...");
+	progress.setValue(++step);
+	QApplication::processEvents();
+	if (progress.wasCanceled())
+	{
+		progress.setValue(steps);
+		return false;
+	}
 
 	// Update score
 	for (i = 0; i < currentLines.size(); i++)
 		currentLines[i].scoreLine();
 
-	//progress.setLabelText("Sorting lines ...");
-	//progress.setValue(++step);
-	//QApplication::processEvents();
-	//if (progress.wasCanceled())
-	//	return;
+	progress.setLabelText("Sorting lines ...");
+	progress.setValue(++step);
+	QApplication::processEvents();
+	if (progress.wasCanceled())
+	{
+		progress.setValue(steps);
+		return false;
+	}
 	
 	// Sort list based on score;
 	std::sort(currentLines.begin(), currentLines.end());
 
-	//progress.setLabelText("Preparing for saving to database ...");
-	//progress.setValue(++step);
-	//QApplication::processEvents();
-	//if (progress.wasCanceled())
-	//	return;
+	progress.setLabelText("Keep only lowest score ...");
+	progress.setValue(++step);
+	QApplication::processEvents();
+	if (progress.wasCanceled())
+	{
+		progress.setValue(steps);
+		return false;
+	}
 
 	// Keep only lowest score
+	score = currentLines[0].score;
+	for (i = 1; i < currentLines.size(); i++)
+	{
+		if (currentLines[i].score > score)
+		{
+			currentLines.remove(i, currentLines.size() - i);
+			break;
+		}
+	}
 
-	return false;
+	progress.setValue(steps);
+	return true;
 }
