@@ -253,7 +253,7 @@ void Database::getTrainingPosition(QVector<BookDBEntry>& pos)
 	if (!db.open())
 		return;
 	QSqlQuery query(db);
-	query.prepare("SELECT cboard, comment, attempt, score, movelist FROM positions;");
+	query.prepare("SELECT cboard, attempt, score, movelist FROM positions;");
 	query.exec();
 	QSqlError error = query.lastError();
 	if (error.isValid())
@@ -264,7 +264,6 @@ void Database::getTrainingPosition(QVector<BookDBEntry>& pos)
 	while (query.next())
 	{
 		bde.board = CompressedBoard::decompress(query.value("cboard").toByteArray());
-		bde.comment = query.value("comment").toString();
 		bde.attempt = query.value("attempt").toInt();
 		bde.score = query.value("score").toInt();
 		bde.convertToMoveList(bde.movelist, query.value("movelist").toString());

@@ -32,6 +32,7 @@ signals:
 	void trainingAddMoves(MoveList&);
 	void trainingSetArrow(int fromSq, int toSq, bool wrong, int sek);
 	void nextResponse();
+	void restart();
 	void trainingStop();
 public:
 	Training* training;

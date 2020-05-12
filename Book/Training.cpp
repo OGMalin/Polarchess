@@ -46,8 +46,6 @@ void Training::walkThrough(ChessBoard& cb, TrainingLine& line, int ply, QVector<
 		return;
 	}
 
-	bid->dirty = true;
-
 	while (1)
 	{
 		tm.move = bid->movelist[curmove].move;
@@ -67,161 +65,20 @@ void Training::walkThrough(ChessBoard& cb, TrainingLine& line, int ply, QVector<
 	}
 }
 
-//bool Training::getNext(TrainingDBEntry& line, int color, ChessBoard& cb)
-//{
-//	int i,j,score;
-//	TrainingDBEntry tde;
-//	QSqlDatabase db = QSqlDatabase::database(TRAINING);
-//	if (!db.open())
-//		return false;
-//	QSqlQuery query(db);
-//	
-//	list.clear();
-//	// Get all traininglines from training db. If none are found try to create new lines from repertoire db.
-//	if (cb.isStartposition())
-//	{
-//		if (color >= 0)
-//		{
-//			query.prepare("SELECT rowid, * FROM training WHERE color=:color ORDER BY score;");
-//			query.bindValue(":color", color);
-//			query.exec();
-//			if (!query.next())
-//			{
-//				createLines(NULL);
-//				query.prepare("SELECT rowid, * FROM training WHERE color=:color ORDER BY score;");
-//				query.bindValue(":color", color);
-//				query.exec();
-//				if (!query.next())
-//					return false;
-//			}
-//		}
-//		else
-//		{
-//			query.exec("SELECT rowid, * FROM training ORDER BY score;");
-//			if (!query.next())
-//			{
-//				createLines(NULL);
-//				query.exec("SELECT rowid, * FROM training ORDER BY score;");
-//				if (!query.next())
-//					return false;
-//			}
-//		}
-//		
-//		bool first = true;
-//		while (1)
-//		{
-//			tde.rowid = query.value("rowid").toInt();
-//			tde.color = query.value("color").toInt();
-//			tde.score = query.value("score").toInt();
-//			tde.MovesFromString(query.value("moves").toString());
-//			if (first)
-//				score = tde.score;
-//			else if (tde.score > score)
-//				break;
-//			list.push_back(tde);
-//			if (!query.next())
-//				break;
-//			first = false;
-//		}
-//	}
-//	else
-//	{
-//		if (color >= 0)
-//		{
-//			query.prepare("SELECT rowid, * FROM training WHERE color=:color ORDER BY score;");
-//			query.bindValue(":color", color);
-//			query.exec();
-//			if (!query.next())
-//			{
-//				createLines(NULL);
-//				query.prepare("SELECT rowid, * FROM training WHERE color=:color ORDER BY score;");
-//				query.bindValue(":color", color);
-//				query.exec();
-//				if (!query.next())
-//					return false;
-//			}
-//		}
-//		else
-//		{
-//			// Have to search all positions here
-//			query.exec("SELECT rowid, * FROM training ORDER BY score;");
-//			if (!query.next())
-//			{
-//				createLines(NULL);
-//				query.exec("SELECT rowid, * FROM training ORDER BY score;");
-//				if (!query.next())
-//					return false;
-//			}
-//		}
-//		while (1)
-//		{
-//			tde.rowid = query.value("rowid").toInt();
-//			tde.color = query.value("color").toInt();
-//			tde.score = query.value("score").toInt();
-//			tde.MovesFromString(query.value("moves").toString());
-//			list.push_back(tde);
-//			if (!query.next())
-//				break;
-//		}
-//		bool found;
-//		ChessBoard b;
-//		for (i = 0; i < list.size(); i++)
-//		{
-//			found = false;
-//			b.setStartposition();
-//			for (j = 0; j < list[i].moves.size(); j++)
-//			{
-//				if (b == cb)
-//				{
-//					found = true;
-//					break;
-//				}
-//				b.doMove(list[i].moves[j].move, false);
-//			}
-//			if (!found)
-//			{
-//				list.remove(i);
-//				--i;
-//			}
-//		}
-//		if (!list.size())
-//			return false;
-//		score = list[0].score;
-//		for (i = 1; i < list.size(); i++)
-//		{
-//			if (list[i].score > score)
-//			{
-//				list.remove(i, list.size() - i);
-//				break;
-//			}
-//		}
-//	}
-//	stat.current = list.size();
-//
-//	if (!list.size())
-//		return false;
-//
-//	// Select a random line from the lines with lowest score
-//	srand(time(NULL));
-//	i = rand() % list.size();
-//
-//	line = list[i];
-//	line.clearScore();
-//	return true;
-//}
-
 void Training::updateScore(TrainingLine& tl)
 {
 	int i;
 	ChessBoard cb;
 
 	// Don't save score/attempt in position before start of training position.
+	cb.setStartposition();
 	for (i = 0; i < tl.moves.size(); i++)
 	{
 		if (cb == startBoard)
 			break;
 		tl.moves[i].score = 0;
 		tl.moves[i].attempt = 0;
+		cb.doMove(tl.moves[i].move, false);
 	}
 	Base[tl.color]->updateTrainingScore(tl);
 }
@@ -306,7 +163,7 @@ bool Training::createLines(QWidget* parent, int color, ChessBoard& scb)
 
 	int i, j, rep, score;
 
-	int steps = 19, step;
+	int steps = 11, step;
 	
 	QProgressDialog progress("Creating trainingdata...", "Abort", 0, steps, parent);
 	progress.setWindowModality(Qt::WindowModal);
@@ -416,6 +273,12 @@ bool Training::createLines(QWidget* parent, int color, ChessBoard& scb)
 		}
 	}
 
+	// Remove dublicated lines
+	for (i = 0; i < currentLines.size()-1; i++)
+		for (j = i + 1; j < currentLines.size(); j++)
+			if (equalLine(currentLines[i], currentLines[j]))
+				currentLines.remove(j--);
+
 	progress.setLabelText("Update score ...");
 	progress.setValue(++step);
 	QApplication::processEvents();
@@ -477,5 +340,42 @@ bool Training::createLines(QWidget* parent, int color, ChessBoard& scb)
 	}
 
 	progress.setValue(steps);
+	return true;
+}
+
+bool Training::equalLine(TrainingLine& tl1, TrainingLine& tl2)
+{
+	ChessBoard cb;
+	int s1, s2, i;
+
+	cb.setStartposition();
+	for (s1 = 0; s1 < tl1.moves.size(); s1++)
+	{
+		if (cb == startBoard)
+			break;
+		cb.doMove(tl1.moves[s1].move, false);
+	}
+	if (s1 == tl1.moves.size())
+		return false;
+	cb.setStartposition();
+	for (s2 = 0; s2 < tl2.moves.size(); s2++)
+	{
+		if (cb == startBoard)
+			break;
+		cb.doMove(tl2.moves[s2].move, false);
+	}
+	if (s2 == tl2.moves.size())
+		return false;
+	if ((tl1.moves.size() - s1) != (tl2.moves.size() - s2))
+		return false;
+	while (1)
+	{
+		if (tl1.moves[s1].move != tl2.moves[s2].move)
+			return false;
+		++s1;
+		++s2;
+		if (s1 == tl1.moves.size())
+			return true;
+	}
 	return true;
 }

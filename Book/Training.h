@@ -13,33 +13,18 @@ class Training
 {
 private:
 	QVector<TrainingLine> currentLines;
-//	TrainingDBInfo tdi;
 	TrainingStatistics stat;
 	ChessBoard startBoard;
 	int startColor;
-//	QVector<TrainingDBEntry> list;
-//	QVector<TrainingDBEntry> currentList;
-//	ChessBoard currentBoard;
-//	int currentColor;
-//	void walkThrough(ChessBoard& cur, TrainingDBEntry& path, int ply, QVector<BookDBEntry>& pos, int color);
 	void walkThrough(ChessBoard& cur, TrainingLine& line, int ply, QVector<BookDBEntry>& pos, int color);
 	//	void convertMovesFromString(const QString& smoves, TrainingDBEntry& tp);
 //	void convertMovesToString(QString& smoves, TrainingDBEntry& tp);
-	bool opened;
+	bool equalLine(TrainingLine& tl1, TrainingLine& tl2);
 public:
 	Database* Base[2];
 
 	Training();
 	~Training();
-
-	// Open a database
-//	bool open(const QString& path);
-
-	// Create a database
-//	bool create(const QString& path);
-
-	// Close the database
-//	void close();
 
 	// Set the database to use (color=WHITE or BLACK)
 	void SetRepertoireDatabase(int color, Database* base);
@@ -47,11 +32,6 @@ public:
 	// Removing all trainingdata and statistics
 	void clearAll();
 
-	// Create traininglines. 
-//	void createLines(QWidget* parent);
-
-	// Get next training line
-//	bool getNext(TrainingDBEntry& line, int color, ChessBoard& cb);
 
 	// Get next trainingline
 	bool getNextLine(TrainingLine& line);
@@ -59,9 +39,6 @@ public:
 
 	// Update training score
 	void updateScore(TrainingLine&);
-
-	// Get db path
-//	QString getPath();
 
 	TrainingStatistics getStat();
 

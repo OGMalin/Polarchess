@@ -5,21 +5,6 @@
 #include "../Common/ChessBoard.h"
 #include <QVector>
 
-
-// Training database
-/*
-	Database format
-
-	color			text
-		The color for the player.
-
-	score	text
-		Calculated score from attempt and score for each move
-
-	moves
-		move1|attempt|score;move1|attempt|score
-*/
-
 struct TrainingMove
 {
 	ChessMove move;
@@ -55,46 +40,6 @@ struct TrainingLine
 	void clearScore() { for (int i = 0; i < moves.size(); i++)moves[i].score = moves[i].attempt = 0; };
 	//chessboard endposition();
 };
-
-//struct TrainingDBInfo
-//{
-//	QString db;
-//	QString version;
-//};
-//
-//struct TrainingDBMove
-//{
-//	ChessMove move;
-//	int attempt;
-//	int score;
-//	void clear() { move.clear(); score = 0; attempt = 0; };
-//};
-//
-//struct TrainingDBEntry
-//{
-//	QVector<TrainingDBMove> moves;
-//	int rowid;
-//	int score; // Score for this line made by calculating score and attempt for each move.
-//	int color;
-//	int current;
-//	void clear() { moves.clear(); score = 0; color = 0; current = 0; rowid = 0; };
-//	friend bool operator<(const TrainingDBEntry& t1, const TrainingDBEntry& t2) { return t1.score < t2.score; };
-//	bool isCorrect(ChessMove& move);
-//	bool nextMove(ChessMove& move);
-//	ChessMove currentMove();
-//	QString MovesToString();
-//	void MovesFromString(const QString&);
-//	int toMove();
-//	void moveList(MoveList&);
-//	void scoreLine();
-//	int attempt() { return moves[current].attempt; };
-//	void incAttempt() { moves[current].attempt = 1; };
-//	void incScore() { moves[current].score = 1; };
-//	void clearScore() { for (int i = 0; i < moves.size(); i++)moves[i].score = moves[i].attempt = 0; };
-//	ChessBoard currentPosition();
-//	ChessBoard endPosition();
-//	bool positionExist(ChessBoard& cb);
-//};
 
 struct TrainingStatistics
 {
@@ -145,7 +90,7 @@ struct BookDBEntry
 	int score;
 	QVector<BookDBMove> movelist;
 	bool dirty;
-	BookDBEntry() { clear();  dirty = false; };
+	BookDBEntry() { clear(); };
 	void clear() { board.clear(); comment.clear(); movelist.clear(); eval = attempt = score = 0; dirty = false; };
 	bool moveExist(const ChessMove& move);
 	void deleteMove(const ChessMove&);

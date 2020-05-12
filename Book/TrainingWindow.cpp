@@ -71,6 +71,7 @@ TrainingWindow::TrainingWindow(QWidget* parent)
 	setLayout(vbox);
 
 	connect(this, SIGNAL(nextResponse()), this, SLOT(next()));
+	connect(this, SIGNAL(restart()), this, SLOT(start()));
 }
 
 TrainingWindow::~TrainingWindow()
@@ -140,6 +141,7 @@ void TrainingWindow::next()
 	{
 		running = false;
 		updateStat();
+		emit restart();
 		return;
 	}
 
