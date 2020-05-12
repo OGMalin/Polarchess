@@ -178,6 +178,7 @@ void TrainingWindow::next()
 	trainingLine.moveList(*ml);
 	emit trainingAddMoves(*ml);
 	delete ml;
+	updateStat();
 }
 
 void TrainingWindow::setCurrentBoard(const ChessBoard& cb)
@@ -235,11 +236,9 @@ void TrainingWindow::moveEntered(ChessMove& move)
 			trainingLine.moveList(*ml);
 			emit trainingAddMoves(*ml);
 			emit trainingSetArrow(SQUARE64(nextmove.fromSquare), SQUARE64(nextmove.toSquare), false, 10);
-			updateStat();
 		}
 		else
 		{
-			running = false;
 			++trainingLine.current;
 			trainingLine.moveList(*ml);
 			emit trainingAddMoves(*ml);
@@ -254,12 +253,16 @@ void TrainingWindow::moveEntered(ChessMove& move)
 				emit nextResponse();
 				break;
 			case 2: // Stop
+				running = false;
 				break;
 			case 3: // Analyze
 				emit trainingStop();
+				running = false;
 				break;
+			updateStat();
 			}
 		}
+		updateStat();
 		return;
 	}
 	updateComment(true);

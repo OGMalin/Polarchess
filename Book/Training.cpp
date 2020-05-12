@@ -416,14 +416,6 @@ bool Training::createLines(QWidget* parent, int color, ChessBoard& scb)
 		}
 	}
 
-	stat.inBase = currentLines.size();
-
-	if (!currentLines.size())
-	{
-		progress.setValue(steps);
-		return false;
-	}
-
 	progress.setLabelText("Update score ...");
 	progress.setValue(++step);
 	QApplication::processEvents();
@@ -435,7 +427,22 @@ bool Training::createLines(QWidget* parent, int color, ChessBoard& scb)
 
 	// Update score
 	for (i = 0; i < currentLines.size(); i++)
-		currentLines[i].scoreLine();
+	{
+		currentLines[i].scoreLine(scb);
+		if (currentLines[i].score < 0)
+		{
+			currentLines.remove(i);
+			--i;
+		}
+	}
+
+	stat.inBase = currentLines.size();
+
+	if (!currentLines.size())
+	{
+		progress.setValue(steps);
+		return false;
+	}
 
 	progress.setLabelText("Sorting lines ...");
 	progress.setValue(++step);

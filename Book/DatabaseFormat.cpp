@@ -36,25 +36,33 @@ bool TrainingLine::positionExist(ChessBoard& cb)
 }
 
 // Policy to select line.
-void TrainingLine::scoreLine()
+void TrainingLine::scoreLine(ChessBoard& cb)
 {
 	int i, sc;
 	int start = 0;
-	score = 100;
-	if (color == BLACK)
-		start = 1;
-	for (i = start; i < moves.size(); i = i + 2)
+	ChessBoard b;
+
+	// Find startposition for calculation
+	b.setStartposition();
+	for (start = 0; start < moves.size(); start++)
 	{
-		sc = -1;
-		if (moves[i].attempt > 0)
-		{
-			sc = 0.5 + (float)((100 * moves[i].score) / moves[i].attempt);
-			if (moves[i].attempt < 10)
-				sc -= (10 - moves[i].attempt);
-			if (sc < 0)
-				sc = 0;
-		}
-		score = __min(sc, score);
+		if (b == cb)
+			break;
+		b.doMove(moves[start].move, false);
+	}
+	if (b.toMove != color)
+		++start;
+	if (start >= moves.size())
+	{
+		score = -1;
+		return;
+	}
+
+	// Do the calculation
+	score = moves[start].score;
+	for (i = start + 2; i < moves.size(); i = i + 2)
+	{
+		score = __min(moves[i].score, score);
 	}
 }
 

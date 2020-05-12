@@ -39,7 +39,9 @@ struct TrainingLine
 	ChessBoard currentPosition();
 	bool positionExist(ChessBoard& cb);
 	int attempt() { return moves[current].attempt; };
-	void scoreLine();
+
+	// Score only positions from cb to end.
+	void scoreLine(ChessBoard& cb);
 	friend bool operator<(const TrainingLine& t1, const TrainingLine& t2) { return t1.score < t2.score; };
 	void moveList(MoveList&);
 
