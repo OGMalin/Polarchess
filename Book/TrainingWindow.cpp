@@ -129,6 +129,7 @@ void TrainingWindow::start()
 		return;
 	}
 
+	updateStat();
 	next();
 }
 
@@ -180,7 +181,7 @@ void TrainingWindow::next()
 	trainingLine.moveList(*ml);
 	emit trainingAddMoves(*ml);
 	delete ml;
-	updateStat();
+	updateStat(1);
 }
 
 void TrainingWindow::setCurrentBoard(const ChessBoard& cb)
@@ -193,14 +194,14 @@ void TrainingWindow::setTraining(Training* t)
 	training = t;
 }
 
-void TrainingWindow::updateStat()
+void TrainingWindow::updateStat(int cur)
 {
 	TrainingStatistics ts = training->getStat();
 	QString qs = tr("In base: ");
 	QTextStream(&qs) << ts.inBase;
 	inBase->setText(qs);
 	qs = tr("Loaded: ");
-	QTextStream(&qs) << ts.current;
+	QTextStream(&qs) << (ts.current + cur);
 	loaded->setText(qs);
 	qs = tr("Score: ");
 	QTextStream(&qs) << trainingLine.score;
@@ -261,10 +262,9 @@ void TrainingWindow::moveEntered(ChessMove& move)
 				emit trainingStop();
 				running = false;
 				break;
-			updateStat();
 			}
 		}
-		updateStat();
+//		updateStat();
 		return;
 	}
 	updateComment(true);
@@ -272,8 +272,7 @@ void TrainingWindow::moveEntered(ChessMove& move)
 	trainingLine.moveList(*ml);
 	emit trainingAddMoves(*ml);
 	emit trainingSetArrow(SQUARE64(nextmove.fromSquare), SQUARE64(nextmove.toSquare), true, 10);
-//	trainingLine.decScore();
-	updateStat();
+//	updateStat();
 	delete ml;
 }
 

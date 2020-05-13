@@ -695,7 +695,7 @@ void MainWindow::trainingSetArrow(int fromSq, int toSq, bool wrong, int sek)
 
 void MainWindow::trainingClearData()
 {
-//	training->clearAll();
+	training->clearAll();
 }
 
 void MainWindow::trainingCreate()

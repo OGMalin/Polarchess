@@ -42,7 +42,7 @@ public:
 	void fontFromString(const QString&);
 	void setCurrentBoard(const ChessBoard&);
 	void setTraining(Training* t);
-	void updateStat();
+	void updateStat(int cur = 0);
 	void moveEntered(ChessMove& move);
 	bool isRunning() { return running; };
 	void stopRunning();
