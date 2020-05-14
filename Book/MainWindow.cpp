@@ -685,6 +685,7 @@ void MainWindow::trainingAddMoves(MoveList& ml)
 		currentPath->add(ml[i]);
 	}
 	boardwindow->setPosition(currentPath->getPosition());
+	enginewindow->setPosition(currentPath->getPosition(), currentPath->current() / 2 + 1);
 	updateWindow();
 }
 
