@@ -3,14 +3,13 @@
 #include <QDialog>
 #include <QComboBox>
 #include <QSpinBox>
-#include <QCheckBox>
+#include <QRadioButton>
 #include <QPushButton>
 #include <QVector>
 #include <QLabel>
 #include "../Common/BoardWindow.h"
 #include "Computer.h"
 #include "Database.h"
-#include "Training.h"
 #include "EngineWindow.h"
 #include "Path.h"
 
@@ -22,14 +21,14 @@ public slots:
 	void startAnalyze();
 	void stopAnalyze();
 	void closeAnalyze();
-	void pathChanged(int);
+	void pathChanged(bool);
 	void enginePV(ComputerDBEngine&, ChessBoard&);
 
 signals:
 	void setPosition(const ChessBoard&);
 
 public:
-	AnalyzeDialog(QWidget* parent, Computer*, Database*, Database*, Database*, EngineWindow*, BoardWindow*, Path*, Training*);
+	AnalyzeDialog(QWidget* parent, Computer*, Database*, Database*, Database*, EngineWindow*, BoardWindow*, Path*);
 
 private:
 	void collectPositions();
@@ -37,17 +36,15 @@ private:
 	QComboBox* dbList;
 	QComboBox* engineList;
 	QSpinBox* timeToUse;
-	QCheckBox* endPosition;
-	QCheckBox* currentPath;
+	QRadioButton* allPosition;
+	QRadioButton* endPosition;
+	QRadioButton* currentPath;
 	QPushButton* startButton;
 	QPushButton* stopButton;
 	QPushButton* closeButton;
 	QLabel* posLabel;
 	Computer* compDB;
-	Database* theoryDB;
-	Database* whiteDB;
-	Database* blackDB;
-	Training* trainingDB;
+	Database* base[3];
 	EngineWindow* enginewindow;
 	BoardWindow* boardwindow;
 	QVector<ChessBoard> positions;

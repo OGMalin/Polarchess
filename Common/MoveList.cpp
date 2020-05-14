@@ -114,6 +114,13 @@ void MoveList::push_front(const ChessMove& m, int score)
 		_size = MOVELISTSIZE;
 };
 
+void MoveList::pop_back()
+{
+	--_size;
+	if (_size < 0)
+		_size = 0;
+
+}
 int MoveList::find(const ChessMove& m)
 {
 	int i;

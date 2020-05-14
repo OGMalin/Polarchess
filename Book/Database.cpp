@@ -414,16 +414,92 @@ void Database::getAllPositions(QVector<ChessBoard>& pos)
 
 void Database::getEndPositions(QVector<ChessBoard>& pos)
 {
+	QVector<BookDBEntry> bdes;
+	BookDBEntry bde;
+	MoveList path;
+	QVector<MoveList> pathlist;
+	ChessBoard cb;
+	int i, j;
+
 	if (!opened)
 		return;
 	QSqlDatabase db = QSqlDatabase::database(dbname);
 	if (!db.open())
 		return;
 	QSqlQuery query(db);
-	query.prepare("SELECT cboard FROM positions WHERE movelist IS NULL OR movelist = '';");
+
+	// Collect all positions
+	query.prepare("SELECT cboard, movelist FROM positions;");
 	query.exec();
+	QSqlError error = query.lastError();
+	if (error.isValid())
+	{
+		qDebug() << "Database error: " << error.databaseText();
+		qDebug() << "Driver error: " << error.driverText();
+		return;
+	}
 	while (query.next())
-		pos.push_back(CompressedBoard::decompress(query.value("cboard").toByteArray()));
+	{
+		bde.board = CompressedBoard::decompress(query.value("cboard").toByteArray());
+		bde.convertToMoveList(bde.movelist, query.value("movelist").toString());
+		bdes.push_back(bde);
+	}
+	if (bdes.size() == 0)
+		return;
+
+	// Create a tree
+	std::sort(bdes.begin(), bdes.end());
+	cb.setStartposition();
+	walkThrough(cb, path, 0, bdes, pathlist);
+
+	// Find end positions
+	pos.clear();
+	for (i = 0; i < pathlist.size(); i++)
+	{
+		cb.setStartposition();
+		for (j = 0; j < pathlist[i].size(); j++)
+			cb.doMove(pathlist[i][j], false);
+		if (j > 0)
+			pos.push_back(cb);
+	}
+}
+
+void Database::walkThrough(ChessBoard& cb, MoveList& path, int ply, QVector<BookDBEntry>& pos, QVector<MoveList>& pathlist)
+{
+	int  curmove = 0;
+	BookDBEntry bde;
+	QVector<BookDBEntry>::iterator bid;
+//	ChessMove move;
+
+	// Get position 
+	bde.board = cb;
+	bid = std::lower_bound(pos.begin(), pos.end(), bde);
+
+	// The position don't exist or no moves or repeating move
+	if ((bid->board != cb) || (bid->movelist.size() == 0))
+	{
+		pathlist.push_back(path);
+		return;
+	}
+
+	// Skip this line because it doesn't have an endposition
+	if (bid->dirty)
+		return;
+
+	bid->dirty = true;
+
+	while (1)
+	{
+//		move = bid->movelist[curmove].move;
+		path.push_back(bid->movelist[curmove].move);
+		cb.doMove(bid->movelist[curmove].move, false);
+		walkThrough(cb, path, ply + 1, pos, pathlist);
+		path.pop_back();
+		++curmove;
+		if (curmove >= bid->movelist.size())
+			break;
+		cb = bde.board;
+	}
 }
 
 #ifdef _DEBUG

@@ -48,4 +48,6 @@ private:
 //	QSqlDatabase bookdb;
 	QString dbname;
 	bool exist(ChessBoard& board);
+	void walkThrough(ChessBoard& cb, MoveList& path, int ply, QVector<BookDBEntry>& pos, QVector<MoveList>& pathlist);
 };
+

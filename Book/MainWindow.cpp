@@ -462,7 +462,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::bookAnalyze()
 {
 	disconnect(enginewindow, nullptr, nullptr, nullptr);
-	AnalyzeDialog dialog(this, computerDB, Base[THEORY], Base[REPWHITE], Base[REPBLACK], enginewindow, boardwindow, currentPath, training);
+	AnalyzeDialog dialog(this, computerDB, Base[THEORY], Base[REPWHITE], Base[REPBLACK], enginewindow, boardwindow, currentPath);
 	dialog.exec();
 	connect(enginewindow, SIGNAL(enginePV(ComputerDBEngine&, ChessBoard&)), this, SLOT(enginePV(ComputerDBEngine&, ChessBoard&)));
 }

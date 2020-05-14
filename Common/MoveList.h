@@ -26,6 +26,7 @@ public:
   void push_front(const ChessMove& m);
   void push_back(const ChessMove& m, int score);
   void push_front(const ChessMove& m, int score);
+  void pop_back();
   // Find the index to a move in the list. Returns size if the move isn't in the list.
   int find(const ChessMove& m);
   void erase(int n, int count = 1);

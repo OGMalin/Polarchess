@@ -5,17 +5,17 @@
 #include <QDir>
 #include <QTextStream>
 
-AnalyzeDialog::AnalyzeDialog(QWidget* parent, Computer* c, Database* t, Database* w, Database* b, EngineWindow* e, BoardWindow* bw, Path* p, Training* tdb)
+AnalyzeDialog::AnalyzeDialog(QWidget* parent, Computer* c, Database* t, Database* w, Database* b, EngineWindow* e, BoardWindow* bw, Path* p)
 	:QDialog(parent)
 {
 	QHBoxLayout* hbox;
 	QVBoxLayout* vbox;
+	QVBoxLayout* vbox2;
 	QLabel* label;
 	compDB = c;
-	theoryDB = t;
-	whiteDB = w;
-	blackDB = b;
-	trainingDB = tdb;
+	base[0] = t;
+	base[1] = w;
+	base[2] = b;
 	enginewindow = e;
 	boardwindow = bw;
 	path = p;
@@ -23,7 +23,6 @@ AnalyzeDialog::AnalyzeDialog(QWidget* parent, Computer* c, Database* t, Database
 	currentPosition = 0;
 
 	vbox = new QVBoxLayout;
-
 	hbox = new QHBoxLayout;
 
 	engineList = new QComboBox;
@@ -45,17 +44,21 @@ AnalyzeDialog::AnalyzeDialog(QWidget* parent, Computer* c, Database* t, Database
 	timeToUse->setMaximum(999);
 	timeToUse->setFixedWidth(60);
 
-	endPosition = new QCheckBox(tr("Only end positions"));
-
-	currentPath = new QCheckBox(tr("Current path"));
-	connect(currentPath, SIGNAL(stateChanged(int)), this, SLOT(pathChanged(int)));
+	vbox2 = new QVBoxLayout;
+	allPosition = new QRadioButton(tr("All saved positions"));
+	endPosition = new QRadioButton(tr("Only end positions"));
+	currentPath = new QRadioButton(tr("Current path"));
+	allPosition->setChecked(true);
+	connect(currentPath, SIGNAL(toggled(bool)), this, SLOT(pathChanged(bool)));
+	vbox2->addWidget(allPosition);
+	vbox2->addWidget(endPosition);
+	vbox2->addWidget(currentPath);
 
 	hbox->addWidget(engineList);
 	hbox->addWidget(dbList);
 	hbox->addWidget(label);
 	hbox->addWidget(timeToUse);
-	hbox->addWidget(endPosition);
-	hbox->addWidget(currentPath);
+	hbox->addLayout(vbox2);
 	vbox->addLayout(hbox);
 
 	hbox = new QHBoxLayout;
@@ -140,7 +143,6 @@ void AnalyzeDialog::collectPositions()
 	ComputerDBEntry cde;
 	QString qs;
 	ComputerDBEngine ce;
-	Database* db;
 	int i, j;
 	int t = timeToUse->value() * 1000;
 	ChessBoard cb;
@@ -157,39 +159,13 @@ void AnalyzeDialog::collectPositions()
 	}
 	else
 	{
-		switch (dbList->currentIndex())
-		{
-		case 0:
-			db = theoryDB;
-			break;
-		case 1:
-			db = whiteDB;
-			break;
-		case 2:
-			db = blackDB;
-			break;
-		default:
+		i = dbList->currentIndex();
+		if ((i < 0) && (i > 2))
 			return;
-		}
 		if (endPosition->isChecked())
-		{
-			if (db == theoryDB)
-			{
-				db->getEndPositions(positions);
-			}
-			else
-			{
-				// There isn't any endposition saved in a repertoire database, use the trainingdatabase instead.
-				if (db == whiteDB)
-					trainingDB->getEndpositions(positions, 0);
-				else
-					trainingDB->getEndpositions(positions, 1);
-			}
-		}
+			base[i]->getEndPositions(positions);
 		else
-		{
-			db->getAllPositions(positions);
-		}
+			base[i]->getAllPositions(positions);
 	}
 
 	// Remove mate and stalemate
@@ -219,16 +195,9 @@ void AnalyzeDialog::collectPositions()
 	}
 }
 
-void AnalyzeDialog::pathChanged(int)
+void AnalyzeDialog::pathChanged(bool b)
 {
-	if (currentPath->isChecked())
-	{
-		dbList->setDisabled(true);
-		endPosition->setDisabled(true);
-		return;
-	}
-	dbList->setDisabled(false);
-	endPosition->setDisabled(false);
+	dbList->setDisabled(b);
 }
 
 void AnalyzeDialog::updateAnalyzed()
