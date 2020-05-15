@@ -59,6 +59,10 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	connect(button, SIGNAL(clicked()), this, SLOT(exportPGNTheory()));
 	button->setToolTip(tr("Export theory to pgn file."));
 	grid->addWidget(button, 1, 5);
+	button = new QPushButton(tr("Clean Book"));
+	connect(button, SIGNAL(clicked()), this, SLOT(cleanupTheoryDB()));
+	button->setToolTip(tr("Remove unused positions."));
+	grid->addWidget(button, 1, 6);
 	grid->setAlignment(Qt::AlignLeft);
 	group->setLayout(grid);
 	vbox->addWidget(group);
@@ -89,6 +93,10 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	connect(button, SIGNAL(clicked()), this, SLOT(exportPGNWhite()));
 	button->setToolTip(tr("Export White repertoire to pgn file."));
 	grid->addWidget(button, 1, 5);
+	button = new QPushButton(tr("Clean Book"));
+	connect(button, SIGNAL(clicked()), this, SLOT(cleanupWhiteDB()));
+	button->setToolTip(tr("Remove unused positions."));
+	grid->addWidget(button, 1, 6);
 	grid->setAlignment(Qt::AlignLeft);
 	group->setLayout(grid);
 	vbox->addWidget(group);
@@ -119,35 +127,13 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	connect(button, SIGNAL(clicked()), this, SLOT(exportPGNBlack()));
 	button->setToolTip(tr("Export Black repertoire to pgn file."));
 	grid->addWidget(button, 1, 5);
+	button = new QPushButton(tr("Clean Book"));
+	connect(button, SIGNAL(clicked()), this, SLOT(cleanupBlackDB()));
+	button->setToolTip(tr("Remove unused positions."));
+	grid->addWidget(button, 1, 6);
 	grid->setAlignment(Qt::AlignLeft);
 	group->setLayout(grid);
 	vbox->addWidget(group);
-
-	//group = new QGroupBox(tr("Training statistics"));
-	//grid = new QGridLayout();
-	//trainingFile = new QLineEdit(trainingDB->getPath());
-	//trainingFile->setDisabled(true);
-	//grid->addWidget(trainingFile, 0, 0, 1, -1);
-	//button = new QPushButton(tr("Open"));
-	//connect(button, SIGNAL(clicked()), this, SLOT(openTrainingDB()));
-	//grid->addWidget(button, 1, 0);
-	//button = new QPushButton(tr("New"));
-	//connect(button, SIGNAL(clicked()), this, SLOT(newTrainingDB()));
-	//grid->addWidget(button, 1, 1);
-	//button = new QPushButton(tr("Close"));
-	//connect(button, SIGNAL(clicked()), this, SLOT(closeTrainingDB()));
-	//grid->addWidget(button, 1, 2);
-	//button = new QPushButton(tr("Clear"));
-	//connect(button, SIGNAL(clicked()), this, SLOT(clearTrainingDB()));
-	//grid->addWidget(button, 1, 3);
-	//button = new QPushButton(tr("Create"));
-	//connect(button, SIGNAL(clicked()), this, SLOT(createTrainingDB()));
-	//grid->addWidget(button, 1, 4);
-	//spacer = new QSpacerItem(spacersize.width(), spacersize.height());
-	//grid->addItem(spacer, 1, 5);
-	//grid->setAlignment(Qt::AlignLeft);
-	//group->setLayout(grid);
-	//vbox->addWidget(group);
 
 	group = new QGroupBox(tr("Computer evaluation"));
 	grid = new QGridLayout();
@@ -169,6 +155,8 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	grid->addItem(spacer, 1, 4);
 	spacer = new QSpacerItem(spacersize.width(), spacersize.height());
 	grid->addItem(spacer, 1, 5);
+	spacer = new QSpacerItem(spacersize.width(), spacersize.height());
+	grid->addItem(spacer, 1, 6);
 	grid->setAlignment(Qt::AlignLeft);
 	group->setLayout(grid);
 	vbox->addWidget(group);
@@ -197,6 +185,8 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	grid->addWidget(button, 1, 4);
 	spacer = new QSpacerItem(spacersize.width(), spacersize.height());
 	grid->addItem(spacer, 1, 5);
+	spacer = new QSpacerItem(spacersize.width(), spacersize.height());
+	grid->addItem(spacer, 1, 6);
 	grid->setAlignment(Qt::AlignLeft);
 	group->setLayout(grid);
 	vbox->addWidget(group);
@@ -223,6 +213,8 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, Database* theory, Database* whit
 	grid->addWidget(button, 1, 4);
 	spacer = new QSpacerItem(spacersize.width(), spacersize.height());
 	grid->addItem(spacer, 1, 5);
+	spacer = new QSpacerItem(spacersize.width(), spacersize.height());
+	grid->addItem(spacer, 1, 6);
 	grid->setAlignment(Qt::AlignLeft);
 	group->setLayout(grid);
 	vbox->addWidget(group);
@@ -261,10 +253,13 @@ void DatabaseDialog::newTheoryDB()
 
 void DatabaseDialog::closeTheoryDB()
 {
-	theoryFile->setText("");
 	theoryDB->close();
 }
 
+void DatabaseDialog::cleanupTheoryDB()
+{
+	theoryDB->cleanUp();
+}
 void DatabaseDialog::openWhiteDB()
 {
 	QString path = QFileDialog::getOpenFileName(this, tr("Open White repertoire book"), whiteFile->text(), tr("Book files (*.pbk)"));
@@ -295,6 +290,11 @@ void DatabaseDialog::closeWhiteDB()
 	whiteDB->close();
 }
 
+void DatabaseDialog::cleanupWhiteDB()
+{
+	whiteDB->cleanUp();
+}
+
 void DatabaseDialog::openBlackDB()
 {
 	QString path = QFileDialog::getOpenFileName(this, tr("Open Black repertoire book"), blackFile->text(), tr("Book files (*.pbk)"));
@@ -323,6 +323,11 @@ void DatabaseDialog::closeBlackDB()
 {
 	blackFile->setText("");
 	blackDB->close();
+}
+
+void DatabaseDialog::cleanupBlackDB()
+{
+	blackDB->cleanUp();
 }
 
 //void DatabaseDialog::openTrainingDB()

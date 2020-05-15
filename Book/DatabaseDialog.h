@@ -5,7 +5,6 @@
 #include <QString>
 #include "Statistics.h"
 #include "Database.h"
-//#include "Training.h"
 #include "Computer.h"
 #include "Openings.h"
 
@@ -20,6 +19,7 @@ public slots:
 	void importPGNTheory();
 	void importBookTheory();
 	void exportPGNTheory();
+	void cleanupTheoryDB();
 
 	void openWhiteDB();
 	void newWhiteDB();
@@ -27,6 +27,7 @@ public slots:
 	void importPGNWhite();
 	void importBookWhite();
 	void exportPGNWhite();
+	void cleanupWhiteDB();
 
 	void openBlackDB();
 	void newBlackDB();
@@ -34,12 +35,7 @@ public slots:
 	void importPGNBlack();
 	void importBookBlack();
 	void exportPGNBlack();
-
-	//void openTrainingDB();
-	//void newTrainingDB();
-	//void closeTrainingDB();
-	//void clearTrainingDB();
-	//void createTrainingDB();
+	void cleanupBlackDB();
 
 	void openComputerDB();
 	void newComputerDB();
@@ -64,14 +60,12 @@ private:
 	QLineEdit* theoryFile;
 	QLineEdit* whiteFile;
 	QLineEdit* blackFile;
-//	QLineEdit* trainingFile;
 	QLineEdit* computerFile;
 	QLineEdit* statisticFile;
 	QLineEdit* openingsFile;
 	Database* theoryDB;
 	Database* whiteDB;
 	Database* blackDB;
-//	Training* trainingDB;
 	Computer* computerDB;
 	Statistics* statDB;
 	Openings* openingsDB;

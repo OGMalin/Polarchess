@@ -30,7 +30,6 @@ public:
 	void getTrainingPosition(QVector<BookDBEntry>&);
 	void clearAllTrainingData();
 	void importBase(Database* iBase);
-//	void updateTrainingScore(TrainingDBEntry&);
 	void updateTrainingScore(TrainingLine&);
 
 	// Get db path
@@ -38,6 +37,8 @@ public:
 
 	void getAllPositions(QVector<ChessBoard>&);
 	void getEndPositions(QVector<ChessBoard>&);
+
+	void cleanUp(QWidget* parent = NULL);
 
 #ifdef _DEBUG
 	void convertBase();
@@ -49,5 +50,6 @@ private:
 	QString dbname;
 	bool exist(ChessBoard& board);
 	void walkThrough(ChessBoard& cb, MoveList& path, int ply, QVector<BookDBEntry>& pos, QVector<MoveList>& pathlist);
+	void markDirty(ChessBoard& cb, QVector<BookDBEntry>& pos);
 };
 

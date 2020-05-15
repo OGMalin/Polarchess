@@ -9,6 +9,9 @@
 #include <QSqlError>
 #include <QIODevice>
 #include <QVariantList>
+#include <QTextStream>
+#include <QProgressDialog>
+#include <QApplication>
 #include <QDebug>
 #include "../Common/ChessBoard.h"
 
@@ -495,6 +498,138 @@ void Database::walkThrough(ChessBoard& cb, MoveList& path, int ply, QVector<Book
 		cb.doMove(bid->movelist[curmove].move, false);
 		walkThrough(cb, path, ply + 1, pos, pathlist);
 		path.pop_back();
+		++curmove;
+		if (curmove >= bid->movelist.size())
+			break;
+		cb = bde.board;
+	}
+}
+
+void Database::cleanUp(QWidget* parent)
+{
+	QVector<BookDBEntry> bdes;
+	BookDBEntry bde;
+	ChessBoard cb;
+	int i, j;
+	QString qs;
+	if (!opened)
+		return;
+	QSqlDatabase db = QSqlDatabase::database(dbname);
+	if (!db.open())
+		return;
+	QSqlQuery query(db);
+
+
+	int steps = 3, step;
+
+	QProgressDialog progress("Reading from database.", "Abort", 0, steps, parent);
+	progress.setWindowModality(Qt::WindowModal);
+	progress.show();
+	QApplication::processEvents();
+	step = 0;
+
+	// Collect all positions
+	query.prepare("SELECT rowid, cboard, movelist FROM positions;");
+	query.exec();
+	QSqlError error = query.lastError();
+	if (error.isValid())
+	{
+		qDebug() << "Database error: " << error.databaseText();
+		qDebug() << "Driver error: " << error.driverText();
+		progress.setValue(steps);
+		return;
+	}
+	while (query.next())
+	{
+		bde.score = query.value("rowid").toInt(); // Using score for rowid for faster delete.
+		bde.board = CompressedBoard::decompress(query.value("cboard").toByteArray());
+		bde.convertToMoveList(bde.movelist, query.value("movelist").toString());
+		bdes.push_back(bde);
+	}
+	if (bdes.size() == 0)
+	{
+		progress.setValue(steps);
+		return;
+	}
+
+	progress.setLabelText("Checking if a positions are in use");
+	progress.setValue(++step);
+	QApplication::processEvents();
+	if (progress.wasCanceled())
+	{
+		progress.setValue(steps);
+		return;
+	}
+
+	// Mark all used positions as dirty
+	std::sort(bdes.begin(), bdes.end());
+	cb.setStartposition();
+	markDirty(cb, bdes);
+
+	progress.setLabelText("Removing unused positions from database.");
+	progress.setValue(++step);
+	QApplication::processEvents();
+	if (progress.wasCanceled())
+	{
+		progress.setValue(steps);
+		return;
+	}
+
+	// Delete all unused positions
+	db.transaction();
+	for (i = 0; i < bdes.size(); i++)
+	{
+		if (!bdes[i].dirty)
+		{
+			qs.clear();
+			QTextStream(&qs) << "DELETE FROM positions WHERE rowid = " << bdes[i].score;
+			query.exec(qs);
+		}
+	}
+	db.commit();
+
+	progress.setLabelText("Truncate the database");
+	progress.setValue(++step);
+	QApplication::processEvents();
+	if (progress.wasCanceled())
+	{
+		progress.setValue(steps);
+		return;
+	}
+
+	// Remove unused records physicaly
+	query.exec("VACUUM");
+
+	progress.setValue(steps);
+}
+
+void Database::markDirty(ChessBoard& cb, QVector<BookDBEntry>& pos)
+{
+	int  curmove = 0;
+	BookDBEntry bde;
+	QVector<BookDBEntry>::iterator bid;
+
+	// Get position 
+	bde.board = cb;
+	bid = std::lower_bound(pos.begin(), pos.end(), bde);
+
+	// The position don't exist
+	if (bid->board != cb)
+		return;
+
+	if (bid->dirty)
+		return;
+
+	bid->dirty = true;
+
+	// The position have no moves
+	if (bid->movelist.size() == 0)
+		return;
+
+	while (1)
+	{
+		cb.doMove(bid->movelist[curmove].move, false);
+		markDirty(cb, pos);
 		++curmove;
 		if (curmove >= bid->movelist.size())
 			break;
