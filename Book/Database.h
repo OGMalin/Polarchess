@@ -29,7 +29,7 @@ public:
 	BookDBInfo bookInfo();
 	void getTrainingPosition(QVector<BookDBEntry>&);
 	void clearAllTrainingData();
-	void importBase(Database* iBase);
+	void importBase(Database* iBase, int preferedColor = -1);
 	void updateTrainingScore(TrainingLine&);
 
 	// Get db path

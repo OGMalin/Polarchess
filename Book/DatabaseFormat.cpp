@@ -243,7 +243,7 @@ void BookDBEntry::convertFromMoveList(const QVector<BookDBMove>& movelist, QStri
 	}
 }
 
-void BookDBEntry::updateMove(BookDBMove& bm, bool mergemove)
+void BookDBEntry::updateMove(BookDBMove& bm, bool mergemove, bool inFront)
 {
 	for (int i = 0; i < movelist.size(); i++)
 	{
@@ -253,16 +253,26 @@ void BookDBEntry::updateMove(BookDBMove& bm, bool mergemove)
 			{
 				if (movelist[i].comment.isEmpty())
 					movelist[i].comment = bm.comment;
-				return;
 			}
-			movelist[i] = bm;
+			else
+			{
+				movelist[i] = bm;
+			}
+			if (inFront && (i != 0))
+			{
+				movelist.swapItemsAt(0, i);
+			}
+
 			return;
 		}
 	}
-	movelist.append(bm);
+	if (inFront)
+		movelist.push_front(bm);
+	else
+		movelist.push_back(bm);
 }
 
-void BookDBEntry::merge(BookDBEntry& bde)
+void BookDBEntry::merge(BookDBEntry& bde, bool inFront)
 {
 	board = bde.board;
 	if (!eval)
@@ -276,10 +286,14 @@ void BookDBEntry::merge(BookDBEntry& bde)
 			comment += bde.comment;
 		}
 	}
-	if (!score)
+	if (inFront)
+	{
 		score = bde.score;
+		attempt = bde.attempt;
+	}
+
 	for (int i = 0; i < bde.movelist.size(); i++)
-		updateMove(bde.movelist[i], true);
+		updateMove(bde.movelist[i], true, inFront);
 }
 
 void StatisticsDBEntry::convertToMoveList(QVector<StatisticsDBMove>& movelist, const QString& data, ChessBoard& cb)

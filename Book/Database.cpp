@@ -295,7 +295,7 @@ void Database::clearAllTrainingData()
 	}
 }
 
-void Database::importBase(Database* iBase)
+void Database::importBase(Database* iBase, int preferedColor)
 {
 	BookDBEntry bde1, bde2;
 	char  sz[16];
@@ -351,7 +351,11 @@ void Database::importBase(Database* iBase)
 				") VALUES ( "
 				":cboard, :comment, :eval, :attempt, :score, :movelist );");
 		}
-		bde1.merge(bde2);
+
+		bool inFront = false;
+		if (bde1.board.toMove == preferedColor)
+			inFront = true;
+		bde1.merge(bde2, inFront);
 		query1.bindValue(":cboard", CompressedBoard::compress(bde1.board));
 		query1.bindValue(":comment", bde1.comment);
 		query1.bindValue(":eval", itoa(bde1.eval, sz, 10));

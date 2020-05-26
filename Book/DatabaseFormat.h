@@ -95,12 +95,12 @@ struct BookDBEntry
 	bool moveExist(const ChessMove& move);
 	void deleteMove(const ChessMove&);
 	void setFirst(const ChessMove&);
-	void updateMove(BookDBMove&bm, bool mergemove = false);
+	void updateMove(BookDBMove&bm, bool mergemove, bool inFront);
 
 	void convertToMoveList(QVector<BookDBMove>&, const QString&);
 	void convertFromMoveList(const QVector<BookDBMove>&, QString&);
 
-	void merge(BookDBEntry& bde);
+	void merge(BookDBEntry& bde, bool inFront);
 
 	friend bool operator<(const BookDBEntry& b1, const BookDBEntry& b2) { return b1.board < b2.board; };
 	friend bool operator==(const BookDBEntry& b1, const BookDBEntry& b2) { return b1.board == b2.board; };

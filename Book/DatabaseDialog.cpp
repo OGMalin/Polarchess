@@ -330,46 +330,6 @@ void DatabaseDialog::cleanupBlackDB()
 	blackDB->cleanUp();
 }
 
-//void DatabaseDialog::openTrainingDB()
-//{
-//	QString path = QFileDialog::getOpenFileName(this, tr("Open training book"), trainingFile->text(), tr("Training files (*.ptr)"));
-//	if (!path.isEmpty())
-//	{
-//		trainingDB->close();
-//		trainingFile->setText(path);
-//		if (!trainingDB->open(path))
-//			trainingDB->create(path);
-//	}
-//}
-//
-//void DatabaseDialog::newTrainingDB()
-//{
-//	QString path = QFileDialog::getSaveFileName(this, tr("New training book"), trainingFile->text(), tr("Training files (*.ptr)"));
-//	if (!path.isEmpty())
-//	{
-//		trainingDB->close();
-//		trainingFile->setText(path);
-//		if (!trainingDB->open(path))
-//			trainingDB->create(path);
-//	}
-//}
-//
-//void DatabaseDialog::closeTrainingDB()
-//{
-//	trainingFile->setText("");
-//	trainingDB->close();
-//}
-//
-//void DatabaseDialog::clearTrainingDB()
-//{
-//	trainingDB->clearAll();
-//}
-//
-//void DatabaseDialog::createTrainingDB()
-//{
-//	trainingDB->createLines(this);
-//}
-
 void DatabaseDialog::openComputerDB()
 {
 	QString path = QFileDialog::getOpenFileName(this, tr("Open computer evaluation book"), computerFile->text(), tr("Computer evaluation files (*.pcp)"));
@@ -489,7 +449,7 @@ void DatabaseDialog::importBookWhite()
 			msgbox.exec();
 			return;
 		}
-		whiteDB->importBase(&iBase);
+		whiteDB->importBase(&iBase, WHITE);
 	}
 }
 
@@ -506,7 +466,7 @@ void DatabaseDialog::importBookBlack()
 			msgbox.exec();
 			return;
 		}
-		blackDB->importBase(&iBase);
+		blackDB->importBase(&iBase, BLACK);
 	}
 }
 
