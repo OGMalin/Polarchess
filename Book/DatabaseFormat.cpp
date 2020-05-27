@@ -293,7 +293,7 @@ void BookDBEntry::merge(BookDBEntry& bde, bool inFront)
 	}
 
 	for (int i = 0; i < bde.movelist.size(); i++)
-		updateMove(bde.movelist[i], true, inFront);
+		updateMove(bde.movelist[i], true, (i == 0) ? inFront : false);
 }
 
 void StatisticsDBEntry::convertToMoveList(QVector<StatisticsDBMove>& movelist, const QString& data, ChessBoard& cb)
