@@ -286,11 +286,11 @@ void BookDBEntry::merge(BookDBEntry& bde, bool inFront)
 			comment += bde.comment;
 		}
 	}
-	if (inFront)
-	{
-		score = bde.score;
-		attempt = bde.attempt;
-	}
+	//if (inFront)
+	//{
+	//	score = bde.score;
+	//	attempt = bde.attempt;
+	//}
 
 	for (int i = 0; i < bde.movelist.size(); i++)
 		updateMove(bde.movelist[i], true, (i == 0) ? inFront : false);
