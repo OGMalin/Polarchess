@@ -1,6 +1,7 @@
 #include "../Common/BaseEngine.h"
 #include "../Common/Utility.h"
 #include <QDebug>
+#include <QApplication>
 #include <windows.h>
 
 using namespace std;
@@ -14,8 +15,10 @@ BaseEngine::BaseEngine(QObject*parent)
 
 BaseEngine::~BaseEngine()
 {
+	unload();
 	if (process)
 	{
+		process->disconnect();
 		process->waitForFinished();
 		delete process;
 		process = NULL;
@@ -58,7 +61,8 @@ void BaseEngine::unload()
 {
 	if (!process)
 		return;
-	disconnect(process);
+	disconnect(process, nullptr, nullptr, nullptr);
+	QApplication::processEvents();
 	int i = 0;
 	process->waitForFinished();
 	while (process->state()!=QProcess::NotRunning)
@@ -78,7 +82,7 @@ void BaseEngine::slotReadyReadStandardOutput()
 	string input;
 	int res;
 	__int64 readlen;
-	while (process && process->canReadLine())
+	while (process && (process->state() != QProcess::NotRunning) && process->canReadLine())
 	{
 		readlen = process->readLine(sz, 1024);
 		if (readlen)
@@ -106,5 +110,17 @@ void BaseEngine::init(QString&key, QString&val)
 
 void BaseEngine::slotFinished()
 {
+	process->disconnect();
 	emit engineStoped();
+}
+
+EngineOption BaseEngine::getOption(QString& name)
+{
+	int i;
+	for (i = 0; i < engineOption.size(); i++)
+	{
+		if (engineOption[i].name == name)
+			return engineOption[i];
+	}
+	return EngineOption();
 }

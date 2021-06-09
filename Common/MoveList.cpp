@@ -304,4 +304,21 @@ ChessMove& MoveList::next(int movenr)
 	return _list[movenr];
 }
 
+ChessMove& MoveList::first()
+{
+	if (_size < 1)
+		_list[0].clear();
+	return _list[0];
+}
+
+ChessMove& MoveList::last()
+{
+	if (_size < 1)
+	{
+		_list[0].clear();
+		return _list[0];
+	}
+	return _list[_size-1];
+}
+
 

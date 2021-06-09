@@ -83,9 +83,6 @@
     <ClCompile Include="..\Common\BoardWindow.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\Common\Engine.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
     <ClCompile Include="..\Common\QChessGame.cpp">
       <Filter>Common</Filter>
     </ClCompile>
@@ -101,14 +98,14 @@
     <ClCompile Include="..\Common\UciEngine.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\Common\XBoardEngine.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
     <ClCompile Include="..\Common\BaseEngine.cpp">
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="..\Common\BoardOption.cpp">
       <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -139,9 +136,6 @@
     <QtMoc Include="..\Common\BoardWindow.h">
       <Filter>Common</Filter>
     </QtMoc>
-    <QtMoc Include="..\Common\Engine.h">
-      <Filter>Common</Filter>
-    </QtMoc>
     <QtMoc Include="..\Common\QChessGame.h">
       <Filter>Common</Filter>
     </QtMoc>
@@ -153,6 +147,9 @@
     </QtMoc>
     <QtMoc Include="..\Common\BoardOption.h">
       <Filter>Common</Filter>
+    </QtMoc>
+    <QtMoc Include="Engine.h">
+      <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
@@ -186,9 +183,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Common\UciEngine.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\XBoardEngine.h">
       <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>

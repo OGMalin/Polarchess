@@ -58,6 +58,10 @@ TrainingWindow::TrainingWindow(QWidget* parent)
 	hbox->addWidget(colorBox);
 	positionBox = new QCheckBox(tr("From current position"));
 	hbox->addWidget(positionBox);
+	movesBox = new QLineEdit;
+	movesBox->setText("0");
+	movesBox->setInputMask("9");
+	hbox->addWidget(movesBox);
 	vbox->addLayout(hbox);
 
 	hbox = new QHBoxLayout;
@@ -119,11 +123,12 @@ void TrainingWindow::start()
 	ChessBoard cb, b;
 	int i;
 	int color = colorBox->currentIndex()-1;
+	int moves = movesBox->text().toInt();
 	if (positionBox->isChecked())
 		cb = currentBoard;
 	else
 		cb.setStartposition();
-	if (!training->createLines(this, color, cb))
+	if (!training->createLines(this, color, cb, moves))
 	{
 		updateStat();
 		return;

@@ -34,7 +34,6 @@ BoardOption::BoardOption(QWidget* parent, BOARDTHEMA& thema)
 	qs += thema.darkBrush.color().name();
 	qs += ";";
 	darkColor->setStyleSheet(qs);
-	darkColor->setStyleSheet("background-color: rgb(243,65,87);");
 	connect(darkColor, SIGNAL(clicked()), this, SLOT(slotDarkColor()));
 	hbox->addWidget(label);
 	hbox->addWidget(darkColor);

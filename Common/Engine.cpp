@@ -1,4 +1,4 @@
-#include "../Common/Engine.h"
+﻿#include "../Common/Engine.h"
 #include "../Common/Utility.h"
 #include <string>
 #include <QSettings>

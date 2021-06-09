@@ -4,7 +4,7 @@
 #include <QPainter>
 #include <QMenu>
 #include <QTimer>
-#include "defs.h"
+#include "../Common/defs.h"
 
 BoardWindow::BoardWindow(QWidget* parent)
 	:QWidget(parent)

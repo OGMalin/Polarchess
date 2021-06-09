@@ -15,6 +15,7 @@
 #include <QVector>
 #include <QTextEdit>
 #include <QColor>
+#include <QLineEdit>
 
 class TrainingWindow : public QWidget
 {
@@ -53,6 +54,7 @@ private:
 	Watch* watch;
 	QComboBox* colorBox;
 	QCheckBox* positionBox;
+	QLineEdit* movesBox;
 	QPushButton* startButton;
 	QLabel*  lRunning;
 	QLabel* inBase;
@@ -66,5 +68,6 @@ private:
 	bool running;
 	QColor theoryColor;
 	QColor repColor;
+
 	void updateComment(bool visible);
 };

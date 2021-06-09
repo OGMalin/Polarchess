@@ -35,7 +35,7 @@ public:
 
 	// Get next trainingline
 	bool getNextLine(TrainingLine& line);
-	bool createLines(QWidget* parent, int color, ChessBoard& cb);
+	bool createLines(QWidget* parent, int color, ChessBoard& cb, int moves);
 
 	// Update training score
 	void updateScore(TrainingLine&);

@@ -52,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent)
 	enginewindow = new EngineWindow;
 	movewindow = new MoveTableWindow;
 	trainingwindow = new TrainingWindow;
+	polyglot = NULL;
 	
 	v1Splitter->addWidget(openingwindow);
 	v1Splitter->addWidget(boardwindow);
@@ -120,6 +121,8 @@ MainWindow::~MainWindow()
 {
 	delete currentPath;
 	delete training;
+	if (polyglot)
+		delete polyglot;
 }
 
 void MainWindow::createMenu()
@@ -135,7 +138,7 @@ void MainWindow::createMenu()
 	writeAct[THEORY] = bookWriteMenu->addAction("Write to theory book", this, &MainWindow::bookWriteTheory);
 	writeAct[REPWHITE] = bookWriteMenu->addAction("Write to White repertoire book", this, &MainWindow::bookWriteWhite);
 	writeAct[REPBLACK] = bookWriteMenu->addAction("Write to Black repertoire book", this, &MainWindow::bookWriteBlack);
-
+	polyglotAct = bookMenu->addAction("*", this, &MainWindow::openPolyglotBook);
 	trainingMenu = menuBar()->addMenu("*");
 	startTrainingAct = trainingMenu->addAction("*", this, &MainWindow::trainingStart);
 	stopTrainingAct = trainingMenu->addAction("*", this, &MainWindow::trainingStop);
@@ -184,6 +187,7 @@ void MainWindow::retranslateUi()
 	exitAct->setText(tr("Exit"));
 
 	bookAnalyzeAct->setText(tr("Annalyze book"));
+	polyglotAct->setText(tr("Open Polyglot book"));
 	trainingMenu->setTitle(tr("Training"));
 	startTrainingAct->setText(tr("Start training"));
 	stopTrainingAct->setText(tr("Stop training"));
@@ -277,7 +281,7 @@ void MainWindow::updateWindow()
 	}
 	else
 	{
-		movewindow->refresh(bde[THEORY], bde[REPWHITE], bde[REPBLACK], sde, cde, currentPath->getPosition(), currentPath->current() / 2 + 1);
+		movewindow->refresh(bde[THEORY], bde[REPWHITE], bde[REPBLACK], sde, cde, currentPath->getPosition(), currentPath->current() / 2 + 1, polyglot);
 		commentwindow->refresh(bde[THEORY].comment, bde[REPWHITE].comment, bde[REPBLACK].comment);
 		openingwindow->refresh(currentPath);
 		trainingwindow->setVisible(false);
@@ -465,6 +469,28 @@ void MainWindow::bookAnalyze()
 	AnalyzeDialog dialog(this, computerDB, Base[THEORY], Base[REPWHITE], Base[REPBLACK], enginewindow, boardwindow, currentPath);
 	dialog.exec();
 	connect(enginewindow, SIGNAL(enginePV(ComputerDBEngine&, ChessBoard&)), this, SLOT(enginePV(ComputerDBEngine&, ChessBoard&)));
+}
+
+void MainWindow::openPolyglotBook()
+{
+	if (polyglot)
+	{
+		polyglot->close();
+		delete polyglot;
+		polyglot = NULL;
+		polyglotAct->setText(tr("Open Polyglot book"));
+	}
+	else
+	{
+		QString path = QFileDialog::getOpenFileName(this, "Open Polyglot book", QString(), "bin files (*.bin)");
+		if (!path.isEmpty())
+		{
+			polyglot = new PolyglotBook;
+			polyglot->open(path);
+			polyglotAct->setText(tr("Close Polyglot book"));
+		}
+	}
+	updateWindow();
 }
 
 void MainWindow::bookWrite(int type)

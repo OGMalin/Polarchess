@@ -10,6 +10,7 @@
 #include "Statistics.h"
 #include "Computer.h"
 #include "../Common/ChessMove.h"
+#include "../Common/PolyglotBook.h"
 
 struct MoveTableHeader
 {
@@ -23,11 +24,11 @@ struct MoveTableHeader
 struct MoveTableEntry
 {
 	ChessMove move;
-	int whitewin, draw, blackwin, elo, year;
+	int whitewin, draw, blackwin, elo, year, polyglot;
 	QString engine;
 	int cp;
 	int rep[3];
-	void clear() { move.clear(); whitewin = draw = blackwin = elo = year = 0; engine.clear(); cp = 0; rep[0] = rep[1] = rep[2] = 0; };
+	void clear() { move.clear(); whitewin = draw = blackwin = elo = year = polyglot = 0; engine.clear(); cp = 0; rep[0] = rep[1] = rep[2] = 0; };
 };
 
 class MoveTableWindow : public QWidget
@@ -38,7 +39,7 @@ public:
 	Computer* computerDB;
 	MoveTableWindow(QWidget *parent=0);
 	~MoveTableWindow();
-	void refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black, StatisticsDBEntry& statistics, ComputerDBEntry& compdata, ChessBoard&, int movenr);
+	void refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black, StatisticsDBEntry& statistics, ComputerDBEntry& compdata, ChessBoard&, int movenr, PolyglotBook*);
 	void addComment(QString& comment);
 	QString fontToString();
 	void fontFromString(const QString&);
@@ -83,10 +84,12 @@ private:
 	MoveTableHeader hDraw;
 	MoveTableHeader hElo;
 	MoveTableHeader hYear;
+	MoveTableHeader hPolyglot;
 	QVector<MoveTableEntry> movetable;
 	void add(BookDBEntry&, int rep, ChessBoard&);
 	void add(StatisticsDBEntry&);
 	void add(ComputerDBEntry&);
+	void add(PolyglotBook*, ChessBoard&);
 	int existInTable(ChessMove& m);
 	void refresh();
 };

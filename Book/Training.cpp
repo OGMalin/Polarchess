@@ -155,7 +155,7 @@ bool Training::getNextLine(TrainingLine& line)
 	return true;
 }
 
-bool Training::createLines(QWidget* parent, int color, ChessBoard& scb)
+bool Training::createLines(QWidget* parent, int color, ChessBoard& scb, int moves)
 {
 	QVector<BookDBEntry> pos;
 	ChessBoard cb;
@@ -236,6 +236,20 @@ bool Training::createLines(QWidget* parent, int color, ChessBoard& scb)
 	{
 		progress.setValue(steps);
 		return false;
+	}
+
+	// Remove moves after last allowed move
+	if (moves)
+	{
+		for (i = 0; i < currentLines.size(); i++)
+		{
+			if ((moves * 2) < currentLines[i].moves.size())
+			{
+				j = currentLines[i].moves.size() / 2;
+				if (moves < j)
+					currentLines[i].moves.remove(moves * 2, currentLines[i].moves.size() - (moves * 2));
+			}
+		}
 	}
 
 	// Remove last move if it not a repertoire move

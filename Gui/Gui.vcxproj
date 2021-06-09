@@ -123,16 +123,15 @@
     <ClCompile Include="..\Common\ChessBoard.cpp" />
     <ClCompile Include="..\Common\ChessGame.cpp" />
     <ClCompile Include="..\Common\ChessMove.cpp" />
-    <ClCompile Include="..\Common\Engine.cpp" />
     <ClCompile Include="..\Common\MoveGenerator.cpp" />
     <ClCompile Include="..\Common\MoveList.cpp" />
     <ClCompile Include="..\Common\QChessGame.cpp" />
     <ClCompile Include="..\Common\UciEngine.cpp" />
     <ClCompile Include="..\Common\Utility.cpp" />
-    <ClCompile Include="..\Common\XBoardEngine.cpp" />
     <ClCompile Include="AboutDialog.cpp" />
     <ClCompile Include="ClockWindow.cpp" />
     <ClCompile Include="Database.cpp" />
+    <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EnginePlayer.cpp" />
     <ClCompile Include="EngineWindow.cpp" />
     <ClCompile Include="main.cpp" />
@@ -158,7 +157,10 @@
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
     </QtMoc>
     <ClInclude Include="..\Common\UciEngine.h" />
-    <ClInclude Include="..\Common\XBoardEngine.h" />
+    <QtMoc Include="Engine.h">
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
+    </QtMoc>
     <ClInclude Include="EnginePlayer.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
       <Define Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;QT_SQL_LIB</Define>
@@ -178,12 +180,6 @@
     <ClInclude Include="..\Common\ChessBoard.h" />
     <ClInclude Include="..\Common\ChessGame.h" />
     <ClInclude Include="..\Common\ChessMove.h" />
-    <QtMoc Include="..\Common\Engine.h">
-      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
-      <Define Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;QT_SQL_LIB</Define>
-      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
-      <Define Condition="'$(Configuration)|$(Platform)'=='Release|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;QT_SQL_LIB</Define>
-    </QtMoc>
     <ClInclude Include="..\Common\MoveGenerator.h" />
     <ClInclude Include="..\Common\MoveList.h" />
     <QtMoc Include="..\Common\QChessGame.h">

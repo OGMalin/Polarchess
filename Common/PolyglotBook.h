@@ -2,27 +2,40 @@
 
 #include <QString>
 #include <QVector>
+#include <QMap>
 #include "../Common/ChessMove.h"
 #include "../Common/ChessBoard.h"
+#include "../Common/defs.h"
 
-struct PolyglotEntry
+struct PolyglotDataEntry
 {
-	unsigned __int64 key;
-	unsigned __int16 move;
-	unsigned __int16 weight;
-	unsigned __int32 learn;
+	unsigned short move;
+	unsigned short weight;
+	unsigned int learn;
+	PolyglotDataEntry() { move = weight = learn = 0; };
 };
 
-class Polyglot
+class PolyglotBook
 {
 public:
-	Polyglot();
-	Polyglot(QString& bookfile);
-	virtual ~Polyglot();
+	QString filename;
+	PolyglotBook();
+	PolyglotBook(QString& bookfile);
+	virtual ~PolyglotBook();
 	bool open(QString& bookfile);
 	void close();
-	void get(ChessBoard& board, QVector<ChessMove>& moves);
+	void save();
+	void get(ChessBoard& board, QVector<PolyglotDataEntry>&);
+	ChessMove move(ChessBoard&, unsigned short);
+	HASHKEY getKey(ChessBoard&);
+	void add(ChessBoard&, ChessMove&, unsigned short weight, unsigned int learn);
+	bool exist(ChessBoard&);
+	int moves();
+	int positions();
 private:
 	bool isOpen;
+	bool isDirty;
+	QMap<HASHKEY, QVector<PolyglotDataEntry>> book;
+	void add(HASHKEY, PolyglotDataEntry&);
 };
 

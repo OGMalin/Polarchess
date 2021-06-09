@@ -5,8 +5,8 @@
 #include "EngineWindow.h"
 #include "Database.h"
 #include "Scoresheet.h"
+#include "Engine.h"
 #include "../Common/BoardWindow.h"
-#include "../Common/Engine.h"
 #include "../Common/QChessGame.h"
 #include <QIcon>
 #include <QSplitter>
@@ -23,6 +23,8 @@
 #include <QRandomGenerator>
 #include <QDate>
 #include <QMessageBox>
+#include <QFileDialog>
+#include <QEventLoop>
 
 MainWindow::MainWindow()
 {
@@ -54,17 +56,26 @@ MainWindow::MainWindow()
 
 	retranslateUi();
 
-	playEngine = new Engine();
-	QString name = "Engine.exe";
-	QString dir = QCoreApplication::applicationDirPath();
-	playEngine->setEngine(name, dir);
+	engine = new Engine();
+	enginestate = 0;
+//	QString name = "Engine.exe";
+//	QString dir = QCoreApplication::applicationDirPath();
+//	playEngine->setEngine(name, dir);
 
 	database = new Database();
-	connect(playEngine, SIGNAL(engineMessage(const QString&)), this, SLOT(playEngineMessage(const QString&)));
-	connect(playEngine, SIGNAL(engineReady()), this, SLOT(playEngineReady()));
-	connect(playEngine, SIGNAL(engineMove(const QString&, const QString&)), this, SLOT(playEngineMove(const QString&, const QString&)));
+//	connect(engine, SIGNAL(engineMessage(const QString&)), this, SLOT(playEngineMessage(const QString&)));
+	connect(engine, SIGNAL(engineStarted()), this, SLOT(playEngineStarted()));
+//	connect(engine, SIGNAL(engineMove(const QString&, const QString&)), this, SLOT(playEngineMove(const QString&, const QString&)));
 	connect(clockwindow, SIGNAL(clockAlarm(int)),this, SLOT(clockAlarm(int)));
 	connect(boardwindow, SIGNAL(moveEntered(ChessMove&)), this, SLOT(moveEntered(ChessMove&)));
+
+	// Check and update engine options
+	if (!installedEngine.isEmpty())
+	{
+		enginestate = 2;
+		if (!engine->load(installedEngine))
+			enginestate = 0;
+	}
 }
 
 MainWindow::~MainWindow()
@@ -75,7 +86,7 @@ MainWindow::~MainWindow()
 	delete langGroup;
 */
 	delete currentGame;
-	delete playEngine;
+	delete engine;
 }
 
 // The text in the menu are set in retranslateUi to be able to switch language 'on the fly'.
@@ -97,7 +108,8 @@ void MainWindow::createMenu()
 
 	// Settings menu
 	settingsMenu = menuBar()->addMenu("*");
-//	fileMenu->addSeparator();
+	installEngineAct = settingsMenu->addAction("*", this, &MainWindow::installEngine);
+	settingsMenu->addSeparator();
 	langMenu = settingsMenu->addMenu("*");
 	engAct = langMenu->addAction(QIcon(":/icon/GB.png"), "*");
 	engAct->setCheckable(true);
@@ -142,6 +154,7 @@ void MainWindow::retranslateUi()
 	resignAct->setText(tr("Resign"));
 
 	settingsMenu->setTitle(tr("Settings"));
+	installEngineAct->setText(tr("Install Engine"));
 	langMenu->setTitle(tr("Language"));
 	if (locale == "nb")
 		langMenu->setIcon(QIcon(":/icon/NO.png"));
@@ -226,6 +239,7 @@ void MainWindow::writeSettings()
 //	settings.setValue("vgeometry", vSplitter->saveState());
 	settings.setValue("language", locale);
 	settings.setValue("player", gameSetting.player);
+	settings.setValue("engine", installedEngine);
 }
 
 void MainWindow::readSettings()
@@ -236,6 +250,7 @@ void MainWindow::readSettings()
 //	QByteArray vgeometry = settings.value("vgeometry", QByteArray()).toByteArray();
 	locale = settings.value("language", QString()).toString();
 	gameSetting.player = settings.value("player", QString()).toString();
+	installedEngine = settings.value("engine", QString()).toString();
 	if (maingeometry.isEmpty())
 	{
 		const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
@@ -290,9 +305,20 @@ void MainWindow::newGame()
 {
 	if (running)
 		return;
-	playEngine->unload();
+
+	engine->unload();
+
+	if (engine->name.isEmpty())
+	{
+		QMessageBox msgbox;
+		msgbox.setText(tr("You must install an engine before you can play."));
+		msgbox.exec();
+		return;
+	}
+
 	NewGameDialog dialog(this);
-	dialog.setDefault(gameSetting,engines);
+
+	dialog.setDefault(gameSetting,engine);
 	if (dialog.exec() == QDialog::Rejected)
 		return;
 	gameSetting=dialog.getSetting();
@@ -304,11 +330,11 @@ void MainWindow::newGame()
 	if (color == WHITE)
 	{
 		currentGame->white(gameSetting.player);
-		currentGame->black(gameSetting.computer);
+		currentGame->black(gameSetting.engineplayer);
 	}
 	else
 	{
-		currentGame->white(gameSetting.computer);
+		currentGame->white(gameSetting.engineplayer);
 		currentGame->black(gameSetting.player);
 	}
 	engineColor = OTHERPLAYER(color);
@@ -319,7 +345,7 @@ void MainWindow::newGame()
 	scoresheet->updateGame(currentGame);
 //	playEngine->load(eng);
 	QString setup = "setoption name Personality value ";
-	setup += gameSetting.computer;
+	setup += gameSetting.enginename;
 	setup += "\n";
 	if (engineColor == WHITE)
 	{
@@ -331,17 +357,17 @@ void MainWindow::newGame()
 		ChessBoard b = currentGame->getStartPosition().board();
 		MoveList ml = currentGame->movelist();
 
-		playEngine->search(b, ml,NORMAL_SEARCH, gameSetting.startTime * 1000, gameSetting.startTimeInc * 1000, gameSetting.startTime * 1000, gameSetting.startTimeInc * 1000, mtg);
+//		playEngine->search(b, ml,NORMAL_SEARCH, gameSetting.startTime * 1000, gameSetting.startTimeInc * 1000, gameSetting.startTime * 1000, gameSetting.startTimeInc * 1000, mtg);
 		boardwindow->flip(true);
 	}
-	playEngine->loadSetup(setup);
+//	playEngine->loadSetup(setup);
 	
 }
 
-void MainWindow::playEngineMessage(const QString& msg)
-{
-	statusBar()->showMessage(msg);
-}
+//void MainWindow::playEngineMessage(const QString& msg)
+//{
+//	statusBar()->showMessage(msg);
+//}
 
 void MainWindow::aboutDialog()
 {
@@ -432,38 +458,68 @@ void MainWindow::moveEntered(ChessMove& move)
 	}
 	ChessBoard b = currentGame->getStartPosition().board();
 	MoveList ml = currentGame->movelist();
-	playEngine->search(b, ml, NORMAL_SEARCH, clockwindow->gettime(WHITE), gameSetting.startTimeInc * 1000, clockwindow->gettime(BLACK), gameSetting.startTimeInc * 1000, mtg);
+//	playEngine->search(b, ml, NORMAL_SEARCH, clockwindow->gettime(WHITE), gameSetting.startTimeInc * 1000, clockwindow->gettime(BLACK), gameSetting.startTimeInc * 1000, mtg);
 }
 
 void MainWindow::endGame()
 {
-	playEngine->unload();
+//	playEngine->unload();
 	saveGame();
 	scoresheet->updateGame(currentGame);
 	running = false;
 	clockwindow->stop();
 }
 
-void MainWindow::playEngineReady()
-{
+void MainWindow::playEngineStarted()
+{	
+	if (enginestate == 1)// Installing
+	{
+		installedEngine = engine->getPath();
+		enginestate = 0;
+		QString qs = "Engine: ";
+		qs += engine->name;
+		qs += "\n";
+		qs += "Author: ";
+		qs += engine->author;
+		statusBar()->showMessage(qs);
+		//QMessageBox msgbox;
+		//msgbox.setText(qs);
+		//msgbox.exec();
+		engine->unload();
+	}
+	else if (enginestate == 2)// Checking
+	{
+		QString qs = "Engine: ";
+		qs += engine->name;
+		qs += "\n";
+		qs += "Author: ";
+		qs += engine->author;
+		statusBar()->showMessage(qs);
+		enginestate = 0;
+		engine->unload();
+	}
+	else if (enginestate == 3)// playing
+	{
+		// If engine to move, ask for a move
+	}
 }
 
-void MainWindow::playEngineMove(const QString& move, const QString& ponder)
-{
-	if (!running)
-		return;
-	int player = currentGame->toMove();
-	ChessMove m=currentGame->getPosition().board().getMoveFromText(move.toStdString());
-	currentGame->doMove(m);
-	boardwindow->setPosition(currentGame->getPosition().board());
-	scoresheet->updateGame(currentGame);
-	if (gameSetting.startTimeInc)
-		clockwindow->addtime(gameSetting.startTimeInc * 1000, player);
-	if (gameSetting.suddenDeathTime && currentGame->moveCount(player) == 40)
-		clockwindow->addtime(gameSetting.suddenDeathTime * 1000, player);
-
-	clockwindow->start(currentGame->toMove());
-}
+//void MainWindow::playEngineMove(const QString& move, const QString& ponder)
+//{
+//	if (!running)
+//		return;
+//	int player = currentGame->toMove();
+//	ChessMove m=currentGame->getPosition().board().getMoveFromText(move.toStdString());
+//	currentGame->doMove(m);
+//	boardwindow->setPosition(currentGame->getPosition().board());
+//	scoresheet->updateGame(currentGame);
+//	if (gameSetting.startTimeInc)
+//		clockwindow->addtime(gameSetting.startTimeInc * 1000, player);
+//	if (gameSetting.suddenDeathTime && currentGame->moveCount(player) == 40)
+//		clockwindow->addtime(gameSetting.suddenDeathTime * 1000, player);
+//
+//	clockwindow->start(currentGame->toMove());
+//}
 
 void MainWindow::resign()
 {
@@ -503,7 +559,7 @@ void MainWindow::abort()
 			return;
 		}
 	}
-	playEngine->unload();
+//	playEngine->unload();
 	running = false;
 	clockwindow->stop();
 }
@@ -511,4 +567,19 @@ void MainWindow::abort()
 void MainWindow::saveGame()
 {
 	database->addGame(currentGame);
+}
+
+void MainWindow::installEngine()
+{
+	QString path = QFileDialog::getOpenFileName(this, tr("Install Engine"), QString(), "UCI Engines (*.exe)");
+	if (!path.isEmpty())
+	{
+		enginestate = 1;
+		if (!engine->load(path))
+			enginestate = 0;
+//		engineFeature.clear();
+//		engineFeature.path = path;
+//		playEngine->getFeature(engineFeature);
+//		playEngine->setEngine(path, QString());
+	}
 }

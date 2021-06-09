@@ -63,6 +63,9 @@ MoveTableWindow::MoveTableWindow(QWidget *parent)
 	hYear.label = tr("Year");
 	hYear.inUse = true;
 	hYear.column = 10;
+	hPolyglot.label = tr("Polyglot");
+	hPolyglot.inUse = false;
+	hPolyglot.column = 11;
 }
 
 MoveTableWindow::~MoveTableWindow()
@@ -110,6 +113,45 @@ void MoveTableWindow::add(BookDBEntry& book, int rep, ChessBoard& cb)
 			movetable[index].rep[rep] = val;
 		}
 		++bit;
+	}
+}
+
+void MoveTableWindow::add(PolyglotBook* polyglot, ChessBoard& cb)
+{
+	if (!polyglot)
+	{
+		hPolyglot.inUse = false;
+		return;
+	}
+	MoveTableEntry mte;
+	QVector<PolyglotDataEntry> pde;
+	ChessMove m;
+	int i, index, w;
+	hPolyglot.inUse = true;
+	polyglot->get(cb, pde);
+
+	int total = 0;
+	for (i = 0; i < pde.size(); i++)
+		total += pde[i].weight;
+
+	for (i = 0; i < pde.size(); i++)
+	{
+		m = polyglot->move(cb, pde[i].move);
+		w = int (((pde[i].weight * 100.0) / total)+0.5);
+		if (w < 1)
+			w = -1;
+		index = existInTable(m);
+		if (index < 0)
+		{
+			mte.clear();
+			mte.move = m;
+			mte.polyglot = w;
+			movetable.push_back(mte);
+		}
+		else
+		{
+			movetable[index].polyglot = w;
+		}
 	}
 }
 
@@ -184,7 +226,7 @@ int MoveTableWindow::existInTable(ChessMove& m)
 	return -1;
 }
 
-void MoveTableWindow::refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black, StatisticsDBEntry& stat, ComputerDBEntry& compdata, ChessBoard& cb, int movenr)
+void MoveTableWindow::refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEntry& black, StatisticsDBEntry& stat, ComputerDBEntry& compdata, ChessBoard& cb, int movenr, PolyglotBook* polyglot)
 {
 	currentMoveNr = movenr;
 	currentBoard = cb;
@@ -195,6 +237,7 @@ void MoveTableWindow::refresh(BookDBEntry& theory, BookDBEntry& white, BookDBEnt
 	add(theory, 0, cb);
 	add(white, 1, cb);
 	add(black, 2, cb);
+	add(polyglot, cb);
 	refresh();
 }
 
@@ -405,6 +448,25 @@ void MoveTableWindow::refresh()
 				item = new QStandardItem(qs);
 				item->setTextAlignment(Qt::AlignVCenter | Qt::AlignRight);
 				model->setItem(i, hYear.column, item);
+			}
+		}
+		if (hPolyglot.inUse)
+		{
+			if (i == 0)
+			{
+				model->setHorizontalHeaderItem(hPolyglot.column, new QStandardItem(hPolyglot.label));
+				++col;
+			}
+			if (movetable[i].polyglot != 0)
+			{
+				qs.clear();
+				if (movetable[i].polyglot < 0)
+					QTextStream(&qs) << "<1%";
+				else
+					QTextStream(&qs) << movetable[i].polyglot << "%";
+				item = new QStandardItem(qs);
+				item->setTextAlignment(Qt::AlignVCenter | Qt::AlignRight);
+				model->setItem(i, hPolyglot.column, item);
 			}
 		}
 	}

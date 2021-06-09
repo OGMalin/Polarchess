@@ -1,4 +1,4 @@
-#include "../Common/UciEngine.h"
+﻿#include "../Common/UciEngine.h"
 #include "../Common/Utility.h"
 
 using namespace std;
@@ -10,12 +10,7 @@ UciEngine::UciEngine()
 
 UciEngine::~UciEngine()
 {
-	if (process)
-	{
-		write("stop");
-		_sleep(500);
-		write("quit");
-	}
+	unload();
 }
 
 void UciEngine::slotStarted()
@@ -53,6 +48,41 @@ void UciEngine::fromEngine(std::string& input)
 	else if (cmd == "bestmove")
 	{
 		emit engineMove(QString(getWord(input, 2).c_str()), QString(getWord(input, 4).c_str()));
+	}
+	else if (cmd == "id")
+	{
+		int index = 2;
+		string value = getWord(input, index);
+		++index;
+		while (value.length())
+		{
+			if (value == "name")
+			{
+				_name = getWord(input, index).c_str();
+				++index;
+				value = getWord(input, index);
+				while (!value.empty())
+				{
+					_name += " ";
+					_name += value.c_str();
+					++index;
+					value = getWord(input, index);
+				}
+			}
+			else if (value == "author")
+			{
+				_author = getWord(input, index).c_str();
+				++index;
+				value = getWord(input, index);
+				while (!value.empty())
+				{
+					_author += " ";
+					_author += value.c_str();
+					++index;
+					value = getWord(input, index);
+				}
+			}
+		}
 	}
 	else if (cmd == "option")
 	{
@@ -334,5 +364,15 @@ void UciEngine::setMultiPV(int n)
 			}
 			return;
 		}
+	}
+}
+
+void UciEngine::unload()
+{
+	if (process)
+	{
+		write("stop");
+		_sleep(500);
+		write("quit");
 	}
 }

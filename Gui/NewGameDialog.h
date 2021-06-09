@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QDialog>
+#include "Engine.h"
 #include "EnginePlayer.h"
 
 class QLineEdit;
@@ -8,11 +9,19 @@ class QComboBox;
 class QCheckBox;
 class QTimeEdit;
 class QLabel;
+class QSpinBox;
+class QSlider;
 
 enum { BULLET, BLITZ, RAPID, CLASSICAL };
 struct NewGameSetting
 {
-	QString computer;
+	QString enginename;
+	int engineskill=0;
+	bool aoutoskill=false;
+	QString personality;
+	int engineelo=0;
+	bool fullstrength=false;
+	QString engineplayer; // enginename, engineskill personality
 	QString player;
 	int gameType;
 	int startTime=900;
@@ -29,8 +38,12 @@ class NewGameDialog : public QDialog
 
 private:
 	NewGameSetting setting;
-	EnginePlayers engines;
 	QLineEdit* playername;
+	QSpinBox* skill;
+	QComboBox* personality;
+	QCheckBox* autoskill;
+	QCheckBox* fullstrength;
+	QSlider* limitstrength;
 	QComboBox* computer;
 	QComboBox* color;
 	QCheckBox* rated;
@@ -40,19 +53,22 @@ private:
 	QTimeEdit* suddendeath;
 	QLabel* gametype;
 	QLabel* computerelo;
-	
-	const QStringList getEnginePlayers();
+	QLabel* startposition;
+	QLabel* enginename;
+
 	void setGameType();
 private slots:
-	void slotOk(bool);
+	void slotOk();
 	void slotSelectPlayer();
 	void slotTimeChanged(const QTime&);
 	void slotPreTime(int);
-	void slotComputerChanged(int);
+	void slotStrengthChanged(int);
+	void slotStrengthClicked(bool);
+	void slotStartposition();
 
 public:
 	NewGameDialog(QWidget *parent);
 	~NewGameDialog();
 	const NewGameSetting getSetting();
-	void setDefault(const NewGameSetting& newsetting, const EnginePlayers& eng);
+	void setDefault(NewGameSetting& newsetting, Engine* eng);
 };

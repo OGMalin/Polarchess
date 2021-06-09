@@ -3,6 +3,7 @@
 #include <QMainWindow>
 #include <QString>
 #include <QTranslator>
+#include <QVector>
 #include "NewGameDialog.h"
 #include "Player.h"
 #include "EnginePlayer.h"
@@ -37,9 +38,9 @@ signals:
 
 public slots:
 	void slotLanguageChanged(QAction* action);
-	void playEngineMessage(const QString&);
-	void playEngineReady();
-	void playEngineMove(const QString&, const QString&);
+//	void playEngineMessage(const QString&);
+	void playEngineStarted();
+//	void playEngineMove(const QString&, const QString&);
 	void clockAlarm(int);
 	void moveEntered(ChessMove&);
 
@@ -65,6 +66,7 @@ private:
 	QAction* resignAct;
 	QAction* abortAct;
 	QAction* flipAct;
+	QAction* installEngineAct;
 	QTranslator translator;
 	QActionGroup * langGroup;
 	QString locale;
@@ -74,14 +76,17 @@ private:
 	Scoresheet* scoresheet;
 	ClockWindow* clockwindow;
 	EngineWindow* enginewindow;
-	Engine* playEngine;
-	Engine* analysisEngine;
+	Engine* engine;
+	//Engine* analysisEngine;
 	Database* database;
 	NewGameSetting gameSetting;
 	Player player;
 	EnginePlayers engines;
+//	EngineFeature engineFeature;
 	int engineColor;
+	int enginestate; // unloaded=0, installing=1, checking=2, playing=3
 	bool running;
+	QString installedEngine;
 	void createMenu();
 	void setLanguage();
 	void loadLanguage();
@@ -95,4 +100,5 @@ private:
 	void abort();
 	void endGame();
 	void saveGame();
+	void installEngine();
 };

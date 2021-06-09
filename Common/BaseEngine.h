@@ -34,6 +34,7 @@ struct OptionCheck
 {
 	bool default;
 	bool value;
+	void clear() { default = value = false; };
 };
 
 struct OptionSpin
@@ -42,6 +43,7 @@ struct OptionSpin
 	int min;
 	int max;
 	int value;
+	void clear(){ default = min = max = value = 0; };
 };
 
 struct OptionCombo
@@ -49,12 +51,14 @@ struct OptionCombo
 	QString default;
 	QStringList var;
 	QString value;
+	void clear() { default.clear(); var.clear(); value.clear(); };
 };
 
 struct OptionString
 {
 	QString default;
 	QString value;
+	void clear() { default.clear(); value.clear(); };
 };
 
 struct EngineOption
@@ -65,6 +69,16 @@ struct EngineOption
 	OptionSpin spin;
 	OptionCombo combo;
 	OptionString string;
+	EngineOption() { clear(); };
+	void clear()
+	{
+		name.clear();
+		type = CHECK;
+		check.clear();
+		spin.clear();
+		combo.clear();
+		string.clear();
+	}
 };
 
 
@@ -121,6 +135,8 @@ protected:
 	QMap<QString, QString> initOptions;
 	int searchtype;
 	QString enginePath;
+	QString _name;
+	QString _author;
 	// Overload this to get the input from the engine
 	virtual void fromEngine(std::string& input) {};
 public slots:
@@ -146,4 +162,8 @@ public:
 	virtual void analyze(ChessBoard& board) {};
 	virtual void stop() {};
 	virtual void setMultiPV(int n) {};
+	virtual EngineOption getOption(QString& name);
+	virtual const QString name() { return _name; };
+	virtual const QString author() { return _author; };
+	virtual const QString path() { return enginePath; };
 };

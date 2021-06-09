@@ -42,5 +42,7 @@ public:
   void trunc();
   bool exist(const ChessMove& m);
   ChessMove& next(int movenr);
+  ChessMove& first();
+  ChessMove& last();
 };
 

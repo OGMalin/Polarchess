@@ -17,6 +17,7 @@
 #include "../Common/BoardWindow.h"
 #include "../Common/DgtBoard.h"
 #include "../Common/MoveList.h"
+#include "../Common/PolyglotBook.h"
 #include <QMainWindow>
 #include <QString>
 #include <QTranslator>
@@ -91,6 +92,7 @@ private:
 	QToolBar* toolbar;
 	QAction* writeAct[3];
 	QAction* bookAnalyzeAct;
+	QAction* polyglotAct;
 	QAction* exitAct;
 	QAction* clearTrainingAct;
 	QAction* createTrainingAct;
@@ -118,6 +120,7 @@ private:
 	Statistics* statisticsDB;
 	Computer* computerDB;
 	Openings* openingsDB;
+	PolyglotBook* polyglot;
 	BookDBEntry bde[3];
 	StatisticsDBEntry sde;
 	ComputerDBEntry cde;
@@ -137,6 +140,7 @@ private:
 	void readSettings();
 	void flipBoard();
 	void bookAnalyze();
+	void openPolyglotBook();
 	void bookWriteTheory() { bookWrite(THEORY); };
 	void bookWriteWhite() { bookWrite(REPWHITE); };
 	void bookWriteBlack() { bookWrite(REPBLACK); };

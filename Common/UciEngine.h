@@ -20,4 +20,5 @@ public:
 	void stop();
 	void newGame();
 	void setMultiPV(int n);
+	void unload();
 };
