@@ -12,12 +12,11 @@ class QLabel;
 class QSpinBox;
 class QSlider;
 
-enum { BULLET, BLITZ, RAPID, CLASSICAL };
 struct NewGameSetting
 {
 	QString enginename;
 	int engineskill=0;
-	bool aoutoskill=false;
+	bool autoskill=false;
 	QString personality;
 	int engineelo=0;
 	bool fullstrength=false;
@@ -55,7 +54,7 @@ private:
 	QLabel* computerelo;
 	QLabel* startposition;
 	QLabel* enginename;
-
+	Engine* engine;
 	void setGameType();
 private slots:
 	void slotOk();
@@ -65,10 +64,13 @@ private slots:
 	void slotStrengthChanged(int);
 	void slotStrengthClicked(bool);
 	void slotStartposition();
+	//void setRating(int) { setRating(); };
+	//void setRating(bool) { setRating(); };
+	void setRating();
 
 public:
-	NewGameDialog(QWidget *parent);
+	NewGameDialog(QWidget *parent, Engine* eng);
 	~NewGameDialog();
 	const NewGameSetting getSetting();
-	void setDefault(NewGameSetting& newsetting, Engine* eng);
+	void setDefault(NewGameSetting& newsetting);
 };

@@ -19,10 +19,12 @@
 #include <QSpinBox>
 #include <QSlider>
 #include <QSpacerItem>
+#include <QStandardPaths>
 
-NewGameDialog::NewGameDialog(QWidget *parent)
+NewGameDialog::NewGameDialog(QWidget *parent, Engine* eng)
 	: QDialog(parent)
 {
+	engine = eng;
 	setWindowTitle(tr("New game"));
 	setSizeGripEnabled(true);
 	QGridLayout* grid = new QGridLayout(this); //Main grid
@@ -44,64 +46,69 @@ NewGameDialog::NewGameDialog(QWidget *parent)
 	frame = new QFrame(this);
 
 	group = new QGroupBox(tr("Your name"),frame);
-	hbox = new QHBoxLayout(group);
-	playername = new QLineEdit(group);
+	hbox = new QHBoxLayout();
+	playername = new QLineEdit();
 	playername->setReadOnly(true);
 	hbox->addWidget(playername);
-	button1 = new QPushButton("...", group);
+	button1 = new QPushButton("...");
 	button1->setMaximumWidth(30);
 	hbox->addWidget(button1);
+	group->setLayout(hbox);
 	grid->addWidget(group, 0, 0);
 	connect(button1, SIGNAL(clicked()), this, SLOT(slotSelectPlayer()));
 //
 	group = new QGroupBox(tr("Opponent"), frame);
-	vbox = new QVBoxLayout(group);
-	hbox = new QHBoxLayout(group);
-	label1 = new QLabel(tr("Engine:"), group);
-	enginename = new QLabel(group);
+	vbox = new QVBoxLayout();
+	hbox = new QHBoxLayout();
+	label1 = new QLabel(tr("Engine:"));
+	enginename = new QLabel();
 	hbox->addWidget(label1);
 	hbox->addWidget(enginename);
 	vbox->addLayout(hbox);
 //
 	// Komodo 13+
-	hbox = new QHBoxLayout(group);
-	label1 = new QLabel(tr("Personality:"),group);
-	personality = new QComboBox(group);
+	hbox = new QHBoxLayout();
+	label1 = new QLabel(tr("Personality:"));
+	personality = new QComboBox();
 	hbox->addWidget(label1);
 	hbox->addWidget(personality);
 	vbox->addLayout(hbox);
-	hbox = new QHBoxLayout(group);
-	label1 = new QLabel(tr("Skill:"), group);
-	skill = new QSpinBox(group);
+	connect(personality, SIGNAL(currentIndexChanged(int)), this, SLOT(setRating()));
+	hbox = new QHBoxLayout();
+	label1 = new QLabel(tr("Skill:"));
+	skill = new QSpinBox();
 	hbox->addWidget(label1);
 	hbox->addWidget(skill);
+	connect(skill, SIGNAL(valueChanged(int)), this, SLOT(setRating()));
 	vbox->addLayout(hbox);
-	autoskill = new QCheckBox(tr("Auto skill"),group);
+	autoskill = new QCheckBox(tr("Auto skill"));
 	vbox->addWidget(autoskill);
+	connect(autoskill, SIGNAL(clicked(bool)), this, SLOT(setRating()));
 
 	// Generic UCI engine
-	fullstrength = new QCheckBox(tr("Full strength"), group);
+	fullstrength = new QCheckBox(tr("Full strength"));
 	vbox->addWidget(fullstrength);
-	limitstrength = new QSlider(group);
+	limitstrength = new QSlider();
 	limitstrength->setOrientation(Qt::Horizontal);
 	vbox->addWidget(limitstrength);
 	connect(fullstrength, SIGNAL(clicked(bool)), this, SLOT(slotStrengthClicked(bool)));
 	connect(limitstrength, SIGNAL(valueChanged(int)), this, SLOT(slotStrengthChanged(int)));
 
-	hbox = new QHBoxLayout(group);
-	label1 = new QLabel(tr("Rating:"), group);
-	computerelo = new QLabel(group);
+	hbox = new QHBoxLayout();
+	label1 = new QLabel(tr("Rating:"));
+	computerelo = new QLabel();
 	hbox->addWidget(label1);
 	hbox->addWidget(computerelo);
 	vbox->addLayout(hbox);
+	group->setLayout(vbox);
 	grid->addWidget(group, 1, 0, 2, 1);
 
 	group = new QGroupBox(tr("Timecontrol"), frame);
-	vbox = new QVBoxLayout(group);
+	vbox = new QVBoxLayout();
 
-	hbox = new QHBoxLayout(group);
-	label1 = new QLabel(tr("Predefined timecontrols:"), group);
-	combo = new QComboBox(group);
+	hbox = new QHBoxLayout();
+	label1 = new QLabel(tr("Predefined timecontrols:"));
+	combo = new QComboBox();
 	combo->addItem(tr(""));
 	combo->addItem(tr("90 min. + 30 sec."));
 	combo->addItem(tr("30 min."));
@@ -114,9 +121,9 @@ NewGameDialog::NewGameDialog(QWidget *parent)
 	vbox->addLayout(hbox);
 	connect(combo, SIGNAL(currentIndexChanged(int)), this, SLOT(slotPreTime(int)));
 
-	hbox = new QHBoxLayout(group);
-	label1 = new QLabel(tr("Start time:"), group);
-	starttime = new QTimeEdit(group);
+	hbox = new QHBoxLayout();
+	label1 = new QLabel(tr("Start time:"));
+	starttime = new QTimeEdit();
 	starttime->setDisplayFormat("HH::mm:ss");
 	starttime->setMinimumTime(QTime(0, 0, 30));
 	hbox->addWidget(label1);
@@ -124,9 +131,9 @@ NewGameDialog::NewGameDialog(QWidget *parent)
 	vbox->addLayout(hbox);
 	connect(starttime, SIGNAL(timeChanged(const QTime&)), this, SLOT(slotTimeChanged(const QTime&)));
 
-	hbox = new QHBoxLayout(group);
-	label1 = new QLabel(tr("Increment:"), group);
-	starttimeinc = new QTimeEdit(group);
+	hbox = new QHBoxLayout();
+	label1 = new QLabel(tr("Increment:"));
+	starttimeinc = new QTimeEdit();
 	starttimeinc->setDisplayFormat("mm:ss");
 	starttimeinc->setMaximumTime(QTime(0, 59, 59));
 	starttimeinc->setCurrentSection(QDateTimeEdit::MinuteSection);
@@ -135,12 +142,12 @@ NewGameDialog::NewGameDialog(QWidget *parent)
 	vbox->addLayout(hbox);
 	connect(starttimeinc, SIGNAL(timeChanged(const QTime&)), this, SLOT(slotTimeChanged(const QTime&)));
 
-	moves = new QCheckBox(tr("New time at 40 moves"), group);
+	moves = new QCheckBox(tr("New time at 40 moves"));
 	vbox->addWidget(moves);
 
-	hbox = new QHBoxLayout(group);
-	label1 = new QLabel(tr("Sudden death:"), group);
-	suddendeath = new QTimeEdit(group);
+	hbox = new QHBoxLayout();
+	label1 = new QLabel(tr("Sudden death:"));
+	suddendeath = new QTimeEdit();
 	suddendeath->setDisplayFormat("HH::mm:ss");
 	hbox->addWidget(label1);
 	hbox->addWidget(suddendeath);
@@ -148,21 +155,21 @@ NewGameDialog::NewGameDialog(QWidget *parent)
 	connect(moves, SIGNAL(clicked(bool)), suddendeath, SLOT(setEnabled(bool)));
 	connect(suddendeath, SIGNAL(timeChanged(const QTime&)), this, SLOT(slotTimeChanged(const QTime&)));
 
-	hbox = new QHBoxLayout(group);
-	label1 = new QLabel(tr("Rating categori:"), group);
-	gametype = new QLabel(group);
+	hbox = new QHBoxLayout();
+	label1 = new QLabel(tr("Rating categori:"));
+	gametype = new QLabel();
 	hbox->addWidget(label1);
 	hbox->addWidget(gametype);
 	vbox->addLayout(hbox);
-
+	group->setLayout(vbox);
 	grid->addWidget(group, 0, 1, 2, 1);
 
 	group = new QGroupBox(frame);
-	vbox = new QVBoxLayout(group);
-	hbox = new QHBoxLayout(group);
-	rated = new QCheckBox(tr("Rated game"), group);
-	label1 = new QLabel(tr("Color:"), group);
-	color = new QComboBox(group);
+	vbox = new QVBoxLayout();
+	hbox = new QHBoxLayout();
+	rated = new QCheckBox(tr("Rated game"));
+	label1 = new QLabel(tr("Color:"));
+	color = new QComboBox();
 	color->addItem(tr("White"));
 	color->addItem(tr("Black"));
 	color->addItem(tr("Random"));
@@ -170,17 +177,17 @@ NewGameDialog::NewGameDialog(QWidget *parent)
 	hbox->addWidget(label1);
 	hbox->addWidget(color);
 	vbox->addLayout(hbox);
-	hbox = new QHBoxLayout(group);
-	label1 = new QLabel(tr("Startposition:"), group);
-	startposition = new QLabel(tr("Standard"), group);
-	button1 = new QPushButton("...", group);
+	hbox = new QHBoxLayout();
+	label1 = new QLabel(tr("Startposition:"));
+	startposition = new QLabel(tr("Standard"));
+	button1 = new QPushButton("...");
 	button1->setMaximumWidth(30);
 	hbox->addWidget(label1);
 	hbox->addWidget(startposition);
 	hbox->addWidget(button1);
 	vbox->addLayout(hbox);
 	connect(button1, SIGNAL(clicked()), this, SLOT(slotStartposition()));
-
+	group->setLayout(vbox);
 	grid->addWidget(group, 2, 1, 1, 1);
 
 	buttonBox = new QDialogButtonBox(this);
@@ -197,16 +204,67 @@ NewGameDialog::~NewGameDialog()
 
 void NewGameDialog::slotOk()
 {
-	//setting.color = color->currentIndex();
-	//setting.computer = computer->currentText();
-	//setting.player = playername->text();
-	//setting.startTime = -starttime->time().secsTo(QTime(0, 0, 0));
-	//setting.startTimeInc = -starttimeinc->time().secsTo(QTime(0, 0, 0));
-	//if (moves->isChecked())
-	//	setting.suddenDeathTime = -suddendeath->time().secsTo(QTime(0, 0, 0));
-	//else
-	//	setting.suddenDeathTime = 0;
-	//setting.rated = rated->isChecked();
+	QString qs;
+	char sz[16];
+	setting.color = color->currentIndex();
+	setting.player = playername->text();
+	setting.startTime = -starttime->time().secsTo(QTime(0, 0, 0));
+	setting.startTimeInc = -starttimeinc->time().secsTo(QTime(0, 0, 0));
+	if (moves->isChecked())
+		setting.suddenDeathTime = -suddendeath->time().secsTo(QTime(0, 0, 0));
+	else
+		setting.suddenDeathTime = 0;
+	setting.rated = rated->isChecked();
+	setting.autoskill = autoskill->isChecked();
+	setting.fullstrength = fullstrength->isChecked();
+	setting.engineskill = skill->text().toInt();
+	setting.engineelo = computerelo->text().toInt();
+	setting.engineplayer = enginename->text();
+	if (skill->isVisible())
+		QTextStream(&setting.engineplayer) << ", Skill " << skill->text();
+	if (personality->isVisible())
+		QTextStream(&setting.engineplayer) << " " << personality->currentText();
+	if (autoskill->isVisible() && setting.autoskill)
+		QTextStream(&setting.engineplayer) << " Autoskill";
+
+	// Update init parameters for engine
+	if (autoskill->isVisible())
+		engine->init(engine->autoskill.name, QString(setting.autoskill ? "true" : "false"));
+	if (skill->isVisible())
+		engine->init(engine->skill.name, QString(skill->text()));
+	if (fullstrength->isVisible() && limitstrength->isVisible())
+	{
+		engine->init(engine->limitstrength.name, QString(setting.fullstrength ? "false" : "true"));
+		if (!setting.fullstrength)
+			engine->init(engine->elo.name, QString(itoa(setting.engineelo, sz, 10)));
+	}
+
+	// Adding book
+	if (!engine->ownbook.name.isEmpty())
+		engine->init(engine->ownbook.name, QString("true"));
+	if (!engine->bookfile.name.isEmpty())
+	{
+		QString path = QStandardPaths::locate(QStandardPaths::DocumentsLocation, "/Polarchess", QStandardPaths::LocateDirectory);
+		QFileInfoList qfil = QDir(path, "pc*.bin").entryInfoList(QDir::NoFilter, QDir::Name | QDir::IgnoreCase);
+		int i, j;
+		QString bookpath;
+		int r = setting.engineelo;
+		if (r == 0)
+			r = 3000;
+		for (i = 1; i <= 3000; i++)
+		{
+			if ((i > r) && !bookpath.isEmpty())
+				break;
+			for (j = 0; j < qfil.size(); j++)
+			{
+				if (qfil[j].fileName().indexOf(itoa(i, sz, 10)) > 0)
+					bookpath = qfil[j].absoluteFilePath();
+			}
+		}
+		if (!bookpath.isEmpty())
+			engine->init(engine->bookfile.name, bookpath);
+	}
+	
 	accept();
 }
 
@@ -240,6 +298,7 @@ void NewGameDialog::slotStartposition()
 
 void NewGameDialog::slotTimeChanged(const QTime&)
 {
+	char sz[16];
 	setGameType();
 }
 
@@ -322,6 +381,7 @@ void NewGameDialog::setGameType()
 		gametype->setText(tr("Classical chess"));
 		setting.gameType = CLASSICAL;
 	}
+	setRating();
 }
 
 const NewGameSetting NewGameDialog::getSetting()
@@ -330,7 +390,7 @@ const NewGameSetting NewGameDialog::getSetting()
 
 }
 
-void NewGameDialog::setDefault(NewGameSetting& newsetting, Engine* eng)
+void NewGameDialog::setDefault(NewGameSetting& newsetting)
 {
 	char sz[16];
 	int i;
@@ -338,7 +398,7 @@ void NewGameDialog::setDefault(NewGameSetting& newsetting, Engine* eng)
 	setting = newsetting;
 	//engines = eng;
 	playername->setText(setting.player);
-	enginename->setText(eng->name);
+	enginename->setText(engine->name);
 
 	if (setting.rated)
 		rated->setChecked(true);
@@ -358,24 +418,21 @@ void NewGameDialog::setDefault(NewGameSetting& newsetting, Engine* eng)
 	starttimeinc->setTime(QTime(0, 0, 0).addSecs(setting.startTimeInc));
 
 	color->setCurrentIndex(setting.color);
-	setGameType();
 
-	computerelo->setText(itoa(setting.engineelo,sz,10));
-
-	if (eng->personality.name == "Personality")
+	if (engine->personality.name == "Personality")
 	{
-		for (i = 0; i < eng->personality.combo.var.size(); i++)
-			personality->addItem(eng->personality.combo.var[i]);
-		personality->setCurrentText(eng->personality.combo.default);
+		for (i = 0; i < engine->personality.combo.var.size(); i++)
+			personality->addItem(engine->personality.combo.var[i]);
+		personality->setCurrentText(engine->personality.combo.default);
 	}
 	else
 	{
 		personality->setVisible(false);
 	}
-	if (eng->skill.name == "Skill")
+	if (engine->skill.name == "Skill")
 	{
-		skill->setMinimum(eng->skill.spin.min);
-		skill->setMaximum(eng->skill.spin.max);
+		skill->setMinimum(engine->skill.spin.min);
+		skill->setMaximum(engine->skill.spin.max);
 		skill->setValue(setting.engineskill);
 	}
 	else
@@ -383,20 +440,20 @@ void NewGameDialog::setDefault(NewGameSetting& newsetting, Engine* eng)
 		skill->setVisible(false);
 	}
 
-	if (eng->autoskill.name == "Auto Skill")
-		autoskill->setChecked(setting.aoutoskill);
+	if (engine->autoskill.name == "Auto Skill")
+		autoskill->setChecked(setting.autoskill);
 	else
 		autoskill->setVisible(false);
 
-	if (eng->limitstrength.name == "UCI_LimitStrength")
+	if (engine->limitstrength.name == "UCI_LimitStrength")
 		fullstrength->setChecked(setting.fullstrength);
 	else
 		fullstrength->setVisible(false);
 
-	if (eng->elo.name == "UCI_Elo")
+	if (engine->elo.name == "UCI_Elo")
 	{
-		limitstrength->setMinimum(eng->elo.spin.min);
-		limitstrength->setMaximum(eng->elo.spin.max);
+		limitstrength->setMinimum(engine->elo.spin.min);
+		limitstrength->setMaximum(engine->elo.spin.max);
 		limitstrength->setValue(setting.engineelo);
 	}
 	else
@@ -404,6 +461,26 @@ void NewGameDialog::setDefault(NewGameSetting& newsetting, Engine* eng)
 		limitstrength->setVisible(false);
 	}
 
+	setGameType();
+
 	resize(minimumSizeHint());
 }
 
+void NewGameDialog::setRating()
+{
+	char sz[16];
+	int r = 0;
+	if (fullstrength->isVisible())
+	{
+		if (!fullstrength->isChecked())
+			r = limitstrength->value();
+	}
+	else if (skill->isVisible())
+	{
+		if (!autoskill->isChecked())
+			r = engine->getRating(skill->text().toInt(), personality->currentText(), setting.gameType);
+
+	}
+	setting.engineelo = r;
+	computerelo->setText(itoa(r, sz, 10));
+}

@@ -375,4 +375,5 @@ void UciEngine::unload()
 		_sleep(500);
 		write("quit");
 	}
+	BaseEngine::unload();
 }

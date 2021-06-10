@@ -45,4 +45,5 @@ public:
 	void clear();
 	void newPlayer(QWidget* parent=0);
 	const QStringList getAll();
+	const void remove(const QString playername);
 };

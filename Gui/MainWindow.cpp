@@ -316,9 +316,9 @@ void MainWindow::newGame()
 		return;
 	}
 
-	NewGameDialog dialog(this);
+	NewGameDialog dialog(this, engine);
 
-	dialog.setDefault(gameSetting,engine);
+	dialog.setDefault(gameSetting);
 	if (dialog.exec() == QDialog::Rejected)
 		return;
 	gameSetting=dialog.getSetting();
@@ -343,7 +343,7 @@ void MainWindow::newGame()
 	clockwindow->settime(gameSetting.startTime*1000, gameSetting.startTime*1000);
 	clockwindow->start(currentGame->getPosition().board().toMove);
 	scoresheet->updateGame(currentGame);
-//	playEngine->load(eng);
+	engine->load(installedEngine);
 	QString setup = "setoption name Personality value ";
 	setup += gameSetting.enginename;
 	setup += "\n";

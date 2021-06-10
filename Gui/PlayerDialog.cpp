@@ -77,7 +77,10 @@ void PlayerDialog::slotAdd()
 void PlayerDialog::slotRemove()
 {
 	int i = playerlist->currentIndex();
-	if (i>=0)
+	if (i >= 0)
+	{
+		Player pl;
+		pl.remove(playerlist->currentText());
 		playerlist->removeItem(i);
+	}
 }
-

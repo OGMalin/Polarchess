@@ -11,12 +11,24 @@
 //#include <QProcess>
 //#include <QStringList>
 //
+
+enum { BULLET = 0, BLITZ, RAPID, CLASSICAL };
+
+struct EngineRating
+{
+	int category;
+	int rating;
+	int skill;
+	QString personality;
+};
+
 class Engine :public QObject
 {
 	Q_OBJECT
 
 private:
 	UciEngine uci;
+	QVector<EngineRating> rating;
 public slots:
 	void slotEngineStarted();
 	void slotEngineStoped();
@@ -34,6 +46,8 @@ public:
 	EngineOption autoskill;
 	EngineOption limitstrength;
 	EngineOption elo;
+	EngineOption ownbook;
+	EngineOption bookfile;
 	QString name;
 	QString author;
 	Engine();
@@ -58,4 +72,6 @@ public:
 //	void setEngine(QString& name, QString& dir) {};
 //	bool loadSetup(QString& setup) { return false; };
 	QString getPath();
+	void init(QString& key, QString& val) { uci.init(key, val); };
+	int getRating(int skill, QString& personality, int category);
 };

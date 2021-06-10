@@ -108,3 +108,14 @@ const QStringList Player::getAll()
 	settings.endGroup();
 	return list;
 }
+
+const void Player::remove(const QString playername)
+{
+	if (playername.isEmpty())
+		return;
+	QString name = playername;
+	QSettings settings;
+	settings.beginGroup("players");
+	settings.remove(name);
+	settings.endGroup();
+}
