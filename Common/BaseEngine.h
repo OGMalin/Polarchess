@@ -156,6 +156,7 @@ public:
 	virtual ~BaseEngine();
 	virtual bool load(QString& path);
 	virtual void unload();
+	virtual bool isLoaded() { return (process == NULL) ? false : true; };
 	void init(QString&key, QString&val);
 	virtual void write(const char* sz) { write(QString(sz)); };
 	virtual void write(QString& qs);

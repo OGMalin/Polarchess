@@ -107,6 +107,9 @@
     <ClCompile Include="Engine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Common\DgtBoard.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -151,6 +154,9 @@
     <QtMoc Include="Engine.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="..\Common\DgtBoard.h">
+      <Filter>Common</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="Gui.qrc">
@@ -183,6 +189,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Common\UciEngine.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\DgtProtocol.h">
       <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>

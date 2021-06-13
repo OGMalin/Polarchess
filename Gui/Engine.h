@@ -32,11 +32,11 @@ private:
 public slots:
 	void slotEngineStarted();
 	void slotEngineStoped();
-//	void slotEngineMove(const QString&, const QString&);
+	void slotEngineMove(const QString&, const QString&);
 //	void slotEngineInfo(const EngineInfo&);
 signals:
 	//void engineMessage(const QString&);
-//	void engineMove(const QString&, const QString&);
+	void engineMove(const QString&, const QString&);
 //	void engineInfo(const EngineInfo&);
 	void engineStarted();
 	void engineStoped();
@@ -50,6 +50,9 @@ public:
 	EngineOption bookfile;
 	QString name;
 	QString author;
+	ChessBoard currentBoard;
+	bool readyok;
+	QString waitCommand;
 	Engine();
 	virtual ~Engine();
 //	// Load an engine

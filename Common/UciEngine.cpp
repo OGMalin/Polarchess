@@ -38,7 +38,7 @@ void UciEngine::fromEngine(std::string& input)
 			}
 			++it;
 		}
-
+		initOptions.clear();
 		write("isready");
 	}
 	else if (cmd == "readyok")

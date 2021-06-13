@@ -1,18 +1,18 @@
 #include "MainWindow.h"
 #include "AboutDialog.h"
 #include "NewGameDialog.h"
-#include "ClockWindow.h"
-#include "EngineWindow.h"
-#include "Database.h"
-#include "Scoresheet.h"
-#include "Engine.h"
-#include "../Common/BoardWindow.h"
-#include "../Common/QChessGame.h"
-#include <QIcon>
-#include <QSplitter>
+//#include "ClockWindow.h"
+//#include "EngineWindow.h"
+//#include "Database.h"
+//#include "Scoresheet.h"
+//#include "Engine.h"
+//#include "../Common/BoardWindow.h"
+//#include "../Common/QChessGame.h"
+//#include <QIcon>
+//#include <QSplitter>
 #include <QMenuBar>
-#include <QToolBar>
-#include <QEvent>
+//#include <QToolBar>
+//#include <QEvent>
 #include <QSettings>
 #include <QCoreApplication>
 #include <QLocale>
@@ -24,7 +24,7 @@
 #include <QDate>
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QEventLoop>
+//#include <QEventLoop>
 
 MainWindow::MainWindow()
 {
@@ -65,7 +65,7 @@ MainWindow::MainWindow()
 	database = new Database();
 //	connect(engine, SIGNAL(engineMessage(const QString&)), this, SLOT(playEngineMessage(const QString&)));
 	connect(engine, SIGNAL(engineStarted()), this, SLOT(playEngineStarted()));
-//	connect(engine, SIGNAL(engineMove(const QString&, const QString&)), this, SLOT(playEngineMove(const QString&, const QString&)));
+	connect(engine, SIGNAL(engineMove(const QString&, const QString&)), this, SLOT(playEngineMove(const QString&, const QString&)));
 	connect(clockwindow, SIGNAL(clockAlarm(int)),this, SLOT(clockAlarm(int)));
 	connect(boardwindow, SIGNAL(moveEntered(ChessMove&)), this, SLOT(moveEntered(ChessMove&)));
 
@@ -342,6 +342,7 @@ void MainWindow::newGame()
 	running = true;
 	clockwindow->settime(gameSetting.startTime*1000, gameSetting.startTime*1000);
 	clockwindow->start(currentGame->getPosition().board().toMove);
+//	scoresheet->c
 	scoresheet->updateGame(currentGame);
 	engine->load(installedEngine);
 	QString setup = "setoption name Personality value ";
@@ -357,11 +358,9 @@ void MainWindow::newGame()
 		ChessBoard b = currentGame->getStartPosition().board();
 		MoveList ml = currentGame->movelist();
 
-//		playEngine->search(b, ml,NORMAL_SEARCH, gameSetting.startTime * 1000, gameSetting.startTimeInc * 1000, gameSetting.startTime * 1000, gameSetting.startTimeInc * 1000, mtg);
+		engine->search(b, ml,NORMAL_SEARCH, gameSetting.startTime * 1000, gameSetting.startTimeInc * 1000, gameSetting.startTime * 1000, gameSetting.startTimeInc * 1000, mtg);
 		boardwindow->flip(true);
 	}
-//	playEngine->loadSetup(setup);
-	
 }
 
 //void MainWindow::playEngineMessage(const QString& msg)
@@ -458,12 +457,12 @@ void MainWindow::moveEntered(ChessMove& move)
 	}
 	ChessBoard b = currentGame->getStartPosition().board();
 	MoveList ml = currentGame->movelist();
-//	playEngine->search(b, ml, NORMAL_SEARCH, clockwindow->gettime(WHITE), gameSetting.startTimeInc * 1000, clockwindow->gettime(BLACK), gameSetting.startTimeInc * 1000, mtg);
+	engine->search(b, ml, NORMAL_SEARCH, clockwindow->gettime(WHITE), gameSetting.startTimeInc * 1000, clockwindow->gettime(BLACK), gameSetting.startTimeInc * 1000, mtg);
 }
 
 void MainWindow::endGame()
 {
-//	playEngine->unload();
+	engine->unload();
 	saveGame();
 	scoresheet->updateGame(currentGame);
 	running = false;
@@ -504,22 +503,22 @@ void MainWindow::playEngineStarted()
 	}
 }
 
-//void MainWindow::playEngineMove(const QString& move, const QString& ponder)
-//{
-//	if (!running)
-//		return;
-//	int player = currentGame->toMove();
-//	ChessMove m=currentGame->getPosition().board().getMoveFromText(move.toStdString());
-//	currentGame->doMove(m);
-//	boardwindow->setPosition(currentGame->getPosition().board());
-//	scoresheet->updateGame(currentGame);
-//	if (gameSetting.startTimeInc)
-//		clockwindow->addtime(gameSetting.startTimeInc * 1000, player);
-//	if (gameSetting.suddenDeathTime && currentGame->moveCount(player) == 40)
-//		clockwindow->addtime(gameSetting.suddenDeathTime * 1000, player);
-//
-//	clockwindow->start(currentGame->toMove());
-//}
+void MainWindow::playEngineMove(const QString& move, const QString& ponder)
+{
+	if (!running)
+		return;
+	int player = currentGame->toMove();
+	ChessMove m=currentGame->getPosition().board().getMoveFromText(move.toStdString());
+	currentGame->doMove(m);
+	boardwindow->setPosition(currentGame->getPosition().board());
+	scoresheet->updateGame(currentGame);
+	if (gameSetting.startTimeInc)
+		clockwindow->addtime(gameSetting.startTimeInc * 1000, player);
+	if (gameSetting.suddenDeathTime && currentGame->moveCount(player) == 40)
+		clockwindow->addtime(gameSetting.suddenDeathTime * 1000, player);
+
+	clockwindow->start(currentGame->toMove());
+}
 
 void MainWindow::resign()
 {
@@ -559,7 +558,7 @@ void MainWindow::abort()
 			return;
 		}
 	}
-//	playEngine->unload();
+	engine->unload();
 	running = false;
 	clockwindow->stop();
 }

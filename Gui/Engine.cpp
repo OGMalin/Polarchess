@@ -1,8 +1,12 @@
 #include "Engine.h"
+#include <string>
 #include <QApplication>
+
+using namespace std;
 
 Engine::Engine()
 {
+	readyok = false;
 }
 
 Engine::~Engine()
@@ -17,7 +21,8 @@ bool Engine::load(QString& path)
 
 	con = connect(&uci, SIGNAL(engineStarted()), SLOT(slotEngineStarted()));
 	con = connect(&uci, SIGNAL(engineStoped()), SLOT(slotEngineStoped()));
-//	con = connect(&uci, SIGNAL(engineInfo(const EngineInfo&)), SLOT(slotEngineInfo(const EngineInfo&)));
+	con = connect(&uci, SIGNAL(engineMove(const QString&, const QString&)), SLOT(slotEngineMove(const QString&, const QString&)));
+	//	con = connect(&uci, SIGNAL(engineInfo(const EngineInfo&)), SLOT(slotEngineInfo(const EngineInfo&)));
 	if (!uci.load(path))
 		return false;
 	return true;
@@ -25,12 +30,71 @@ bool Engine::load(QString& path)
 
 void Engine::unload()
 {
+	readyok = false;
 	uci.disconnect();
 	uci.unload();
 }
 
 void Engine::search(ChessBoard& board, MoveList& moves, SEARCHTYPE searchtype, int wtime, int winc, int btime, int binc, int movestogo)
 {
+		if (!uci.isLoaded())
+			return;
+		QString cmd;
+		QStringList list;
+		//ChessBoard b;
+		int i;
+		currentBoard = board;
+		for (i = 0; i < moves.size(); i++)
+		{
+			list.append(currentBoard.makeMoveText(moves.at(i),UCI).c_str());
+			if (!currentBoard.doMove(moves.at(i), true))
+				break;
+		}
+		string s=board.getFen();
+		cmd = "position";
+
+		if (board.isStartposition())
+			cmd += " startpos";
+		else
+			cmd += QString(" fen ") + board.getFen(true).c_str();
+		if (list.size())
+		{
+			cmd += " moves";
+			QStringList::iterator lit = list.begin();
+			while (lit != list.end())
+			{
+				cmd += " ";
+				cmd += *lit;
+				++lit;
+			}
+		}
+		// If engine playing white it is most probaly not ready yet.
+		cmd += "\n";
+		if (readyok)
+			uci.write(cmd);
+		else
+			waitCommand += cmd;
+		cmd="go";
+		if (searchtype == PONDER_SEARCH)
+			cmd += " ponder";
+		if (searchtype == INFINITE_SEARCH)
+		{
+			cmd += " infinite";
+		}
+		else
+		{
+			cmd += " wtime " + QString().setNum(wtime);
+			cmd += " btime " + QString().setNum(btime);
+			cmd += " winc " + QString().setNum(winc);
+			cmd += " binc " + QString().setNum(binc);
+		}
+		if (movestogo)
+			cmd += "movestogo " + QString().setNum(movestogo);
+		cmd += "\n";
+		if (readyok)
+			uci.write(cmd);
+		else
+			waitCommand += cmd;
 }
 
 void Engine::slotEngineStarted()
@@ -129,7 +193,12 @@ void Engine::slotEngineStarted()
 		}
 	}
 
-
+	if (!waitCommand.isEmpty())
+	{
+		uci.write(waitCommand);
+		waitCommand.clear();
+	}
+	readyok = true;
 	emit engineStarted();
 }
 
@@ -139,10 +208,10 @@ void Engine::slotEngineStoped()
 	emit engineStoped();
 }
 
-//void Engine::slotEngineInfo(const EngineInfo& ei)
-//{
-//	emit engineInfo(ei);
-//}
+void Engine::slotEngineMove(const QString& smove, const QString& sponder)
+{
+	emit engineMove(smove, sponder);
+}
 
 QString Engine::getPath()
 {

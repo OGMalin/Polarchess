@@ -257,12 +257,18 @@ void NewGameDialog::slotOk()
 				break;
 			for (j = 0; j < qfil.size(); j++)
 			{
-				if (qfil[j].fileName().indexOf(itoa(i, sz, 10)) > 0)
+				qs = "pc";
+				qs+=itoa(i, sz, 10);
+				qs += ".bin";
+				if (qfil[j].fileName().indexOf(qs) >= 0)
 					bookpath = qfil[j].absoluteFilePath();
 			}
 		}
 		if (!bookpath.isEmpty())
+		{
+			bookpath.replace("/", "\\"); // Is it needed? Kommodo don't care.
 			engine->init(engine->bookfile.name, bookpath);
+		}
 	}
 	
 	accept();
@@ -470,16 +476,14 @@ void NewGameDialog::setRating()
 {
 	char sz[16];
 	int r = 0;
-	if (fullstrength->isVisible())
+	if (!engine->skill.name.isEmpty())
 	{
-		if (!fullstrength->isChecked())
-			r = limitstrength->value();
-	}
-	else if (skill->isVisible())
-	{
-		if (!autoskill->isChecked())
+		if (!engine->autoskill.name.isEmpty() && !engine->autoskill.check.value)
 			r = engine->getRating(skill->text().toInt(), personality->currentText(), setting.gameType);
-
+	}
+	else if (!engine->limitstrength.name.isEmpty() && engine->limitstrength.check.value)
+	{
+		r = engine->elo.spin.value;
 	}
 	setting.engineelo = r;
 	computerelo->setText(itoa(r, sz, 10));

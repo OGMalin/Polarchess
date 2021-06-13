@@ -1,26 +1,29 @@
 #pragma once
 
+#include "NewGameDialog.h"
+#include "Player.h"
+#include "EnginePlayer.h"
+#include "ClockWindow.h"
+#include "EngineWindow.h"
+#include "Database.h"
+#include "Scoresheet.h"
+#include "Engine.h"
+#include "../Common/BoardWindow.h"
+#include "../Common/QChessGame.h"
+#include "../Common/ChessMove.h"
+#include "../Common/DgtBoard.h"
 #include <QMainWindow>
 #include <QString>
 #include <QTranslator>
 #include <QVector>
-#include "NewGameDialog.h"
-#include "Player.h"
-#include "EnginePlayer.h"
-#include "../Common/ChessMove.h"
-
-class QMenu;
-class QToolBar;
-class QAction;
-class QActionGroup;
-class QSplitter;
-class BoardWindow;
-class Scoresheet;
-class ClockWindow;
-class EngineWindow;
-class Engine;
-class Database;
-class QChessGame;
+#include <QToolButton>
+#include <QSplitter>
+#include <QToolBar>
+#include <QMenu>
+#include <QAction>
+#include <QToolBar>
+#include <QActionGroup>
+#include <QSplitter>
 
 class MainWindow : public QMainWindow
 {
@@ -40,7 +43,7 @@ public slots:
 	void slotLanguageChanged(QAction* action);
 //	void playEngineMessage(const QString&);
 	void playEngineStarted();
-//	void playEngineMove(const QString&, const QString&);
+	void playEngineMove(const QString&, const QString&);
 	void clockAlarm(int);
 	void moveEntered(ChessMove&);
 
@@ -72,11 +75,13 @@ private:
 	QString locale;
 	QSplitter* hSplitter;
 	QSplitter* vSplitter;
+	QToolButton* dgtIcon;
 	BoardWindow* boardwindow;
 	Scoresheet* scoresheet;
 	ClockWindow* clockwindow;
 	EngineWindow* enginewindow;
 	Engine* engine;
+	DgtBoard* dgt;
 	//Engine* analysisEngine;
 	Database* database;
 	NewGameSetting gameSetting;

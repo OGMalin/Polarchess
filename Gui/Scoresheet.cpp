@@ -32,7 +32,7 @@ void Scoresheet::updateGame(QChessGame* game)
 	QStringList header;
 	header << game->white() << game->black();
 	model->setHorizontalHeaderLabels(header);
-
+	model->clear();
 	QStringList list;
 	game->getMovelist(list);
 	int i;
