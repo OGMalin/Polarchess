@@ -1,4 +1,7 @@
 #pragma once
+
+// Search the internet for dgtbrd13.h from DGT to find better description of these contants.
+
 #include <windows.h>
 //#ifndef BYTE
 //#define BYTE unsigned char
