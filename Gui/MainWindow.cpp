@@ -33,6 +33,7 @@ MainWindow::MainWindow()
 	readSettings();
 	running = false;
 	createMenu();
+	dgt = NULL;
 
 	statusBar();
 	loadLanguage();
@@ -109,6 +110,8 @@ void MainWindow::createMenu()
 	// Settings menu
 	settingsMenu = menuBar()->addMenu("*");
 	installEngineAct = settingsMenu->addAction("*", this, &MainWindow::installEngine);
+	useDgtAct = settingsMenu->addAction("*", this, &MainWindow::useDgt);
+	useDgtAct->setCheckable(true);
 	settingsMenu->addSeparator();
 	langMenu = settingsMenu->addMenu("*");
 	engAct = langMenu->addAction(QIcon(":/icon/GB.png"), "*");
@@ -155,6 +158,7 @@ void MainWindow::retranslateUi()
 
 	settingsMenu->setTitle(tr("Settings"));
 	installEngineAct->setText(tr("Install Engine"));
+	useDgtAct->setText(tr("Use DGT Electronic board"));
 	langMenu->setTitle(tr("Language"));
 	if (locale == "nb")
 		langMenu->setIcon(QIcon(":/icon/NO.png"));
@@ -239,6 +243,18 @@ void MainWindow::writeSettings()
 //	settings.setValue("vgeometry", vSplitter->saveState());
 	settings.setValue("language", locale);
 	settings.setValue("player", gameSetting.player);
+	settings.beginGroup("lastgame");
+	settings.setValue("skill", gameSetting.engineskill);
+	settings.setValue("autoskill", gameSetting.autoskill);
+	settings.setValue("personality", gameSetting.personality);
+	settings.setValue("elo", gameSetting.engineelo);
+	settings.setValue("fullstrength", gameSetting.fullstrength);
+	settings.setValue("time", gameSetting.startTime);
+	settings.setValue("increment", gameSetting.startTimeInc);
+	settings.setValue("suddendeath", gameSetting.suddenDeathTime);
+	settings.setValue("rated", gameSetting.rated);
+	settings.setValue("color", gameSetting.color);
+	settings.endGroup();
 	settings.setValue("engine", installedEngine);
 }
 
@@ -250,6 +266,20 @@ void MainWindow::readSettings()
 //	QByteArray vgeometry = settings.value("vgeometry", QByteArray()).toByteArray();
 	locale = settings.value("language", QString()).toString();
 	gameSetting.player = settings.value("player", QString()).toString();
+	// Last game setup
+	settings.beginGroup("lastgame");
+	gameSetting.engineskill = settings.value("skill", "0").toInt();
+	gameSetting.autoskill = settings.value("autoskill", "false").toBool();
+	gameSetting.personality = settings.value("personality", "").toString();
+	gameSetting.engineelo = settings.value("elo", "0").toInt();
+	gameSetting.fullstrength = settings.value("fullstrength", "false").toBool();
+	gameSetting.startTime = settings.value("time", "900").toInt();
+	gameSetting.startTimeInc = settings.value("increment", "10").toInt();
+	gameSetting.suddenDeathTime = settings.value("suddendeath", "0").toInt();
+	gameSetting.rated = settings.value("rated", "false").toBool();
+	gameSetting.color = settings.value("color", "0").toInt();
+	settings.endGroup();
+
 	installedEngine = settings.value("engine", QString()).toString();
 	if (maingeometry.isEmpty())
 	{
@@ -582,3 +612,54 @@ void MainWindow::installEngine()
 //		playEngine->setEngine(path, QString());
 	}
 }
+
+void MainWindow::dgtStatus(int status)
+{
+	if (dgtIcon)
+	{
+		if (status==0)
+			dgtIcon->setIcon(QIcon(":/icon/dgtDisconnect.png"));
+		else if (status==1)
+			dgtIcon->setIcon(QIcon(":/icon/dgtConnect.png"));
+		else if (status == 2)
+			dgtIcon->setIcon(QIcon(":/icon/dgtSync.png"));
+	}
+}
+
+void MainWindow::dgtStatusClicked(bool)
+{
+	if (dgt->isVisible())
+		dgt->hide();
+	else
+		dgt->show();
+}
+
+void MainWindow::useDgt()
+{
+	if (useDgtAct->isChecked())
+	{
+		if (!dgt)
+		{
+//			dgt = new DgtDLL(this);
+			dgt = new DgtBoard(this);
+			connect(dgt, SIGNAL(dgtStatus(int)), this, SLOT(dgtStatus(int)));
+			dgtIcon = new QToolButton();
+			dgtIcon->setIcon(QIcon(":/icon/dgtDisconnect.png"));
+			connect(dgtIcon, SIGNAL(clicked(bool)), this, SLOT(dgtStatusClicked(bool)));
+			statusBar()->addPermanentWidget(dgtIcon);
+		}
+	}
+	else
+	{
+		if (dgt)
+		{
+			statusBar()->removeWidget(dgtIcon);
+			disconnect(dgtIcon);
+			disconnect(dgt);
+			delete dgt;
+			delete dgtIcon;
+			dgt = NULL;
+		}
+	}
+}
+

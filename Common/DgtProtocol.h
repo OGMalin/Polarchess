@@ -21,19 +21,31 @@ const BYTE DGT_SEND_TRADEMARK = 0x47; // Get trademark message.
 const BYTE DGT_SEND_EE_MOVES = 0x49; // Get stored moves.
 const BYTE DGT_TO_BUSMODE = 0x4a; // Set board in busmode.
 const BYTE DGT_SEND_UPDATE_NICE = 0x4b; // Automatic send changes and clock.
+const BYTE DGT_SEND_BATTERY_STATUS = 0x4c; // Request battery status for bluetooth board
 const BYTE DGT_SEND_VERSION = 0x4d; // Get version.
+const BYTE DGT_RETURN_LONG_SERIALNR = 0x55; // Get long serial number from bluetooth board
 
 // Message from the DGT board
 const BYTE DGT_MSG_ERROR = 0x00;
 const BYTE DGT_MSG_NONE = 0x80; //
 const BYTE DGT_MSG_BOARD_DUMP = 0X86;
+const BYTE DGT_MSG_BOARD_DUMP_SIZE = 64;
 const BYTE DGT_MSG_BWTIME = 0x8d; //
+const BYTE DGT_MSG_BWTIME_SIZE = 7; //
 const BYTE DGT_MSG_FIELD_UPDATE = 0x8e; //
+const BYTE DGT_MSG_FIELD_UPDATE_SIZE = 2;
 const BYTE DGT_MSG_EE_MOVES = 0x8f; //
 const BYTE DGT_MSG_BUSADRES = 0x90; //
+const BYTE DGT_MSG_BUSADRES_SIZE = 2;
 const BYTE DGT_MSG_SERIALNR = 0x91; //
+const BYTE DGT_MSG_SERIALNR_SIZE = 5;
 const BYTE DGT_MSG_TRADEMARK = 0x92; //
 const BYTE DGT_MSG_VERSION = 0x93; //
+const BYTE DGT_MSG_VERSION_SIZE = 2;
+const BYTE DGT_MSG_BATTERY_STATUS = 0xb0; // Battery status for bluetooth board
+const BYTE DGT_MSG_BATTERY_STATUS_SIZE = 4;
+const BYTE DGT_MSG_LONG_SERIALNR = 0xb2; // Battery status for bluetooth board
+const BYTE DGT_MSG_LONG_SERIALNR_SIZE = 10;
 
 // Board dump message
 // The board is scanned from upper left corner (connector on left side).

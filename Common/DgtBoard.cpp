@@ -2,6 +2,8 @@
 #include "../Common/defs.h"
 #include <QDialog>
 #include <QBoxLayout>
+#include <QGridLayout>
+#include <QFrame>
 #include <QDialogButtonBox>
 #include <QSerialPortInfo>
 #include <QPushButton>
@@ -10,7 +12,7 @@
 #include <QByteArray>
 #include <QDebug>
 
-#ifdef _DEBUG
+//#ifdef _DEBUG
 QString convertToHex(BYTE* data, int len)
 {
 	QString qs;
@@ -25,67 +27,76 @@ QString convertToHex(QByteArray& data)
 		QTextStream(&qs) << (((BYTE)data[i] < 16) ? " 0" : " ") << QString::number((BYTE)data[i], 16);
 	return qs;
 }
-#endif
+//#endif
 
 DgtBoard::DgtBoard(QWidget* parent)
 	: QDialog(parent)
 {
 	port = new QSerialPort(this);
-	connect(port, &QSerialPort::readyRead, this, &DgtBoard::readFromDGT);
-	connect(port, SIGNAL(errorOccurred(int)), this, SLOT(comError(int)));
+//	connect(port, &QSerialPort::readyRead, this, &DgtBoard::readFromDGT);
+	connect(port, &QSerialPort::readyRead, this, &DgtBoard::readyRead);
+	connect(port, SIGNAL(errorOccurred(QSerialPort::SerialPortError)), this, SLOT(comError(QSerialPort::SerialPortError)));
+
+	setWindowTitle(tr("DGT board"));
+	setSizeGripEnabled(true);
+	QGridLayout* grid = new QGridLayout(this); //Main grid
+	QFrame* frame = new QFrame(this);
 	QHBoxLayout* hbox;
 	QVBoxLayout* vbox;
+	QPushButton* button;
 	_status = 0;
 
 	timer = new QTimer();
 	connect(timer, SIGNAL(timeout()), this, SLOT(timerMessage()));
-	timer->start(500);
-
-	hbox = new QHBoxLayout;
 
 	vbox = new QVBoxLayout;
 
-	QPushButton* button = new QPushButton(tr("Update port list")); // Do this automatic when you know how
+	hbox = new QHBoxLayout;
+	button = new QPushButton(tr("Update port list")); // Do this automatic when you know how
 	button->setFixedWidth(button->minimumSizeHint().width());
 	connect(button, SIGNAL(clicked()), this, SLOT(listPorts()));
-	vbox->addWidget(button);
-
+	hbox->addWidget(button);
 	portlist = new QComboBox;
 	listPorts();
-	vbox->addWidget(portlist);
+	hbox->addWidget(portlist);
+	vbox->addLayout(hbox);
 
+	hbox = new QHBoxLayout;
 	button = new QPushButton(tr("Connect"));
 	button->setFixedWidth(button->minimumSizeHint().width());
 	connect(button, SIGNAL(clicked()), this, SLOT(connectDgt()));
-	vbox->addWidget(button);
-
+	hbox->addWidget(button);
 	button = new QPushButton(tr("Disconnect"));
 	button->setFixedWidth(button->minimumSizeHint().width());
 	connect(button, SIGNAL(clicked()), this, SLOT(disconnectDgt()));
-	vbox->addWidget(button);
-
+	hbox->addWidget(button);
+	vbox->addLayout(hbox);
 	statusLine = new QLabel("Disconnected");
 	vbox->addWidget(statusLine);
 
 	dgtVersion = new QLabel("Dgt Board version:");
 	vbox->addWidget(dgtVersion);
 
-	vbox->setAlignment(Qt::AlignTop);
+//	vbox->setAlignment(Qt::AlignTop);
 
-	hbox->addLayout(vbox);
+	grid->addLayout(vbox,0,0);
 
+	vbox = new QVBoxLayout;
+
+	hbox = new QHBoxLayout;
+	whiteClock = new QLabel("00:00:00");
+	blackClock = new QLabel("00:00:00");
+	hbox->addWidget(whiteClock, 0, Qt::AlignLeft);
+	hbox->addWidget(blackClock, 0, Qt::AlignRight);
+	vbox->addLayout(hbox);
 	boardwindow = new BoardWindow;
 	boardwindow->setDisabled(true);
 	boardwindow->setPosition("8/8/8/8/8/8/8/8 w - -");
-	hbox->addWidget(boardwindow);
-
-	vbox = new QVBoxLayout;
-	vbox->addLayout(hbox);
+	vbox->addWidget(boardwindow);
+	grid->addLayout(vbox, 0, 1);
 
 	QDialogButtonBox* buttons = new QDialogButtonBox(QDialogButtonBox::Close, this);
-	vbox->addWidget(buttons);
-
-	setLayout(vbox);
+	grid->addWidget(buttons,1,0,1,2);
 
 	connect(buttons, SIGNAL(accepted()), this, SLOT(accept()));
 	connect(buttons, SIGNAL(rejected()), this, SLOT(reject()));
@@ -122,31 +133,25 @@ void DgtBoard::connectDgt()
 	QString com = portlist->currentText();
 	QByteArray ba;
 	port->setPortName(com);
-	if (port->open(QIODevice::ReadWrite))
+	port->setBaudRate(QSerialPort::Baud9600);
+	port->setDataBits(QSerialPort::Data8);
+	port->setStopBits(QSerialPort::OneStop);
+	port->setParity(QSerialPort::NoParity);
+	port->setFlowControl(QSerialPort::NoFlowControl);
+	if (port->open(QIODevice::ReadWrite))//| QIODevice::Unbuffered))
 	{
+		//port->setBreakEnabled(false);
+		//port->setDataTerminalReady(false);
+		//port->setRequestToSend(false);
+		_sleep(1500);
+		_status = 1;
+
 		statusLine->setText("Connected");
 		write(DGT_SEND_RESET);
-		_sleep(200);
-		QApplication::processEvents();
-//		write(DGT_SEND_TRADEMARK);
-		_sleep(200);
-		QApplication::processEvents();
 		write(DGT_SEND_VERSION);
-		_sleep(200);
-		QApplication::processEvents();
-//		write(DGT_RETURN_SERIALNR);
-		_sleep(200);
-		QApplication::processEvents();
-//		write(DGT_SEND_CLK);
-		_sleep(200);
-		QApplication::processEvents();
+		write(DGT_SEND_CLK);
 		write(DGT_SEND_BRD);
-		_sleep(200);
-		QApplication::processEvents();
-		write(DGT_SEND_UPDATE_BRD);
-		_sleep(200);
-		QApplication::processEvents();
-		_status = 1;
+		write(DGT_SEND_UPDATE_NICE);
 	}
 	else
 	{
@@ -161,8 +166,57 @@ void DgtBoard::disconnectDgt()
 	if (port->isOpen())
 		port->close();
 	_status = 0;
+	timer->stop();
 	emit dgtStatus(_status);
 	statusLine->setText("Disconnected");
+}
+
+void DgtBoard::readyRead()
+{
+	BYTE code;
+	int index, i, msglen, j;
+	QByteArray data;
+	char d[0x3000];
+	index = 0;
+	QApplication::processEvents();
+
+//	eventLoop.exec();
+
+	if (!port->isOpen())
+		return;
+	_sleep(100);
+	while (port->bytesAvailable())
+	{
+		if (port->read(d, 1) != 1)
+			return;
+		code = (BYTE)d[0];
+
+		qDebug(QString(port->portName() + QString(" -> Code: ") + QString(itoa(code, d, 16))).toLatin1());
+
+		//	eventLoop.exec();
+
+		QApplication::processEvents();
+		if (port->read(d, 2) != 2)
+			return;
+
+		msglen = ((BYTE)d[0] & (BYTE)0x7f) << 7;
+		msglen += (BYTE)d[1] & (BYTE)0x7f;
+
+		msglen -= 3;
+
+		qDebug(QString(port->portName() + QString(" -> Msglen: ") + QString(itoa(msglen, d, 16))).toLatin1());
+
+		//	eventLoop.exec();
+
+		QApplication::processEvents();
+		if (port->read(d, msglen) != msglen)
+			return;
+
+		qDebug(QString(port->portName() + QString(" -> ") + convertToHex((BYTE*)d, msglen)).toLatin1());
+
+		interpretMessage(code, msglen, (BYTE*)d);
+		_sleep(100);
+	}
 }
 
 void DgtBoard::readFromDGT()
@@ -175,15 +229,12 @@ void DgtBoard::readFromDGT()
 	while (1)
 	{
 		QApplication::processEvents();
-		port->waitForReadyRead(100);
+		port->waitForReadyRead(500);
 		data = port->readAll();
 		if (!data.size())
 			break;
-#ifdef _DEBUG
-		QString qs = port->portName() + " ->";
-		qs += convertToHex(data);
-		qDebug(qs.toLatin1());
-#endif
+		qDebug(QString(port->portName() + QString(" -> ") + convertToHex(data)).toLatin1());
+		msglen = 0;
 		for (i=0;i<data.size();i++)
 		{
 			if (index == 0)
@@ -212,19 +263,15 @@ void DgtBoard::readFromDGT()
 						d[j] = data[j];
 					interpretMessage(code, msglen - 3, &d[3]);
 					index = 0;
+					msglen = 0;
 				}
 			}
 
 		}
+		break;
 	}
-#ifdef _DEBUG
 	if (index)
-	{ // Missing bytes
-		QString qs = port->portName() + " *->";
-		qs += convertToHex(data);
-		qDebug(qs.toLatin1());
-	}
-#endif
+		qDebug(QString(port->portName() + QString(" *-> ") + convertToHex(data)).toLatin1());
 }
 
 void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
@@ -237,6 +284,11 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 	switch (code)
 	{
 	case DGT_MSG_BOARD_DUMP:
+		if (datalength != DGT_MSG_BOARD_DUMP_SIZE)
+		{
+			qDebug("DGT_MSG_BOARD_DUMP messagelength mismatch");
+			break;
+		}
 		if (equalBoard(stableBoard, data))
 			break;
 		if (!equalBoard(lastBoard, data))
@@ -255,6 +307,11 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 		emit newPosition(bS, *ml);
 		break;
 	case DGT_MSG_BWTIME:
+		if (datalength != DGT_MSG_BWTIME_SIZE)
+		{
+			qDebug("DGT_MSG_BWTIME messagelength mismatch");
+			break;
+		}
 		memset(&clock.leftFlag,data[0],1);
 		clock.leftMinutes = data[1];
 		clock.leftSeconds = data[2];
@@ -264,17 +321,33 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 		memset(&clock.status, data[6], 1);
 		break;
 	case DGT_MSG_FIELD_UPDATE:
-		field.field = data[0];
-		field.piece = data[1];
+		if (datalength != DGT_MSG_FIELD_UPDATE_SIZE)
+		{
+			qDebug("DGT_MSG_FIELD_UPDATE messagelength mismatch");
+			break;
+		}
+		write(DGT_SEND_BRD);
+		//field.field = data[0];
+		//field.piece = data[1];
 //		if (field.field<64)
 //			lastBoard[field.field] = field.piece;
 //		updateDialog();
 		break;
 	case DGT_MSG_BUSADRES:
+		if (datalength != DGT_MSG_BUSADRES_SIZE)
+		{
+			qDebug("DGT_MSG_BUSADRES messagelength mismatch");
+			break;
+		}
 		busadres = (data[0] & (BYTE)0x7f) << 7;
 		busadres += data[1] & (BYTE)0x7f;
 		break;
 	case DGT_MSG_SERIALNR:
+		if (datalength != DGT_MSG_SERIALNR_SIZE)
+		{
+			qDebug("DGT_MSG_SERIALNR messagelength mismatch");
+			break;
+		}
 		data[datalength] = '\0';
 		serialnr = (char*)data;
 		break;
@@ -283,6 +356,11 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 		trademark = (char*)data;
 		break;
 	case DGT_MSG_VERSION:
+		if (datalength != DGT_MSG_VERSION_SIZE)
+		{
+			qDebug("DGT_MSG_VERSION messagelength mismatch");
+			break;
+		}
 		version.major = data[0];
 		version.minor = data[1];
 		qs= "Dgt Board version: ";
@@ -303,19 +381,20 @@ void DgtBoard::write(BYTE command)
 		return;
 	if (!port->isOpen())
 	{
+		qDebug(QString(port->portName() + "*<- Error: Try to write when port is not open.").toLatin1());
 		_status = 0;
 		return;
 	}
 	BYTE sz[2];
 	sz[0] = command;
-	sz[1] = 0;
-	port->write((char*)sz);
-#ifdef _DEBUG
-	QString qs = port->portName() + " <- ";
-	QTextStream(&qs) << QString::number(command,16);
-	qDebug(qs.toLatin1());
-#endif
-	_sleep(3);
+	port->write((char*)sz,1);
+	port->flush();
+
+	qDebug(QString(port->portName() + QString(" <- ") + convertToHex(&command,1)).toLatin1());
+	_sleep(200);
+	QApplication::processEvents();
+	//	port->waitForBytesWritten(1000);
+	//	_sleep(200);
 }
 
 void DgtBoard::updateDialog()
@@ -337,10 +416,11 @@ void DgtBoard::timerMessage()
 	}
 }
 
-void DgtBoard::comError(int error)
+void DgtBoard::comError(QSerialPort::SerialPortError  error)
 {
-
-	qDebug("Error");
+	if (error)
+		qDebug("Error: %i, %s", error, port->errorString().toLatin1());
+//	port->clearError();
 }
 
 bool DgtBoard::equalBoard(BYTE*b1, BYTE*b2)

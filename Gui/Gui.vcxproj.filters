@@ -110,6 +110,9 @@
     <ClCompile Include="..\Common\DgtBoard.cpp">
       <Filter>Common</Filter>
     </ClCompile>
+    <ClCompile Include="..\Common\DgtDll.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -155,6 +158,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="..\Common\DgtBoard.h">
+      <Filter>Common</Filter>
+    </QtMoc>
+    <QtMoc Include="..\Common\DgtDLL.h">
       <Filter>Common</Filter>
     </QtMoc>
   </ItemGroup>
@@ -215,6 +221,15 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="images\pieces.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icon\dgtConnect.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icon\dgtDisconnect.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icon\dgtSync.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

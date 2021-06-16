@@ -429,7 +429,7 @@ void NewGameDialog::setDefault(NewGameSetting& newsetting)
 	{
 		for (i = 0; i < engine->personality.combo.var.size(); i++)
 			personality->addItem(engine->personality.combo.var[i]);
-		personality->setCurrentText(engine->personality.combo.default);
+		personality->setCurrentText(setting.personality);
 	}
 	else
 	{

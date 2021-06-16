@@ -20,8 +20,9 @@ public slots:
 	void connectDgt();
 	void disconnectDgt();
 	void readFromDGT();
+	void readyRead();
 	void timerMessage();
-	void comError(int);
+	void comError(QSerialPort::SerialPortError);
 signals:
 	// Send last status.
 	// 0 = Not connected
@@ -51,6 +52,8 @@ private:
 	QSerialPort* port;
 	QLabel* statusLine;
 	QLabel* dgtVersion;
+	QLabel* whiteClock;
+	QLabel* blackClock;
 	BoardWindow* boardwindow;
 	QTimer* timer;
 	void interpretMessage(BYTE code, int datalength, BYTE* data);

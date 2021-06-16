@@ -12,6 +12,7 @@
 #include "../Common/QChessGame.h"
 #include "../Common/ChessMove.h"
 #include "../Common/DgtBoard.h"
+//#include "../Common/DgtDLL.h"
 #include <QMainWindow>
 #include <QString>
 #include <QTranslator>
@@ -46,6 +47,8 @@ public slots:
 	void playEngineMove(const QString&, const QString&);
 	void clockAlarm(int);
 	void moveEntered(ChessMove&);
+	void dgtStatus(int);
+	void dgtStatusClicked(bool);
 
 public:
 	QChessGame* currentGame;
@@ -70,24 +73,26 @@ private:
 	QAction* abortAct;
 	QAction* flipAct;
 	QAction* installEngineAct;
+	QAction* useDgtAct;
+	QToolButton* dgtIcon;
 	QTranslator translator;
 	QActionGroup * langGroup;
 	QString locale;
 	QSplitter* hSplitter;
 	QSplitter* vSplitter;
-	QToolButton* dgtIcon;
 	BoardWindow* boardwindow;
 	Scoresheet* scoresheet;
 	ClockWindow* clockwindow;
 	EngineWindow* enginewindow;
 	Engine* engine;
+//	DgtDLL* dgt;
 	DgtBoard* dgt;
 	//Engine* analysisEngine;
 	Database* database;
 	NewGameSetting gameSetting;
 	Player player;
 	EnginePlayers engines;
-//	EngineFeature engineFeature;
+	//	EngineFeature engineFeature;
 	int engineColor;
 	int enginestate; // unloaded=0, installing=1, checking=2, playing=3
 	bool running;
@@ -106,4 +111,5 @@ private:
 	void endGame();
 	void saveGame();
 	void installEngine();
+	void useDgt();
 };
