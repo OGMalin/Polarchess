@@ -385,6 +385,15 @@ void BoardWindow::setPosition(const ChessBoard& cb)
 	update();
 }
 
+void BoardWindow::setPiece(int sq, int piece)
+{
+	dragPiece = EMPTY;
+	currentBoard.board[SQUARE128(sq)] = piece;
+	squareMarkup.clear();
+	arrowMarkup.clear();
+	update();
+}
+
 void BoardWindow::showContextMenu(const QPoint& pos)
 {
 	QMenu* contextMenu = new QMenu(this);

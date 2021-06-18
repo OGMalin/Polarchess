@@ -32,9 +32,13 @@ public:
 	void newGame();
 	void setPosition(const QString& fen);
 	void setPosition(const ChessBoard& cb);
+	// sq=square (0-63), timeout in sec.
 	void markSquare(int sq, QColor color, int timeout);
+	// from, to = square (0-63), timeout in sec.
 	void markArrow(int from, int to, QColor color, int timeout);
 	void setTheme(BOARDTHEMA& t);
+	// sq=square (0-63)
+	void setPiece(int sq, int piece);
 	BOARDTHEMA getTheme();
 
 public slots:

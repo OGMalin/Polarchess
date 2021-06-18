@@ -326,6 +326,13 @@ int ChessBoard::legalMoves()
 	return n;
 }
 
+int ChessBoard::legalMoves(MoveList& ml)
+{
+	MoveGenerator gen;
+	gen.makeMoves(*this, ml);
+	return ml.size();
+}
+
 const ChessMove ChessBoard::getMoveFromText(const std::string text)
 {
 	int moveit;

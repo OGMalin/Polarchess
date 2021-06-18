@@ -19,7 +19,7 @@ public slots:
 	void listPorts();
 	void connectDgt();
 	void disconnectDgt();
-	void readFromDGT();
+//	void readFromDGT();
 	void readyRead();
 	void timerMessage();
 	void comError(QSerialPort::SerialPortError);
@@ -36,10 +36,12 @@ public:
 	~DgtBoard();
 	// Return values: 0=Not connected, 1=Connected out of sync, 2=Connected in sync
 	int status();
+	// Let the driver know the GUI position
 	void setBoard(ChessBoard&);
 private:
 	DGT_MSG_VERSION_STRUCT version;
-	ChessBoard guiBoard; // Gui board
+	ChessBoard guiCBBoard; // Gui board
+	BYTE guiBoard[64]; // Gui board in dgt format
 	BYTE stableBoard[64]; // Last stable board
 	BYTE lastBoard[64]; // Last received board from the DGT board
 	DGT_MSG_BWTIME_STRUCT clock;
@@ -58,10 +60,12 @@ private:
 	QTimer* timer;
 	void interpretMessage(BYTE code, int datalength, BYTE* data);
 	void write(BYTE command);
-	void updateDialog();
+	void updateDialog(BYTE*);
+	void updateDialog(BYTE fiield, BYTE piece);
 	bool equalBoard(BYTE*, BYTE*);
 	bool equalBoard(ChessBoard&, BYTE*);
-	void convertBoard(ChessBoard&, BYTE*);
+	void convertBoard(ChessBoard& from, BYTE* to);
 	// Search to find the moves between the two board
 	void findPossibleMoves(MoveList*, ChessBoard& start, ChessBoard& end);
+	ChessMove getLegalMove(BYTE*);
 };

@@ -3,6 +3,7 @@
 #include <string>
 #include "../Common/defs.h"
 #include "../Common/ChessMove.h"
+#include "../Common//MoveList.h"
 
 enum { FIDE, SAN, LAN, COOR, UCI };
 
@@ -47,7 +48,10 @@ public:
 	typePiece pieceAt(int file, int row);
 	typePiece getPieceFromChar(char c);
 	char getCharFromPiece(typePiece p);
+	// Return number of legal moves
 	int legalMoves();
+	// Return number of legal moves and fill all moves in ml
+	int legalMoves(MoveList& ml);
 	HASHKEY hashkey();
 	HASHKEY newHashkey(const ChessMove& m, HASHKEY oldkey);
 

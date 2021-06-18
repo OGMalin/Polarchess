@@ -32,6 +32,10 @@ QString convertToHex(QByteArray& data)
 DgtBoard::DgtBoard(QWidget* parent)
 	: QDialog(parent)
 {
+	memset(guiBoard, 0, 64);
+	memset(stableBoard, 0, 64);
+	memset(lastBoard, 0, 64);
+
 	port = new QSerialPort(this);
 //	connect(port, &QSerialPort::readyRead, this, &DgtBoard::readFromDGT);
 	connect(port, &QSerialPort::readyRead, this, &DgtBoard::readyRead);
@@ -47,6 +51,7 @@ DgtBoard::DgtBoard(QWidget* parent)
 	_status = 0;
 
 	timer = new QTimer();
+	timer->setSingleShot(true);
 	connect(timer, SIGNAL(timeout()), this, SLOT(timerMessage()));
 
 	vbox = new QVBoxLayout;
@@ -144,21 +149,15 @@ void DgtBoard::connectDgt()
 		//port->setDataTerminalReady(false);
 		//port->setRequestToSend(false);
 		_sleep(1500);
-		_status = 1;
-
-		statusLine->setText("Connected");
 		write(DGT_SEND_RESET);
 		write(DGT_SEND_VERSION);
-		write(DGT_SEND_CLK);
-		write(DGT_SEND_BRD);
-		write(DGT_SEND_UPDATE_NICE);
 	}
 	else
 	{
 		statusLine->setText("Disconnected");
 		_status = 0;
+		emit dgtStatus(_status);
 	}
-	emit dgtStatus(_status);
 }
 
 void DgtBoard::disconnectDgt()
@@ -207,10 +206,15 @@ void DgtBoard::readyRead()
 		qDebug(QString(port->portName() + QString(" -> Msglen: ") + QString(itoa(msglen, d, 16))).toLatin1());
 
 		//	eventLoop.exec();
-
-		QApplication::processEvents();
-		if (port->read(d, msglen) != msglen)
-			return;
+		if (msglen > 0)
+		{
+			QApplication::processEvents();
+			if (port->read(d, msglen) != msglen)
+			{
+				qDebug("Can't read the message, not enough bytes.");
+				return;
+			}
+		}
 
 		qDebug(QString(port->portName() + QString(" -> ") + convertToHex((BYTE*)d, msglen)).toLatin1());
 
@@ -219,66 +223,67 @@ void DgtBoard::readyRead()
 	}
 }
 
-void DgtBoard::readFromDGT()
-{
-	BYTE code;
-	int index, i, msglen, j;
-	QByteArray data;
-	BYTE d[0x3000];
-	index = 0;
-	while (1)
-	{
-		QApplication::processEvents();
-		port->waitForReadyRead(500);
-		data = port->readAll();
-		if (!data.size())
-			break;
-		qDebug(QString(port->portName() + QString(" -> ") + convertToHex(data)).toLatin1());
-		msglen = 0;
-		for (i=0;i<data.size();i++)
-		{
-			if (index == 0)
-			{
-				if ((data[i] & (BYTE)0x80) == 0)
-					continue;
-				code = data[i];
-				++index;
-			}
-			else if (index == 1)
-			{
-				msglen = (data[i] & (BYTE)0x7f) << 7;
-				++index;
-			}
-			else if (index == 2)
-			{
-				msglen += data[i] & (BYTE)0x7f;
-				++index;
-			}
-			else
-			{
-				++index;
-				if (index == msglen)
-				{
-					for (j = 0; j < data.size(); j++)
-						d[j] = data[j];
-					interpretMessage(code, msglen - 3, &d[3]);
-					index = 0;
-					msglen = 0;
-				}
-			}
-
-		}
-		break;
-	}
-	if (index)
-		qDebug(QString(port->portName() + QString(" *-> ") + convertToHex(data)).toLatin1());
-}
+//void DgtBoard::readFromDGT()
+//{
+//	BYTE code;
+//	int index, i, msglen, j;
+//	QByteArray data;
+//	BYTE d[0x3000];
+//	index = 0;
+//	while (1)
+//	{
+//		QApplication::processEvents();
+//		port->waitForReadyRead(500);
+//		data = port->readAll();
+//		if (!data.size())
+//			break;
+//		qDebug(QString(port->portName() + QString(" -> ") + convertToHex(data)).toLatin1());
+//		msglen = 0;
+//		for (i=0;i<data.size();i++)
+//		{
+//			if (index == 0)
+//			{
+//				if ((data[i] & (BYTE)0x80) == 0)
+//					continue;
+//				code = data[i];
+//				++index;
+//			}
+//			else if (index == 1)
+//			{
+//				msglen = (data[i] & (BYTE)0x7f) << 7;
+//				++index;
+//			}
+//			else if (index == 2)
+//			{
+//				msglen += data[i] & (BYTE)0x7f;
+//				++index;
+//			}
+//			else
+//			{
+//				++index;
+//				if (index == msglen)
+//				{
+//					for (j = 0; j < data.size(); j++)
+//						d[j] = data[j];
+//					interpretMessage(code, msglen - 3, &d[3]);
+//					index = 0;
+//					msglen = 0;
+//				}
+//			}
+//
+//		}
+//		break;
+//	}
+//	if (index)
+//		qDebug(QString(port->portName() + QString(" *-> ") + convertToHex(data)).toLatin1());
+//}
 
 void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 {
 	MoveList* ml = new MoveList;
 	ChessBoard bS;
 	ChessBoard bL;
+	ChessMove move;
 	int i,j;
 	QString qs;
 	switch (code)
@@ -289,22 +294,21 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 			qDebug("DGT_MSG_BOARD_DUMP messagelength mismatch");
 			break;
 		}
-		if (equalBoard(stableBoard, data))
+		move = getLegalMove(data);
+		if (move.empty())
 			break;
-		if (!equalBoard(lastBoard, data))
+
+		memcpy(lastBoard, data, 64);
+		if (timer->isActive())
 		{
-			memcpy(lastBoard, data, 64);
-			if (isVisible())
-				updateDialog();
+			updateDialog(lastBoard);
+			write(DGT_SEND_BRD);
 			break;
 		}
-		if (isVisible())
-			updateDialog();
+		if (equalBoard(stableBoard, lastBoard))
+			break;
 		memcpy(stableBoard, lastBoard, 64);
-		convertBoard(bS, stableBoard);
-		convertBoard(bL, lastBoard);
-		findPossibleMoves(ml, bS, bL);
-		emit newPosition(bS, *ml);
+		emit newMove(move);
 		break;
 	case DGT_MSG_BWTIME:
 		if (datalength != DGT_MSG_BWTIME_SIZE)
@@ -326,12 +330,14 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 			qDebug("DGT_MSG_FIELD_UPDATE messagelength mismatch");
 			break;
 		}
+		timer->stop();
 		write(DGT_SEND_BRD);
+//		timer->start(500);
 		//field.field = data[0];
 		//field.piece = data[1];
 //		if (field.field<64)
 //			lastBoard[field.field] = field.piece;
-//		updateDialog();
+		updateDialog(data[0],data[1]);
 		break;
 	case DGT_MSG_BUSADRES:
 		if (datalength != DGT_MSG_BUSADRES_SIZE)
@@ -356,6 +362,7 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 		trademark = (char*)data;
 		break;
 	case DGT_MSG_VERSION:
+		// Version are used to check for connection.
 		if (datalength != DGT_MSG_VERSION_SIZE)
 		{
 			qDebug("DGT_MSG_VERSION messagelength mismatch");
@@ -366,6 +373,12 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 		qs= "Dgt Board version: ";
 		QTextStream(&qs) << (int)version.major << "." << ((version.minor<10)?"0":"") << (int)version.minor;
 		dgtVersion->setText(qs);
+		statusLine->setText("Connected");
+		_status = 1;
+		emit dgtStatus(_status);
+		write(DGT_SEND_CLK);
+		write(DGT_SEND_BRD);
+		write(DGT_SEND_UPDATE_NICE);
 		break;
 	case DGT_MSG_ERROR:
 	case DGT_MSG_NONE:
@@ -385,23 +398,35 @@ void DgtBoard::write(BYTE command)
 		_status = 0;
 		return;
 	}
-	BYTE sz[2];
-	sz[0] = command;
-	port->write((char*)sz,1);
+	port->write((char*)&command, 1);
 	port->flush();
 
 	qDebug(QString(port->portName() + QString(" <- ") + convertToHex(&command,1)).toLatin1());
-	_sleep(200);
+	_sleep(100);
 	QApplication::processEvents();
-	//	port->waitForBytesWritten(1000);
-	//	_sleep(200);
 }
 
-void DgtBoard::updateDialog()
+void DgtBoard::updateDialog(BYTE* data)
 {
 	ChessBoard cb;
 	convertBoard(cb, lastBoard);
 	boardwindow->setPosition(cb);
+}
+
+void DgtBoard::updateDialog(BYTE field, BYTE piece)
+{
+	int p[13] = { EMPTY,whitepawn,whiterook,whiteknight,whitebishop,whiteking,whitequeen,blackpawn,blackrook,blackknight,blackbishop,blackking,blackqueen };
+	int sq[64] = {  56,57,58,59,60,61,62,63,
+					48,49,50,51,52,53,54,55,
+					40,41,42,43,44,45,46,47,
+					32,33,34,35,36,37,38,39,
+					24,25,26,27,28,29,30,31,
+					16,17,18,19,20,21,22,23,
+					 8, 9,10,11,12,13,14,15,
+					 0, 1, 2, 3, 4, 5, 6, 7 };
+	if ((field > 63) || (piece > 12))
+		return;
+	boardwindow->setPiece(sq[field], p[piece]);
 }
 
 void DgtBoard::timerMessage()
@@ -431,14 +456,17 @@ bool DgtBoard::equalBoard(BYTE*b1, BYTE*b2)
 	return true;
 }
 
-bool DgtBoard::equalBoard(ChessBoard& cb, BYTE* b)
+bool DgtBoard::equalBoard(ChessBoard& cb, BYTE* data)
 {
-	return false;
+	BYTE b[64];
+	convertBoard(cb, b);
+	return equalBoard(b, data);
 }
 
+// Convert from ChessBoard to DGT board
 void DgtBoard::convertBoard(ChessBoard& cb, BYTE* b)
 {
-	int dgtpiece[13] = { 0,1,4,2,3,6,5,7,10,8,9,12,11 };
+	int piece[13] = { DGT_EMPTY,DGT_WPAWN,DGT_WKNIGHT,DGT_WBISHOP,DGT_WROOK,DGT_WQUEEN,DGT_WKING,DGT_BPAWN,DGT_BKNIGHT,DGT_BBISHOP,DGT_BROOK,DGT_BQUEEN,DGT_BKING };
 	int i;
 	int f, r;
 	i = 0;
@@ -446,12 +474,12 @@ void DgtBoard::convertBoard(ChessBoard& cb, BYTE* b)
 	{
 		for (f = 0; f < 8; f++)
 		{
-			if (b[i] < 13)
-				cb.board[SQUARE(f, r)] = dgtpiece[b[i]];
+			b[i] = piece[cb.board[SQUARE(f, r)]];
 			++i;
 		}
 	}
 }
+
 
 void DgtBoard::findPossibleMoves(MoveList*, ChessBoard& start, ChessBoard& end)
 {
@@ -460,13 +488,32 @@ void DgtBoard::findPossibleMoves(MoveList*, ChessBoard& start, ChessBoard& end)
 
 void DgtBoard::setBoard(ChessBoard& cb)
 {
-	guiBoard = cb;
+	guiCBBoard = cb;
+	convertBoard(cb, guiBoard);
 	if (_status)
 	{
-		if (equalBoard(cb,stableBoard))
+		if (equalBoard(guiBoard,stableBoard))
 			_status=2;
 		else
 			_status=1;
 	}
 	emit dgtStatus(_status);
+}
+
+ChessMove DgtBoard::getLegalMove(BYTE* data)
+{
+	MoveList ml;
+	ChessBoard cb;
+	BYTE b[64];
+	int i;
+	guiCBBoard.legalMoves(ml);
+	for (i = 0; i < ml.size(); i++)
+	{
+		cb = guiCBBoard;
+		cb.doMove(ml[i],false);
+		convertBoard(cb, b);
+		if (equalBoard(data, b))
+			return ml[i];
+	}
+	return ChessMove();
 }
