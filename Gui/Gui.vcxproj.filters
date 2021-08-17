@@ -110,7 +110,7 @@
     <ClCompile Include="..\Common\DgtBoard.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\Common\DgtDll.cpp">
+    <ClCompile Include="..\Common\Timer.cpp">
       <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>
@@ -160,9 +160,6 @@
     <QtMoc Include="..\Common\DgtBoard.h">
       <Filter>Common</Filter>
     </QtMoc>
-    <QtMoc Include="..\Common\DgtDLL.h">
-      <Filter>Common</Filter>
-    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="Gui.qrc">
@@ -198,6 +195,12 @@
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="..\Common\DgtProtocol.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\defs.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Timer.h">
       <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>

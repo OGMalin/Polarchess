@@ -110,12 +110,15 @@ NewGameDialog::NewGameDialog(QWidget *parent, Engine* eng)
 	label1 = new QLabel(tr("Predefined timecontrols:"));
 	combo = new QComboBox();
 	combo->addItem(tr(""));
+	combo->addItem(tr("90 min. + g/30 min + 30 sec."));
 	combo->addItem(tr("90 min. + 30 sec."));
 	combo->addItem(tr("30 min."));
+	combo->addItem(tr("25 min. + 10 sec."));
 	combo->addItem(tr("15 min. + 10 sec."));
+	combo->addItem(tr("5 min. + 3 sec."));
 	combo->addItem(tr("5 min."));
 	combo->addItem(tr("3 min. + 2 sec."));
-	combo->addItem(tr("1 min. + 2 sec."));
+	combo->addItem(tr("1 min. + 1 sec."));
 	hbox->addWidget(label1);
 	hbox->addWidget(combo);
 	vbox->addLayout(hbox);
@@ -315,41 +318,62 @@ void NewGameDialog::slotPreTime(int index)
 	case 1:
 		starttime->setTime(QTime(1, 30, 0));
 		starttimeinc->setTime(QTime(0, 0, 30));
+		suddendeath->setTime(QTime(0, 30, 0));
+		moves->setChecked(true);
+		suddendeath->setEnabled(true);
+		break;
+	case 2:
+		starttime->setTime(QTime(1, 30, 0));
+		starttimeinc->setTime(QTime(0, 0, 30));
 		suddendeath->setTime(QTime(0, 0, 0));
 		moves->setChecked(false);
 		suddendeath->setEnabled(false);
 		break;
-	case 2:
+	case 3:
 		starttime->setTime(QTime(0, 30, 0));
 		starttimeinc->setTime(QTime(0, 0, 0));
 		suddendeath->setTime(QTime(0, 0, 0));
 		moves->setChecked(false);
 		suddendeath->setEnabled(false);
 		break;
-	case 3:
+	case 4:
+		starttime->setTime(QTime(0, 25, 0));
+		starttimeinc->setTime(QTime(0, 0, 10));
+		suddendeath->setTime(QTime(0, 0, 0));
+		moves->setChecked(false);
+		suddendeath->setEnabled(false);
+		break;
+	case 5:
 		starttime->setTime(QTime(0, 15, 0));
 		starttimeinc->setTime(QTime(0, 0, 10));
 		suddendeath->setTime(QTime(0, 0, 0));
 		moves->setChecked(false);
 		suddendeath->setEnabled(false);
 		break;
-	case 4:
+	case 6:
+		starttime->setTime(QTime(0, 5, 0));
+		starttimeinc->setTime(QTime(0, 0, 3));
+		suddendeath->setTime(QTime(0, 0, 0));
+		moves->setChecked(false);
+		suddendeath->setEnabled(false);
+		break;
+	case 7:
 		starttime->setTime(QTime(0, 5, 0));
 		starttimeinc->setTime(QTime(0, 0, 0));
 		suddendeath->setTime(QTime(0, 0, 0));
 		moves->setChecked(false);
 		suddendeath->setEnabled(false);
 		break;
-	case 5:
+	case 8:
 		starttime->setTime(QTime(0, 3, 0));
 		starttimeinc->setTime(QTime(0, 0, 2));
 		suddendeath->setTime(QTime(0, 0, 0));
 		moves->setChecked(false);
 		suddendeath->setEnabled(false);
 		break;
-	case 6:
+	case 9:
 		starttime->setTime(QTime(0, 1, 0));
-		starttimeinc->setTime(QTime(0, 0, 2));
+		starttimeinc->setTime(QTime(0, 0, 1));
 		suddendeath->setTime(QTime(0, 0, 0));
 		moves->setChecked(false);
 		suddendeath->setEnabled(false);

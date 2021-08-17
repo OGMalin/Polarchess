@@ -14,7 +14,8 @@
     <ProjectGuid>{0880A708-BBB3-43EB-A55F-1B3E350FC102}</ProjectGuid>
     <Keyword>QtVS_v304</Keyword>
     <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
-  <QtMsBuild Condition="'$(QtMsBuild)'=='' or !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild></PropertyGroup>
+    <QtMsBuild Condition="'$(QtMsBuild)'=='' or !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -25,13 +26,9 @@
     <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  
-  
-  
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
     <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
   </Target>
-  
   <ImportGroup Label="ExtensionSettings" />
   <ImportGroup Label="Shared" />
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -40,7 +37,31 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <PropertyGroup Label="UserMacros" /><ImportGroup Condition="Exists('$(QtMsBuild)\qt_defaults.props')"><Import Project="$(QtMsBuild)\qt_defaults.props" /></ImportGroup><PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'"><OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir><CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet><RunCodeAnalysis>false</RunCodeAnalysis></PropertyGroup><PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"><OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir><CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet><RunCodeAnalysis>false</RunCodeAnalysis></PropertyGroup><PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'"><QtInstall>$(DefaultQtVersion)</QtInstall><QtModules>core;sql;network;gui;widgets;serialport</QtModules></PropertyGroup><PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"><QtInstall>$(DefaultQtVersion)</QtInstall><QtModules>core;sql;network;gui;widgets;serialport</QtModules></PropertyGroup><ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')"><Import Project="$(QtMsBuild)\qt.props" /></ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt_defaults.props')">
+    <Import Project="$(QtMsBuild)\qt_defaults.props" />
+  </ImportGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <QtInstall>$(DefaultQtVersion)</QtInstall>
+    <QtModules>core;sql;network;gui;widgets;serialport</QtModules>
+  </PropertyGroup>
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <QtInstall>$(DefaultQtVersion)</QtInstall>
+    <QtModules>core;sql;network;gui;widgets;serialport</QtModules>
+  </PropertyGroup>
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
+    <Import Project="$(QtMsBuild)\qt.props" />
+  </ImportGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -51,7 +72,8 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <EnablePREfast>false</EnablePREfast>
-    <MultiProcessorCompilation>true</MultiProcessorCompilation></ClCompile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
@@ -60,19 +82,20 @@
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtMoc>
-      
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
-      
-      
-    <QtMocDir>.\GeneratedFiles\$(ConfigurationName)</QtMocDir><QtMocFileName>moc_%(Filename).cpp</QtMocFileName></QtMoc>
+      <QtMocDir>.\GeneratedFiles\$(ConfigurationName)</QtMocDir>
+      <QtMocFileName>moc_%(Filename).cpp</QtMocFileName>
+    </QtMoc>
     <QtUic>
       <ExecutionDescription>Uic'ing %(Identity)...</ExecutionDescription>
-      
-    <QtUicDir>.\GeneratedFiles</QtUicDir><QtUicFileName>ui_%(Filename).h</QtUicFileName></QtUic>
+      <QtUicDir>.\GeneratedFiles</QtUicDir>
+      <QtUicFileName>ui_%(Filename).h</QtUicFileName>
+    </QtUic>
     <QtRcc>
       <ExecutionDescription>Rcc'ing %(Identity)...</ExecutionDescription>
-      
-    <QtRccDir>.\GeneratedFiles</QtRccDir><QtRccFileName>qrc_%(Filename).cpp</QtRccFileName></QtRcc>
+      <QtRccDir>.\GeneratedFiles</QtRccDir>
+      <QtRccFileName>qrc_%(Filename).cpp</QtRccFileName>
+    </QtRcc>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -83,7 +106,8 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <EnablePREfast>false</EnablePREfast>
-    <MultiProcessorCompilation>true</MultiProcessorCompilation></ClCompile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
@@ -92,19 +116,20 @@
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtMoc>
-      
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
-      
-      
-    <QtMocDir>.\GeneratedFiles\$(ConfigurationName)</QtMocDir><QtMocFileName>moc_%(Filename).cpp</QtMocFileName></QtMoc>
+      <QtMocDir>.\GeneratedFiles\$(ConfigurationName)</QtMocDir>
+      <QtMocFileName>moc_%(Filename).cpp</QtMocFileName>
+    </QtMoc>
     <QtUic>
       <ExecutionDescription>Uic'ing %(Identity)...</ExecutionDescription>
-      
-    <QtUicDir>.\GeneratedFiles</QtUicDir><QtUicFileName>ui_%(Filename).h</QtUicFileName></QtUic>
+      <QtUicDir>.\GeneratedFiles</QtUicDir>
+      <QtUicFileName>ui_%(Filename).h</QtUicFileName>
+    </QtUic>
     <QtRcc>
       <ExecutionDescription>Rcc'ing %(Identity)...</ExecutionDescription>
-      
-    <QtRccDir>.\GeneratedFiles</QtRccDir><QtRccFileName>qrc_%(Filename).cpp</QtRccFileName></QtRcc>
+      <QtRccDir>.\GeneratedFiles</QtRccDir>
+      <QtRccFileName>qrc_%(Filename).cpp</QtRccFileName>
+    </QtRcc>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Common\BaseEngine.cpp" />
@@ -159,82 +184,50 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MoveTableWindow.h">
-      
-      
-      
-      
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="CommentWindow.h">
-      
-      
-      
-      
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="OpeningWindow.h">
-      
-      
-      
-      
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="..\Common\BoardWindow.h">
-      
-      
-      
-      
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="DatabaseDialog.h">
-      
-      
     </QtMoc>
     <QtMoc Include="..\Common\DgtBoard.h">
-      
-      
     </QtMoc>
     <QtMoc Include="..\Common\BoardOption.h">
-      
-      
     </QtMoc>
     <ClInclude Include="..\Common\DgtProtocol.h" />
     <QtMoc Include="AnalyzeDialog.h">
-      
-      
     </QtMoc>
     <ClInclude Include="CreateEngine.h" />
     <ClInclude Include="DatabaseFormat.h" />
     <QtMoc Include="ExportPgnDialog.h">
-      
-      
     </QtMoc>
     <ClInclude Include="ListOrderDialog.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql;$(QTDIR)\include\QtSerialPort;$(QTDIR)\include\QtNetwork</IncludePath>
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql;$(QTDIR)\include\QtSerialPort;$(QTDIR)\include\QtNetwork</IncludePath>
     </ClInclude>
     <QtMoc Include="TrainingWindow.h">
-      
-      
     </QtMoc>
     <ClInclude Include="Openings.h" />
     <ClInclude Include="OpeningsDialog.h" />
     <ClInclude Include="resource.h" />
     <QtMoc Include="TrainingDialog.h">
-      
-      
     </QtMoc>
     <ClInclude Include="WDLBar.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtSql</IncludePath>
     </ClInclude>
     <QtMoc Include="..\Common\BaseEngine.h">
-      
-      
     </QtMoc>
     <ClInclude Include="..\Common\ChessBoard.h" />
     <ClInclude Include="..\Common\ChessGame.h" />
@@ -242,8 +235,6 @@
     <ClInclude Include="..\Common\defs.h" />
     <ClInclude Include="..\Common\Epd.h" />
     <QtMoc Include="Watch.h">
-      
-      
     </QtMoc>
     <ClInclude Include="..\Common\UciEngine.h" />
     <ClInclude Include="..\Common\XBoardEngine.h" />
@@ -251,10 +242,6 @@
     <ClInclude Include="Training.h" />
     <ClInclude Include="Statistics.h" />
     <QtMoc Include="..\Common\Engine.h">
-      
-      
-      
-      
     </QtMoc>
     <ClInclude Include="..\Common\MoveGenerator.h" />
     <ClInclude Include="..\Common\MoveList.h" />
@@ -263,35 +250,17 @@
     <ClInclude Include="..\Common\PolyglotBook.h" />
     <ClInclude Include="..\Common\WinFile.h" />
     <QtMoc Include="ImportPgnDialog.h">
-      
-      
     </QtMoc>
     <ClInclude Include="Path.h" />
     <QtMoc Include="EngineWindow.h">
-      
-      
-      
-      
     </QtMoc>
     <QtMoc Include="PathWindow.h">
-      
-      
-      
-      
     </QtMoc>
     <ClInclude Include="..\Common\Relations.h" />
     <ClInclude Include="..\Common\Utility.h" />
     <QtMoc Include="Database.h">
-      
-      
-      
-      
     </QtMoc>
     <QtMoc Include="AboutDialog.h">
-      
-      
-      
-      
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

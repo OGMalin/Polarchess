@@ -626,6 +626,29 @@ void MainWindow::dgtStatus(int status)
 	}
 }
 
+void MainWindow::dgtNewMove(ChessMove& m)
+{
+	moveEntered(m);
+}
+
+void MainWindow::dgtNewGame()
+{
+	newGame();
+}
+
+void MainWindow::dgtResult(int result)
+{
+	QString qs;
+	//if (result == DRAW)
+	//	qs = "1/2-1/2";
+	//else if (result == WHITEWIN)
+	//	qs = "1-0";
+	//else
+	//	qs = BLACKWIN;
+	currentGame->result(qs);
+	endGame();
+}
+
 void MainWindow::dgtStatusClicked(bool)
 {
 	if (dgt->isVisible())
@@ -643,10 +666,16 @@ void MainWindow::useDgt()
 //			dgt = new DgtDLL(this);
 			dgt = new DgtBoard(this);
 			connect(dgt, SIGNAL(dgtStatus(int)), this, SLOT(dgtStatus(int)));
+			connect(dgt, SIGNAL(dgtNewMove(ChessMove&)), this, SLOT(dgtNewMove(ChessMove&)));
+			connect(dgt, SIGNAL(dgtNewGame()), this, SLOT(dgtNewGame()));
+			connect(dgt, SIGNAL(dgtResult(int)), this, SLOT(dgtResult(int)));
 			dgtIcon = new QToolButton();
 			dgtIcon->setIcon(QIcon(":/icon/dgtDisconnect.png"));
 			connect(dgtIcon, SIGNAL(clicked(bool)), this, SLOT(dgtStatusClicked(bool)));
 			statusBar()->addPermanentWidget(dgtIcon);
+			dgt->setBoard(currentGame->getPosition().board());
+			if (!dgt->autoConnect())
+				dgt->show();
 		}
 	}
 	else
