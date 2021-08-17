@@ -29,7 +29,12 @@ QString convertToHex(QByteArray& data)
 	return qs;
 }
 
-#ifdef WINDOWS_SERIAL
+void CALLBACK staticStableTimeout(HWND hwnd, UINT msg, UINT_PTR idEvent, DWORD dw)
+{
+	qDebug("DGT -> Static timeout.");
+	((DgtBoard*)idEvent)->stableTimeout();
+}
+
 void DgtBoard::threadLoop(void*lpv)
 {
 	// Maks lengde på meldinger fra DGT brettet er 16k
@@ -92,7 +97,7 @@ void DgtBoard::threadLoop(void*lpv)
 	}
 	_endthread();
 };
-#endif
+
 DgtBoard::DgtBoard(QWidget* parent)
 	: QDialog(parent)
 {
@@ -100,18 +105,12 @@ DgtBoard::DgtBoard(QWidget* parent)
 	waitForClockAck = false;
 	memset(guiBoard, 0, 64);
 	memset(stableBoard, 0, 64);
+	timerID = 0;
 ////	memset(lastBoard, 0, 64);
 	updateMode = 0;
-#ifdef WINDOWS_SERIAL
 	hThread = NULL;
 	hComm = NULL;
 	abort = true;
-#else
-	port = new QSerialPort(this);
-//	connect(port, &QSerialPort::readyRead, this, &DgtBoard::readFromDGT);
-	connect(port, &QSerialPort::readyRead, this, &DgtBoard::readyRead);
-	connect(port, SIGNAL(errorOccurred(QSerialPort::SerialPortError)), this, SLOT(comError(QSerialPort::SerialPortError)));
-#endif
 	setWindowTitle(tr("DGT board"));
 	setSizeGripEnabled(true);
 	QGridLayout* grid = new QGridLayout(this); //Main grid
@@ -201,10 +200,8 @@ DgtBoard::DgtBoard(QWidget* parent)
 
 DgtBoard::~DgtBoard()
 {
-//#ifdef WINDOWS_SERIAL
 //	disconnectDgt();
 //	CloseHandle(hThread);
-//#endif
 //	close();
 }
 //
@@ -226,7 +223,6 @@ void DgtBoard::listPorts()
 	portlist->setFixedWidth(portlist->minimumSizeHint().width());
 }
 
-#ifdef WINDOWS_SERIAL
 void DgtBoard::connectDgt(QString portname)
 {
 	DCB dcb;
@@ -328,163 +324,6 @@ void DgtBoard::disconnectDgt()
 	updateMode = 0;
 	clockConnected = false;
 }
-
-#else
-void DgtBoard::connectDgt(QString portname)
-{
-	QSettings settings;
-	if (port->isOpen())
-		port->close();
-	if (portname.isEmpty())
-		portname = portlist->currentText();
-	QByteArray ba;
-	port->setPortName(portname);
-	port->setBaudRate(QSerialPort::Baud9600);
-	port->setDataBits(QSerialPort::Data8);
-	port->setStopBits(QSerialPort::OneStop);
-	port->setParity(QSerialPort::NoParity);
-	port->setFlowControl(QSerialPort::NoFlowControl);
-	if (port->open(QIODevice::ReadWrite))//| QIODevice::Unbuffered))
-	{
-		settings.beginGroup("Dgt");
-		settings.setValue("port", portname);
-		settings.endGroup();
-		//port->setBreakEnabled(false);
-		//port->setDataTerminalReady(false);
-		//port->setRequestToSend(false);
-		_sleep(1500);
-		updateMode = DGT_SEND_RESET;
-		write(updateMode);
-		write(DGT_SEND_VERSION);
-	}
-	else
-	{
-		statusLine->setText("Disconnected");
-		_status = 0;
-		emit dgtStatus(_status);
-	}
-}
-
-void DgtBoard::disconnectDgt()
-{
-	if (port->isOpen())
-		port->close();
-	_status = 0;
-	timer->stop();
-	emit dgtStatus(_status);
-	statusLine->setText("Disconnected");
-}
-
-void DgtBoard::readyRead()
-{
-	BYTE code;
-	int index, i, datalen, j;
-	QByteArray data;
-	char d[0x3000];
-	index = 0;
-//	QApplication::processEvents();
-
-//	eventLoop.exec();
-
-	if (!port->isOpen())
-		return;
-	_sleep(100);
-	while (port->bytesAvailable())
-	{
-		if (port->read(d, 1) != 1)
-			return;
-		code = (BYTE)d[0];
-
-		qDebug(QString(port->portName() + QString(" -> Code: ") + QString(itoa(code, d, 16))).toLatin1());
-
-		//	eventLoop.exec();
-
-//		QApplication::processEvents();
-		if (port->read(d, 2) != 2)
-			return;
-		datalen = MSG_LENGTH(d[0], d[1]);
-
-//		msglen = ((BYTE)d[0] & (BYTE)0x7f) << 7;
-//		msglen += (BYTE)d[1] & (BYTE)0x7f;
-
-		// Msg length include command and msg length bytes.
-		datalen -= 3;
-
-		qDebug(QString(port->portName() + QString(" -> Msglen: ") + QString(itoa(datalen, d, 16))).toLatin1());
-
-		//	eventLoop.exec();
-		if (datalen > 0)
-		{
-//			QApplication::processEvents();
-			if (port->read(d, datalen) != datalen)
-			{
-				qDebug("Can't read the message, not enough bytes.");
-				return;
-			}
-		}
-
-		qDebug(QString(port->portName() + QString(" -> ") + convertToHex((BYTE*)d, datalen)).toLatin1());
-
-		interpretMessage(code, datalen, (BYTE*)d);
-//		_sleep(100);
-	}
-}
-
-//void DgtBoard::readFromDGT()
-//{
-//	BYTE code;
-//	int index, i, msglen, j;
-//	QByteArray data;
-//	BYTE d[0x3000];
-//	index = 0;
-//	while (1)
-//	{
-//		QApplication::processEvents();
-//		port->waitForReadyRead(500);
-//		data = port->readAll();
-//		if (!data.size())
-//			break;
-//		qDebug(QString(port->portName() + QString(" -> ") + convertToHex(data)).toLatin1());
-//		msglen = 0;
-//		for (i=0;i<data.size();i++)
-//		{
-//			if (index == 0)
-//			{
-//				if ((data[i] & (BYTE)0x80) == 0)
-//					continue;
-//				code = data[i];
-//				++index;
-//			}
-//			else if (index == 1)
-//			{
-//				msglen = (data[i] & (BYTE)0x7f) << 7;
-//				++index;
-//			}
-//			else if (index == 2)
-//			{
-//				msglen += data[i] & (BYTE)0x7f;
-//				++index;
-//			}
-//			else
-//			{
-//				++index;
-//				if (index == msglen)
-//				{
-//					for (j = 0; j < data.size(); j++)
-//						d[j] = data[j];
-//					interpretMessage(code, msglen - 3, &d[3]);
-//					index = 0;
-//					msglen = 0;
-//				}
-//			}
-//
-//		}
-//		break;
-//	}
-//	if (index)
-//		qDebug(QString(port->portName() + QString(" *-> ") + convertToHex(data)).toLatin1());
-//}
-#endif
 
 void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 {
@@ -799,7 +638,6 @@ void DgtBoard::writeClock(BYTE command, BYTE* message)
 	}
 }
 
-#ifdef WINDOWS_SERIAL
 void DgtBoard::write(BYTE command)
 {
 	//	if (_status == 0)
@@ -829,25 +667,6 @@ void DgtBoard::write(BYTE* message, int length)
 		qDebug("DGT -> Try to write %i bytes but did only write %i bytes.", length, written);
 }
 
-#else
-void DgtBoard::write(BYTE command)
-{
-//	if (_status == 0)
-//		return;
-	if (!port->isOpen())
-	{
-		qDebug(QString(port->portName() + "*<- Error: Try to write when port is not open.").toLatin1());
-		_status = 0;
-		return;
-	}
-	port->write((char*)&command, 1);
-	port->flush();
-
-	qDebug(QString(port->portName() + QString(" <- ") + convertToHex(&command,1)).toLatin1());
-	_sleep(200);
-	QApplication::processEvents();
-}
-#endif
 void DgtBoard::updateDialog(BYTE* data)
 {
 	ChessBoard cb;
@@ -871,19 +690,12 @@ void DgtBoard::updateDialog(BYTE field, BYTE piece)
 	boardwindow->setPiece(sq[field], p[piece]);
 }
 
-//TIMERPROC DgtBoard::stableTimeout(HWND,UINT,UINT,DWORD)
-//{
-//	write(DGT_SEND_BRD);
-//}
-//
-//#ifndef WINDOWS_SERIAL
 //void DgtBoard::comError(QSerialPort::SerialPortError  error)
 //{
 //	if (error)
 //		qDebug("Error: %i, %s", error, port->errorString().toLatin1());
 ////	port->clearError();
 //}
-//#endif
 
 bool DgtBoard::equalBoard(BYTE*b1, BYTE*b2)
 {
@@ -970,12 +782,12 @@ ChessMove DgtBoard::getLegalMove(BYTE* data)
 	return ChessMove();
 }
 
-#ifdef WINDOWS_SERIAL
 bool DgtBoard::autoConnect()
 {
 	if (hComm)
 		return false;
 	QString portname;
+	startTimer();
 	int i = portlist->count();
 	if (i == 0)
 		return false;
@@ -995,28 +807,24 @@ bool DgtBoard::autoConnect()
 	connectDgt(portname);
 	return true;
 }
-#else
-bool DgtBoard::autoConnect()
+
+void DgtBoard::startTimer()
 {
-	if (port->isOpen())
-		return;
-	QString portname;
-	int i = portlist->count();
-	if (i == 0)
-		return;
-	if (i == 1)
-	{
-		portname = portlist->itemText(0);
-	}
-	else
-	{
-		QSettings settings;
-		settings.beginGroup("Dgt");
-		portname = settings.value("port", "").toString();
-		settings.endGroup();
-	}
-	if (portname.isEmpty())
-		return;
-	connectDgt(portname);
+	stopTimer();
+	qDebug("DGT -> Starting timer.");
+	timerID=SetTimer(NULL, UINT_PTR(this), 1000, staticStableTimeout);
 }
-#endif
+
+void DgtBoard::stopTimer()
+{
+	qDebug("DGT -> Stoping timer.");
+	if (timerID)
+		KillTimer(NULL, timerID);
+}
+
+void DgtBoard::stableTimeout()
+{
+	qDebug("DGT -> Timeout.");
+	write(DGT_REQ_BOARD);
+}
+

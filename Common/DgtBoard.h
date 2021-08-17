@@ -1,16 +1,9 @@
 #pragma once
-#define WINDOWS_SERIAL
-
-#ifdef WINDOWS_SERIAL
 #include <Windows.h>
-#endif
 #include <QDialog>
 //#include <QWidget>
 #include <QComboBox>
 //#include <QTimeEdit>
-#ifndef WINDOWS_SERIAL
-#include <QSerialPort>
-#endif
 #include <QLabel>
 //#include <QByteArray>
 //#include <QTimer>
@@ -34,12 +27,6 @@ public slots:
 	void disconnectDgt();
 //	void dgtPortOpen(bool);
 	void interpretMessage(BYTE code, int datalength, BYTE* data);
-#ifndef WINDOWS_SERIAL
-//	void readFromDGT();
-	void readyRead();
-	void comError(QSerialPort::SerialPortError);
-#endif
-//	TIMERPROC stableTimeout(HWND, UINT, UINT, DWORD);
 signals:
 //	// Send last status.
 //	// 0 = Not connected
@@ -99,13 +86,13 @@ private:
 	ChessMove getLegalMove(BYTE*);
 //
 //	// For nativ serial com
-#ifdef WINDOWS_SERIAL
+	UINT_PTR timerID;
+	void startTimer();
+	void stopTimer();
 	static void threadLoop(void* lpv);
 public:
+	void stableTimeout();
 	bool abort;
 	HANDLE hThread;
 	HANDLE hComm;
-#else
-	QSerialPort* port;
-#endif
 };

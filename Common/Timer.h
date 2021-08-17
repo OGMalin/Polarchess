@@ -1,10 +1,11 @@
 #pragma once
+#include <Windows.h>
 
 class Timer
 {
+	bool active;
 public:
-	Timer();
-	~Timer();
-	void start(int ms);
+//	template<typename Function>
+	void start(auto function, int ms);
 	void stop();
 };

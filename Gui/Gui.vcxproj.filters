@@ -110,9 +110,6 @@
     <ClCompile Include="..\Common\DgtBoard.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\Common\Timer.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -198,9 +195,6 @@
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="..\Common\defs.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\Timer.h">
       <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>
