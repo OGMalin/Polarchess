@@ -24,6 +24,10 @@
 #include <QDate>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QTextToSpeech>
+#include <QLocale>
+#include <QVoice>
+
 //#include <QEventLoop>
 
 MainWindow::MainWindow()
@@ -400,7 +404,25 @@ void MainWindow::newGame()
 
 void MainWindow::aboutDialog()
 {
+	/* test*/
+	QTextToSpeech speech(this);
+	QVector<QLocale> loc=speech.availableLocales();
+	int i;
+	for (i = 0; i < loc.size(); i++)
+	{
+		qDebug("Lang: %i",loc[i].language());
+	}
+	QVector<QVoice> voc=speech.availableVoices();
+	for (i = 0; i < voc.size(); i++)
+	{
+		qDebug("Voice: %i, %s", voc[i].gender(), voc[i].genderName(voc[i].gender()).toLatin1());
+	}
+	QStringList en = speech.availableEngines();
+
+	speech.say("Springer til e4");
 	AboutDialog dialog(this);
+	speech.say("Knight to e4");
+
 	dialog.exec();
 }
 
