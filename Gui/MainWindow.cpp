@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "AboutDialog.h"
 #include "NewGameDialog.h"
+#include "SoundDialog.h"
 //#include "ClockWindow.h"
 //#include "EngineWindow.h"
 //#include "Database.h"
@@ -113,6 +114,7 @@ void MainWindow::createMenu()
 
 	// Settings menu
 	settingsMenu = menuBar()->addMenu("*");
+	soundAct = settingsMenu->addAction("*", this, &MainWindow::sound);
 	installEngineAct = settingsMenu->addAction("*", this, &MainWindow::installEngine);
 	useDgtAct = settingsMenu->addAction("*", this, &MainWindow::useDgt);
 	useDgtAct->setCheckable(true);
@@ -161,6 +163,7 @@ void MainWindow::retranslateUi()
 	resignAct->setText(tr("Resign"));
 
 	settingsMenu->setTitle(tr("Settings"));
+	soundAct->setText(tr("Sound"));
 	installEngineAct->setText(tr("Install Engine"));
 	useDgtAct->setText(tr("Use DGT Electronic board"));
 	langMenu->setTitle(tr("Language"));
@@ -259,6 +262,10 @@ void MainWindow::writeSettings()
 	settings.setValue("rated", gameSetting.rated);
 	settings.setValue("color", gameSetting.color);
 	settings.endGroup();
+	settings.beginGroup("sound");
+	settings.setValue("language", soundSetting.language);
+	settings.setValue("usage", soundSetting.usage);
+	settings.endGroup();
 	settings.setValue("engine", installedEngine);
 }
 
@@ -282,6 +289,11 @@ void MainWindow::readSettings()
 	gameSetting.suddenDeathTime = settings.value("suddendeath", "0").toInt();
 	gameSetting.rated = settings.value("rated", "false").toBool();
 	gameSetting.color = settings.value("color", "0").toInt();
+	settings.endGroup();
+
+	settings.beginGroup("sound");
+	soundSetting.language = settings.value("language", "0").toInt();
+	soundSetting.usage = settings.value("usage", "0").toInt();
 	settings.endGroup();
 
 	installedEngine = settings.value("engine", QString()).toString();
@@ -404,25 +416,7 @@ void MainWindow::newGame()
 
 void MainWindow::aboutDialog()
 {
-	/* test*/
-	QTextToSpeech speech(this);
-	QVector<QLocale> loc=speech.availableLocales();
-	int i;
-	for (i = 0; i < loc.size(); i++)
-	{
-		qDebug("Lang: %i",loc[i].language());
-	}
-	QVector<QVoice> voc=speech.availableVoices();
-	for (i = 0; i < voc.size(); i++)
-	{
-		qDebug("Voice: %i, %s", voc[i].gender(), voc[i].genderName(voc[i].gender()).toLatin1());
-	}
-	QStringList en = speech.availableEngines();
-
-	speech.say("Springer til e4");
 	AboutDialog dialog(this);
-	speech.say("Knight to e4");
-
 	dialog.exec();
 }
 
@@ -714,3 +708,11 @@ void MainWindow::useDgt()
 	}
 }
 
+void MainWindow::sound()
+{
+	SoundDialog dialog(this);
+	dialog.set(soundSetting);
+	if (dialog.exec() == QDialog::Rejected)
+		return;
+	dialog.get(soundSetting);
+}
