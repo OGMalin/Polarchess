@@ -86,13 +86,11 @@ private:
 	ChessMove getLegalMove(BYTE*);
 //
 //	// For nativ serial com
-	UINT_PTR timerID;
-	void startTimer();
-	void stopTimer();
+//	void startTimer();
+//	void stopTimer();
 	static void threadLoop(void* lpv);
 public:
-	void stableTimeout();
+//	void stableTimeout();
 	bool abort;
 	HANDLE hThread;
-	HANDLE hComm;
 };

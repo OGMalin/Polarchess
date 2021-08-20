@@ -29,10 +29,29 @@ QString convertToHex(QByteArray& data)
 	return qs;
 }
 
-void CALLBACK staticStableTimeout(HWND hwnd, UINT msg, UINT_PTR idEvent, DWORD dw)
+HANDLE dgtHComm;
+HANDLE dgtTimer;
+
+void dgtStopTimer()
 {
-	qDebug("DGT -> Static timeout.");
-	((DgtBoard*)idEvent)->stableTimeout();
+	if (!dgtTimer)
+		return;
+	DeleteTimerQueueTimer(NULL, dgtTimer, NULL);
+	dgtTimer = NULL;
+}
+
+VOID CALLBACK dgtTimerProc(VOID*, BOOLEAN)
+{
+	dgtStopTimer();
+	TransmitCommChar(dgtHComm, DGT_REQ_BOARD);
+}
+
+void dgtStartTimer(int ms)
+{
+	if (dgtTimer)
+		dgtStopTimer();
+	if (!CreateTimerQueueTimer(&dgtTimer, NULL, dgtTimerProc, NULL, ms, 0, WT_EXECUTEONLYONCE))
+		qDebug("Failed to create timer.");
 }
 
 void DgtBoard::threadLoop(void*lpv)
@@ -54,7 +73,7 @@ void DgtBoard::threadLoop(void*lpv)
 	//dgt->connect(dgt->stableTimer, SIGNAL(timeout()), dgt, SLOT(stableTimeout()));
 	while (!dgt->abort)
 	{
-		if (!ReadFile(dgt->hComm, &b, 1, &dwRead, NULL))
+		if (!ReadFile(dgtHComm, &b, 1, &dwRead, NULL))
 		{
 			dwError = GetLastError();
 			if (dwError == ERROR_HANDLE_EOF)
@@ -95,6 +114,7 @@ void DgtBoard::threadLoop(void*lpv)
 			msgLen = 0x4000;
 		}
 	}
+	dgtStopTimer(); // Just in case
 	_endthread();
 };
 
@@ -105,11 +125,11 @@ DgtBoard::DgtBoard(QWidget* parent)
 	waitForClockAck = false;
 	memset(guiBoard, 0, 64);
 	memset(stableBoard, 0, 64);
-	timerID = 0;
+	dgtTimer = NULL;
 ////	memset(lastBoard, 0, 64);
 	updateMode = 0;
 	hThread = NULL;
-	hComm = NULL;
+	dgtHComm = NULL;
 	abort = true;
 	setWindowTitle(tr("DGT board"));
 	setSizeGripEnabled(true);
@@ -232,7 +252,7 @@ void DgtBoard::connectDgt(QString portname)
 	disconnectDgt();
 	if (portname.isEmpty())
 		portname = portlist->currentText();
-	hComm = CreateFileA(
+	dgtHComm = CreateFileA(
 		portname.toLatin1(),
 		GENERIC_READ | GENERIC_WRITE,
 		0,
@@ -240,15 +260,15 @@ void DgtBoard::connectDgt(QString portname)
 		OPEN_EXISTING,
 		0,//FILE_FLAG_OVERLAPPED,
 		NULL);
-	if (hComm == INVALID_HANDLE_VALUE)
+	if (dgtHComm == INVALID_HANDLE_VALUE)
 	{
-		hComm = NULL;
+		dgtHComm = NULL;
 		return;
 	};
 
 	// Set up communication parameters.
 	dcb.DCBlength = sizeof(DCB);
-	GetCommState(hComm, &dcb);
+	GetCommState(dgtHComm, &dcb);
 	dcb.BaudRate = CBR_9600;
 	dcb.ByteSize = 8;
 	dcb.Parity = NOPARITY;
@@ -266,17 +286,17 @@ void DgtBoard::connectDgt(QString portname)
 	dcb.fNull = 0;
 	dcb.fRtsControl = RTS_CONTROL_DISABLE;
 	dcb.fAbortOnError = 0;
-	SetCommState(hComm, &dcb);
+	SetCommState(dgtHComm, &dcb);
 
-	GetCommTimeouts(hComm, &timeout);
+	GetCommTimeouts(dgtHComm, &timeout);
 	timeout.ReadIntervalTimeout = MAXDWORD;
 	timeout.ReadTotalTimeoutMultiplier = MAXDWORD;
 	timeout.ReadTotalTimeoutConstant = 500;
 	timeout.WriteTotalTimeoutMultiplier = 0;
 	timeout.WriteTotalTimeoutConstant = 0;
 
-	SetCommTimeouts(hComm, &timeout);
-	if (!GetCommMask(hComm, &Maske))
+	SetCommTimeouts(dgtHComm, &timeout);
+	if (!GetCommMask(dgtHComm, &Maske))
 		return;
 	Maske |= EV_RXCHAR;
 	//	if (!SetCommMask(hComm,Maske))
@@ -311,10 +331,10 @@ void DgtBoard::disconnectDgt()
 	if (hThread)
 		if (WaitForSingleObject(hThread, 1000) == WAIT_TIMEOUT)
 			TerminateThread(hThread, TRUE);
-	if (hComm != NULL)
-		CloseHandle(hComm);
+	if (dgtHComm != NULL)
+		CloseHandle(dgtHComm);
 	hThread = NULL;
-	hComm = NULL;
+	dgtHComm = NULL;
 	_status = 0;
 //	stableTimer->stop();
 	emit dgtStatus(_status);
@@ -494,6 +514,8 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 			qDebug("DGT_MSG_FIELD_UPDATE messagelength mismatch");
 			break;
 		}
+		dgtStartTimer(500);
+//		dgtTimer = SetTimer(NULL, NULL, 500, staticStableTimeout);
 		// Restart timer
 //		if (stableTimer)
 //			restartTimer = true;
@@ -642,26 +664,26 @@ void DgtBoard::write(BYTE command)
 {
 	//	if (_status == 0)
 	//		return;
-	if (!hComm)
+	if (!dgtHComm)
 	{
 		qDebug("DGT <- Error: Try to write when port is not open.");
 		_status = 0;
 		return;
 	}
-	TransmitCommChar(hComm, command);
+	TransmitCommChar(dgtHComm, command);
 	qDebug(QString(QString("DGT <- ") + convertToHex(&command, 1)).toLatin1());
 }
 void DgtBoard::write(BYTE* message, int length)
 {
 
-	if (!hComm)
+	if (!dgtHComm)
 	{
 		qDebug("DGT <- Error: Try to write when port is not open.");
 		_status = 0;
 		return;
 	}
 	DWORD written;
-	WriteFile(hComm,message,length,&written,NULL);
+	WriteFile(dgtHComm,message,length,&written,NULL);
 	qDebug(QString(QString("DGT <- ") + convertToHex(message, length)).toLatin1());
 	if (written != length)
 		qDebug("DGT -> Try to write %i bytes but did only write %i bytes.", length, written);
@@ -784,10 +806,9 @@ ChessMove DgtBoard::getLegalMove(BYTE* data)
 
 bool DgtBoard::autoConnect()
 {
-	if (hComm)
+	if (dgtHComm)
 		return false;
 	QString portname;
-	startTimer();
 	int i = portlist->count();
 	if (i == 0)
 		return false;
@@ -804,27 +825,31 @@ bool DgtBoard::autoConnect()
 	}
 	if (portname.isEmpty())
 		return false;
+//	startTimer();
 	connectDgt(portname);
 	return true;
 }
 
-void DgtBoard::startTimer()
-{
-	stopTimer();
-	qDebug("DGT -> Starting timer.");
-	timerID=SetTimer(NULL, UINT_PTR(this), 1000, staticStableTimeout);
-}
-
-void DgtBoard::stopTimer()
-{
-	qDebug("DGT -> Stoping timer.");
-	if (timerID)
-		KillTimer(NULL, timerID);
-}
-
-void DgtBoard::stableTimeout()
-{
-	qDebug("DGT -> Timeout.");
-	write(DGT_REQ_BOARD);
-}
-
+//void DgtBoard::startTimer()
+//{
+//	stopTimer();
+//	qDebug("DGT -> Starting timer.");
+//	timerID=SetTimer(NULL, UINT_PTR(this), 500, staticStableTimeout);
+//	if (timerID==0)
+//		qDebug("DGT -> Failed to create a timer.");
+//}
+//
+//void DgtBoard::stopTimer()
+//{
+//	qDebug("DGT -> Stoping timer.");
+//	if (timerID)
+//		KillTimer(NULL, timerID);
+//}
+//
+//void DgtBoard::stableTimeout()
+//{
+//	qDebug("DGT -> Timeout.");
+//	stopTimer();
+//	write(DGT_REQ_BOARD);
+//}
+//
