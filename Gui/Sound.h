@@ -2,6 +2,7 @@
 
 #include <QDialog>
 #include <QComboBox>
+#include <QObject>
 
 struct SoundSetting
 {
@@ -22,4 +23,12 @@ public:
 	~SoundDialog();
 	void set(SoundSetting);
 	void get(SoundSetting&);
+};
+
+class Sound : public QObject
+{
+	Q_OBJECT
+public:
+	Sound(QObject* parent);
+	~Sound();
 };

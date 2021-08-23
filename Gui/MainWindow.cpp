@@ -1,7 +1,6 @@
 #include "MainWindow.h"
 #include "AboutDialog.h"
 #include "NewGameDialog.h"
-#include "SoundDialog.h"
 //#include "ClockWindow.h"
 //#include "EngineWindow.h"
 //#include "Database.h"

@@ -1,4 +1,4 @@
-#include "SoundDialog.h"
+#include "Sound.h"
 #include <QGridLayout>
 #include <QBoxLayout>
 #include <QDialogButtonBox>
@@ -76,3 +76,13 @@ void SoundDialog::get(SoundSetting& setting)
 }
 
 
+Sound::Sound(QObject* parent)
+	:QObject(parent)
+{
+
+}
+
+Sound::~Sound()
+{
+
+}

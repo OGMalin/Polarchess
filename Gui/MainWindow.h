@@ -8,7 +8,7 @@
 #include "Database.h"
 #include "Scoresheet.h"
 #include "Engine.h"
-#include "SoundDialog.h"
+#include "Sound.h"
 #include "../Common/BoardWindow.h"
 #include "../Common/QChessGame.h"
 #include "../Common/ChessMove.h"
@@ -90,6 +90,7 @@ private:
 	ClockWindow* clockwindow;
 	EngineWindow* enginewindow;
 	Engine* engine;
+	Sound* sound;
 //	DgtDLL* dgt;
 	DgtBoard* dgt;
 	//Engine* analysisEngine;

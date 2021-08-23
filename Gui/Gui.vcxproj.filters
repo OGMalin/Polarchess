@@ -110,7 +110,7 @@
     <ClCompile Include="..\Common\DgtBoard.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="SoundDialog.cpp">
+    <ClCompile Include="Sound.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -160,7 +160,7 @@
     <QtMoc Include="..\Common\DgtBoard.h">
       <Filter>Common</Filter>
     </QtMoc>
-    <QtMoc Include="SoundDialog.h">
+    <QtMoc Include="Sound.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
