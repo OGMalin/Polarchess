@@ -98,7 +98,6 @@ private:
 	NewGameSetting gameSetting;
 	Player player;
 	EnginePlayers engines;
-	SoundSetting soundSetting;
 	//	EngineFeature engineFeature;
 	int engineColor;
 	int enginestate; // unloaded=0, installing=1, checking=2, playing=3
@@ -119,5 +118,5 @@ private:
 	void saveGame();
 	void installEngine();
 	void useDgt();
-	void sound();
+	void setSound();
 };

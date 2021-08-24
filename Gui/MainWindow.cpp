@@ -34,9 +34,7 @@ MainWindow::MainWindow()
 {
 	currentGame = new QChessGame();
 	currentGame->newGame();
-	readSettings();
 	running = false;
-	createMenu();
 	dgt = NULL;
 
 	statusBar();
@@ -46,10 +44,11 @@ MainWindow::MainWindow()
 	hSplitter = new QSplitter(Qt::Horizontal);
 	vSplitter = new QSplitter(Qt::Vertical);
 
-	boardwindow = new BoardWindow;
-	scoresheet = new Scoresheet;
-	clockwindow = new ClockWindow;
-	enginewindow = new EngineWindow;
+	boardwindow = new BoardWindow(this);
+	scoresheet = new Scoresheet(this);
+	clockwindow = new ClockWindow(this);
+	enginewindow = new EngineWindow(this);
+	sound = new Sound(this);
 
 	hSplitter->addWidget(boardwindow);
 	hSplitter->addWidget(vSplitter);
@@ -59,6 +58,7 @@ MainWindow::MainWindow()
 
 	setCentralWidget(hSplitter);
 
+	createMenu();
 	retranslateUi();
 
 	engine = new Engine();
@@ -66,6 +66,8 @@ MainWindow::MainWindow()
 //	QString name = "Engine.exe";
 //	QString dir = QCoreApplication::applicationDirPath();
 //	playEngine->setEngine(name, dir);
+
+	readSettings();
 
 	database = new Database();
 //	connect(engine, SIGNAL(engineMessage(const QString&)), this, SLOT(playEngineMessage(const QString&)));
@@ -113,7 +115,7 @@ void MainWindow::createMenu()
 
 	// Settings menu
 	settingsMenu = menuBar()->addMenu("*");
-	soundAct = settingsMenu->addAction("*", this, &MainWindow::sound);
+	soundAct = settingsMenu->addAction("*", this, &MainWindow::setSound);
 	installEngineAct = settingsMenu->addAction("*", this, &MainWindow::installEngine);
 	useDgtAct = settingsMenu->addAction("*", this, &MainWindow::useDgt);
 	useDgtAct->setCheckable(true);
@@ -261,10 +263,12 @@ void MainWindow::writeSettings()
 	settings.setValue("rated", gameSetting.rated);
 	settings.setValue("color", gameSetting.color);
 	settings.endGroup();
+
 	settings.beginGroup("sound");
-	settings.setValue("language", soundSetting.language);
-	settings.setValue("usage", soundSetting.usage);
+	settings.setValue("language", sound->setting.language);
+	settings.setValue("usage", sound->setting.usage);
 	settings.endGroup();
+
 	settings.setValue("engine", installedEngine);
 }
 
@@ -291,8 +295,8 @@ void MainWindow::readSettings()
 	settings.endGroup();
 
 	settings.beginGroup("sound");
-	soundSetting.language = settings.value("language", "0").toInt();
-	soundSetting.usage = settings.value("usage", "0").toInt();
+	sound->setting.language = settings.value("language", "0").toInt();
+	sound->setting.usage = settings.value("usage", "0").toInt();
 	settings.endGroup();
 
 	installedEngine = settings.value("engine", QString()).toString();
@@ -707,11 +711,7 @@ void MainWindow::useDgt()
 	}
 }
 
-void MainWindow::sound()
+void MainWindow::setSound()
 {
-	SoundDialog dialog(this);
-	dialog.set(soundSetting);
-	if (dialog.exec() == QDialog::Rejected)
-		return;
-	dialog.get(soundSetting);
+	sound->showDialog();
 }
