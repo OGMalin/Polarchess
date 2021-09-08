@@ -124,30 +124,32 @@ void Sound::say(ChessBoard& cb, ChessMove& cm)
 	}
 	else
 	{
-		switch (piece)
-		{
-			case PAWN: text = "Pawn"; break;
-			case KNIGHT: text = "Pawn"; break;
-			case BISHOP: text = "Pawn"; break;
-			case ROOK: text = "Pawn"; break;
-			case QUEEN: text = "Pawn"; break;
-			case KING: text = "Pawn"; break;
-		}
+		text = pieceAsText(piece);
 		text += " from ";
 		text += squareAsText(cm.fromSquare);
+		text += " to ";
+		text += squareAsText(cm.toSquare);
 	}
+	speech.say(text);
 }
 
 QString Sound::squareAsText(int sq)
 {
-	QString qs;
-	char* files="abcdefgh"]
-	switch (FILE(sq))
-	{
-	case 0: qs = "A";
-
-	}
+	char* files = "abcdefgh";
+	char* ranks = "12345678";
 	int f = FILE(sq);
-
+	int r = RANK(sq);
+	if ((f > 7) || (f < 0))
+		return "";
+	if ((r > 7) || (r < 0))
+		return "";
+	return files[f] + ranks[r];
 }
 
+QString Sound::pieceAsText(int p)
+{
+	char* pieces[] = { "", "Pawn", "Knight", "Bishop", "Rook", "Queen", "King" };
+	if ((p > 6) || (p < 1))
+		return "";
+	return pieces[p];
+}

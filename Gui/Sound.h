@@ -32,6 +32,7 @@ class Sound : public QObject
 	Q_OBJECT
 private:
 	QString squareAsText(int);
+	QString pieceAsText(int);
 public:
 	Sound(QObject* parent);
 	~Sound();
