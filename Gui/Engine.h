@@ -47,7 +47,7 @@ public:
 	EngineOption limitstrength;
 	EngineOption elo;
 	EngineOption ownbook;
-	EngineOption bookfile;
+//	EngineOption bookfile;
 	QString name;
 	QString author;
 	ChessBoard currentBoard;

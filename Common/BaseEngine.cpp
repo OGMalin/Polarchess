@@ -27,6 +27,8 @@ BaseEngine::~BaseEngine()
 
 bool BaseEngine::load(QString& path)
 {
+	engineOption.clear();
+	initOptions.clear();
 	if (path.isEmpty())
 		return false;
 	process = new QProcess(this);

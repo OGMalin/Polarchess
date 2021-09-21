@@ -23,6 +23,18 @@ bool Engine::load(QString& path)
 	con = connect(&uci, SIGNAL(engineStoped()), SLOT(slotEngineStoped()));
 	con = connect(&uci, SIGNAL(engineMove(const QString&, const QString&)), SLOT(slotEngineMove(const QString&, const QString&)));
 	//	con = connect(&uci, SIGNAL(engineInfo(const EngineInfo&)), SLOT(slotEngineInfo(const EngineInfo&)));
+
+	personality.clear();
+	skill.clear();
+	autoskill.clear();
+	limitstrength.clear();
+	elo.clear();
+	ownbook.clear();
+	//	bookfile.clear();
+	name.clear();
+	author.clear();
+	rating.clear();
+
 	if (!uci.load(path))
 		return false;
 	return true;
@@ -106,7 +118,7 @@ void Engine::slotEngineStarted()
 	limitstrength = uci.getOption(QString("UCI_LimitStrength"));
 	elo = uci.getOption(QString("UCI_Elo"));
 	ownbook = uci.getOption(QString("OwnBook"));
-	bookfile = uci.getOption(QString("Book File"));
+//	bookfile = uci.getOption(QString("Book File"));
 
 	name = uci.name();
 	i = name.indexOf("64");

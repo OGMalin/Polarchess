@@ -9,6 +9,7 @@
 #include "Scoresheet.h"
 #include "Engine.h"
 #include "Sound.h"
+#include "Book.h"
 #include "../Common/BoardWindow.h"
 #include "../Common/QChessGame.h"
 #include "../Common/ChessMove.h"
@@ -91,6 +92,7 @@ private:
 	EngineWindow* enginewindow;
 	Engine* engine;
 	Sound* sound;
+	Book* book;
 //	DgtDLL* dgt;
 	DgtBoard* dgt;
 	//Engine* analysisEngine;

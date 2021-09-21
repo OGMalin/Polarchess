@@ -3,6 +3,7 @@
 #include <QDialog>
 #include "Engine.h"
 #include "EnginePlayer.h"
+#include "Book.h"
 
 class QLineEdit;
 class QComboBox;
@@ -29,6 +30,7 @@ struct NewGameSetting
 	bool rated=false;
 	// 0=white, 1=black, 2=random
 	int color=2;
+	QString book;
 };
 
 class NewGameDialog : public QDialog
@@ -45,11 +47,15 @@ private:
 	QSlider* limitstrength;
 	QComboBox* computer;
 	QComboBox* color;
+	QComboBox* book;
 	QCheckBox* rated;
 	QCheckBox* moves;
+	QCheckBox* defaultBook;
 	QTimeEdit* starttime;
 	QTimeEdit* starttimeinc;
 	QTimeEdit* suddendeath;
+	QLabel* lPersonality;
+	QLabel* lSkill;
 	QLabel* gametype;
 	QLabel* computerelo;
 	QLabel* startposition;

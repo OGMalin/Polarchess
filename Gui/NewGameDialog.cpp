@@ -68,16 +68,16 @@ NewGameDialog::NewGameDialog(QWidget *parent, Engine* eng)
 //
 	// Komodo 13+
 	hbox = new QHBoxLayout();
-	label1 = new QLabel(tr("Personality:"));
+	lPersonality = new QLabel(tr("Personality:"));
 	personality = new QComboBox();
-	hbox->addWidget(label1);
+	hbox->addWidget(lPersonality);
 	hbox->addWidget(personality);
 	vbox->addLayout(hbox);
 	connect(personality, SIGNAL(currentIndexChanged(int)), this, SLOT(setRating()));
 	hbox = new QHBoxLayout();
-	label1 = new QLabel(tr("Skill:"));
+	lSkill = new QLabel(tr("Skill:"));
 	skill = new QSpinBox();
-	hbox->addWidget(label1);
+	hbox->addWidget(lSkill);
 	hbox->addWidget(skill);
 	connect(skill, SIGNAL(valueChanged(int)), this, SLOT(setRating()));
 	vbox->addLayout(hbox);
@@ -93,6 +93,22 @@ NewGameDialog::NewGameDialog(QWidget *parent, Engine* eng)
 	vbox->addWidget(limitstrength);
 	connect(fullstrength, SIGNAL(clicked(bool)), this, SLOT(slotStrengthClicked(bool)));
 	connect(limitstrength, SIGNAL(valueChanged(int)), this, SLOT(slotStrengthChanged(int)));
+
+	hbox = new QHBoxLayout();
+	label1 = new QLabel(tr("Opening book:"));
+	book = new QComboBox();
+	hbox->addWidget(label1);
+	hbox->addWidget(book);
+	vbox->addLayout(hbox);
+	defaultBook = new QCheckBox(tr("Use default book"));
+	vbox->addWidget(defaultBook);
+	QString path = QStandardPaths::locate(QStandardPaths::DocumentsLocation, "/Polarchess", QStandardPaths::LocateDirectory);
+	QFileInfoList qfil = QDir(path, "pc*.bin").entryInfoList(QDir::NoFilter, QDir::Name | QDir::IgnoreCase);
+	int i;
+	for (i = 0; i < qfil.size(); i++)
+	{
+		book->addItem(qfil[i].baseName());
+	}
 
 	hbox = new QHBoxLayout();
 	label1 = new QLabel(tr("Rating:"));
@@ -242,21 +258,21 @@ void NewGameDialog::slotOk()
 			engine->init(engine->elo.name, QString(itoa(setting.engineelo, sz, 10)));
 	}
 
-	// Adding book
+	// Adding boo
 	if (!engine->ownbook.name.isEmpty())
-		engine->init(engine->ownbook.name, QString("true"));
-	if (!engine->bookfile.name.isEmpty())
+		engine->init(engine->ownbook.name, QString("false"));
+	setting.book.clear();
+	if (defaultBook->isChecked())
 	{
 		QString path = QStandardPaths::locate(QStandardPaths::DocumentsLocation, "/Polarchess", QStandardPaths::LocateDirectory);
 		QFileInfoList qfil = QDir(path, "pc*.bin").entryInfoList(QDir::NoFilter, QDir::Name | QDir::IgnoreCase);
 		int i, j;
-		QString bookpath;
 		int r = setting.engineelo;
 		if (r == 0)
 			r = 3000;
 		for (i = 1; i <= 3000; i++)
 		{
-			if ((i > r) && !bookpath.isEmpty())
+			if ((i > r) && !setting.book.isEmpty())
 				break;
 			for (j = 0; j < qfil.size(); j++)
 			{
@@ -264,14 +280,13 @@ void NewGameDialog::slotOk()
 				qs+=itoa(i, sz, 10);
 				qs += ".bin";
 				if (qfil[j].fileName().indexOf(qs) >= 0)
-					bookpath = qfil[j].absoluteFilePath();
+					setting.book = qfil[j].baseName();
 			}
 		}
-		if (!bookpath.isEmpty())
-		{
-			bookpath.replace("/", "\\"); // Is it needed? Kommodo don't care.
-			engine->init(engine->bookfile.name, bookpath);
-		}
+	}
+	else
+	{
+		setting.book = book->currentText();
 	}
 	
 	accept();
@@ -458,6 +473,7 @@ void NewGameDialog::setDefault(NewGameSetting& newsetting)
 	else
 	{
 		personality->setVisible(false);
+		lPersonality->setVisible(false);
 	}
 	if (engine->skill.name == "Skill")
 	{
@@ -468,6 +484,7 @@ void NewGameDialog::setDefault(NewGameSetting& newsetting)
 	else
 	{
 		skill->setVisible(false);
+		lSkill->setVisible(false);
 	}
 
 	if (engine->autoskill.name == "Auto Skill")
@@ -491,6 +508,7 @@ void NewGameDialog::setDefault(NewGameSetting& newsetting)
 		limitstrength->setVisible(false);
 	}
 
+	book->setCurrentText(setting.book);
 	setGameType();
 
 	resize(minimumSizeHint());
@@ -502,7 +520,9 @@ void NewGameDialog::setRating()
 	int r = 0;
 	if (!engine->skill.name.isEmpty())
 	{
-		if (!engine->autoskill.name.isEmpty() && !engine->autoskill.check.value)
+		if (!engine->autoskill.name.isEmpty() && engine->autoskill.check.value)
+			r = 0;
+		else
 			r = engine->getRating(skill->text().toInt(), personality->currentText(), setting.gameType);
 	}
 	else if (!engine->limitstrength.name.isEmpty() && engine->limitstrength.check.value)

@@ -49,6 +49,7 @@ MainWindow::MainWindow()
 	clockwindow = new ClockWindow(this);
 	enginewindow = new EngineWindow(this);
 	sound = new Sound(this);
+	book = new Book();
 
 	hSplitter->addWidget(boardwindow);
 	hSplitter->addWidget(vSplitter);
@@ -94,6 +95,7 @@ MainWindow::~MainWindow()
 */
 	delete currentGame;
 	delete engine;
+	delete book;
 }
 
 // The text in the menu are set in retranslateUi to be able to switch language 'on the fly'.
