@@ -31,6 +31,7 @@ struct NewGameSetting
 	// 0=white, 1=black, 2=random
 	int color=2;
 	QString book;
+	bool defaultBook = true;
 };
 
 class NewGameDialog : public QDialog

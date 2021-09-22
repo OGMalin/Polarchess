@@ -258,7 +258,7 @@ void NewGameDialog::slotOk()
 			engine->init(engine->elo.name, QString(itoa(setting.engineelo, sz, 10)));
 	}
 
-	// Adding boo
+	// Adding book
 	if (!engine->ownbook.name.isEmpty())
 		engine->init(engine->ownbook.name, QString("false"));
 	setting.book.clear();
@@ -288,7 +288,9 @@ void NewGameDialog::slotOk()
 	{
 		setting.book = book->currentText();
 	}
-	
+	if (!setting.book.isEmpty())
+		QTextStream(&setting.engineplayer) << " Book: " << setting.book;
+
 	accept();
 }
 
@@ -509,6 +511,8 @@ void NewGameDialog::setDefault(NewGameSetting& newsetting)
 	}
 
 	book->setCurrentText(setting.book);
+	defaultBook->setChecked(setting.defaultBook);
+
 	setGameType();
 
 	resize(minimumSizeHint());

@@ -264,6 +264,8 @@ void MainWindow::writeSettings()
 	settings.setValue("suddendeath", gameSetting.suddenDeathTime);
 	settings.setValue("rated", gameSetting.rated);
 	settings.setValue("color", gameSetting.color);
+	settings.setValue("book", gameSetting.book);
+	settings.setValue("defaultbook", gameSetting.defaultBook);
 	settings.endGroup();
 
 	settings.beginGroup("sound");
@@ -294,6 +296,8 @@ void MainWindow::readSettings()
 	gameSetting.suddenDeathTime = settings.value("suddendeath", "0").toInt();
 	gameSetting.rated = settings.value("rated", "false").toBool();
 	gameSetting.color = settings.value("color", "0").toInt();
+	gameSetting.book = settings.value("book", "").toString();
+	gameSetting.defaultBook = settings.value("defaultbook", "true").toBool();
 	settings.endGroup();
 
 	settings.beginGroup("sound");
@@ -373,6 +377,7 @@ void MainWindow::newGame()
 	if (dialog.exec() == QDialog::Rejected)
 		return;
 	gameSetting=dialog.getSetting();
+
 	currentGame->newGame();
 	boardwindow->setPosition(currentGame->getPosition().board());
 	int color = gameSetting.color;
