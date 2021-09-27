@@ -80,6 +80,7 @@ private:
 	QAction* flipAct;
 	QAction* installEngineAct;
 	QAction* useDgtAct;
+	QAction* saveToPgnAct;
 	QToolButton* dgtIcon;
 	QTranslator translator;
 	QActionGroup * langGroup;
@@ -104,6 +105,7 @@ private:
 	int engineColor;
 	int enginestate; // unloaded=0, installing=1, checking=2, playing=3
 	bool running;
+	bool autoSaveToPgn;
 	QString installedEngine;
 	void createMenu();
 	void setLanguage();
@@ -121,4 +123,5 @@ private:
 	void installEngine();
 	void useDgt();
 	void setSound();
+	void saveToPgn();
 };

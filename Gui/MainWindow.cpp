@@ -36,6 +36,7 @@ MainWindow::MainWindow()
 	currentGame->newGame();
 	running = false;
 	dgt = NULL;
+	autoSaveToPgn = true;
 
 	statusBar();
 	loadLanguage();
@@ -69,6 +70,8 @@ MainWindow::MainWindow()
 //	playEngine->setEngine(name, dir);
 
 	readSettings();
+
+	saveToPgnAct->setChecked(autoSaveToPgn);
 
 	database = new Database();
 //	connect(engine, SIGNAL(engineMessage(const QString&)), this, SLOT(playEngineMessage(const QString&)));
@@ -119,6 +122,8 @@ void MainWindow::createMenu()
 	settingsMenu = menuBar()->addMenu("*");
 	soundAct = settingsMenu->addAction("*", this, &MainWindow::setSound);
 	installEngineAct = settingsMenu->addAction("*", this, &MainWindow::installEngine);
+	saveToPgnAct = settingsMenu->addAction("*", this, &MainWindow::saveToPgn);
+	saveToPgnAct->setCheckable(true);
 	useDgtAct = settingsMenu->addAction("*", this, &MainWindow::useDgt);
 	useDgtAct->setCheckable(true);
 	settingsMenu->addSeparator();
@@ -168,6 +173,7 @@ void MainWindow::retranslateUi()
 	settingsMenu->setTitle(tr("Settings"));
 	soundAct->setText(tr("Sound"));
 	installEngineAct->setText(tr("Install Engine"));
+	saveToPgnAct->setText(tr("Save to pgn"));
 	useDgtAct->setText(tr("Use DGT Electronic board"));
 	langMenu->setTitle(tr("Language"));
 	if (locale == "nb")
@@ -252,6 +258,7 @@ void MainWindow::writeSettings()
 //	settings.setValue("hgeometry", hSplitter->saveState());
 //	settings.setValue("vgeometry", vSplitter->saveState());
 	settings.setValue("language", locale);
+	settings.setValue("autosave", autoSaveToPgn);
 	settings.setValue("player", gameSetting.player);
 	settings.beginGroup("lastgame");
 	settings.setValue("skill", gameSetting.engineskill);
@@ -283,6 +290,7 @@ void MainWindow::readSettings()
 //	QByteArray hgeometry = settings.value("hgeometry", QByteArray()).toByteArray();
 //	QByteArray vgeometry = settings.value("vgeometry", QByteArray()).toByteArray();
 	locale = settings.value("language", QString()).toString();
+	autoSaveToPgn = settings.value("autosave", "true").toBool();
 	gameSetting.player = settings.value("player", QString()).toString();
 	// Last game setup
 	settings.beginGroup("lastgame");
@@ -721,4 +729,10 @@ void MainWindow::useDgt()
 void MainWindow::setSound()
 {
 	sound->showDialog();
+}
+
+void MainWindow::saveToPgn()
+{
+	autoSaveToPgn = autoSaveToPgn ? false : true;
+	saveToPgnAct->setChecked(autoSaveToPgn);
 }
