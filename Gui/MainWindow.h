@@ -35,6 +35,7 @@ class MainWindow : public QMainWindow
 private:
 	void closeEvent(QCloseEvent* event) override;
 	void aboutDialog();
+	bool gameFinnish();
 
 protected:
 	void changeEvent(QEvent*);

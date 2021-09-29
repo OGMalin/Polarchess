@@ -986,6 +986,27 @@ typePiece ChessBoard::pieceAt(int file, int row)
 	return board[SQUARE(file, row)];
 }
 
+bool ChessBoard::inCheck()
+{
+	MoveGenerator mg;
+	return mg.inCheck(*this, toMove);
+}
+
+int ChessBoard::countPieces(typePiece p)
+{
+	typeSquare sq;
+	int res = 0;
+	for (sq = 0; sq < 0x88; sq++)
+	{
+		if (LEGALSQUARE(sq))
+		{
+			if (board[sq] == p)
+				++res;
+		}
+	}
+	return res;
+}
+
 bool operator<(const ChessBoard& b1, const ChessBoard& b2)
 {
 	typeSquare sq;

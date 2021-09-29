@@ -52,6 +52,8 @@ public:
 	int legalMoves();
 	// Return number of legal moves and fill all moves in ml
 	int legalMoves(MoveList& ml);
+	bool inCheck();
+	int countPieces(typePiece);
 	HASHKEY hashkey();
 	HASHKEY newHashkey(const ChessMove& m, HASHKEY oldkey);
 

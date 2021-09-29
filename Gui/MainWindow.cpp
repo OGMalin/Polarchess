@@ -406,12 +406,8 @@ void MainWindow::newGame()
 	running = true;
 	clockwindow->settime(gameSetting.startTime*1000, gameSetting.startTime*1000);
 	clockwindow->start(currentGame->getPosition().board().toMove);
-//	scoresheet->c
 	scoresheet->updateGame(currentGame);
 	engine->load(installedEngine);
-	QString setup = "setoption name Personality value ";
-	setup += gameSetting.enginename;
-	setup += "\n";
 	if (engineColor == WHITE)
 	{
 		int mtg=0;
@@ -499,6 +495,9 @@ void MainWindow::moveEntered(ChessMove& move)
 
 	scoresheet->updateGame(currentGame);
 
+	if (gameFinnish())
+		return;
+
 	if (!running)
 		return;
 
@@ -576,6 +575,8 @@ void MainWindow::playEngineMove(const QString& move, const QString& ponder)
 	currentGame->doMove(m);
 	boardwindow->setPosition(currentGame->getPosition().board());
 	scoresheet->updateGame(currentGame);
+	if (gameFinnish())
+		return;
 	if (gameSetting.startTimeInc)
 		clockwindow->addtime(gameSetting.startTimeInc * 1000, player);
 	if (gameSetting.suddenDeathTime && currentGame->moveCount(player) == 40)
@@ -587,17 +588,17 @@ void MainWindow::playEngineMove(const QString& move, const QString& ponder)
 void MainWindow::resign()
 {
 	// Test
-	QSettings settings("Engine.ini", QSettings::IniFormat);
-	settings.beginGroup("PolarChess");
-	settings.setValue("path", "Engine.exe");
-	settings.setValue("book", "Polarchess");
-	settings.setValue("bookdepth", 10);
-	settings.setValue("Elo", 1600);
-	settings.beginWriteArray("option");
-	settings.setValue("UCI_LimitStrength", true);
-	settings.setValue("UCI_Elo", 1600);
-	settings.endArray();
-	settings.endGroup();
+	//QSettings settings("Engine.ini", QSettings::IniFormat);
+	//settings.beginGroup("PolarChess");
+	//settings.setValue("path", "Engine.exe");
+	//settings.setValue("book", "Polarchess");
+	//settings.setValue("bookdepth", 10);
+	//settings.setValue("Elo", 1600);
+	//settings.beginWriteArray("option");
+	//settings.setValue("UCI_LimitStrength", true);
+	//settings.setValue("UCI_Elo", 1600);
+	//settings.endArray();
+	//settings.endGroup();
 
 	if (!running)
 		return;
@@ -735,4 +736,34 @@ void MainWindow::saveToPgn()
 {
 	autoSaveToPgn = autoSaveToPgn ? false : true;
 	saveToPgnAct->setChecked(autoSaveToPgn);
+}
+
+bool MainWindow::gameFinnish()
+{
+	// Check for mate/stalemate
+	ChessBoard cb = currentGame->getPosition().board();
+	if ( cb.legalMoves() < 1)
+	{
+		if (cb.inCheck())
+		{
+
+			if (cb.toMove == WHITE)
+				currentGame->result(QString("0-1"));
+			else
+				currentGame->result(QString("1-0"));
+		}
+		else
+		{
+			currentGame->result(QString("1/2-1/2"));
+		}
+		endGame();
+		return true;
+	}
+
+	// 3-fold repetition
+
+	// 50 moves rule
+
+	// Insuficient material
+	return false;
 }

@@ -225,6 +225,7 @@ void NewGameDialog::slotOk()
 {
 	QString qs;
 	char sz[16];
+	engine->clearInit();
 	setting.color = color->currentIndex();
 	setting.player = playername->text();
 	setting.startTime = -starttime->time().secsTo(QTime(0, 0, 0));

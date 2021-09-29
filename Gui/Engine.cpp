@@ -111,7 +111,7 @@ void Engine::search(ChessBoard& board, MoveList& moves, SEARCHTYPE searchtype, i
 
 void Engine::slotEngineStarted()
 {
-	int i,j;
+	int i, j, rat;
 	personality = uci.getOption(QString("Personality"));
 	skill = uci.getOption(QString("Skill"));
 	autoskill = uci.getOption(QString("Auto Skill"));
@@ -136,6 +136,37 @@ void Engine::slotEngineStarted()
 		EngineRating er;
 		if (skill.name == "Skill")
 		{
+			if (skill.spin.max == 35)
+			{
+				if (personality.name == "Personality")
+				{
+					for (i = 0; i < 35; i++)
+					{
+						for (j = 0; j < personality.combo.var.size(); j++)
+						{
+							rat = i * 100;
+							er.skill = i;
+							er.personality = personality.combo.var[j];
+							// Bullet
+							er.rating = rat + 200;
+							er.category = BULLET;
+							rating.push_back(er);
+							// Blitz
+							er.category = BLITZ;
+							er.rating = rat + 100;
+							rating.push_back(er);
+							// Rapid
+							er.category = RAPID;
+							er.rating = rat;
+							rating.push_back(er);
+							// Classical
+							er.category = CLASSICAL;
+							er.rating = rat - 200;
+							rating.push_back(er);
+						}
+					}
+				}
+			}
 			if (skill.spin.max == 25)
 			{
 				if (personality.name == "Personality")
@@ -144,19 +175,20 @@ void Engine::slotEngineStarted()
 					{
 						for (j = 0; j < personality.combo.var.size(); j++)
 						{
+							rat = (i + 1) * 125;
 							er.skill = i;
 							er.personality = personality.combo.var[j];
-							er.rating = (er.skill + 1) * 125 + 200;
+							er.rating = rat + 200;
 							er.category = BULLET;
 							rating.push_back(er);
 							er.category = BLITZ;
-							er.rating -= 100;
+							er.rating = rat + 100;
 							rating.push_back(er);
 							er.category = RAPID;
-							er.rating -= 100;
+							er.rating = rat;
 							rating.push_back(er);
 							er.category = CLASSICAL;
-							er.rating -= 100;
+							er.rating = rat - 100;
 							rating.push_back(er);
 						}
 					}
@@ -165,19 +197,20 @@ void Engine::slotEngineStarted()
 				{
 					for (i = 0; i < 25; i++)
 					{
+						rat = (i + 1) * 125;
 						er.skill = i;
 						er.personality.clear();
-						er.rating = (er.skill + 1) * 125 + 200;
+						er.rating = rat + 200;
 						er.category = BULLET;
 						rating.push_back(er);
 						er.category = BLITZ;
-						er.rating -= 100;
+						er.rating = rat + 100;
 						rating.push_back(er);
 						er.category = RAPID;
-						er.rating -= 100;
+						er.rating = rat;
 						rating.push_back(er);
 						er.category = CLASSICAL;
-						er.rating -= 100;
+						er.rating = rat - 100;
 						rating.push_back(er);
 					}
 				}
@@ -186,19 +219,20 @@ void Engine::slotEngineStarted()
 			{
 				for (i = 0; i < 20; i++)
 				{
+					rat = (i + 1) * 142;
 					er.skill = i;
 					er.personality.clear();
-					er.rating = (er.skill + 1) * 142 + 200;
+					er.rating = rat + 200;
 					er.category = BULLET;
 					rating.push_back(er);
 					er.category = BLITZ;
-					er.rating -= 100;
+					er.rating = rat + 100;
 					rating.push_back(er);
 					er.category = RAPID;
-					er.rating -= 100;
+					er.rating = rat;
 					rating.push_back(er);
 					er.category = CLASSICAL;
-					er.rating -= 100;
+					er.rating = rat - 100;
 					rating.push_back(er);
 				}
 			}

@@ -158,6 +158,7 @@ public:
 	virtual void unload();
 	virtual bool isLoaded() { return (process == NULL) ? false : true; };
 	void init(QString&key, QString&val);
+	void clearInit() { initOptions.clear(); }
 	virtual void write(const char* sz) { write(QString(sz)); };
 	virtual void write(QString& qs);
 	virtual void analyze(ChessBoard& board) {};

@@ -76,5 +76,6 @@ public:
 //	bool loadSetup(QString& setup) { return false; };
 	QString getPath();
 	void init(QString& key, QString& val) { uci.init(key, val); };
+	void clearInit() { uci.clearInit(); };
 	int getRating(int skill, QString& personality, int category);
 };
