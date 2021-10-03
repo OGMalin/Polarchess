@@ -125,4 +125,5 @@ private:
 	void useDgt();
 	void setSound();
 	void saveToPgn();
+	void doEngineMove();
 };

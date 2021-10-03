@@ -410,16 +410,8 @@ void MainWindow::newGame()
 	engine->load(installedEngine);
 	if (engineColor == WHITE)
 	{
-		int mtg=0;
-		if (gameSetting.suddenDeathTime)
-		{
-			mtg = 40 - currentGame->moveCount(WHITE);
-		}
-		ChessBoard b = currentGame->getStartPosition().board();
-		MoveList ml = currentGame->movelist();
-
-		engine->search(b, ml,NORMAL_SEARCH, gameSetting.startTime * 1000, gameSetting.startTimeInc * 1000, gameSetting.startTime * 1000, gameSetting.startTimeInc * 1000, mtg);
 		boardwindow->flip(true);
+		doEngineMove();
 	}
 }
 
@@ -510,17 +502,7 @@ void MainWindow::moveEntered(ChessMove& move)
 	// Switch the clock
 	clockwindow->start(currentGame->toMove());
 
-	// Let the engine find a move
-	int mtg = 0;
-	if (gameSetting.suddenDeathTime)
-	{
-		mtg = 40 - currentGame->moveCount(currentGame->toMove());
-		if (mtg < 0)
-			mtg = 0;
-	}
-	ChessBoard b = currentGame->getStartPosition().board();
-	MoveList ml = currentGame->movelist();
-	engine->search(b, ml, NORMAL_SEARCH, clockwindow->gettime(WHITE), gameSetting.startTimeInc * 1000, clockwindow->gettime(BLACK), gameSetting.startTimeInc * 1000, mtg);
+	doEngineMove();
 }
 
 void MainWindow::endGame()
@@ -766,4 +748,23 @@ bool MainWindow::gameFinnish()
 
 	// Insuficient material
 	return false;
+}
+
+void MainWindow::doEngineMove()
+{
+	ChessBoard b = currentGame->getStartPosition().board();
+
+	// First check for book moves
+	ChessMove m=book->getMove(b);
+
+	// Let the engine find a move
+	int mtg = 0;
+	if (gameSetting.suddenDeathTime)
+	{
+		mtg = 40 - currentGame->moveCount(currentGame->toMove());
+		if (mtg < 0)
+			mtg = 0;
+	}
+	MoveList ml = currentGame->movelist();
+	engine->search(b, ml, NORMAL_SEARCH, clockwindow->gettime(WHITE), gameSetting.startTimeInc * 1000, clockwindow->gettime(BLACK), gameSetting.startTimeInc * 1000, mtg);
 }

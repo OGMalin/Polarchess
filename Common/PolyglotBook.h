@@ -22,7 +22,7 @@ public:
 	PolyglotBook();
 	PolyglotBook(QString& bookfile);
 	virtual ~PolyglotBook();
-	bool open(QString& bookfile);
+	virtual bool open(QString& bookfile);
 	void close();
 	void save();
 	void get(ChessBoard& board, QVector<PolyglotDataEntry>&);
