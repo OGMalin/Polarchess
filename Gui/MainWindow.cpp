@@ -386,6 +386,11 @@ void MainWindow::newGame()
 		return;
 	gameSetting=dialog.getSetting();
 
+	if (gameSetting.book.isEmpty())
+		book->close();
+	else
+		book->open(gameSetting.book);
+
 	currentGame->newGame();
 	boardwindow->setPosition(currentGame->getPosition().board());
 	int color = gameSetting.color;
@@ -752,10 +757,15 @@ bool MainWindow::gameFinnish()
 
 void MainWindow::doEngineMove()
 {
-	ChessBoard b = currentGame->getStartPosition().board();
+	ChessBoard b = currentGame->getPosition().board();
 
 	// First check for book moves
 	ChessMove m=book->getMove(b);
+	if (!m.empty())
+	{
+		playEngineMove(b.makeMoveText(m,SAN).c_str(),"");
+		return;
+	}
 
 	// Let the engine find a move
 	int mtg = 0;
@@ -765,6 +775,7 @@ void MainWindow::doEngineMove()
 		if (mtg < 0)
 			mtg = 0;
 	}
+	b = currentGame->getStartPosition().board();
 	MoveList ml = currentGame->movelist();
 	engine->search(b, ml, NORMAL_SEARCH, clockwindow->gettime(WHITE), gameSetting.startTimeInc * 1000, clockwindow->gettime(BLACK), gameSetting.startTimeInc * 1000, mtg);
 }

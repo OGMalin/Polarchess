@@ -7,6 +7,6 @@ class Book : public PolyglotBook
 public:
 	Book();
 	~Book();
-	bool open();
+	bool open(QString&);
 	ChessMove getMove(ChessBoard&);
 };
