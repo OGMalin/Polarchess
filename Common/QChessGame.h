@@ -91,6 +91,10 @@ public:
 	void gotoMove(int ply);
 	void addComment(QString& comment, int index = -1);
 	int moveCount(int color);
+	// Check if last position a 3 fold position
+	bool is3fold();
+	bool is50move();
+
 	void site(QString& s) { _site = s; };
 	void event(QString& s) { _event = s; };
 	void round(QString& s) { _round = s; };

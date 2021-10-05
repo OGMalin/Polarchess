@@ -733,7 +733,6 @@ bool MainWindow::gameFinnish()
 	{
 		if (cb.inCheck())
 		{
-
 			if (cb.toMove == WHITE)
 				currentGame->result(QString("0-1"));
 			else
@@ -748,10 +747,28 @@ bool MainWindow::gameFinnish()
 	}
 
 	// 3-fold repetition
+	if (currentGame->is3fold())
+	{
+		currentGame->result(QString("1/2-1/2"));
+		return true;
+	}
 
 	// 50 moves rule
+	if (currentGame->is50move())
+	{
+		currentGame->result(QString("1/2-1/2"));
+		return true;
+	}
 
 	// Insuficient material
+	int i,p,pt;
+	for (i = 0; i < 64; i++)
+	{
+		p = cb.board[SQUARE128(i)];
+		pt == PIECE(p);
+		if ((pt == PAWN) || (pt == QUEEN) || (p = ROOK))
+			return false;
+	}
 	return false;
 }
 

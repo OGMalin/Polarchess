@@ -139,6 +139,46 @@ MoveList QChessGame::movelist()
 	}
 	return ml;
 }
+
+bool QChessGame::is3fold()
+{
+	int count = 0;
+	if (line.size() == 0)
+		return false;
+	ChessBoard cb = game[line.back()].board();
+	QList<int>::iterator lit = line.begin();
+	while (lit != line.end())
+	{
+		if (game[*lit].board() == cb)
+			++count;
+		++lit;
+	}
+	if (count >= 3)
+		return true;
+	return false;
+}
+
+bool QChessGame::is50move()
+{
+	int count = 0;
+	if (line.size() == 0)
+		return false;
+	ChessMove m;
+	QList<int>::iterator lit = line.begin();
+	while (lit != line.end())
+	{
+		m = game[*lit]._moves[0].move();
+		if ((m.moveType == PAWNMOVE) || (m.moveType == CASTLE) || (m.moveType == CAPTURE))
+			count == 0;
+		else
+			++count;
+		++lit;
+	}
+	if (count >= 100)
+		return true;
+	return false;
+}
+
 typeColor QChessGame::toMove()
 {
 	return getPosition().board().toMove;
