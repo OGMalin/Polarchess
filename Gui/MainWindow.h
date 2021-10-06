@@ -36,6 +36,7 @@ private:
 	void closeEvent(QCloseEvent* event) override;
 	void aboutDialog();
 	bool gameFinnish();
+	bool canWin(typeColor c); // Checked when someone run out of time 
 
 protected:
 	void changeEvent(QEvent*);

@@ -729,7 +729,7 @@ bool MainWindow::gameFinnish()
 {
 	// Check for mate/stalemate
 	ChessBoard cb = currentGame->getPosition().board();
-	if ( cb.legalMoves() < 1)
+	if (cb.legalMoves() < 1)
 	{
 		if (cb.inCheck())
 		{
@@ -760,14 +760,46 @@ bool MainWindow::gameFinnish()
 		return true;
 	}
 
-	// Insuficient material
-	int i,p,pt;
+	// Insufficient material
+	int i, p, pt, knights[2], bishops[2];
+	knights[WHITE] = knights[BLACK] = bishops[WHITE] = bishops[BLACK] = 0;
 	for (i = 0; i < 64; i++)
 	{
 		p = cb.board[SQUARE128(i)];
 		pt == PIECE(p);
 		if ((pt == PAWN) || (pt == QUEEN) || (p = ROOK))
 			return false;
+		switch (pt)
+		{
+		case KNIGHT:
+			++knights[PIECECOLOR(p)];
+			break;
+		case BISHOP:
+			++bishops[PIECECOLOR(p)];
+			break;
+		}
+	}
+
+	// Only kings with only one piece are draw
+	if ((knights[WHITE] + knights[BLACK] + bishops[WHITE] + bishops[BLACK]) < 2)
+		return true;
+
+	return false;
+}
+
+bool MainWindow::canWin(typeColor c)
+{
+	ChessBoard cb = currentGame->getPosition().board();
+	int i, p, pt;
+
+	for (i = 0; i < 64; i++)
+	{
+		p = cb.board[SQUARE128(i)];
+		if (PIECECOLOR(p) == c)
+		{
+			if ((pt == PAWN) || (pt == KNIGHT) || (pt == BISHOP) || (pt == ROOK) || (pt == QUEEN))
+				return true;
+		}
 	}
 	return false;
 }

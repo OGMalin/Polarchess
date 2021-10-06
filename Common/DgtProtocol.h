@@ -36,7 +36,7 @@ const BYTE DGT_SBI_CLOCK_MESSAGE = 0X2B; // Send command to the clock. Result in
 const BYTE DGT_I2C_CLOCK_MESSAGE = 0x2c;
 const BYTE DGT_SET_LEDS = 0x60; // Set LED pattern on Revelation II.
 
-// Message from the DGT boardyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
+// Message from the DGT board
 //const BYTE DGT_MSG_ERROR = 0x00;
 //const BYTE DGT_MSG_NONE = 0x80; //
 const BYTE DGT_MSG_BOARD_DUMP = 0X86;
