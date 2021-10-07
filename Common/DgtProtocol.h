@@ -1,7 +1,7 @@
 #pragma once
 
 // These constants are from Ref:72002 e-Board protocol description version P1.0
-
+// Thanks to DGT support team for giving me this manual.
 // This is not all constants but what I use for single board communication
 
 //#include <windows.h>

@@ -167,9 +167,11 @@ bool QChessGame::is50move()
 	QList<int>::iterator lit = line.begin();
 	while (lit != line.end())
 	{
+		if (game[*lit]._moves.size() < 1)
+			break;
 		m = game[*lit]._moves[0].move();
 		if ((m.moveType == PAWNMOVE) || (m.moveType == CASTLE) || (m.moveType == CAPTURE))
-			count == 0;
+			count = 0;
 		else
 			++count;
 		++lit;

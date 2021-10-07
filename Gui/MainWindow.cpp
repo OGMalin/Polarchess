@@ -462,11 +462,19 @@ void MainWindow::firstTime()
 
 void MainWindow::clockAlarm(int color)
 {
-	currentGame->addComment(tr("Lost on time."));
-	if (color == WHITE)
-		currentGame->result(QString("0-1"));
+	if (!canWin(OTHERPLAYER(color)))
+	{
+		currentGame->addComment(tr("Draw by insufficient material"));
+		currentGame->result(QString("1/2-1/2"));
+	}
 	else
-		currentGame->result(QString("1-0"));
+	{
+		currentGame->addComment(tr("Lost on time."));
+		if (color == WHITE)
+			currentGame->result(QString("0-1"));
+		else
+			currentGame->result(QString("1-0"));
+	}
 	endGame();
 }
 
@@ -766,7 +774,7 @@ bool MainWindow::gameFinnish()
 	for (i = 0; i < 64; i++)
 	{
 		p = cb.board[SQUARE128(i)];
-		pt == PIECE(p);
+		pt = PIECE(p);
 		if ((pt == PAWN) || (pt == QUEEN) || (p = ROOK))
 			return false;
 		switch (pt)
