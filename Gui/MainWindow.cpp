@@ -27,6 +27,8 @@
 #include <QTextToSpeech>
 #include <QLocale>
 #include <QVoice>
+#include <QClipboard>
+#include <QTextStream>
 
 //#include <QEventLoop>
 
@@ -110,13 +112,16 @@ void MainWindow::createMenu()
 	fileMenu = menuBar()->addMenu("*");
 	exitAct = fileMenu->addAction("*", this, &QWidget::close);
 
+	//Board menu
 	boardMenu = menuBar()->addMenu("*");
 	flipAct = boardMenu->addAction("*", this, &MainWindow::flipBoard);
 
+	// Game menu
 	gameMenu = menuBar()->addMenu("*");
 	newGameAct = gameMenu->addAction(QIcon(":/icon/board48.png"),"*",this,&MainWindow::newGame);
 	abortAct = gameMenu->addAction(QIcon(":/icon/abort48.png"), "*", this, &MainWindow::abort);
 	resignAct = gameMenu->addAction(QIcon(":/icon/resign48.png"), "*", this, &MainWindow::resign);
+	copyAct = gameMenu->addAction("*", this, &MainWindow::copy,QKeySequence::Copy);
 
 	// Settings menu
 	settingsMenu = menuBar()->addMenu("*");
@@ -169,6 +174,7 @@ void MainWindow::retranslateUi()
 	newGameAct->setText(tr("New game"));
 	abortAct->setText(tr("Abort"));
 	resignAct->setText(tr("Resign"));
+	copyAct->setText(tr("Copy"));
 
 	settingsMenu->setTitle(tr("Settings"));
 	soundAct->setText(tr("Sound"));
@@ -803,6 +809,7 @@ bool MainWindow::canWin(typeColor c)
 	for (i = 0; i < 64; i++)
 	{
 		p = cb.board[SQUARE128(i)];
+		pt = PIECE(p);
 		if (PIECECOLOR(p) == c)
 		{
 			if ((pt == PAWN) || (pt == KNIGHT) || (pt == BISHOP) || (pt == ROOK) || (pt == QUEEN))
@@ -836,3 +843,12 @@ void MainWindow::doEngineMove()
 	MoveList ml = currentGame->movelist();
 	engine->search(b, ml, NORMAL_SEARCH, clockwindow->gettime(WHITE), gameSetting.startTimeInc * 1000, clockwindow->gettime(BLACK), gameSetting.startTimeInc * 1000, mtg);
 }
+
+void MainWindow::copy()
+{
+	QString qs;
+	QClipboard* clipboard = QApplication::clipboard();
+	currentGame->getPgn(qs);
+	clipboard->setText(qs);
+}
+

@@ -56,6 +56,7 @@ public slots:
 	void dgtNewGame();
 	void dgtResult(int);
 	void dgtStatusClicked(bool);
+	void copy();
 
 public:
 	QChessGame* currentGame;
@@ -79,6 +80,7 @@ private:
 	QAction* newGameAct;
 	QAction* resignAct;
 	QAction* abortAct;
+	QAction* copyAct;
 	QAction* flipAct;
 	QAction* installEngineAct;
 	QAction* useDgtAct;

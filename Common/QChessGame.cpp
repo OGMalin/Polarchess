@@ -1,5 +1,5 @@
 #include "QChessGame.h"
-
+#include <QTextStream>
 const QChessMove QChessPosition::move(int nextpos)
 {
 	QChessMoveList::iterator mit=_moves.begin();
@@ -231,4 +231,23 @@ void QChessGame::gotoMove(int ply)
 //		newline.back();
 		line = newline;
 	}
+}
+
+void QChessGame::getPgn(QString& qs, bool useTime)
+{
+	QStringList qsl;
+	qs.clear();
+	getMovelist(qsl, SAN);
+	QTextStream(&qs) << "[Event \"" << event() << "\"" << endl << "[Site \"" << site() << "\"" << endl << "[Date \"" << date() << "\"" << endl << "[Round \"" << round() << "\"" << endl << "[White \"" << white() << "\"" << endl << "[Black \"" << black() << "\"" << endl << "[Result \"" << result() << "\"" << endl << endl;
+	int i;
+	for (i = 0; i < qsl.size(); i++)
+	{
+		if (i % 2)
+			QTextStream(&qs) << " ";
+		else
+			QTextStream(&qs) << " " << (2 + i) / 2 << ". ";
+		QTextStream(&qs) << qsl[i];
+	}
+
+	QTextStream(&qs) << " " << result() << endl << endl;
 }

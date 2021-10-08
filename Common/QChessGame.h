@@ -84,6 +84,7 @@ public:
 	const QChessPosition getPosition();
 	const QChessPosition getStartPosition();
 	void getMovelist(QStringList& list, int type=FIDE);
+	void getPgn(QString&, bool useTime = true);
 	MoveList movelist();
 	bool doMove(const QChessMove& move);
 	bool doMove(const ChessMove& move);
