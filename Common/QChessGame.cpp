@@ -32,8 +32,9 @@ void QChessGame::clear()
 	_blackelo.clear();
 	_round.clear();
 	_date.clear();
-	_whitetimecontrol.clear();
-	_blacktimecontrol.clear();
+	_whiteclock.clear();
+	_blackclock.clear();
+	_timecontrol.clear();
 	_rated.clear();
 	_eco.clear();
 	_analysisengine.clear();
@@ -246,8 +247,7 @@ void QChessGame::getPgn(QString& qs, bool useTime)
 			QTextStream(&qs) << " ";
 		else
 			QTextStream(&qs) << " " << (2 + i) / 2 << ". ";
-		QTextStream(&qs) << qsl[i];
+		QTextStream(&qs) << qsl[i] << "{[%clk 0:00:00]";
 	}
-
 	QTextStream(&qs) << " " << result() << endl << endl;
 }

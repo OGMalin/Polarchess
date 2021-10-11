@@ -13,6 +13,7 @@ class QChessMove
 public:
 	ChessMove _move;
 	QString _comment;
+	// Second on the players clock after the move are done.
 	int _second;
 	int _next;
 
@@ -70,8 +71,9 @@ private:
 	QString _result;
 	QString _whiteelo;
 	QString _blackelo;
-	QString _whitetimecontrol;
-	QString _blacktimecontrol;
+	QString _whiteclock;
+	QString _blackclock;
+	QString _timecontrol;
 	QString _rated; //Blank, BULLET, BLITZ, RAPID, CLASSICAL
 	QString _eco;
 	QString _analysisengine;
@@ -105,9 +107,9 @@ public:
 	void result(QString& s) { _result = s; };
 	void whiteelo(QString& s) { _whiteelo = s; };
 	void blackelo(QString& s) { _blackelo = s; };
-	void whitetimecontrol(QString& s) { _whitetimecontrol = s; };
-	void blacktimecontrol(QString& s) { _blacktimecontrol = s; };
-	void timecontrol(QString& s) { _whitetimecontrol=_blacktimecontrol = s; };
+	void whiteclock(QString& s) { _whiteclock = s; };
+	void blackclock(QString& s) { _blackclock = s; };
+	void timecontrol(QString& s) { _timecontrol = s; };
 	void rated(QString& s) { _rated = s; };
 	void eco(QString& s) { _eco = s; };
 	void analysisengine(QString& s) { _analysisengine = s; };
@@ -122,9 +124,9 @@ public:
 	const QString result() { return _result; };
 	const QString whiteelo() { return _whiteelo; };
 	const QString blackelo() { return _blackelo; };
-	const QString whitetimecontrol() { return _whitetimecontrol; };
-	const QString blacktimecontrol() { return _blacktimecontrol; };
-	const QString timecontrol() { return _whitetimecontrol; };
+	const QString whiteclock() { return _whiteclock; };
+	const QString blackclock() { return _blackclock; };
+	const QString timecontrol() { return _timecontrol; };
 	const QString rated() { return _rated; };
 	const QString eco() { return _eco; };
 	const QString analysisengine() { return _analysisengine; };
