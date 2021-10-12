@@ -81,7 +81,7 @@ MainWindow::MainWindow()
 	connect(engine, SIGNAL(engineMove(const QString&, const QString&)), this, SLOT(playEngineMove(const QString&, const QString&)));
 	connect(clockwindow, SIGNAL(clockAlarm(int)),this, SLOT(clockAlarm(int)));
 	connect(boardwindow, SIGNAL(moveEntered(ChessMove&)), this, SLOT(moveEntered(ChessMove&)));
-
+	connect(scoresheet, SIGNAL(moveSelected(int)), this, SLOT(moveSelected(int)));
 	// Check and update engine options
 	if (!installedEngine.isEmpty())
 	{
@@ -398,25 +398,25 @@ void MainWindow::newGame()
 		book->open(gameSetting.book);
 
 	currentGame->newGame();
-	boardwindow->setPosition(currentGame->getPosition().board());
+	boardwindow->setPosition(currentGame->getPosition().board);
 	int color = gameSetting.color;
 	if (color == 2)
 		color = QRandomGenerator::global()->bounded(0, 1);
 	if (color == WHITE)
 	{
-		currentGame->white(gameSetting.player);
-		currentGame->black(gameSetting.engineplayer);
+		currentGame->white=gameSetting.player;
+		currentGame->black=gameSetting.engineplayer;
 	}
 	else
 	{
-		currentGame->white(gameSetting.engineplayer);
-		currentGame->black(gameSetting.player);
+		currentGame->white=gameSetting.engineplayer;
+		currentGame->black=gameSetting.player;
 	}
 	engineColor = OTHERPLAYER(color);
-	currentGame->date(QDate().currentDate().toString("YYYY.MM.DD"));
+	currentGame->date = QDate().currentDate();
 	running = true;
 	clockwindow->settime(gameSetting.startTime*1000, gameSetting.startTime*1000);
-	clockwindow->start(currentGame->getPosition().board().toMove);
+	clockwindow->start(currentGame->getPosition().board.toMove);
 	scoresheet->updateGame(currentGame);
 	engine->load(installedEngine);
 	if (engineColor == WHITE)
@@ -470,16 +470,16 @@ void MainWindow::clockAlarm(int color)
 {
 	if (!canWin(OTHERPLAYER(color)))
 	{
-		currentGame->addComment(tr("Draw by insufficient material"));
-		currentGame->result(QString("1/2-1/2"));
+		currentGame->termination=tr("Draw by insufficient material");
+		currentGame->result=2;
 	}
 	else
 	{
-		currentGame->addComment(tr("Lost on time."));
+		currentGame->termination=tr("Lost on time.");
 		if (color == WHITE)
-			currentGame->result(QString("0-1"));
+			currentGame->result = 3;
 		else
-			currentGame->result(QString("1-0"));
+			currentGame->result = 1;
 	}
 	endGame();
 }
@@ -491,16 +491,15 @@ void MainWindow::moveEntered(ChessMove& move)
 	// Move not allowed, engine to move.
 	if (running && (tomove == engineColor))
 	{
-		QChessPosition pos = currentGame->getPosition();
-		boardwindow->setPosition(pos.board());
+		boardwindow->setPosition(currentGame->getPosition().board);
 		return;
 	}
 
 	// Do the move if it is legal
-	if (!currentGame->doMove(move))
+	if (!currentGame->doMove(move,clockwindow->gettime(tomove)))
 	{
 		QChessPosition pos = currentGame->getPosition();
-		boardwindow->setPosition(pos.board());
+		boardwindow->setPosition(currentGame->getPosition().board);
 		return;
 	}
 
@@ -572,9 +571,9 @@ void MainWindow::playEngineMove(const QString& move, const QString& ponder)
 	if (!running)
 		return;
 	int player = currentGame->toMove();
-	ChessMove m=currentGame->getPosition().board().getMoveFromText(move.toStdString());
-	currentGame->doMove(m);
-	boardwindow->setPosition(currentGame->getPosition().board());
+	ChessMove m=currentGame->getPosition().board.getMoveFromText(move.toStdString());
+	currentGame->doMove(m, clockwindow->gettime(player));
+	boardwindow->setPosition(currentGame->getPosition().board);
 	scoresheet->updateGame(currentGame);
 	if (gameFinnish())
 		return;
@@ -588,25 +587,13 @@ void MainWindow::playEngineMove(const QString& move, const QString& ponder)
 
 void MainWindow::resign()
 {
-	// Test
-	//QSettings settings("Engine.ini", QSettings::IniFormat);
-	//settings.beginGroup("PolarChess");
-	//settings.setValue("path", "Engine.exe");
-	//settings.setValue("book", "Polarchess");
-	//settings.setValue("bookdepth", 10);
-	//settings.setValue("Elo", 1600);
-	//settings.beginWriteArray("option");
-	//settings.setValue("UCI_LimitStrength", true);
-	//settings.setValue("UCI_Elo", 1600);
-	//settings.endArray();
-	//settings.endGroup();
-
 	if (!running)
 		return;
-	if (engineColor==WHITE)
-		currentGame->result(QString("1-0"));
+	currentGame->termination = tr("Resignation");
+	if (engineColor == WHITE)
+		currentGame->result = 1;
 	else
-		currentGame->result(QString("0-1"));
+		currentGame->result = 3;
 	endGame();
 }
 
@@ -681,7 +668,7 @@ void MainWindow::dgtResult(int result)
 	//	qs = "1-0";
 	//else
 	//	qs = BLACKWIN;
-	currentGame->result(qs);
+	currentGame->result=result;
 	endGame();
 }
 
@@ -709,7 +696,7 @@ void MainWindow::useDgt()
 			dgtIcon->setIcon(QIcon(":/icon/dgtDisconnect.png"));
 			connect(dgtIcon, SIGNAL(clicked(bool)), this, SLOT(dgtStatusClicked(bool)));
 			statusBar()->addPermanentWidget(dgtIcon);
-			dgt->setBoard(currentGame->getPosition().board());
+			dgt->setBoard(currentGame->getPosition().board);
 			if (!dgt->autoConnect())
 				dgt->show();
 		}
@@ -742,19 +729,22 @@ void MainWindow::saveToPgn()
 bool MainWindow::gameFinnish()
 {
 	// Check for mate/stalemate
-	ChessBoard cb = currentGame->getPosition().board();
+	ChessBoard cb = currentGame->getPosition().board;
 	if (cb.legalMoves() < 1)
 	{
 		if (cb.inCheck())
 		{
+			currentGame->termination = tr("Checkmate");
 			if (cb.toMove == WHITE)
-				currentGame->result(QString("0-1"));
+				currentGame->result = 3;
 			else
-				currentGame->result(QString("1-0"));
+				currentGame->result = 1;
 		}
 		else
 		{
-			currentGame->result(QString("1/2-1/2"));
+
+			currentGame->termination = tr("Stalemate");
+			currentGame->result = 2;
 		}
 		endGame();
 		return true;
@@ -763,14 +753,16 @@ bool MainWindow::gameFinnish()
 	// 3-fold repetition
 	if (currentGame->is3fold())
 	{
-		currentGame->result(QString("1/2-1/2"));
+		currentGame->termination = tr("3 fold repetition");
+		currentGame->result = 2;
 		return true;
 	}
 
 	// 50 moves rule
 	if (currentGame->is50move())
 	{
-		currentGame->result(QString("1/2-1/2"));
+		currentGame->termination = tr("50 moves rule");
+		currentGame->result = 2;
 		return true;
 	}
 
@@ -803,7 +795,7 @@ bool MainWindow::gameFinnish()
 
 bool MainWindow::canWin(typeColor c)
 {
-	ChessBoard cb = currentGame->getPosition().board();
+	ChessBoard cb = currentGame->getPosition().board;
 	int i, p, pt;
 
 	for (i = 0; i < 64; i++)
@@ -821,7 +813,7 @@ bool MainWindow::canWin(typeColor c)
 
 void MainWindow::doEngineMove()
 {
-	ChessBoard b = currentGame->getPosition().board();
+	ChessBoard b = currentGame->getPosition().board;
 
 	// First check for book moves
 	ChessMove m=book->getMove(b);
@@ -839,7 +831,7 @@ void MainWindow::doEngineMove()
 		if (mtg < 0)
 			mtg = 0;
 	}
-	b = currentGame->getStartPosition().board();
+	b = currentGame->getPosition(0).board;
 	MoveList ml = currentGame->movelist();
 	engine->search(b, ml, NORMAL_SEARCH, clockwindow->gettime(WHITE), gameSetting.startTimeInc * 1000, clockwindow->gettime(BLACK), gameSetting.startTimeInc * 1000, mtg);
 }
@@ -852,3 +844,10 @@ void MainWindow::copy()
 	clipboard->setText(qs);
 }
 
+void MainWindow::moveSelected(int ply)
+{
+	if (running)
+		return;
+	ChessBoard cb = currentGame->getPosition(ply).board;
+	boardwindow->setPosition(cb);
+}

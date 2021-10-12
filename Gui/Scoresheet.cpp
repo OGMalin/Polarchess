@@ -24,13 +24,23 @@ Scoresheet::Scoresheet(QWidget* parent)
 	vbox->addWidget(table);
 	setLayout(vbox);
 	
+	connect(table, SIGNAL(clicked(const QModelIndex&)), this, SLOT(moveClicked(const QModelIndex&)));
+	connect(table, SIGNAL(activated(const QModelIndex&)), this, SLOT(moveClicked(const QModelIndex&)));
+
 //	resize(minimumSizeHint());
+}
+
+void Scoresheet::moveClicked(const QModelIndex& index)
+{
+	int col = index.column();
+	int row = index.row();
+	emit moveSelected(row * 2 + col + 1);
 }
 
 void Scoresheet::updateGame(QChessGame* game)
 {
 	QStringList header;
-	header << game->white() << game->black();
+	header << game->white << game->black;
 	model->setHorizontalHeaderLabels(header);
 	model->clear();
 	QStringList list;
@@ -55,9 +65,9 @@ void Scoresheet::updateGame(QChessGame* game)
 		}
 		++lit;
 	}
-	if (!game->result().isEmpty())
+	if (game->result!=0)
 	{
-		item = new QStandardItem(game->result());
+		item = new QStandardItem(game->resultToString());
 		item->setTextAlignment(Qt::AlignCenter);
 		model->setItem(row, col, item);
 	}

@@ -12,6 +12,10 @@ class Scoresheet :public QWidget
 private:
 	QTableView * table;
 	QStandardItemModel* model;
+signals:
+	void moveSelected(int);
+public slots:
+	void moveClicked(const QModelIndex&);
 public:
 	Scoresheet(QWidget* parent = 0);
 	void updateGame(QChessGame*);

@@ -57,6 +57,7 @@ public slots:
 	void dgtResult(int);
 	void dgtStatusClicked(bool);
 	void copy();
+	void moveSelected(int);
 
 public:
 	QChessGame* currentGame;

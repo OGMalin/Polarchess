@@ -1,15 +1,5 @@
 #include "QChessGame.h"
 #include <QTextStream>
-const QChessMove QChessPosition::move(int nextpos)
-{
-	QChessMoveList::iterator mit=_moves.begin();
-	while (mit != _moves.end())
-	{
-		if (nextpos == mit->nextposition())
-			return *mit;
-	}
-	return QChessMove();
-}
 
 QChessGame::QChessGame(QObject *parent)
 	: QObject(parent)
@@ -23,105 +13,96 @@ QChessGame::~QChessGame()
 
 void QChessGame::clear()
 {
-	_site.clear();
-	_event.clear();
-	_white.clear();
-	_black.clear();
-	_result.clear();
-	_whiteelo.clear();
-	_blackelo.clear();
-	_round.clear();
-	_date.clear();
-	_whiteclock.clear();
-	_blackclock.clear();
-	_timecontrol.clear();
-	_rated.clear();
-	_eco.clear();
-	_analysisengine.clear();
-	_annotator.clear();
+	site.clear();
+	event.clear();
+	white.clear();
+	black.clear();
+	result=0;
+	whiteelo=0;
+	blackelo=0;
+	round.clear();
+	date.setDate(QDate::currentDate().year(), QDate::currentDate().month(), QDate::currentDate().day());
+	whiteclock=0;
+	blackclock=0;
+	timecontrol.clear();
+	termination.clear();
+	rated=0;
 	game.clear();
-	line.clear();
 }
 
 void QChessGame::newGame(const QString& fen)
 {
-	game.clear();
-	line.clear();
+	clear();
 	QChessPosition pos;
 	if (fen.isEmpty())
-		pos.setStartposition();
+		pos.board.setStartposition();
 	else
 		pos.setFen(fen);
 	game.push_back(pos);
-	line.push_back(0);
 }
 
-bool QChessGame::doMove(const ChessMove& move)
+bool QChessGame::doMove(ChessMove& move, int sec)
 {
 	QChessMove m;
-	m.move(move);
-	return doMove(m);
-}
-
-bool QChessGame::doMove(const QChessMove& move)
-{
-	if (line.size() == 0)
-		return false;
-	ChessBoard cb;
-	int index = line.back();
-	cb = game[index].board();
-	QChessMove qm = move;
-	ChessMove m = qm.move();
-	if (!cb.doMove(m, true))
-		return false;
+	m.move=move;
+	m.second = sec;
 	QChessPosition pos;
-	pos.board(cb);
-	qm.nextposition(game.size());
+	pos.board = getPosition().board;
+	if (!pos.board.isLegal(move))
+		return false;
+	pos.move = m;
 	game.push_back(pos);
-	game[index].addMove(qm);
-	line.push_back(qm.nextposition());
 	return true;
 }
 
-const QChessPosition QChessGame::getPosition()
-{
-	if (line.size()==0)
-		return QChessPosition();
-	return game[line.back()];
-}
+//bool QChessGame::doMove(const QChessMove& move)
+//{
+//	ChessBoard cb;
+//	int index = line.back();
+//	cb = game[index].board();
+//	QChessMove qm = move;
+//	ChessMove m = qm.move();
+//	if (!cb.doMove(m, true))
+//		return false;
+//	QChessPosition pos;
+//	pos.board(cb);
+//	qm.nextposition(game.size());
+//	game.push_back(pos);
+//	game[index].addMove(qm);
+//	line.push_back(qm.nextposition());
+//	return true;
+//}
 
-const QChessPosition QChessGame::getStartPosition()
+QChessPosition QChessGame::getPosition(int ply)
 {
-	if (line.size()==0)
+	if (game.size() == 0)
 		return QChessPosition();
-	return game[line.front()];
+	if (ply >= game.size())
+		ply = game.size() - 1;
+	if (ply == -1)
+		ply= game.size() - 1;
+
+	return game[ply];
 }
 
 void QChessGame::getMovelist(QStringList& list, int type)
 {
 	QString piecechartr(tr("NBRQK"));
 	QString piecechar("NBRQK");
-	if (line.size() == 0)
+	if (game.size() == 0)
 		return;
 	QChessMove m;
 	QString qs;
-	int i;
-	QList<int>::iterator lit=line.begin();
-	int current, next;
-	current = *lit;
-	++lit;
-	while (lit != line.end())
+	int i,j;
+	for (i=0;i<game.size();i++)
 	{
-		next = *lit;
-		m=game[current].move(next);
-		if (m.isEmpty())
+		m=game[i].move;
+		if (m.move.empty())
 			break;
-		qs = game[current].board().makeMoveText(m.move(), type).c_str();
-		for (i = 0; i < 5; i++)
-			qs.replace(piecechar.at(i), piecechartr.at(i));
+		qs = game[i].board.makeMoveText(m.move, type).c_str();
+		for (j = 0; j < 5; j++)
+			qs.replace(piecechar.at(j), piecechartr.at(j));
 		list.append(qs);
-		current = next;
-		++lit;
 	}
 }
 
@@ -130,13 +111,15 @@ MoveList QChessGame::movelist()
 	MoveList ml;
 	QChessPosition pos;
 	QChessMove m;
-	QList<int>::iterator lit = line.begin();
-	while (lit != line.end())
+	int i;
+	if (game.size() == 0)
+		return ml;
+	for (i=0;i<game.size();i++)
 	{
-		if (!game[*lit]._moves.size())
+		if (game[i].move.move.empty())
 			break;
-		ml.push_back(game[*lit]._moves[0].move());
-		++lit;
+
+		ml.push_back(game[i].move.move);
 	}
 	return ml;
 }
@@ -144,15 +127,14 @@ MoveList QChessGame::movelist()
 bool QChessGame::is3fold()
 {
 	int count = 0;
-	if (line.size() == 0)
+	if (game.size() == 0)
 		return false;
-	ChessBoard cb = game[line.back()].board();
-	QList<int>::iterator lit = line.begin();
-	while (lit != line.end())
+	ChessBoard cb = game[game.size()-1].board;
+	int i;
+	for (i=0;i<game.size();i++)
 	{
-		if (game[*lit].board() == cb)
+		if (game[i].board == cb)
 			++count;
-		++lit;
 	}
 	if (count >= 3)
 		return true;
@@ -162,92 +144,130 @@ bool QChessGame::is3fold()
 bool QChessGame::is50move()
 {
 	int count = 0;
-	if (line.size() == 0)
+	if (game.size() == 0)
 		return false;
 	ChessMove m;
-	QList<int>::iterator lit = line.begin();
-	while (lit != line.end())
+	int i;
+	for (i=0;i<game.size();i++)
 	{
-		if (game[*lit]._moves.size() < 1)
+		if (game[i].move.move.empty())
 			break;
-		m = game[*lit]._moves[0].move();
+		m = game[i].move.move;
 		if ((m.moveType == PAWNMOVE) || (m.moveType == CASTLE) || (m.moveType == CAPTURE))
 			count = 0;
 		else
 			++count;
-		++lit;
 	}
 	if (count >= 100)
 		return true;
 	return false;
 }
 
-typeColor QChessGame::toMove()
-{
-	return getPosition().board().toMove;
-}
-
-void QChessGame::addComment(QString& comment, int index)
-{
-	if (line.size() == 0)
-		return;
-	if (index == -1)
-		index = line.back();
-	game[index].comment(comment);
-}
+//void QChessGame::addComment(QString& comment, int index)
+//{
+//	if (line.size() == 0)
+//		return;
+//	if (index == -1)
+//		index = line.back();
+//	game[index].comment(comment);
+//}
 
 int QChessGame::moveCount(int color)
 {
-	if (line.size() == 0)
-		return 0;
 	int mc;
-	if (getStartPosition().board().toMove == WHITE)
+	if (!game.size())
+		return 0;
+	if (game[0].board.toMove == WHITE)
 	{
 		if (color==WHITE)
-			mc = line.size() / 2;
+			mc = game.size() / 2;
 		else
-			mc = (line.size()-1) / 2;
+			mc = (game.size()-1) / 2;
 	}
 	else
 	{
 		if (color == BLACK)
-			mc = line.size() / 2;
+			mc = game.size() / 2;
 		else
-			mc = (line.size() - 1) / 2;
+			mc = (game.size() - 1) / 2;
 	}
 	return mc;
 }
 
-void QChessGame::gotoMove(int ply)
-{
-	int i;
-	QList<int> newline;
-	for (i = 0; i < ply+1; i++)
-	{
-		if (i<line.size())
-			newline.push_back(line[i]);
-	}
-	if (!newline.isEmpty())
-	{
-//		newline.back();
-		line = newline;
-	}
-}
-
+//void QChessGame::gotoMove(int ply)
+//{
+//	int i;
+//	QList<int> newline;
+//	for (i = 0; i < ply+1; i++)
+//	{
+//		if (i<line.size())
+//			newline.push_back(line[i]);
+//	}
+//	if (!newline.isEmpty())
+//	{
+////		newline.back();
+//		line = newline;
+//	}
+//}
+//
 void QChessGame::getPgn(QString& qs, bool useTime)
 {
-	QStringList qsl;
-	qs.clear();
-	getMovelist(qsl, SAN);
-	QTextStream(&qs) << "[Event \"" << event() << "\"" << endl << "[Site \"" << site() << "\"" << endl << "[Date \"" << date() << "\"" << endl << "[Round \"" << round() << "\"" << endl << "[White \"" << white() << "\"" << endl << "[Black \"" << black() << "\"" << endl << "[Result \"" << result() << "\"" << endl << endl;
-	int i;
-	for (i = 0; i < qsl.size(); i++)
+//	QStringList qsl;
+//	qs.clear();
+//	getMovelist(qsl, SAN);
+//	QTextStream(&qs) << "[Event \"" << event() << "\"" << endl << "[Site \"" << site() << "\"" << endl << "[Date \"" << date() << "\"" << endl << "[Round \"" << round() << "\"" << endl << "[White \"" << white() << "\"" << endl << "[Black \"" << black() << "\"" << endl << "[Result \"" << result() << "\"" << timecontrol() << "\"" << endl << endl;
+//	int i;
+//	QList<int>::iterator lit = line.begin();
+//	QChessMove qm;
+//	while (lit != line.end())
+//	{
+//		qm = game[*lit].move();
+//		++lit;
+//	}
+//	for (i = 0; i < qsl.size(); i++)
+//	{
+//		if (i % 2)
+//			QTextStream(&qs) << " ";
+//		else
+//			QTextStream(&qs) << " " << (2 + i) / 2 << ". ";
+//		QTextStream(&qs) << qsl[i] << "{[%clk 0:00:00]";
+//	}
+//	QTextStream(&qs) << " " << result() << endl << endl;
+//	//QString piecechartr(tr("NBRQK"));
+//	//QString piecechar("NBRQK");
+//	//if (line.size() == 0)
+//	//	return;
+//	//QChessMove m;
+//	//QString qs;
+//	//int i;
+//	//QList<int>::iterator lit = line.begin();
+//	//int current, next;
+//	//current = *lit;
+//	//++lit;
+//	//while (lit != line.end())
+//	//{
+//	//	next = *lit;
+//	//	m = game[current].move(next);
+//	//	if (m.isEmpty())
+//	//		break;
+//	//	qs = game[current].board().makeMoveText(m.move(), type).c_str();
+//	//	for (i = 0; i < 5; i++)
+//	//		qs.replace(piecechar.at(i), piecechartr.at(i));
+//	//	list.append(qs);
+//	//	current = next;
+//	//	++lit;
+//	//}
+//
+}
+
+QString QChessGame::resultToString()
+{
+	QString qs;
+	switch (result)
 	{
-		if (i % 2)
-			QTextStream(&qs) << " ";
-		else
-			QTextStream(&qs) << " " << (2 + i) / 2 << ". ";
-		QTextStream(&qs) << qsl[i] << "{[%clk 0:00:00]";
+	case 1: qs = "1-0";
+	case 2: qs = "1/2-1/2";
+	case 3: qs = "0-1";
 	}
-	QTextStream(&qs) << " " << result() << endl << endl;
+	return qs;
 }
