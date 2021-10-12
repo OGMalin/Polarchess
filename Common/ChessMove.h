@@ -20,6 +20,7 @@ public:
   ChessMove& operator=(const ChessMove& m);
   void clear();
   bool empty();
+  int asInt() { return (fromSquare << 8) + toSquare; };
   friend bool operator==(const ChessMove& m1, const ChessMove& m2);
   friend bool operator!=(const ChessMove& m1, const ChessMove& m2);
 };

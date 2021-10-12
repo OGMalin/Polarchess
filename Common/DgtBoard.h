@@ -1,23 +1,22 @@
 #pragma once
 #include <Windows.h>
 #include <QDialog>
-//#include <QWidget>
 #include <QComboBox>
-//#include <QTimeEdit>
 #include <QLabel>
-//#include <QByteArray>
-//#include <QTimer>
+#include <QSlider>
 #include "../Common/ChessBoard.h"
+#include "../Common/ChessMove.h"
 #include "../Common/BoardWindow.h"
-//#include "../Common/MoveList.h"
 #include "../Common/DgtProtocol.h"
 
-#ifndef BYTE
-#define BYTE unsigned char
-#endif
+//#ifndef BYTE
+//#define BYTE unsigned char
+//#endif
 enum { DRAW, WHITEWIN, BLACKWIN };
+
 //
 // Interfacing with a Dgt electronic chess board.
+
 class DgtBoard : public QDialog
 {
 	Q_OBJECT
@@ -27,6 +26,7 @@ public slots:
 	void disconnectDgt();
 //	void dgtPortOpen(bool);
 	void interpretMessage(BYTE code, int datalength, BYTE* data);
+	void delaytimeChanged(int);
 signals:
 //	// Send last status.
 //	// 0 = Not connected
@@ -34,7 +34,7 @@ signals:
 //	// 2 = Connected and in sync
 	void dgtStatus(int);
 //	void newPosition(ChessBoard&, MoveList&);
-	void dgtNewMove(ChessMove&);
+	void dgtNewMove(ChessMove*);
 	void dgtNewGame();
 	void dgtResult(int);
 public:
@@ -70,6 +70,8 @@ private:
 ////	QTimeEdit* rightClock;
 	QLabel* leftClock;
 	QLabel* rightClock;
+	QSlider* timedelay;
+	QLabel* timedelayValue;
 	BoardWindow* boardwindow;
 ////	QTimer* stableTimer;
 	void write(BYTE command);

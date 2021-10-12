@@ -503,6 +503,9 @@ void MainWindow::moveEntered(ChessMove& move)
 		return;
 	}
 
+	if (dgt)
+		dgt->setBoard(currentGame->getPosition().board);
+
 	scoresheet->updateGame(currentGame);
 
 	if (gameFinnish())
@@ -574,6 +577,8 @@ void MainWindow::playEngineMove(const QString& move, const QString& ponder)
 	ChessMove m=currentGame->getPosition().board.getMoveFromText(move.toStdString());
 	currentGame->doMove(m, clockwindow->gettime(player));
 	boardwindow->setPosition(currentGame->getPosition().board);
+	if (dgt)
+		dgt->setBoard(currentGame->getPosition().board);
 	scoresheet->updateGame(currentGame);
 	if (gameFinnish())
 		return;
@@ -649,9 +654,10 @@ void MainWindow::dgtStatus(int status)
 	}
 }
 
-void MainWindow::dgtNewMove(ChessMove& m)
+void MainWindow::dgtNewMove(ChessMove* m)
 {
-	moveEntered(m);
+	moveEntered(*m);
+	boardwindow->setPosition(currentGame->getPosition().board);
 }
 
 void MainWindow::dgtNewGame()
@@ -686,10 +692,9 @@ void MainWindow::useDgt()
 	{
 		if (!dgt)
 		{
-//			dgt = new DgtDLL(this);
 			dgt = new DgtBoard(this);
 			connect(dgt, SIGNAL(dgtStatus(int)), this, SLOT(dgtStatus(int)));
-			connect(dgt, SIGNAL(dgtNewMove(ChessMove&)), this, SLOT(dgtNewMove(ChessMove&)));
+			connect(dgt, SIGNAL(dgtNewMove(ChessMove*)), this, SLOT(dgtNewMove(ChessMove*)));
 			connect(dgt, SIGNAL(dgtNewGame()), this, SLOT(dgtNewGame()));
 			connect(dgt, SIGNAL(dgtResult(int)), this, SLOT(dgtResult(int)));
 			dgtIcon = new QToolButton();
@@ -849,5 +854,7 @@ void MainWindow::moveSelected(int ply)
 	if (running)
 		return;
 	ChessBoard cb = currentGame->getPosition(ply).board;
+	if (dgt)
+		dgt->setBoard(cb);
 	boardwindow->setPosition(cb);
 }

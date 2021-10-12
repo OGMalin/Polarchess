@@ -140,15 +140,8 @@ DgtBoard::DgtBoard(QWidget* parent)
 	QPushButton* button;
 	QLabel* label;
 	_status = 0;
-//
-////	stableTimer = NULL;
-//	//stableTimer = new QTimer(0);
-//	//stableTimer->setSingleShot(true);
-//	//stableTimer->setInterval(500);
-//	//connect(stableTimer, SIGNAL(timeout()), this, SLOT(stableTimeout()));
-//
 	vbox = new QVBoxLayout;
-//
+
 	hbox = new QHBoxLayout;
 	button = new QPushButton(tr("Update port list")); // Do this automatic when you know how
 	button->setFixedWidth(button->minimumSizeHint().width());
@@ -171,6 +164,22 @@ DgtBoard::DgtBoard(QWidget* parent)
 	vbox->addLayout(hbox);
 	statusLine = new QLabel("Disconnected");
 	vbox->addWidget(statusLine);
+
+	hbox = new QHBoxLayout;
+	label = new QLabel(tr("Stable timer:"));
+	timedelayValue = new QLabel("250");
+	hbox->addWidget(label);
+	hbox->addWidget(timedelayValue);
+	timedelay = new QSlider(Qt::Horizontal);
+	timedelay->setTickInterval(10);
+	timedelay->setPageStep(10);
+	timedelay->setTickPosition(QSlider::NoTicks);
+	timedelay->setMinimum(100);
+	timedelay->setMaximum(1000);
+	timedelay->setSliderPosition(300);
+	hbox->addWidget(timedelay);
+	vbox->addLayout(hbox);
+	connect(timedelay, SIGNAL(valueChanged(int)), this, SLOT(delaytimeChanged(int)));
 
 	hbox = new QHBoxLayout;
 	label = new QLabel("Dgt Board version :");
@@ -220,8 +229,8 @@ DgtBoard::DgtBoard(QWidget* parent)
 
 DgtBoard::~DgtBoard()
 {
-//	disconnectDgt();
-//	CloseHandle(hThread);
+	disconnectDgt();
+	CloseHandle(hThread);
 //	close();
 }
 //
@@ -327,6 +336,7 @@ void DgtBoard::connectDgt(QString portname)
 
 void DgtBoard::disconnectDgt()
 {
+	dgtStopTimer();
 	abort = true;
 	if (hThread)
 		if (WaitForSingleObject(hThread, 1000) == WAIT_TIMEOUT)
@@ -336,7 +346,6 @@ void DgtBoard::disconnectDgt()
 	hThread = NULL;
 	dgtHComm = NULL;
 	_status = 0;
-//	stableTimer->stop();
 	emit dgtStatus(_status);
 	statusLine->setText("Disconnected");
 	lBoardVersion->setText("No board");
@@ -365,11 +374,9 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 		memcpy(stableBoard, data, 64);
 		updateDialog(stableBoard);
 		if (equalBoard(guiBoard, stableBoard))
-		{
 			_status = 2;
-			emit dgtStatus(_status);
-		}
-		_status = 1;
+		else
+			_status = 1;
 		emit dgtStatus(_status);
 		move = getLegalMove(stableBoard);
 		if (move.empty())
@@ -403,7 +410,7 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 			// Mark the board with different between guiboard and stable board
 			break;
 		}
-		emit dgtNewMove(move);
+		emit dgtNewMove(&move);
 		break;
 	case DGT_MSG_SBI_CLOCK:
 		if (datalength != 7)
@@ -514,7 +521,7 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 			qDebug("DGT_MSG_FIELD_UPDATE messagelength mismatch");
 			break;
 		}
-		dgtStartTimer(500);
+		dgtStartTimer(timedelay->sliderPosition());
 //		dgtTimer = SetTimer(NULL, NULL, 500, staticStableTimeout);
 		// Restart timer
 //		if (stableTimer)
@@ -853,3 +860,9 @@ bool DgtBoard::autoConnect()
 //	write(DGT_REQ_BOARD);
 //}
 //
+
+void DgtBoard::delaytimeChanged(int v)
+{
+	char str[16];
+	timedelayValue->setText(itoa(v, str, 10));
+}

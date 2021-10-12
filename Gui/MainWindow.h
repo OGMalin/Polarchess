@@ -52,7 +52,7 @@ public slots:
 	void clockAlarm(int);
 	void moveEntered(ChessMove&);
 	void dgtStatus(int);
-	void dgtNewMove(ChessMove&);
+	void dgtNewMove(ChessMove*);
 	void dgtNewGame();
 	void dgtResult(int);
 	void dgtStatusClicked(bool);

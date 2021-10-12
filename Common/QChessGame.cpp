@@ -47,10 +47,11 @@ bool QChessGame::doMove(ChessMove& move, int sec)
 	m.move=move;
 	m.second = sec;
 	QChessPosition pos;
-	pos.board = getPosition().board;
+	pos.board = game[game.size() - 1].board;
 	if (!pos.board.isLegal(move))
 		return false;
-	pos.move = m;
+	game[game.size() - 1].move = m;
+	pos.board.doMove(m.move, false);
 	game.push_back(pos);
 	return true;
 }
