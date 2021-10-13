@@ -401,7 +401,7 @@ void MainWindow::newGame()
 	boardwindow->setPosition(currentGame->getPosition().board);
 	int color = gameSetting.color;
 	if (color == 2)
-		color = QRandomGenerator::global()->bounded(0, 1);
+		color = QRandomGenerator::global()->bounded(0, 2);
 	if (color == WHITE)
 	{
 		currentGame->white=gameSetting.player;
@@ -415,6 +415,7 @@ void MainWindow::newGame()
 	engineColor = OTHERPLAYER(color);
 	currentGame->date = QDate().currentDate();
 	running = true;
+
 	clockwindow->settime(gameSetting.startTime*1000, gameSetting.startTime*1000);
 	clockwindow->start(currentGame->getPosition().board.toMove);
 	scoresheet->updateGame(currentGame);
@@ -470,12 +471,11 @@ void MainWindow::clockAlarm(int color)
 {
 	if (!canWin(OTHERPLAYER(color)))
 	{
-		currentGame->termination=tr("Draw by insufficient material");
 		currentGame->result=2;
 	}
 	else
 	{
-		currentGame->termination=tr("Lost on time.");
+		currentGame->termination=tr("time forfeit");
 		if (color == WHITE)
 			currentGame->result = 3;
 		else
@@ -594,7 +594,6 @@ void MainWindow::resign()
 {
 	if (!running)
 		return;
-	currentGame->termination = tr("Resignation");
 	if (engineColor == WHITE)
 		currentGame->result = 1;
 	else
@@ -739,7 +738,6 @@ bool MainWindow::gameFinnish()
 	{
 		if (cb.inCheck())
 		{
-			currentGame->termination = tr("Checkmate");
 			if (cb.toMove == WHITE)
 				currentGame->result = 3;
 			else
@@ -748,7 +746,6 @@ bool MainWindow::gameFinnish()
 		else
 		{
 
-			currentGame->termination = tr("Stalemate");
 			currentGame->result = 2;
 		}
 		endGame();
@@ -758,7 +755,6 @@ bool MainWindow::gameFinnish()
 	// 3-fold repetition
 	if (currentGame->is3fold())
 	{
-		currentGame->termination = tr("3 fold repetition");
 		currentGame->result = 2;
 		return true;
 	}
@@ -766,7 +762,6 @@ bool MainWindow::gameFinnish()
 	// 50 moves rule
 	if (currentGame->is50move())
 	{
-		currentGame->termination = tr("50 moves rule");
 		currentGame->result = 2;
 		return true;
 	}

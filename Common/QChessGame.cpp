@@ -215,29 +215,33 @@ void QChessGame::getPgn(QString& qs, bool useTime)
 	int i, j;
 	qs.clear();
 	QChessMove m;
-	QTextStream(&qs) << "[Event \"" << (event.isEmpty() ? "?" : event) << "\"\n";
-	QTextStream(&qs) << "[Site \"" << (site.isEmpty() ? "?" : site) << "\"\n";
-	QTextStream(&qs) << "[Date \"" << (date.isValid() ? "????.??.??" : date.toString("YYYY.MM.dd")) << "\"\n";
-	QTextStream(&qs) << "[Round \"" << (round.isEmpty() ? "?" : round) << "\"\n";
-	QTextStream(&qs) << "[White \"" << (white.isEmpty() ? "?" : white) << "\"\n";
-	QTextStream(&qs) << "[Black \"" << (black.isEmpty() ? "?" : black) << "\"\n";
-	QTextStream(&qs) << "[Result \"" << resultToString() << "\"\n";
+	QTextStream(&qs) << "[Event \"" << (event.isEmpty() ? "?" : event) << "\"]\n";
+	QTextStream(&qs) << "[Site \"" << (site.isEmpty() ? "?" : site) << "\"]\n";
+	QTextStream(&qs) << "[Date \"" << (date.isValid() ? "????.??.??" : date.toString("YYYY.MM.dd")) << "\"]\n";
+	QTextStream(&qs) << "[Round \"" << (round.isEmpty() ? "?" : round) << "\"]\n";
+	QTextStream(&qs) << "[White \"" << (white.isEmpty() ? "?" : white) << "\"]\n";
+	QTextStream(&qs) << "[Black \"" << (black.isEmpty() ? "?" : black) << "\"]\n";
+	QTextStream(&qs) << "[Result \"" << resultToString() << "\"]\n";
+	if (!termination.isEmpty())
+		QTextStream(&qs) << "[Termination \"" << termination << "\"]\n";
 	if (!timecontrol.isEmpty())
-		QTextStream(&qs) << "[Timecontrol \"" << timecontrol << "\"\n";
+		QTextStream(&qs) << "[Timecontrol \"" << timecontrol << "\"]\n";
 
 	for (i = 0; i < game.size(); i++)
 	{
+		if ((i % 10) == 0)
+			qs += "\n";
 		m = game[i].move;
 		if (m.move.empty())
 			break;
+		if ((i%2)==0)
+			QTextStream(&qs) << (2 + i) / 2 << ". ";
 		QTextStream(&qs) << game[i].board.makeMoveText(m.move, SAN).c_str() << " ";
 		if (m.second > 0)
-			QTextStream(&qs) << "[%clk " << clockToString(m.second) << "] ";
+			QTextStream(&qs) << "{ [%clk " << clockToString(m.second) << "] } ";
 	}
 
-	QTextStream(&qs) << resultToString() << "\"\n";
-
-
+	QTextStream(&qs) << resultToString();
 }
 
 QString QChessGame::resultToString()
