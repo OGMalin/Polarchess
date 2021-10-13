@@ -110,7 +110,6 @@ void QChessGame::getMovelist(QStringList& list, int type)
 MoveList QChessGame::movelist()
 {
 	MoveList ml;
-	QChessPosition pos;
 	QChessMove m;
 	int i;
 	if (game.size() == 0)
@@ -213,52 +212,32 @@ int QChessGame::moveCount(int color)
 //
 void QChessGame::getPgn(QString& qs, bool useTime)
 {
-//	QStringList qsl;
-//	qs.clear();
-//	getMovelist(qsl, SAN);
-//	QTextStream(&qs) << "[Event \"" << event() << "\"" << endl << "[Site \"" << site() << "\"" << endl << "[Date \"" << date() << "\"" << endl << "[Round \"" << round() << "\"" << endl << "[White \"" << white() << "\"" << endl << "[Black \"" << black() << "\"" << endl << "[Result \"" << result() << "\"" << timecontrol() << "\"" << endl << endl;
-//	int i;
-//	QList<int>::iterator lit = line.begin();
-//	QChessMove qm;
-//	while (lit != line.end())
-//	{
-//		qm = game[*lit].move();
-//		++lit;
-//	}
-//	for (i = 0; i < qsl.size(); i++)
-//	{
-//		if (i % 2)
-//			QTextStream(&qs) << " ";
-//		else
-//			QTextStream(&qs) << " " << (2 + i) / 2 << ". ";
-//		QTextStream(&qs) << qsl[i] << "{[%clk 0:00:00]";
-//	}
-//	QTextStream(&qs) << " " << result() << endl << endl;
-//	//QString piecechartr(tr("NBRQK"));
-//	//QString piecechar("NBRQK");
-//	//if (line.size() == 0)
-//	//	return;
-//	//QChessMove m;
-//	//QString qs;
-//	//int i;
-//	//QList<int>::iterator lit = line.begin();
-//	//int current, next;
-//	//current = *lit;
-//	//++lit;
-//	//while (lit != line.end())
-//	//{
-//	//	next = *lit;
-//	//	m = game[current].move(next);
-//	//	if (m.isEmpty())
-//	//		break;
-//	//	qs = game[current].board().makeMoveText(m.move(), type).c_str();
-//	//	for (i = 0; i < 5; i++)
-//	//		qs.replace(piecechar.at(i), piecechartr.at(i));
-//	//	list.append(qs);
-//	//	current = next;
-//	//	++lit;
-//	//}
-//
+	int i, j;
+	qs.clear();
+	QChessMove m;
+	QTextStream(&qs) << "[Event \"" << (event.isEmpty() ? "?" : event) << "\"\n";
+	QTextStream(&qs) << "[Site \"" << (site.isEmpty() ? "?" : site) << "\"\n";
+	QTextStream(&qs) << "[Date \"" << (date.isValid() ? "????.??.??" : date.toString("YYYY.MM.dd")) << "\"\n";
+	QTextStream(&qs) << "[Round \"" << (round.isEmpty() ? "?" : round) << "\"\n";
+	QTextStream(&qs) << "[White \"" << (white.isEmpty() ? "?" : white) << "\"\n";
+	QTextStream(&qs) << "[Black \"" << (black.isEmpty() ? "?" : black) << "\"\n";
+	QTextStream(&qs) << "[Result \"" << resultToString() << "\"\n";
+	if (!timecontrol.isEmpty())
+		QTextStream(&qs) << "[Timecontrol \"" << timecontrol << "\"\n";
+
+	for (i = 0; i < game.size(); i++)
+	{
+		m = game[i].move;
+		if (m.move.empty())
+			break;
+		QTextStream(&qs) << game[i].board.makeMoveText(m.move, SAN).c_str() << " ";
+		if (m.second > 0)
+			QTextStream(&qs) << "[%clk " << clockToString(m.second) << "] ";
+	}
+
+	QTextStream(&qs) << resultToString() << "\"\n";
+
+
 }
 
 QString QChessGame::resultToString()
@@ -270,5 +249,15 @@ QString QChessGame::resultToString()
 	case 2: qs = "1/2-1/2";
 	case 3: qs = "0-1";
 	}
+	return qs;
+}
+
+QString QChessGame::clockToString(int sec)
+{
+	int h = sec / 3600;
+	int m = (sec % 3600) / 60;
+	int s = (sec % 60);
+	QString qs;
+	QTextStream(&qs) << h << ":" << m << ":" << s;
 	return qs;
 }

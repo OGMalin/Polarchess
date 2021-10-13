@@ -68,4 +68,5 @@ public:
 	bool is3fold();
 	bool is50move();
 	QString resultToString();
+	QString clockToString(int sec);
 };

@@ -496,7 +496,7 @@ void MainWindow::moveEntered(ChessMove& move)
 	}
 
 	// Do the move if it is legal
-	if (!currentGame->doMove(move,clockwindow->gettime(tomove)))
+	if (!currentGame->doMove(move,clockwindow->gettime(tomove)/1000))
 	{
 		QChessPosition pos = currentGame->getPosition();
 		boardwindow->setPosition(currentGame->getPosition().board);
@@ -575,7 +575,7 @@ void MainWindow::playEngineMove(const QString& move, const QString& ponder)
 		return;
 	int player = currentGame->toMove();
 	ChessMove m=currentGame->getPosition().board.getMoveFromText(move.toStdString());
-	currentGame->doMove(m, clockwindow->gettime(player));
+	currentGame->doMove(m, clockwindow->gettime(player)/1000);
 	boardwindow->setPosition(currentGame->getPosition().board);
 	if (dgt)
 		dgt->setBoard(currentGame->getPosition().board);
@@ -623,7 +623,7 @@ void MainWindow::abort()
 
 void MainWindow::saveGame()
 {
-	database->addGame(currentGame);
+	database->addGame(currentGame, autoSaveToPgn);
 }
 
 void MainWindow::installEngine()

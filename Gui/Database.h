@@ -19,5 +19,5 @@ public:
 	Database(QObject *parent=0);
 	~Database();
 	bool create();
-	bool addGame(QChessGame* game);
+	bool addGame(QChessGame* game, bool savetopgn);
 };
