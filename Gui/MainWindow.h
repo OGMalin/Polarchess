@@ -101,6 +101,7 @@ private:
 	Book* book;
 //	DgtDLL* dgt;
 	DgtBoard* dgt;
+	DgtSetting dgtSetting;
 	//Engine* analysisEngine;
 	Database* database;
 	NewGameSetting gameSetting;

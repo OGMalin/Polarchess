@@ -67,10 +67,6 @@ void DgtBoard::threadLoop(void*lpv)
 	DWORD len = 0;
 	index = 0;
 	msgLen = 0x4000;
-	//dgt->stableTimer = new QTimer(0);
-	//dgt->stableTimer->setSingleShot(true);
-	//dgt->stableTimer->setInterval(500);
-	//dgt->connect(dgt->stableTimer, SIGNAL(timeout()), dgt, SLOT(stableTimeout()));
 	while (!dgt->abort)
 	{
 		if (!ReadFile(dgtHComm, &b, 1, &dwRead, NULL))
@@ -123,9 +119,12 @@ DgtBoard::DgtBoard(QWidget* parent)
 {
 	clockConnected = false;
 	waitForClockAck = false;
+	dgtSetting.autoRotate = true;
+	dgtSetting.delay = 300;
 	memset(guiBoard, 0, 64);
 	memset(stableBoard, 0, 64);
 	dgtTimer = NULL;
+	rotated = false;
 ////	memset(lastBoard, 0, 64);
 	updateMode = 0;
 	hThread = NULL;
@@ -176,7 +175,7 @@ DgtBoard::DgtBoard(QWidget* parent)
 	timedelay->setTickPosition(QSlider::NoTicks);
 	timedelay->setMinimum(100);
 	timedelay->setMaximum(1000);
-	timedelay->setSliderPosition(300);
+	timedelay->setSliderPosition(dgtSetting.delay);
 	hbox->addWidget(timedelay);
 	vbox->addLayout(hbox);
 	connect(timedelay, SIGNAL(valueChanged(int)), this, SLOT(delaytimeChanged(int)));
@@ -187,7 +186,19 @@ DgtBoard::DgtBoard(QWidget* parent)
 	lBoardVersion = new QLabel("No board");
 	hbox->addWidget(lBoardVersion);
 	vbox->addLayout(hbox);
-
+	hbox = new QHBoxLayout;
+	label = new QLabel("Autorotate :");
+	hbox->addWidget(label);
+	autorotate = new QCheckBox();
+	hbox->addWidget(autorotate);
+	vbox->addLayout(hbox);
+	hbox = new QHBoxLayout;
+	button = new QPushButton("Rotate");
+	hbox->addWidget(button);
+	vbox->addLayout(hbox);
+	connect(button, SIGNAL(clicked()), this, SLOT(rotate()));
+	connect(autorotate, SIGNAL(stateChanged(int)), this, SLOT(autorotateChanged(int)));
+	
 	hbox = new QHBoxLayout;
 	label = new QLabel("Dgt Clock version :");
 	hbox->addWidget(label);
@@ -274,6 +285,8 @@ void DgtBoard::connectDgt(QString portname)
 		dgtHComm = NULL;
 		return;
 	};
+	
+	dgtSetting.port = portname;
 
 	// Set up communication parameters.
 	dcb.DCBlength = sizeof(DCB);
@@ -322,9 +335,6 @@ void DgtBoard::connectDgt(QString portname)
 		abort = true;
 		return;
 	}
-	settings.beginGroup("Dgt");
-	settings.setValue("port", portname);
-	settings.endGroup();
 
 	// Give the DGT board some time to initilize (is it needed?).
 	_sleep(1500);
@@ -521,7 +531,7 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 			qDebug("DGT_MSG_FIELD_UPDATE messagelength mismatch");
 			break;
 		}
-		dgtStartTimer(timedelay->sliderPosition());
+		dgtStartTimer(dgtSetting.delay);
 //		dgtTimer = SetTimer(NULL, NULL, 500, staticStableTimeout);
 		// Restart timer
 //		if (stableTimer)
@@ -825,44 +835,44 @@ bool DgtBoard::autoConnect()
 	}
 	else
 	{
-		QSettings settings;
-		settings.beginGroup("Dgt");
-		portname = settings.value("port", "").toString();
-		settings.endGroup();
+		portname = dgtSetting.port;
 	}
 	if (portname.isEmpty())
 		return false;
-//	startTimer();
 	connectDgt(portname);
+	if (!dgtHComm)
+		return false;
 	return true;
 }
-
-//void DgtBoard::startTimer()
-//{
-//	stopTimer();
-//	qDebug("DGT -> Starting timer.");
-//	timerID=SetTimer(NULL, UINT_PTR(this), 500, staticStableTimeout);
-//	if (timerID==0)
-//		qDebug("DGT -> Failed to create a timer.");
-//}
-//
-//void DgtBoard::stopTimer()
-//{
-//	qDebug("DGT -> Stoping timer.");
-//	if (timerID)
-//		KillTimer(NULL, timerID);
-//}
-//
-//void DgtBoard::stableTimeout()
-//{
-//	qDebug("DGT -> Timeout.");
-//	stopTimer();
-//	write(DGT_REQ_BOARD);
-//}
-//
 
 void DgtBoard::delaytimeChanged(int v)
 {
 	char str[16];
+	dgtSetting.delay = v;
 	timedelayValue->setText(itoa(v, str, 10));
+}
+
+void DgtBoard::autorotateChanged(int v)
+{
+	dgtSetting.autoRotate = autorotate->isChecked();
+}
+
+void DgtBoard::rotate()
+{
+	rotated = rotated ? false : true;
+}
+
+DgtSetting DgtBoard::setting()
+{
+	return dgtSetting;
+}
+
+void DgtBoard::setting(DgtSetting& s)
+{
+	char str[16];
+	dgtSetting = s;
+	timedelay->setSliderPosition(dgtSetting.delay);
+	timedelayValue->setText(itoa(dgtSetting.delay, str, 10));
+	portlist->setCurrentText(dgtSetting.port);
+	autorotate->setChecked(dgtSetting.autoRotate);
 }

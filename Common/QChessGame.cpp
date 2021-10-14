@@ -217,7 +217,7 @@ void QChessGame::getPgn(QString& qs, bool useTime)
 	QChessMove m;
 	QTextStream(&qs) << "[Event \"" << (event.isEmpty() ? "?" : event) << "\"]\n";
 	QTextStream(&qs) << "[Site \"" << (site.isEmpty() ? "?" : site) << "\"]\n";
-	QTextStream(&qs) << "[Date \"" << (date.isValid() ? "????.??.??" : date.toString("YYYY.MM.dd")) << "\"]\n";
+	QTextStream(&qs) << "[Date \"" << (date.isValid() ? date.toString("yyyy.MM.dd") : "????.??.??") << "\"]\n";
 	QTextStream(&qs) << "[Round \"" << (round.isEmpty() ? "?" : round) << "\"]\n";
 	QTextStream(&qs) << "[White \"" << (white.isEmpty() ? "?" : white) << "\"]\n";
 	QTextStream(&qs) << "[Black \"" << (black.isEmpty() ? "?" : black) << "\"]\n";

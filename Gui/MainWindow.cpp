@@ -259,6 +259,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::writeSettings()
 {
 	player.save();
+	if (dgt)
+		dgtSetting = dgt->setting();
 	QSettings settings;
 	settings.setValue("maingeometry", saveGeometry());
 //	settings.setValue("hgeometry", hSplitter->saveState());
@@ -284,6 +286,12 @@ void MainWindow::writeSettings()
 	settings.beginGroup("sound");
 	settings.setValue("language", sound->setting.language);
 	settings.setValue("usage", sound->setting.usage);
+	settings.endGroup();
+
+	settings.beginGroup("dgt");
+	settings.setValue("port", dgtSetting.port);
+	settings.setValue("autorotate", dgtSetting.autoRotate);
+	settings.setValue("delay", dgtSetting.delay);
 	settings.endGroup();
 
 	settings.setValue("engine", installedEngine);
@@ -317,6 +325,12 @@ void MainWindow::readSettings()
 	settings.beginGroup("sound");
 	sound->setting.language = settings.value("language", "0").toInt();
 	sound->setting.usage = settings.value("usage", "0").toInt();
+	settings.endGroup();
+
+	settings.beginGroup("dgt");
+	dgtSetting.port=settings.value("port", "").toString();
+	dgtSetting.autoRotate = settings.value("autorotate", "true").toBool();
+	dgtSetting.delay = settings.value("deley", "300").toInt();
 	settings.endGroup();
 
 	installedEngine = settings.value("engine", QString()).toString();
@@ -398,6 +412,18 @@ void MainWindow::newGame()
 		book->open(gameSetting.book);
 
 	currentGame->newGame();
+	currentGame->site = "PolarChess GUI";
+	currentGame->event = (gameSetting.rated ? "Rated " : "Unrated ");
+	switch (gameSetting.gameType)
+	{
+	case BULLET: currentGame->event += "Bullet "; break;
+	case BLITZ: currentGame->event += "Blitz "; break;
+	case RAPID: currentGame->event += "Rapid "; break;
+	case CLASSICAL: currentGame->event += "Classical "; break;
+	}
+	currentGame->event += "game";
+	currentGame->rated = gameSetting.rated;
+	currentGame->gametype = gameSetting.gameType;
 	boardwindow->setPosition(currentGame->getPosition().board);
 	int color = gameSetting.color;
 	if (color == 2)
@@ -667,12 +693,6 @@ void MainWindow::dgtNewGame()
 void MainWindow::dgtResult(int result)
 {
 	QString qs;
-	//if (result == DRAW)
-	//	qs = "1/2-1/2";
-	//else if (result == WHITEWIN)
-	//	qs = "1-0";
-	//else
-	//	qs = BLACKWIN;
 	currentGame->result=result;
 	endGame();
 }
@@ -692,6 +712,7 @@ void MainWindow::useDgt()
 		if (!dgt)
 		{
 			dgt = new DgtBoard(this);
+			dgt->setting(dgtSetting);
 			connect(dgt, SIGNAL(dgtStatus(int)), this, SLOT(dgtStatus(int)));
 			connect(dgt, SIGNAL(dgtNewMove(ChessMove*)), this, SLOT(dgtNewMove(ChessMove*)));
 			connect(dgt, SIGNAL(dgtNewGame()), this, SLOT(dgtNewGame()));
@@ -709,6 +730,7 @@ void MainWindow::useDgt()
 	{
 		if (dgt)
 		{
+			dgtSetting = dgt->setting();
 			statusBar()->removeWidget(dgtIcon);
 			disconnect(dgtIcon);
 			disconnect(dgt);

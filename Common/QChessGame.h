@@ -48,7 +48,8 @@ public:
 	int blackclock;
 	QString timecontrol;
 	QString termination;
-	int rated; //Unrated=0, BULLET=1, BLITZ=2, RAPID=3, CLASSICAL=4
+	bool rated;
+	int gametype; // BULLET=0, BLITZ=1, RAPID=2, CLASSICAL=3
 	QChessGame(QObject *parent=0);
 	~QChessGame();
 	void clear();

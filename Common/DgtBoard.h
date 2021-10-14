@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <QDialog>
 #include <QComboBox>
+#include <QCheckBox>
 #include <QLabel>
 #include <QSlider>
 #include "../Common/ChessBoard.h"
@@ -13,6 +14,13 @@
 //#define BYTE unsigned char
 //#endif
 enum { DRAW, WHITEWIN, BLACKWIN };
+
+struct DgtSetting
+{
+	QString port;
+	int delay;
+	bool autoRotate;
+};
 
 //
 // Interfacing with a Dgt electronic chess board.
@@ -27,6 +35,8 @@ public slots:
 //	void dgtPortOpen(bool);
 	void interpretMessage(BYTE code, int datalength, BYTE* data);
 	void delaytimeChanged(int);
+	void autorotateChanged(int);
+	void rotate();
 signals:
 //	// Send last status.
 //	// 0 = Not connected
@@ -45,10 +55,14 @@ public:
 //	// Let the driver know the GUI position
 	void setBoard(ChessBoard&);
 	bool autoConnect();
+	DgtSetting setting();
+	void setting(DgtSetting&);
 private:
+	DgtSetting dgtSetting;
 	bool clockConnected;
 	bool waitForClockAck;
 	BYTE updateMode;
+	bool rotated;
 	QList<QByteArray> clockCommands;
 //	DGT_MSG_VERSION_STRUCT boardVersion;
 //	DGT_MSG_VERSION_STRUCT clockVersion;
@@ -63,6 +77,7 @@ private:
 	int _status;
 //	QString serialnr;
 	QComboBox* portlist;
+	QCheckBox* autorotate;
 	QLabel* statusLine;
 	QLabel* lBoardVersion;
 	QLabel* lClockVersion;
@@ -86,13 +101,8 @@ private:
 //	// Search to find the moves between the two board
 //	void findPossibleMoves(MoveList*, ChessBoard& start, ChessBoard& end);
 	ChessMove getLegalMove(BYTE*);
-//
-//	// For nativ serial com
-//	void startTimer();
-//	void stopTimer();
 	static void threadLoop(void* lpv);
 public:
-//	void stableTimeout();
 	bool abort;
 	HANDLE hThread;
 };
