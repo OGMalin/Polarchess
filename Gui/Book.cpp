@@ -36,7 +36,8 @@ ChessMove Book::getMove(ChessBoard& cb)
 		for (i = 0; i < moves.size(); i++)
 		{
 			m = move(cb, moves[i].move);
-			if ((j + moves[i].weight) >= v)
+			j += moves[i].weight;
+			if (j >= v)
 				return m;
 		}
 	}
