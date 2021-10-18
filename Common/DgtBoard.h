@@ -58,6 +58,7 @@ public:
 	DgtSetting setting();
 	void setting(DgtSetting&);
 private:
+	int DgtVersion;
 	DgtSetting dgtSetting;
 	bool clockConnected;
 	bool waitForClockAck;

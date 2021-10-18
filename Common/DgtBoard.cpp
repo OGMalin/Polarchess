@@ -117,6 +117,7 @@ void DgtBoard::threadLoop(void*lpv)
 DgtBoard::DgtBoard(QWidget* parent)
 	: QDialog(parent)
 {
+	DgtVersion = 0;
 	clockConnected = false;
 	waitForClockAck = false;
 	dgtSetting.autoRotate = true;
