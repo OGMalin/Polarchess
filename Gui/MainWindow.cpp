@@ -601,6 +601,7 @@ void MainWindow::playEngineMove(const QString& move, const QString& ponder)
 		return;
 	int player = currentGame->toMove();
 	ChessMove m=currentGame->getPosition().board.getMoveFromText(move.toStdString());
+	sound->say(currentGame->getPosition().board, m);
 	currentGame->doMove(m, clockwindow->gettime(player)/1000);
 	boardwindow->setPosition(currentGame->getPosition().board);
 	if (dgt)

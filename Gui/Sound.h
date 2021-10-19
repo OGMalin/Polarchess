@@ -5,6 +5,7 @@
 #include <QDialog>
 #include <QComboBox>
 #include <QObject>
+#include <QTextToSpeech>
 
 struct SoundSetting
 {
@@ -34,6 +35,7 @@ private:
 	QString squareAsText(int);
 	QString pieceAsText(int);
 public:
+	QTextToSpeech* speech;
 	Sound(QObject* parent);
 	~Sound();
 	SoundSetting setting;

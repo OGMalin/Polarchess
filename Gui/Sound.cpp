@@ -4,7 +4,6 @@
 #include <QBoxLayout>
 #include <QDialogButtonBox>
 #include <QLabel>
-#include <QTextToSpeech>
 #include <QSound>
 
 SoundDialog::SoundDialog(QWidget *parent)
@@ -44,6 +43,7 @@ SoundDialog::SoundDialog(QWidget *parent)
 
 	connect(buttons, SIGNAL(accepted()), this, SLOT(accept()));
 	connect(buttons, SIGNAL(rejected()), this, SLOT(reject()));
+	delete speech;
 }
 
 SoundDialog::~SoundDialog()
@@ -81,6 +81,7 @@ void SoundDialog::get(SoundSetting& setting)
 Sound::Sound(QObject* parent)
 	:QObject(parent)
 {
+	speech = new QTextToSpeech(this);
 }
 
 Sound::~Sound()
@@ -108,11 +109,6 @@ void Sound::say(ChessBoard& cb, ChessMove& cm)
 		return;
 	}
 
-	// Speak the move
-	QTextToSpeech speech(this);
-	if (setting.language)
-		speech.setLocale((QLocale::Language)setting.language);
-	//		QLocale loc((QLocale::Language)setting.language);
 	int piece = PIECE(cb.board[cm.fromSquare]);
 	QString text;
 	if (cm.moveType == CASTLE)
@@ -130,20 +126,27 @@ void Sound::say(ChessBoard& cb, ChessMove& cm)
 		text += " to ";
 		text += squareAsText(cm.toSquare);
 	}
-	speech.say(text);
+	//if (setting.language)
+	//	speech->setLocale((QLocale::Language)setting.language);
+	//		QLocale loc((QLocale::Language)setting.language);
+	speech->say(text);
 }
 
 QString Sound::squareAsText(int sq)
 {
 	char* files = "abcdefgh";
 	char* ranks = "12345678";
+	char res[3];
 	int f = FILE(sq);
 	int r = RANK(sq);
 	if ((f > 7) || (f < 0))
 		return "";
 	if ((r > 7) || (r < 0))
 		return "";
-	return files[f] + ranks[r];
+	res[0] = files[f];
+	res[1] = ranks[r];
+	res[2] = 0;
+	return res;
 }
 
 QString Sound::pieceAsText(int p)
