@@ -117,7 +117,8 @@ void DgtBoard::threadLoop(void*lpv)
 DgtBoard::DgtBoard(QWidget* parent)
 	: QDialog(parent)
 {
-	DgtVersion = 0;
+	DgtBoardVersion = 0;
+	DgtClockVersion = 0;
 	clockConnected = false;
 	waitForClockAck = false;
 	dgtSetting.autoRotate = true;
@@ -383,6 +384,8 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 			break;
 		}
 		memcpy(stableBoard, data, 64);
+		if (rotated)
+			rotateBoard(stableBoard);
 		updateDialog(stableBoard);
 		if (equalBoard(guiBoard, stableBoard))
 			_status = 2;
@@ -396,11 +399,26 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 			// New game
 			ChessBoard cb;
 			convertBoard(stableBoard, cb);
+			qDebug("Fen: %s",cb.getFen().c_str());
+
 			if (cb.isStartposition())
 			{
 				emit dgtNewGame();
 				break;
 			}
+			//try a roteted board
+			rotateBoard(stableBoard);
+			convertBoard(stableBoard, cb);
+			qDebug("Fen: %s", cb.getFen().c_str());
+			if (cb.isStartposition())
+			{
+				rotated = !rotated;
+				updateDialog(stableBoard);
+				emit dgtNewGame();
+				break;
+			}
+			rotateBoard(stableBoard);
+
 			// Result
 			if (cb.board[d4] == whiteking)
 			{
@@ -429,7 +447,7 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 			qDebug("DGT_MSG_SBI_CLOCK messagelength mismatch");
 			break;
 		}
-		if ((data[0] & 0x0f) == 0x0a)
+		if (((data[0] & 0x0f) == 0x0a) || ((data[3]&0x0f)==0x0a))
 		{ // Clock ack message
 			int ack0 = (data[1] & 0x7f) | ((data[3] << 3) & 0x80);
 			int ack1 = (data[2] & 0x7f) | ((data[3] << 2) & 0x80);
@@ -437,7 +455,7 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 			int ack3 = (data[5] & 0x7f) | ((data[0] << 2) & 0x80);
 			if (ack0 == 0x40)
 			{
-				qDebug("Error: Sending CMD_CLOCK_SETNRUN while clock is not in mode 23");
+				qDebug("Error: Sending CMD_CLOCK_SETNRUN while clock is not in mode 23/25");
 				writeClock();
 				break;
 			}
@@ -469,6 +487,7 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 			case DGT_CMD_CLOCK_VERSION:
 				//clockVersion.major = ack2 >> 4;
 				//clockVersion.minor = ack2 & 0x0f;
+				DgtClockVersion = ack2 >> 4; //XL=1, 3000=2
 				qs.clear();
 				QTextStream(&qs) << (int)(ack2 >> 4) << "." << (((ack2 & 0x0f) < 10) ? "0" : "") << (int)(ack2 & 0x0f);
 				lClockVersion->setText(qs);
@@ -571,6 +590,13 @@ void DgtBoard::interpretMessage(BYTE code, int datalength, BYTE* data)
 		{
 			qDebug("DGT_MSG_VERSION messagelength mismatch");
 			break;
+		}
+		switch (data[0])
+		{
+		case 0: DgtBoardVersion = 3; break; // Serial/USB.b
+		case 1: DgtBoardVersion = 1; break; // Bluetooth
+		case 3: DgtBoardVersion = 2; break; // Revetation II
+		case 4: DgtBoardVersion = 4; break; // USB c
 		}
 		//boardVersion.major = data[0];
 		//boardVersion.minor = data[1];
@@ -712,6 +738,8 @@ void DgtBoard::updateDialog(BYTE* data)
 	ChessBoard cb;
 	convertBoard(data, cb);
 	boardwindow->setPosition(cb);
+	if (rotated)
+		boardwindow->flip(true);
 }
 
 void DgtBoard::updateDialog(BYTE field, BYTE piece)
@@ -860,7 +888,8 @@ void DgtBoard::autorotateChanged(int v)
 
 void DgtBoard::rotate()
 {
-	rotated = rotated ? false : true;
+//	rotated = rotated ? false : true;
+//	updateDialog(stableBoard);
 }
 
 DgtSetting DgtBoard::setting()
@@ -876,4 +905,18 @@ void DgtBoard::setting(DgtSetting& s)
 	timedelayValue->setText(itoa(dgtSetting.delay, str, 10));
 	portlist->setCurrentText(dgtSetting.port);
 	autorotate->setChecked(dgtSetting.autoRotate);
+}
+
+void DgtBoard::rotateBoard(BYTE* board)
+{
+	int i=0, j=63, k;
+	while (i < j)
+	{
+		k = board[i];
+		board[i] = board[j];
+		board[j] = k;
+		++i;
+		--j;
+	}
+
 }

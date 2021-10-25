@@ -969,7 +969,7 @@ char ChessBoard::getCharFromPiece(typePiece p)
 
 bool ChessBoard::isStartposition()
 {
-	string ss = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq";
+	string ss = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 	string s=getFen(true);
 	if (s.substr(0,ss.size()) == ss)
 		return true;

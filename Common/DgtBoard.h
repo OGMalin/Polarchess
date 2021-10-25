@@ -58,7 +58,10 @@ public:
 	DgtSetting setting();
 	void setting(DgtSetting&);
 private:
-	int DgtVersion;
+	// 1=Serial/USB-b, 2=Bluetooth, 3=Revelation II, 4=USV-c
+	int DgtBoardVersion;
+	// 1=DT XL, 2=DGT 3000
+	int DgtClockVersion;
 	DgtSetting dgtSetting;
 	bool clockConnected;
 	bool waitForClockAck;
@@ -99,6 +102,7 @@ private:
 	bool equalBoard(ChessBoard&, BYTE*);
 	void convertBoard(ChessBoard& from, BYTE* to);
 	void convertBoard(BYTE* from, ChessBoard& to);
+	void rotateBoard(BYTE* board);
 //	// Search to find the moves between the two board
 //	void findPossibleMoves(MoveList*, ChessBoard& start, ChessBoard& end);
 	ChessMove getLegalMove(BYTE*);
