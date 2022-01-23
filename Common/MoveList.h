@@ -30,6 +30,7 @@ public:
   // Find the index to a move in the list. Returns size if the move isn't in the list.
   int find(const ChessMove& m);
   void erase(int n, int count = 1);
+  void erase(const ChessMove& m) { erase(find(m)); };
   MoveList& operator=(const MoveList& ml);
   inline ChessMove& operator[](int i) { return _list[i]; };
   inline const ChessMove& operator[](int i) const { return _list[i]; };

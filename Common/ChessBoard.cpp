@@ -285,7 +285,7 @@ void ChessBoard::setFen(const char* szFen)
 bool ChessBoard::doMove(const char* sz)
 {
 	ChessMove m;
-	if (strcmp(sz, "0000"))
+	if (strcmp(sz, "0000") == 0)
 		m.moveType = NULL_MOVE;
 	else
 		m = getMoveFromText(sz);
