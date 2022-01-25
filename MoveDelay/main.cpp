@@ -1,4 +1,4 @@
-// Startup file for the board driver
+// Startup file for the delay interface
 
 #include "FrontEnd.h"
 //#include <iostream>
