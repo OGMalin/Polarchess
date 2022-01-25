@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
 		GetCurrentDirectory(256, sz);
 		s = sz;
 		s+="\\MoveDelay.ini";
-		if (GetPrivateProfileStringA("Engine", "Path", "", sz, 256, s.c_str()))
+		if (GetPrivateProfileString("Engine", "Path", "", sz, 256, s.c_str()))
 			fe.enginepath = sz;
 	}
 
