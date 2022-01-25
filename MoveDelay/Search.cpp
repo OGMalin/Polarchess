@@ -50,7 +50,7 @@ Search::~Search()
 
 }
 
-bool Search::checkMove(ChessBoard& cb, int wtime, int btime, std::string bestmove, std::string ponder, int delay)
+bool Search::checkMove(ChessBoard& cb, int wtime, int btime, std::string bestmove, std::string ponder, int delay, StopWatch& watch)
 {
 	int t;
 	if (cb.toMove == WHITE)
@@ -75,6 +75,7 @@ bool Search::checkMove(ChessBoard& cb, int wtime, int btime, std::string bestmov
 	LOG("S! Check for easy move");
 	if (easyMove(cb, cb.getMoveFromText(bestmove)))
 		return true;
+
 	LOG("S! No easymove found.");
 	switch (delay)
 	{
@@ -88,6 +89,11 @@ bool Search::checkMove(ChessBoard& cb, int wtime, int btime, std::string bestmov
 		t /= 40;
 		break;
 	}
+
+	// Take in account the time used until now
+	t -= watch.read(WatchPrecision::Millisecond);
+	if (t <= 10)
+		return true;
 
 	EnterCriticalSection(&searchCS);
 	lastline = "bestmove " + bestmove;
@@ -150,7 +156,7 @@ bool Search::easyMove(const ChessBoard& startboard, const ChessMove& bm)
 	alpha = -MATE;
 	beta = MATE;
 	ChessMove bestmove = ml[0][0];
-	for (depth = 1; depth < 4; depth++)
+	for (depth = 1; depth < 3; depth++)
 	{
 		for (mit = 0; mit < ml[0].size(); mit++)
 		{
@@ -186,7 +192,7 @@ bool Search::easyMove(const ChessBoard& startboard, const ChessMove& bm)
 	score = -MATE;
 	alpha = -MATE;
 	beta = MATE;
-	for (depth = 1; depth < 4; depth++)
+	for (depth = 1; depth < 3; depth++)
 	{
 		for (mit = 0; mit < ml[0].size(); mit++)
 		{

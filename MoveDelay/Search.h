@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include "..\Common\ChessBoard.h"
 #include "..\Common\MoveGenerator.h"
+#include "..\Common\StopWatch.h"
 #include <string>
 #include <list>
 
@@ -37,7 +38,7 @@ public:
 	HANDLE hEvent;
 	Search();
 	~Search();
-	bool checkMove(ChessBoard& cb, int wtime, int btime, std::string bestmove, std::string ponder, int delay);
+	bool checkMove(ChessBoard& cb, int wtime, int btime, std::string bestmove, std::string ponder, int delay, StopWatch& watch);
 	void input();
 	int get(std::string& s);
 	void stop();

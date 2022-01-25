@@ -215,7 +215,7 @@ void FrontEnd::engineInput()
 				gui.write("bestmove " + input);
 				break;
 			}
-			if (search.checkMove(currentBoard, wtime, btime, getWord(input, 1), getWord(input, 3),delay))
+			if (search.checkMove(currentBoard, wtime, btime, getWord(input, 1), getWord(input, 3),delay, watch))
 				gui.write("bestmove " + input);
 			break;
 		}
