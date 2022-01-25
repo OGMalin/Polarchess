@@ -136,8 +136,8 @@ bool Search::easyMove(const ChessBoard& startboard, const ChessMove& bm)
 	int bestscore;
 	int score;
 	int depth;
-	int alpha = -MATE;
-	int beta = MATE;
+	int alpha;
+	int beta;
 	ml[0].clear();
 	mgen.makeMoves(cb, ml[0]);
 	if (ml[0].size() == 0)
@@ -146,27 +146,32 @@ bool Search::easyMove(const ChessBoard& startboard, const ChessMove& bm)
 	// Search for the best move
 	int mit;
 	bestscore = -MATE;
+	score = -MATE;
+	alpha = -MATE;
+	beta = MATE;
 	ChessMove bestmove = ml[0][0];
 	for (depth = 1; depth < 4; depth++)
 	{
 		for (mit = 0; mit < ml[0].size(); mit++)
 		{
 			mgen.doMove(cb, ml[0][mit]);
-			bestscore = -alphaBeta(cb, -beta, -alpha, depth, 1);
+			score = -alphaBeta(cb, -beta, -alpha, depth, 1);
 			mgen.undoMove(cb, ml[0][mit]);
-			if (bestscore >= beta)
+			if ( score >= beta)
 			{
+				score = beta;
 				break;
 			}
-			if (bestscore > alpha)
+			if (score > alpha)
 			{
 				bestmove = ml[0][mit];
-				alpha = bestscore;
+				alpha = score;
 			}
 		}
 		ml[0].swap(ml[0].find(bestmove), 0);
 //		cout << endl;
 	}
+	bestscore = score;
 
 	// If the move played isn't the best move it isn't an easy move
 	if (bm != bestmove)
@@ -179,6 +184,8 @@ bool Search::easyMove(const ChessBoard& startboard, const ChessMove& bm)
 	bestmove = ml[0][0];
 
 	score = -MATE;
+	alpha = -MATE;
+	beta = MATE;
 	for (depth = 1; depth < 4; depth++)
 	{
 		for (mit = 0; mit < ml[0].size(); mit++)
@@ -187,7 +194,10 @@ bool Search::easyMove(const ChessBoard& startboard, const ChessMove& bm)
 			score = -alphaBeta(cb, -beta, -alpha, depth, 1);
 			mgen.undoMove(cb, ml[0][mit]);
 			if (score >= beta)
+			{
+				score = beta;
 				break;
+			}
 			if (score > alpha)
 			{
 				alpha = score;
@@ -258,7 +268,7 @@ int Search::quinceSearch(ChessBoard& cb, int alpha, int beta, int ply)
 	for (mit = 0; mit < ml[ply].size(); mit++)
 	{
 		mgen.doMove(cb, ml[ply][mit]);
-		score = -quinceSearch(cb,-beta, -alpha,ply+1);
+		score = -quinceSearch(cb, -beta, -alpha, ply + 1);
 		mgen.undoMove(cb, ml[ply][mit]);
 		if (score >= beta)
 			return beta;

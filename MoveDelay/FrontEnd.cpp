@@ -34,6 +34,9 @@ int FrontEnd::run()
 	hs[1] = engine.hEvent;
 	hs[2] = search.hEvent;
 
+	//char sz[256];
+	//GetCurrentDirectoryA(256, sz);
+	//LOG(sz);
 	if (!engine.start(enginepath))
 	{
 		LOG("Engine not started");
@@ -146,10 +149,10 @@ bool FrontEnd::guiInput()
 			//gui.input("position startpos moves g1f3 g8f6 g2g3 b7b6 f1g2 c8b7 e1g1 e7e6");
 			//gui.input("go wtime 940000 btime 932857 winc 10000 binc 10000");
 //			ChessBoard cb;
-//			cb.setStartposition();
-////			cb.setFen("rn1qkb1r/pbpp1ppp/1p2pn2/8/8/5NP1/PPPPPPBP/RNBQ1RK1 w kq - 0 1");
+////			cb.setStartposition();
+//			cb.setFen("3q2k1/pp3pp1/5n1p/1NP5/1PN3b1/P2R4/4r1pP/6K1 w - - 0 29");
 //			ChessMove m;
-//			m=cb.getMoveFromText("d2d4");
+//			m=cb.getMoveFromText("d3d8");
 //			watch.start();
 //			search.easyMove(cb, m);
 //			cout << watch.read(WatchPrecision::Millisecond) << endl;
