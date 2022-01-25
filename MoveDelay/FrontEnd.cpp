@@ -35,7 +35,7 @@ int FrontEnd::run()
 	hs[2] = search.hEvent;
 
 	//char sz[256];
-	//GetCurrentDirectoryA(256, sz);
+	//GetCurrentDirectory(256, sz);
 	//LOG(sz);
 	if (!engine.start(enginepath))
 	{
