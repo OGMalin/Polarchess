@@ -91,7 +91,7 @@ bool Search::checkMove(ChessBoard& cb, int wtime, int btime, std::string bestmov
 	}
 
 	// Take in account the time used until now
-	t -= watch.read(WatchPrecision::Millisecond);
+	t -= (int)watch.read(WatchPrecision::Millisecond);
 	if (t <= 10)
 		return true;
 

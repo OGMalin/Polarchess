@@ -39,3 +39,14 @@ extern bool isNumber(const std::string& s, int type = 0);
 extern void breakLines(std::string& s, int linelength);
 
 extern const std::string getQuotedString(std::string& s);
+
+// Get the directory to a program.
+// Ex. c:\Program Files\Engines\WCrafty.exe would return c:\Program Files\Engines\
+// and ..\Engines\ could also return c:\Program Files\Engines\
+// If this routine fails to find the directory it return null.
+extern char* findPath(const char* fullpath, char* buf, int len);
+
+// Get the filename without path and extention.
+extern const std::string getFilename(std::string fullpath);
+
+extern const std::string getProgramPath();

@@ -302,3 +302,82 @@ const string getQuotedString(std::string& s)
 	}
 	return line;
 }
+
+char* findPath(const char* fullpath, char* buf, int len)
+{
+	char* fn;
+	size_t l;
+	char buffer[MAX_PATH];
+	buf[0] = '\0';
+	buffer[0] = '\0';
+	DWORD fa = 0;
+	if (GetFullPathName(fullpath, MAX_PATH, buffer, &fn))
+	{
+		while (1)
+		{
+			l = strlen(buffer);
+			if (l < 4)
+			{
+				l += 4;
+				if (MAX_PATH < l) return NULL;
+				strcat_s(buffer, MAX_PATH, ".exe");
+			}
+			else if (_stricmp(&buffer[l - 4], ".exe") != 0)
+			{
+				if (MAX_PATH < l) return NULL;
+				strcat_s(buffer, MAX_PATH, ".exe");
+				l += 4;
+			}
+			fa = GetFileAttributes(buffer);
+			if (fa != 0xffffffff)
+			{
+				if (GetFullPathName(buffer, len, buf, &fn))
+				{
+					fn[0] = '\0';
+					return buf;
+				}
+				return NULL;
+			}
+			while (buffer[l - 1] > ' ')
+			{
+				l--;
+				if (l < 1)
+					return NULL;
+			}
+			buffer[l - 1] = '\0';
+		}
+	}
+	return NULL;
+}
+
+const std::string getFilename(std::string fullpath)
+{
+	size_t first = fullpath.find_last_of('\\');
+	if (first == std::string::npos)
+		first = fullpath.find_last_of('/');
+	if (first == std::string::npos)
+		first = 0;
+	else
+		++first;
+	size_t last = fullpath.find_last_of('.');
+	if (last == std::string::npos)
+		last = fullpath.length();
+	if (first >= last)
+		return "";
+	return fullpath.substr(first, last - first);
+}
+
+const std::string getProgramPath()
+{
+	string s;
+	char sz[MAX_PATH];
+	if (!GetModuleFileName(NULL, sz, MAX_PATH))
+		return string("");
+	string::size_type size;
+	s = sz;
+	size = s.find_last_of('\\');
+	if (size != string::npos)
+		return s.substr(0, size + 1);
+	return string("");
+}
+

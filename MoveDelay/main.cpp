@@ -1,6 +1,7 @@
 // Startup file for the delay interface
 
 #include "FrontEnd.h"
+#include "../Common/Utility.h"
 //#include <iostream>
 using namespace std;
 
@@ -8,6 +9,9 @@ int main(int argc, char* argv[])
 {
 	// Create the main interface.
 	FrontEnd fe;
+
+	string path = getProgramPath();
+	SetCurrentDirectory(path.c_str());
 
 	// Find engine path.
 	if (argc > 1)
@@ -18,9 +22,7 @@ int main(int argc, char* argv[])
 	{
 		char sz[256];
 		string s;
-		GetCurrentDirectory(256, sz);
-		s = sz;
-		s+="\\MoveDelay.ini";
+		s = path + "MoveDelay.ini";
 		if (GetPrivateProfileString("Engine", "Path", "", sz, 256, s.c_str()))
 			fe.enginepath = sz;
 	}
