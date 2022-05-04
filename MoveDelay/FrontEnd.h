@@ -7,9 +7,12 @@
 #include "Search.h"
 #include "..\Common\ChessBoard.h"
 #include "..\Common\StopWatch.h"
+#include <map>
 
 class FrontEnd
 {
+	std::map<std::string, std::string> transFromEngine;
+	std::map<std::string, std::string> transFromGui;
 	int delay;
 	bool bookmove;
 	bool stoping;
@@ -27,4 +30,6 @@ public:
 	FrontEnd();
 	~FrontEnd();
 	int run();
+	void transEngine(std::string, char*);
+	void transGui(std::string, char*);
 };

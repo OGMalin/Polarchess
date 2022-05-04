@@ -83,8 +83,20 @@ bool FrontEnd::guiInput()
 	int i;
 	string input, s, smove;
 	int guiCmd;
+	map<string, string>::iterator transIt;
 	while ((guiCmd = gui.get(input)) != GUI_none)
 	{
+		transIt = transFromGui.begin();
+		while (transIt != transFromGui.end())
+		{
+			st = input.find((*transIt).first);
+			while (st != string::npos)
+			{
+				input.replace(st, (*transIt).first.length(), (*transIt).second);
+				st = input.find((*transIt).first, st + (*transIt).second.length());
+			}
+			++transIt;
+		}
 		switch (guiCmd)
 		{
 		case GUI_quit:
@@ -168,8 +180,21 @@ void FrontEnd::engineInput()
 	string input;
 	string bestmove, ponder;
 	int engineResponse;
+	size_t st;
+	map<string, string>::iterator transIt;
 	while ((engineResponse = engine.get(input)) != ENGINE_none)
 	{
+		transIt = transFromEngine.begin();
+		while (transIt != transFromEngine.end())
+		{
+			st = input.find((*transIt).first);
+			while (st != string::npos)
+			{
+				input.replace(st, (*transIt).first.length(), (*transIt).second);
+				st = input.find((*transIt).first, st + (*transIt).second.length());
+			}
+			++transIt;
+		}
 		switch (engineResponse)
 		{
 		case ENGINE_other:
@@ -228,4 +253,38 @@ void FrontEnd::searchInput()
 	int searchResponse;
 	while ((searchResponse = search.get(input)) != SEARCH_none)
 		gui.write(input);
+}
+
+void FrontEnd::transEngine(string ini, char* sz)
+{
+	char value[256];
+	size_t index=0;
+	string skey, svalue;
+	while (sz[index] != 0)
+	{
+		if (GetPrivateProfileString("TransEngine", &sz[index], "", value, 256, ini.c_str()))
+		{
+			skey = &sz[index];
+			svalue = value;
+			transFromEngine.insert(map<string, string>::value_type(skey, svalue));
+			index += skey.length() + 1;
+		}
+	}
+}
+
+void FrontEnd::transGui(string ini, char* sz)
+{
+	char value[256];
+	size_t index = 0;
+	string skey, svalue;
+	while (sz[index] != 0)
+	{
+		if (GetPrivateProfileString("TransGui", &sz[index], "", value, 256, ini.c_str()))
+		{
+			skey = &sz[index];
+			svalue = value;
+			transFromGui.insert(map<string, string>::value_type(skey, svalue));
+			index += skey.length() + 1;
+		}
+	}
 }

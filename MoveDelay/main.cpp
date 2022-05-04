@@ -7,11 +7,14 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
+	char sz[4096];
+
 	// Create the main interface.
 	FrontEnd fe;
 
 	string path = getProgramPath();
 	SetCurrentDirectory(path.c_str());
+	path += "MoveDelay.ini";
 
 	// Find engine path.
 	if (argc > 1)
@@ -20,12 +23,14 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		char sz[256];
-		string s;
-		s = path + "MoveDelay.ini";
-		if (GetPrivateProfileString("Engine", "Path", "", sz, 256, s.c_str()))
+		if (GetPrivateProfileString("Engine", "Path", "", sz, 256, path.c_str()))
 			fe.enginepath = sz;
 	}
+
+	if (GetPrivateProfileString("TransEngine", NULL, "", sz, 4096, path.c_str()))
+		fe.transEngine(path, sz);
+	if (GetPrivateProfileString("TransGui", NULL, "", sz, 4096, path.c_str()))
+		fe.transGui(path, sz);
 
 	// Start the main loop.
 	return fe.run();
