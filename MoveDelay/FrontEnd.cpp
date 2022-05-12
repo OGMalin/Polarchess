@@ -258,7 +258,7 @@ void FrontEnd::searchInput()
 void FrontEnd::transEngine(string ini, char* sz)
 {
 	char value[256];
-	size_t index=0;
+	size_t index=0,st;
 	string skey, svalue;
 	while (sz[index] != 0)
 	{
@@ -266,6 +266,12 @@ void FrontEnd::transEngine(string ini, char* sz)
 		{
 			skey = &sz[index];
 			svalue = value;
+			st = svalue.find("\\n");
+			while (st != string::npos)
+			{
+				svalue.replace(st, 2, "\n");
+				st = svalue.find("\\n", st + 1);
+			}
 			transFromEngine.insert(map<string, string>::value_type(skey, svalue));
 			index += skey.length() + 1;
 		}
@@ -275,7 +281,7 @@ void FrontEnd::transEngine(string ini, char* sz)
 void FrontEnd::transGui(string ini, char* sz)
 {
 	char value[256];
-	size_t index = 0;
+	size_t index = 0,st;
 	string skey, svalue;
 	while (sz[index] != 0)
 	{
@@ -283,6 +289,12 @@ void FrontEnd::transGui(string ini, char* sz)
 		{
 			skey = &sz[index];
 			svalue = value;
+			st = svalue.find("\\n");
+			while (st != string::npos)
+			{
+				svalue.replace(st, 2, "\n");
+				st = svalue.find("\\n", st + 1);
+			}
 			transFromGui.insert(map<string, string>::value_type(skey, svalue));
 			index += skey.length() + 1;
 		}
