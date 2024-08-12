@@ -225,40 +225,49 @@ bool PolyglotBook::open(string& bookfile)
 {
 	HASHKEY key;
 	PolyglotDataEntry pde;
-	unsigned char buf[16];
+	int length;
+	unsigned char* buf;
 	// ask the user first
 //	if (isOpen && isDirty)
 //		save();
 	isDirty = false;
 	isOpen = false;
-	ifstream file(bookfile);
+	ifstream file;
+	file.open(bookfile, ios::binary);
 	if (!file.is_open())
 		return false;
 	filename = bookfile;
 	book.clear();
-	while (!file.eof())
+	file.seekg(0, ios::end);
+	length = file.tellg();
+	file.seekg(0, ios::beg);
+	buf = new unsigned char[length];
+	file.read((char*)buf, length);
+	file.close();
+	int i=0;
+	while (i<length)
 	{
-		file.read((char*)buf, 16);
-		key = (HASHKEY)(buf[0]) << 56;
-		key += (HASHKEY)(buf[1]) << 48;
-		key += (HASHKEY)(buf[2]) << 40;
-		key += (HASHKEY)(buf[3]) << 32;
-		key += (HASHKEY)(buf[4]) << 24;
-		key += (HASHKEY)(buf[5]) << 16;
-		key += (HASHKEY)(buf[6]) << 8;
-		key += (HASHKEY)(buf[7]);
-		pde.move = (unsigned short)(buf[8]) << 8;
-		pde.move += (unsigned short)(buf[9]);
-		pde.weight = (unsigned short)(buf[10]) << 8;
-		pde.weight += (unsigned short)(buf[11]);
-		pde.learn = (unsigned int)(buf[12]) << 24;
-		pde.learn += (unsigned int)(buf[13]) << 16;
-		pde.learn += (unsigned int)(buf[14]) << 8;
-		pde.learn += (unsigned int)(buf[15]);
+		key = (HASHKEY)(buf[i + 0]) << 56;
+		key += (HASHKEY)(buf[i + 1]) << 48;
+		key += (HASHKEY)(buf[i + 2]) << 40;
+		key += (HASHKEY)(buf[i + 3]) << 32;
+		key += (HASHKEY)(buf[i + 4]) << 24;
+		key += (HASHKEY)(buf[i + 5]) << 16;
+		key += (HASHKEY)(buf[i + 6]) << 8;
+		key += (HASHKEY)(buf[i + 7]);
+		pde.move = (unsigned short)(buf[i + 8]) << 8;
+		pde.move += (unsigned short)(buf[i + 9]);
+		pde.weight = (unsigned short)(buf[i + 10]) << 8;
+		pde.weight += (unsigned short)(buf[i + 11]);
+		pde.learn = (unsigned int)(buf[i + 12]) << 24;
+		pde.learn += (unsigned int)(buf[i + 13]) << 16;
+		pde.learn += (unsigned int)(buf[i + 14]) << 8;
+		pde.learn += (unsigned int)(buf[i + 15]);
 		if ((pde.move > 0) && (pde.weight>0))
 			add(key, pde);
+		i += 16;
 	}
-	file.close();
+	delete buf;
 	isOpen = true;
 	return true;
 }
@@ -372,7 +381,7 @@ void PolyglotBook::get(ChessBoard& cb, vector<PolyglotDataEntry>&moves)
 {
 	HASHKEY key=getKey(cb);
 	moves.clear();
-	moves = book[getKey(cb)];
+	moves = book[key];
 }
 
 HASHKEY PolyglotBook::getKey(ChessBoard& cb)
@@ -489,13 +498,62 @@ int PolyglotBook::positions()
 	return (int)book.size();
 }
 
-ChessMove PolyglotBook::select(ChessBoard& board, vector<PolyglotDataEntry>& data)
+ChessMove PolyglotBook::select(ChessBoard& board, vector<PolyglotDataEntry>& data, bool best)
 {
-	if (data.size() > 0)
-	{
-		return move(board, data[0].move);
-	}
 	ChessMove m;
-	m.clear();
-	return m;
+	int len = data.size();
+	int i;
+	int max=0,high=0;
+
+	if (len < 1)
+	{
+		m.clear();
+		return m;
+	}
+
+	if (best)
+	{
+		for (i = 0; i < len; i++)
+		{
+			if (data[i].weight > high)
+				high = data[i].weight;
+		}
+		for (i = 0; i < len; i++)
+		{
+			if (data[i].weight != high)
+				data[i].weight = 0;
+		}
+	}
+	vector<PolyglotDataEntry> d;
+
+	for (i = 0; i < len; i++)
+	{
+		if (data[i].weight > 0)
+			d.push_back(data[i]);
+	}
+
+	len = d.size();
+
+	for (i = 0; i < len; i++)
+		max += d[i].weight;
+
+	if (max<1)
+	{
+		m.clear();
+		return m;
+	}
+
+	srand(time(0));
+	int ran = rand() % max;
+	max = 0;
+	unsigned short pm;
+	for (i=0;i < len;i++)
+	{
+		pm = data[i].move;
+		max += data[i].weight;
+		if (max > ran)
+			break;
+	}
+
+	return move(board, pm);
 }

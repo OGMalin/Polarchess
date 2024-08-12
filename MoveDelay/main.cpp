@@ -34,6 +34,12 @@ int main(int argc, char* argv[])
 		fe.polyglot.open(b);
 	}
 
+	if (GetPrivateProfileString("Engine", "BestMove", "", sz, 256, path.c_str()))
+	{
+		if ((strlen(sz)>0) && (sz[0]=='t'))
+			fe.BestMove = true;
+	}
+
 	if (GetPrivateProfileString("TransEngine", NULL, "", sz, 4096, path.c_str()))
 		fe.transEngine(path, sz);
 	if (GetPrivateProfileString("TransGui", NULL, "", sz, 4096, path.c_str()))

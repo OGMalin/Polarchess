@@ -18,6 +18,7 @@ FrontEnd::FrontEnd()
 	bookmove = false;
 	wtime = btime = 0;
 	stoping = true;
+	BestMove = false;
 }
 
 FrontEnd::~FrontEnd()
@@ -43,6 +44,9 @@ int FrontEnd::run()
 		gui.write("info Engine not started.");
 		return 1;
 	}
+
+	currentBoard.setStartposition();
+
 	while (1)
 	{
 		dw = WaitForMultipleObjects(3, hs, FALSE, INFINITE);
@@ -83,6 +87,7 @@ bool FrontEnd::guiInput()
 	int i;
 	string input, s, smove;
 	int guiCmd;
+	ChessMove m;
 	map<string, string>::iterator transIt;
 	while ((guiCmd = gui.get(input)) != GUI_none)
 	{
@@ -111,9 +116,11 @@ bool FrontEnd::guiInput()
 			{
 				std::vector<PolyglotDataEntry> polymoves;
 				polyglot.get(currentBoard, polymoves);
-				if (polymoves.size() > 0)
+				m=polyglot.select(currentBoard, polymoves, BestMove);
+				if (!m.empty())
 				{
-
+					gui.write("bestmove " + currentBoard.makeMoveText(m, UCI));
+					break;
 				}
 			}
 			bookmove = false;

@@ -31,7 +31,7 @@ public:
 	HASHKEY getKey(ChessBoard&);
 	void add(ChessBoard&, ChessMove&, unsigned short weight, unsigned int learn);
 	bool exist(ChessBoard&);
-	ChessMove select(ChessBoard&, std::vector<PolyglotDataEntry>&);
+	ChessMove select(ChessBoard&, std::vector<PolyglotDataEntry>&, bool best);
 	int moves();
 	int positions();
 private:

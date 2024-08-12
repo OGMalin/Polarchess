@@ -14,7 +14,7 @@ void StopWatch::start()
 	else
 	{
 		usePrecision = false;
-		starttime = GetTickCount();
+		starttime = GetTickCount64();
 	}
 }
 

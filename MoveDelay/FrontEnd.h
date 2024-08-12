@@ -29,6 +29,7 @@ class FrontEnd
 	void searchInput();
 public:
 	PolyglotBook polyglot;
+	bool BestMove;
 	std::string enginepath;
 	FrontEnd();
 	~FrontEnd();

@@ -12,6 +12,7 @@ class StopWatch
 	ULONGLONG starttime;
 	ULONGLONG frequency;
 public:
+	StopWatch() { usePrecision = false; starttime = 0; frequency = 0; };
 	void start();
 	ULONGLONG read(int precision);
 };
