@@ -23,32 +23,32 @@
     <ProjectGuid>{741D7E23-2304-48E3-9E74-31F840932F2A}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>MoveDelay</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
@@ -157,6 +157,7 @@
     <ClCompile Include="..\Common\ChessMove.cpp" />
     <ClCompile Include="..\Common\MoveGenerator.cpp" />
     <ClCompile Include="..\Common\MoveList.cpp" />
+    <ClCompile Include="..\Common\PolyglotBook.cpp" />
     <ClCompile Include="..\Common\StopWatch.cpp" />
     <ClCompile Include="..\Common\Utility.cpp" />
     <ClCompile Include="Engine.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="..\Common\defs.h" />
     <ClInclude Include="..\Common\MoveGenerator.h" />
     <ClInclude Include="..\Common\MoveList.h" />
+    <ClInclude Include="..\Common\PolyglotBook.h" />
     <ClInclude Include="..\Common\StopWatch.h" />
     <ClInclude Include="..\Common\Utility.h" />
     <ClInclude Include="Engine.h" />

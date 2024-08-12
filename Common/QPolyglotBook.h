@@ -1,8 +1,8 @@
 #pragma once
 
-#include <string>
-#include <vector>
-#include <map>
+#include <QString>
+#include <QVector>
+#include <QMap>
 #include "../Common/ChessMove.h"
 #include "../Common/ChessBoard.h"
 #include "../Common/defs.h"
@@ -18,25 +18,24 @@ struct PolyglotDataEntry
 class PolyglotBook
 {
 public:
-	bool isOpen;
-	std::string filename;
+	QString filename;
 	PolyglotBook();
-	PolyglotBook(std::string& bookfile);
+	PolyglotBook(QString& bookfile);
 	virtual ~PolyglotBook();
-	virtual bool open(std::string& bookfile);
+	virtual bool open(QString& bookfile);
 	void close();
 	void save();
-	void get(ChessBoard& board, std::vector<PolyglotDataEntry>&);
+	void get(ChessBoard& board, QVector<PolyglotDataEntry>&);
 	ChessMove move(ChessBoard&, unsigned short);
 	HASHKEY getKey(ChessBoard&);
 	void add(ChessBoard&, ChessMove&, unsigned short weight, unsigned int learn);
 	bool exist(ChessBoard&);
-	ChessMove select(ChessBoard&, std::vector<PolyglotDataEntry>&);
 	int moves();
 	int positions();
 private:
+	bool isOpen;
 	bool isDirty;
-	std::map<HASHKEY, std::vector<PolyglotDataEntry>> book;
+	QMap<HASHKEY, QVector<PolyglotDataEntry>> book;
 	void add(HASHKEY, PolyglotDataEntry&);
 };
 

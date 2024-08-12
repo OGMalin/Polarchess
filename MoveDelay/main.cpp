@@ -2,6 +2,7 @@
 
 #include "FrontEnd.h"
 #include "../Common/Utility.h"
+#include <string>
 //#include <iostream>
 using namespace std;
 
@@ -25,6 +26,12 @@ int main(int argc, char* argv[])
 	{
 		if (GetPrivateProfileString("Engine", "Path", "", sz, 256, path.c_str()))
 			fe.enginepath = sz;
+	}
+
+	if (GetPrivateProfileString("Engine", "Book", "", sz, 256, path.c_str()))
+	{
+		string b=sz;
+		fe.polyglot.open(b);
 	}
 
 	if (GetPrivateProfileString("TransEngine", NULL, "", sz, 4096, path.c_str()))

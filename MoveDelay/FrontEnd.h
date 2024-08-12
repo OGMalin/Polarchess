@@ -7,6 +7,8 @@
 #include "Search.h"
 #include "..\Common\ChessBoard.h"
 #include "..\Common\StopWatch.h"
+#include "..\Common\PolyglotBook.h"
+
 #include <map>
 
 class FrontEnd
@@ -26,6 +28,7 @@ class FrontEnd
 	void engineInput();
 	void searchInput();
 public:
+	PolyglotBook polyglot;
 	std::string enginepath;
 	FrontEnd();
 	~FrontEnd();

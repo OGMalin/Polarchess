@@ -1,10 +1,8 @@
 #pragma once
 
 #include "../Common/PolyglotBook.h"
-#include <fstream>
+#include <QFile>
 #include <string>
-
-using namespace std;
 
 const HASHKEY PolyglotRandom64[781] = {
    HASHKEY(0x9D39247E33776D41), HASHKEY(0x2AF7398005AAA5C7), HASHKEY(0x44DB015024623547), HASHKEY(0x9C15F73E62A76AE2),
@@ -211,7 +209,7 @@ PolyglotBook::PolyglotBook()
 	isDirty = false;
 }
 
-PolyglotBook::PolyglotBook(string& bookfile)
+PolyglotBook::PolyglotBook(QString& bookfile)
 {
 	open(bookfile);
 }
@@ -221,7 +219,7 @@ PolyglotBook::~PolyglotBook()
 	close();
 }
 
-bool PolyglotBook::open(string& bookfile)
+bool PolyglotBook::open(QString& bookfile)
 {
 	HASHKEY key;
 	PolyglotDataEntry pde;
@@ -231,14 +229,14 @@ bool PolyglotBook::open(string& bookfile)
 //		save();
 	isDirty = false;
 	isOpen = false;
-	ifstream file(bookfile);
-	if (!file.is_open())
+	if (!QFile::exists(bookfile))
 		return false;
 	filename = bookfile;
 	book.clear();
-	while (!file.eof())
+	QFile file(filename);
+	file.open(QIODevice::ReadOnly);
+	while (file.read((char*)buf, 16) == 16)
 	{
-		file.read((char*)buf, 16);
 		key = (HASHKEY)(buf[0]) << 56;
 		key += (HASHKEY)(buf[1]) << 48;
 		key += (HASHKEY)(buf[2]) << 40;
@@ -266,14 +264,13 @@ bool PolyglotBook::open(string& bookfile)
 void PolyglotBook::add(HASHKEY key, PolyglotDataEntry& pde)
 {
 	int i, j;
-/*
+
 	if (book[key].size())
 	{
 		for (i = 0; i < book[key].size(); i++)
 			if (book[key].value(i).move == pde.move)
 				return;
 	}
-	*/
 	book[key].push_back(pde);
 }
 
@@ -321,14 +318,16 @@ void PolyglotBook::add(ChessBoard& cb, ChessMove& move, unsigned short weight, u
 
 void PolyglotBook::save()
 {
-/*	PolyglotDataEntry pde;
+	PolyglotDataEntry pde;
 	char buf[16];
-	if (filename.empty())
-		return;
-	ofstream file(filename);
-	if (!file.is_open())
+	if (filename.isEmpty())
 		return;
 	int move;
+	if (QFile::exists(filename))
+		QFile::remove(filename);
+
+	QFile file(filename);
+	file.open(QIODevice::WriteOnly);
 	QMapIterator<HASHKEY, QVector<PolyglotDataEntry>> entry(book);
 	while (entry.hasNext())
 	{
@@ -358,7 +357,6 @@ void PolyglotBook::save()
 		}
 	}
 	file.close();
-*/
 }
 
 void PolyglotBook::close()
@@ -368,7 +366,7 @@ void PolyglotBook::close()
 	isOpen = false;
 }
 
-void PolyglotBook::get(ChessBoard& cb, vector<PolyglotDataEntry>&moves)
+void PolyglotBook::get(ChessBoard& cb, QVector<PolyglotDataEntry>&moves)
 {
 	HASHKEY key=getKey(cb);
 	moves.clear();
@@ -473,29 +471,16 @@ int PolyglotBook::moves()
 	//for (int i = 0; i < book.size(); i++)
 	//	m += book[i].moves.size();
 
-/*
 	QMapIterator<HASHKEY, QVector<PolyglotDataEntry>> entry(book);
 	while (entry.hasNext())
 	{
 		entry.next();
 		m += entry.value().size();
 	}
-	*/
 	return m;
 }
 
 int PolyglotBook::positions()
 {
-	return (int)book.size();
-}
-
-ChessMove PolyglotBook::select(ChessBoard& board, vector<PolyglotDataEntry>& data)
-{
-	if (data.size() > 0)
-	{
-		return move(board, data[0].move);
-	}
-	ChessMove m;
-	m.clear();
-	return m;
+	return book.size();
 }

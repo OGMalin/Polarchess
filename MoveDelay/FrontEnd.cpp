@@ -106,6 +106,16 @@ bool FrontEnd::guiInput()
 			engine.write(input);
 			break;
 		case GUI_go:
+			// Check for internal book moves
+			if (polyglot.isOpen)
+			{
+				std::vector<PolyglotDataEntry> polymoves;
+				polyglot.get(currentBoard, polymoves);
+				if (polymoves.size() > 0)
+				{
+
+				}
+			}
 			bookmove = false;
 			stoping = false;
 			watch.start();
