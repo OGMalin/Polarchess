@@ -15,7 +15,10 @@ int main(int argc, char* argv[])
 
 	string path = getProgramPath();
 	SetCurrentDirectory(path.c_str());
-	path += "MoveDelay.ini";
+
+	GetModuleFileName(NULL, sz, MAX_PATH);
+	path += getFilename(sz);
+	path += ".ini";
 
 	// Find engine path.
 	if (argc > 1)

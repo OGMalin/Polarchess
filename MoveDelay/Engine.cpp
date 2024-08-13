@@ -153,9 +153,10 @@ bool Engine::start(const std::string& path)
 	// Clear the process information
 	ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
 
-	if (!CreateProcess(
-		path.c_str(),
-		NULL,
+	char szPath[MAX_PATH];
+	strcpy_s(szPath, MAX_PATH,path.c_str());
+	if (!CreateProcess(NULL,
+		szPath,
 		NULL,
 		NULL,
 		TRUE,

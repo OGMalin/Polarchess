@@ -267,7 +267,7 @@ bool PolyglotBook::open(string& bookfile)
 			add(key, pde);
 		i += 16;
 	}
-	delete buf;
+	delete [] buf;
 	isOpen = true;
 	return true;
 }
@@ -381,7 +381,8 @@ void PolyglotBook::get(ChessBoard& cb, vector<PolyglotDataEntry>&moves)
 {
 	HASHKEY key=getKey(cb);
 	moves.clear();
-	moves = book[key];
+	if (book.find(key)!=book.end())
+		moves = book[key];
 }
 
 HASHKEY PolyglotBook::getKey(ChessBoard& cb)
