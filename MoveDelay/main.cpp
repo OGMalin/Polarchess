@@ -43,10 +43,16 @@ int main(int argc, char* argv[])
 			fe.BestMove = true;
 	}
 
+	if (GetPrivateProfileString("Engine", "DisableDelay", "", sz, 256, path.c_str()))
+	{
+		if ((strlen(sz) > 0) && (sz[0] == 't'))
+			fe.disableDelay = true;
+	}
+
 	if (GetPrivateProfileString("TransEngine", NULL, "", sz, 4096, path.c_str()))
-		fe.transEngine(path, sz);
+		fe.engine.readTranslation(path, sz);
 	if (GetPrivateProfileString("TransGui", NULL, "", sz, 4096, path.c_str()))
-		fe.transGui(path, sz);
+		fe.gui.readTranslation(path, sz);
 
 	// Start the main loop.
 	return fe.run();

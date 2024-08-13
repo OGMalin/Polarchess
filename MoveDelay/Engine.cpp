@@ -3,11 +3,13 @@
 #include "..\Common\Utility.h"
 
 // Use with logging
-//#include <fstream>
-//std::ofstream logfileE;
-//#define LOG(txt) logfileE.open("MoveDelay.log", ios::out | ios::app);logfileE << txt << endl;logfileE.close();
+#ifdef _DEBUG
+#include <fstream>
+std::ofstream logfileE;
+#define LOG(txt) logfileE.open("logfile.log", ios::out | ios::app);logfileE << txt << endl;logfileE.close();
+#endif
 // Else
-#define LOG(txt) {};
+//#define LOG(txt) {};
 
 using namespace std;
 
@@ -69,7 +71,9 @@ void Engine::write(const std::string& s)
 	DWORD dw;
 	if (hWrite)
 	{
-		LOG("E< "+s);
+#ifdef _DEBUG
+		LOG("Engine<- " + s);
+#endif
 		WriteFile(hWrite, s.c_str(), (DWORD)s.length(), &dw, NULL);
 		WriteFile(hWrite, "\n", 1, &dw, NULL);
 	}
@@ -232,9 +236,13 @@ void Engine::input(const std::string& s)
 {
 	if (s.length() == 0)
 		return;
+	string ss=s;
 	EnterCriticalSection(&engineCS);
-	inQue.push_back(s);
-	LOG("E> " + s);
+	translate(ss);
+	inQue.push_back(ss);
+#ifdef _DEBUG
+	LOG("Engine-> " + s);
+#endif
 	LeaveCriticalSection(&engineCS);
 	SetEvent(hEvent);
 }
@@ -273,4 +281,44 @@ int Engine::extract(std::string& s)
 	}
 	s = trim(s);
 	return ret;
+}
+
+void Engine::readTranslation(string ini, char* sz)
+{
+	char value[256];
+	size_t index = 0, st;
+	string skey, svalue;
+	while (sz[index] != 0)
+	{
+		if (GetPrivateProfileString("TransEngine", &sz[index], "", value, 256, ini.c_str()))
+		{
+			skey = &sz[index];
+			svalue = value;
+			st = svalue.find("\\n");
+			while (st != string::npos)
+			{
+				svalue.replace(st, 2, "\n");
+				st = svalue.find("\\n", st + 1);
+			}
+			translation.insert(map<string, string>::value_type(skey, svalue));
+			index += skey.length() + 1;
+		}
+	}
+}
+
+void Engine::translate(std::string& input)
+{
+	size_t st;
+	map<string, string>::iterator transIt;
+	transIt = translation.begin();
+	while (transIt != translation.end())
+	{
+		st = input.find((*transIt).first);
+		while (st != string::npos)
+		{
+			input.replace(st, (*transIt).first.length(), (*transIt).second);
+			st = input.find((*transIt).first, st + (*transIt).second.length());
+		}
+		++transIt;
+	}
 }

@@ -239,7 +239,7 @@ bool PolyglotBook::open(string& bookfile)
 	filename = bookfile;
 	book.clear();
 	file.seekg(0, ios::end);
-	length = file.tellg();
+	length = (int)file.tellg();
 	file.seekg(0, ios::beg);
 	buf = new unsigned char[length];
 	file.read((char*)buf, length);
@@ -274,7 +274,7 @@ bool PolyglotBook::open(string& bookfile)
 
 void PolyglotBook::add(HASHKEY key, PolyglotDataEntry& pde)
 {
-	int i, j;
+//	int i, j;
 /*
 	if (book[key].size())
 	{
@@ -392,7 +392,7 @@ HASHKEY PolyglotBook::getKey(ChessBoard& cb)
 
 	// Pieces
 	typeSquare sq = 0;
-	int file, row, piece, p;
+	int file, row, piece;
 	for (row = 0; row < 8; row++)
 	{
 		for (file = 0; file < 8; file++)
@@ -465,7 +465,7 @@ ChessMove PolyglotBook::move(ChessBoard& cb, unsigned short m)
 bool PolyglotBook::exist(ChessBoard& cb)
 {
 	HASHKEY key = getKey(cb);
-	int i;
+//	int i;
 	if (book[key].size())
 		return true;
 	//for (i = 0; i < book.size(); i++)
@@ -502,7 +502,7 @@ int PolyglotBook::positions()
 ChessMove PolyglotBook::select(ChessBoard& board, vector<PolyglotDataEntry>& data, bool best)
 {
 	ChessMove m;
-	int len = data.size();
+	int len = (int)data.size();
 	int i;
 	int max=0,high=0;
 
@@ -533,7 +533,7 @@ ChessMove PolyglotBook::select(ChessBoard& board, vector<PolyglotDataEntry>& dat
 			d.push_back(data[i]);
 	}
 
-	len = d.size();
+	len = (int)d.size();
 
 	for (i = 0; i < len; i++)
 		max += d[i].weight;
@@ -544,7 +544,7 @@ ChessMove PolyglotBook::select(ChessBoard& board, vector<PolyglotDataEntry>& dat
 		return m;
 	}
 
-	srand(time(0));
+	srand((unsigned int)time(0));
 	int ran = rand() % max;
 	max = 0;
 	unsigned short pm;

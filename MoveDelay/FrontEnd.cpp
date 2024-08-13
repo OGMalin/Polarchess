@@ -1,14 +1,17 @@
 #include "FrontEnd.h"
 #include <string>
 #include "..\Common\Utility.h"
+//#include "../Common/Logfile.h"
+
 //#include <iostream>
 
-// Use with logging
-//#include <fstream>
-//std::ofstream logfileF;
-//#define LOG(txt) logfileF.open("MoveDelay.log", ios::out | ios::app);logfileF << txt << endl;logfileF.close();
-// Else
-#define LOG(txt) {};
+#ifdef _DEBUG
+#include <fstream>
+std::ofstream logfileF;
+#define LOG(txt) logfileF.open("logfile.log", ios::out | ios::app);logfileF << txt << endl;logfileF.close();
+#endif
+//Else
+//#define LOG(txt) {};
 
 using namespace std;
 
@@ -19,6 +22,7 @@ FrontEnd::FrontEnd()
 	wtime = btime = 0;
 	stoping = true;
 	BestMove = false;
+	disableDelay = false;
 }
 
 FrontEnd::~FrontEnd()
@@ -40,7 +44,9 @@ int FrontEnd::run()
 	//LOG(sz);
 	if (!engine.start(enginepath))
 	{
+#ifdef _DEBUG
 		LOG("Engine not started");
+#endif
 		gui.write("info Engine not started.");
 		return 1;
 	}
@@ -88,20 +94,8 @@ bool FrontEnd::guiInput()
 	string input, s, smove;
 	int guiCmd;
 	ChessMove m;
-	map<string, string>::iterator transIt;
 	while ((guiCmd = gui.get(input)) != GUI_none)
 	{
-		transIt = transFromGui.begin();
-		while (transIt != transFromGui.end())
-		{
-			st = input.find((*transIt).first);
-			while (st != string::npos)
-			{
-				input.replace(st, (*transIt).first.length(), (*transIt).second);
-				st = input.find((*transIt).first, st + (*transIt).second.length());
-			}
-			++transIt;
-		}
 		switch (guiCmd)
 		{
 		case GUI_quit:
@@ -114,14 +108,30 @@ bool FrontEnd::guiInput()
 			// Check for internal book moves
 			if (polyglot.isOpen)
 			{
+
+#ifdef _DEBUG
+				LOG("Searching for Polyglot moves");
+#endif
+
 				std::vector<PolyglotDataEntry> polymoves;
 				polyglot.get(currentBoard, polymoves);
+
+#ifdef _DEBUG
+				LOG("Polyglot moves:");
+				LOG(polymoves.size());
+#endif
+
 				m=polyglot.select(currentBoard, polymoves, BestMove);
 				if (!m.empty())
 				{
 					gui.write("bestmove " + currentBoard.makeMoveText(m, UCI));
 					break;
 				}
+
+#ifdef _DEBUG
+				LOG("No Polyglot moves found, handle the search over to the engine.");
+#endif
+
 			}
 			bookmove = false;
 			stoping = false;
@@ -197,21 +207,8 @@ void FrontEnd::engineInput()
 	string input;
 	string bestmove, ponder;
 	int engineResponse;
-	size_t st;
-	map<string, string>::iterator transIt;
 	while ((engineResponse = engine.get(input)) != ENGINE_none)
 	{
-		transIt = transFromEngine.begin();
-		while (transIt != transFromEngine.end())
-		{
-			st = input.find((*transIt).first);
-			while (st != string::npos)
-			{
-				input.replace(st, (*transIt).first.length(), (*transIt).second);
-				st = input.find((*transIt).first, st + (*transIt).second.length());
-			}
-			++transIt;
-		}
 		switch (engineResponse)
 		{
 		case ENGINE_other:
@@ -227,6 +224,12 @@ void FrontEnd::engineInput()
 			gui.write("info " + input);
 			break;
 		case ENGINE_bestmove:
+			// Don't delay when testing
+			if (disableDelay)
+			{
+				gui.write("bestmove " + input);
+				break;
+			}
 			// Don't delay bookmoves
 			if (bookmove)
 			{
@@ -272,48 +275,3 @@ void FrontEnd::searchInput()
 		gui.write(input);
 }
 
-void FrontEnd::transEngine(string ini, char* sz)
-{
-	char value[256];
-	size_t index=0,st;
-	string skey, svalue;
-	while (sz[index] != 0)
-	{
-		if (GetPrivateProfileString("TransEngine", &sz[index], "", value, 256, ini.c_str()))
-		{
-			skey = &sz[index];
-			svalue = value;
-			st = svalue.find("\\n");
-			while (st != string::npos)
-			{
-				svalue.replace(st, 2, "\n");
-				st = svalue.find("\\n", st + 1);
-			}
-			transFromEngine.insert(map<string, string>::value_type(skey, svalue));
-			index += skey.length() + 1;
-		}
-	}
-}
-
-void FrontEnd::transGui(string ini, char* sz)
-{
-	char value[256];
-	size_t index = 0,st;
-	string skey, svalue;
-	while (sz[index] != 0)
-	{
-		if (GetPrivateProfileString("TransGui", &sz[index], "", value, 256, ini.c_str()))
-		{
-			skey = &sz[index];
-			svalue = value;
-			st = svalue.find("\\n");
-			while (st != string::npos)
-			{
-				svalue.replace(st, 2, "\n");
-				st = svalue.find("\\n", st + 1);
-			}
-			transFromGui.insert(map<string, string>::value_type(skey, svalue));
-			index += skey.length() + 1;
-		}
-	}
-}

@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include <string>
 #include <list>
+#include <map>
 
 enum {
 	ENGINE_none = 0,
@@ -18,6 +19,7 @@ class Engine
 {
 public:
 	std::list<std::string> inQue;
+	std::map<std::string, std::string> translation;
 	bool abort;
 	PROCESS_INFORMATION pi;
 	HANDLE hRead, hWrite;
@@ -32,4 +34,6 @@ public:
 	void write(const std::string& s);
 	int get(std::string& s);
 	int extract(std::string& s);
+	void readTranslation(std::string, char*);
+	void translate(std::string&);
 };

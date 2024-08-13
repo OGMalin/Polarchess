@@ -9,18 +9,12 @@
 #include "..\Common\StopWatch.h"
 #include "..\Common\PolyglotBook.h"
 
-#include <map>
-
 class FrontEnd
 {
-	std::map<std::string, std::string> transFromEngine;
-	std::map<std::string, std::string> transFromGui;
 	int delay;
 	bool bookmove;
 	bool stoping;
 	int wtime, btime;
-	GUI gui;
-	Engine engine;
 	Search search;
 	ChessBoard currentBoard;
 	StopWatch watch;
@@ -29,11 +23,12 @@ class FrontEnd
 	void searchInput();
 public:
 	PolyglotBook polyglot;
+	GUI gui;
+	Engine engine;
 	bool BestMove;
+	bool disableDelay; // For testing
 	std::string enginepath;
 	FrontEnd();
 	~FrontEnd();
 	int run();
-	void transEngine(std::string, char*);
-	void transGui(std::string, char*);
 };

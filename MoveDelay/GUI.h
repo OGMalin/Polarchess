@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include <string>
 #include <list>
+#include <map>
 
 enum {
 	GUI_none = 0,
@@ -24,6 +25,7 @@ public:
 	HANDLE hEvent;
 	HANDLE hThread;
 	std::list<std::string> inQue;
+	std::map<std::string, std::string> translation;
 
 	GUI();
 	~GUI();
@@ -32,5 +34,7 @@ public:
 	int get(std::string& s);
 	int extract(std::string& s);
 	void write(const std::string& s);
+	void readTranslation(std::string, char*);
+	void translate(std::string&);
 };
 
